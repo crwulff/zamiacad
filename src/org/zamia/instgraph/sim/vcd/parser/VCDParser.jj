@@ -1,0 +1,446 @@
+
+options {
+  STATIC = false;
+  //LOOKAHEAD = 5;
+  
+  // DEBUG_PARSER = true;
+  // CHOICE_AMBIGUITY_CHECK=3;
+  IGNORE_CASE=false;
+  USER_CHAR_STREAM = true;
+  UNICODE_INPUT = true;
+  CACHE_TOKENS = true;
+}
+
+PARSER_BEGIN(VCDParser)
+
+/* 
+ * Copyright 2009 by the authors indicated in the @author tags. 
+ * All rights reserved. 
+ * 
+ * See the LICENSE file for details.
+ * 
+ * 
+ */
+
+package org.zamia.instgraph.sim.vcd.parser;
+
+import org.zamia.*;
+import java.util.*;
+import java.math.BigInteger;
+import java.io.Reader;
+import java.io.IOException;
+import java.io.StringReader;
+import org.zamia.instgraph.sim.vcd.*;
+import org.zamia.instgraph.*;
+import org.zamia.util.*;
+
+/**
+ * @author Guenter Bartsch
+ */
+
+@SuppressWarnings("all")
+public class VCDParser {
+	
+	public final static boolean dump = false;
+	private SourceFile sf;
+	private String lib;
+	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
+	public final static ExceptionLogger el = ExceptionLogger.getInstance();
+	private SimpleCharStream stream;
+	
+	private PathName fCurPath;
+	private VCDData fData;
+	
+	private BigInteger fTimeScale=new BigInteger("1");
+	private BigInteger fCurTime=new BigInteger("0");
+	
+	public VCDParser() {
+		this (new SimpleCharStream(new StringReader("")));
+	}
+	
+    private long getLocation(Token aToken) {
+    	
+    	return aToken == null ? 0 :  ((long) aToken.beginColumn) << 32 | (long) aToken.beginLine ;
+    }
+
+    private long getLocation () {
+    	Token t = getToken(0);
+    	if (t.next != null)
+    		t = t.next;
+    	return getLocation (t);
+    }
+    
+    
+    public VCDData parse(Reader aReader, SourceFile aSF, VCDData aData) throws IOException, ZamiaException {
+
+		try {
+			logger.debug("VCD: parsing %s", aSF);
+    
+	    	stream = new SimpleCharStream(aReader);
+	    	sf = aSF;
+	    	
+	    	fCurPath = new PathName(".");
+            
+            fData = aData;
+            
+            ReInit (stream);
+            value_change_dump_definitions ();
+            
+		} catch (ParseException e) {
+          throw new ZamiaException(e.getMessage(), new SourceLocation(sf, getLocation(e.currentToken.next)));
+        } catch (TokenMgrError e) {
+          throw new ZamiaException(e.getMessage(), new SourceLocation(sf,e.line,e.col));
+		}
+		
+		return fData;
+    }
+}
+
+PARSER_END(VCDParser)
+
+
+<TS_MODE,VAR_BRACKET_MODE,VAR_MODE,VAR_ID_MODE,SCOPE_MODE,ID_MODE,DEFAULT> SKIP :
+{
+    " "
+  | "\n"
+  | "\r"
+  | "\t"
+  | "\b"
+  | "\0"
+  | "\f"
+  | "\u00a0"
+  | "\ufffd"
+}
+
+<DEFAULT>  MORE :
+{
+   < "$comment" > : COMMENT
+}
+ 
+<COMMENT> SKIP :
+{
+  < "$end" > : DEFAULT
+}
+ 
+<COMMENT> MORE :
+{
+  < ~[] > : COMMENT
+}
+
+
+<DEFAULT> MORE :
+{
+   <"$date" > : DECLARATION
+|  <"$enddefinitions"> : DECLARATION 
+|  <"$version"> : DECLARATION
+}
+ 
+<DECLARATION> TOKEN :
+{
+  <DECLARATION_COMMAND: "$end" > : DEFAULT
+}
+ 
+<DECLARATION> MORE :
+{
+  < ~[] > : DECLARATION
+}
+
+<DEFAULT> TOKEN :
+{
+    <END:           "$end"> 
+|   <DUMPALL:       "$dumpall"> 
+|   <DUMPOFF:       "$dumpoff"> 
+|   <DUMPON:        "$dumpon">  
+|   <DUMPVARS:      "$dumpvars">
+|   <SCOPE:         "$scope"> : SCOPE_MODE
+|   <UPSCOPE:       "$upscope">
+|   <VAR:           "$var"> : VAR_MODE 
+|   <TIMESCALE:     "$timescale"> : TS_MODE
+} 
+
+<DEFAULT> TOKEN :
+{
+    <#digit:                           ["0"-"9"]>
+  | <#DECIMAL_NUMBER:                  <digit> (<digit>)*>
+  | <SIMULATION_TIME:                  "#" <DECIMAL_NUMBER> > 
+  | <#VECTOR_VALUE:                    ["0","1","x","X","z","Z","U","u","W","w","L","l","H","h","-"]>
+  | <BINARY_NUMBER:                    ("b"|"B")<VECTOR_VALUE> (<VECTOR_VALUE>)*> : ID_MODE
+  | <#exponent:                        ("e" ("+")? <DECIMAL_NUMBER>) | ("e" "-" <DECIMAL_NUMBER>)>
+  | <REAL_NUMBER:                      ("r"|"R") <DECIMAL_NUMBER> ( "." <DECIMAL_NUMBER> )? ( <exponent> )?>
+  | <VALUE:                            ["0","1","x","X","z","Z","U","u","W","w","L","l","H","h","-"]> : ID_MODE
+  | <SCALAR_VALUE_CHANGE:			   <VALUE> <IDENTIFIER_CODE> > 
+} 
+
+<ID_MODE> TOKEN :
+{
+  <#IDENTIFIER_CHARACTER:			   ["\u0021"-"\u007E"]> 
+  | <IDENTIFIER_CODE:				   <IDENTIFIER_CHARACTER>(<IDENTIFIER_CHARACTER>)*> : DEFAULT
+}
+
+<SCOPE_MODE> TOKEN:
+{
+	  <BEGIN:		"begin"> : ID_MODE
+	| <FORK:        "fork"> : ID_MODE
+	| <FUNCTION:    "function"> : ID_MODE
+	| <MODULE:      "module"> : ID_MODE
+	| <TASK:        "task"> : ID_MODE
+}
+
+<VAR_MODE> TOKEN:
+{
+	  <EVENT:		         "event"> : VAR_MODE
+	| <INTEGER:              "integer"> : VAR_MODE
+	| <PARAMETER:            "parameter"> : VAR_MODE
+	| <REAL:                 "real"> : VAR_MODE
+	| <REALTIME:             "realtime"> : VAR_MODE
+	| <REG:                  "reg"> : VAR_MODE
+	| <SUPPLY0:              "supply0"> : VAR_MODE
+	| <SUPPLY1:              "supply1"> : VAR_MODE
+	| <TIME:                 "time"> : VAR_MODE
+	| <TRI:                  "tri"> : VAR_MODE
+	| <TRIAND:               "triand"> : VAR_MODE
+	| <TRIOR:                "trior"> : VAR_MODE
+	| <TRIREG:               "trireg"> : VAR_MODE
+	| <TRI0:                 "tri0"> : VAR_MODE
+	| <TRI1:                 "tri1"> : VAR_MODE
+	| <WAND:                 "wand"> : VAR_MODE
+	| <WIRE:                 "wire"> : VAR_MODE
+	| <WOR:                  "wor"> : VAR_MODE
+    | <VAR_END:              "$end"> : DEFAULT
+    | <#VAR_DIGIT:           ["0"-"9"]> 
+    | <VAR_DECIMAL_NUMBER:   <VAR_DIGIT> (<VAR_DIGIT>)*> : VAR_ID_MODE
+    | <#VAR_LETTER:          ["A"-"Z","a"-"z"]>
+    | <#VAR_LETTER_OR_DIGIT: (<VAR_LETTER> | <VAR_DIGIT>) >
+    | <VAR_ID:               <VAR_LETTER> ( "_" | <VAR_LETTER_OR_DIGIT> )* > : VAR_MODE
+    | <LBRACKET:             "[" > : VAR_BRACKET_MODE
+}
+
+<VAR_BRACKET_MODE> TOKEN:
+{
+      <RBRACKET:             "]" > : VAR_MODE
+    | <COLON:                ":" > : VAR_BRACKET_MODE
+    | <#VARB_DIGIT:          ["0"-"9"]> 
+    | <VARB_DECIMAL_NUMBER:  <VAR_DIGIT> (<VAR_DIGIT>)*> : VAR_BRACKET_MODE
+}
+
+<VAR_ID_MODE> TOKEN:
+{
+  <#VAR_IDENTIFIER_CHARACTER:  ["\u0021"-"\u007E"]> 
+  | <VAR_IDENTIFIER_CODE:	   <IDENTIFIER_CHARACTER>(<IDENTIFIER_CHARACTER>)*> : VAR_MODE
+}
+
+<TS_MODE> TOKEN:
+{
+    <#TS_DIGIT:           ["0"-"9"]> 
+    | <TS_DECIMAL_NUMBER: <VAR_DIGIT> (<VAR_DIGIT>)*> : TS_MODE
+    | <SECOND:            "s"> : DEFAULT
+    | <MSECOND:           "ms"> : DEFAULT
+    | <USECOND:           "us"> : DEFAULT
+    | <NSECOND:           "ns"> : DEFAULT
+    | <PSECOND:           "ps"> : DEFAULT
+    | <FSECOND:           "fs"> : DEFAULT
+}
+
+void value_change_dump_definitions() throws ZamiaException :
+{
+}
+{
+	{
+		if (dump) logger.debug ("VCD: Compiling %s", sf.toString());
+		
+	}
+
+	( <DECLARATION_COMMAND> | vcd_declaration_scope() | vcd_declaration_upscope() | vcd_declaration_vars() | vcd_declaration_timescale() )*
+	( simulation_command() )*
+	<EOF>
+}
+
+void vcd_declaration_scope() :
+{
+	Token t;
+}
+{
+	<SCOPE> scope_type() t=<IDENTIFIER_CODE> <END>
+	{
+		logger.debug("VCD: vcd_declaration_scope: %s", t.image);
+		fCurPath = fCurPath.append(VCDData.convertSegmentId(t.image));
+		logger.debug("VCD: current scope is "+fCurPath);
+	} 
+}
+
+void scope_type() :
+{
+}
+{
+	( <BEGIN>
+	| <FORK>
+	| <FUNCTION>
+	| <MODULE>
+	| <TASK>
+	)
+}
+
+void vcd_declaration_upscope() :
+{
+	Token t;
+}
+{
+	<UPSCOPE> <END>
+	{
+		//logger.debug("VCD: vcd_declaration_upscope");
+		fCurPath = fCurPath.getParent();
+	} 
+}
+
+void vcd_declaration_vars() throws ZamiaException :
+{
+	Token tID, tWidth;
+	int width;
+	PathName path;
+}
+{
+	<VAR> var_type() tWidth=<VAR_DECIMAL_NUMBER> tID=<VAR_IDENTIFIER_CODE> path=reference() <VAR_END>
+	{
+		//logger.info ("VCD: variable declaration: %s => %s, type is %s", si, tID.image, si.getType());
+		fData.newSignal(path, tID.image);
+	}
+}
+
+void var_type() :
+{
+}
+{
+	( <EVENT>
+	| <INTEGER>
+	| <PARAMETER>
+	| <REAL>
+	| <REALTIME>
+	| <REG>
+	| <SUPPLY0>
+	| <SUPPLY1>
+	| <TIME>
+	| <TRI>
+	| <TRIAND>
+	| <TRIOR>
+	| <TRIREG>
+	| <TRI0>
+	| <TRI1>
+	| <WAND>
+	| <WIRE>
+	| <WOR>
+	)
+}
+
+PathName reference() :
+{
+	Token t, tIdx1 = null, tIdx2 = null;
+}
+{
+	t = <VAR_ID> [ <LBRACKET> tIdx1=<VARB_DECIMAL_NUMBER> [ <COLON> tIdx2=<VARB_DECIMAL_NUMBER> ] <RBRACKET> ]
+	{
+		return fCurPath.append(t.image);
+		//		if (tIdx1 != null) {		//			aSI.setIdx1(Integer.parseInt(tIdx1.image));		//		}		//		if (tIdx2 != null) {		//			aSI.setIdx2(Integer.parseInt(tIdx2.image));		//		}
+	}
+}
+
+void vcd_declaration_timescale() :
+{
+	Token t;
+}
+{
+	<TIMESCALE> t=<TS_DECIMAL_NUMBER> time_unit() <END>
+	{
+		fData.setTimeScale(fTimeScale);
+		
+		logger.debug("VCD: TimeScale is %s", fTimeScale);
+	}
+}
+
+void time_unit() :
+{
+}
+{
+	(<SECOND> { fTimeScale = new BigInteger("1000000000000000");}
+	|<MSECOND>{ fTimeScale = new BigInteger("1000000000000");}
+	|<USECOND>{ fTimeScale = new BigInteger("1000000000");}
+	|<NSECOND>{ fTimeScale = new BigInteger("1000000");}
+	|<PSECOND>{ fTimeScale = new BigInteger("1000");}
+	|<FSECOND>{ fTimeScale = new BigInteger("1");}
+	)
+}
+
+void simulation_command() throws ZamiaException :{
+	Token t;
+	BigInteger ct, st, et;
+}{	( simulation_keyword() ( value_change() )* <END>
+	| t=<SIMULATION_TIME> 
+		{ 
+			ct = fTimeScale.multiply(new BigInteger(t.image.substring(1)));
+			st = fData.getStartTime();
+			if (st == null) {
+			  fData.setStartTime(ct);
+			  fData.setEndTime(ct);
+			} else if (st.compareTo(ct) > 0) {
+			  fData.setStartTime(ct);
+			}
+			et = fData.getEndTime();
+			if (et == null || et.compareTo(ct)<0) {
+			  fData.setEndTime(ct);
+			}			  
+			fCurTime = ct;
+			
+			logger.debug ("VCD: Simulation time %d ps", fCurTime);
+		}
+	| value_change() 
+	)}
+
+void simulation_keyword() :
+{
+}
+{
+	( <DUMPALL> | <DUMPOFF> | <DUMPON> | <DUMPVARS> )	
+}
+
+void value_change() throws ZamiaException :
+{
+	Token t;
+	char vc;
+	String ic;
+}
+{
+	( t=<SCALAR_VALUE_CHANGE> 
+	{
+		vc = t.image.charAt(0);
+		ic = t.image.substring(1);
+		
+		fData.addBit(fCurTime, ic, vc);
+		
+	}
+	| vector_value_change()
+	)
+}
+
+void vector_value_change() throws ZamiaException :
+{
+	Token tIC, tV;
+	String vs;
+	SignalInfo si;
+	int w,l;
+	char expansionC;
+	StringBuilder buf;
+}
+{
+	( tV=<BINARY_NUMBER> tIC=<IDENTIFIER_CODE>
+		{
+          fData.addBinaryVector(fCurTime, tIC.image, tV.image);
+		}
+	| tV=<REAL_NUMBER> tIC=<IDENTIFIER_CODE> 
+		{
+			logger.error("VCD: vector_value_change real %s => %s", tIC, tV);
+			// FIXME: implement
+			throw new ZamiaException ("Sorry, real values in VCD files are not supported yet.");
+		}
+	)
+}
+
+

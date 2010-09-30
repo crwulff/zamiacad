@@ -1,0 +1,3908 @@
+
+options {
+  STATIC = false;
+  //LOOKAHEAD = 5;
+  
+  // DEBUG_PARSER = true;
+  // CHOICE_AMBIGUITY_CHECK=3;
+  IGNORE_CASE=true;
+  USER_CHAR_STREAM = true;
+  UNICODE_INPUT = true;
+  CACHE_TOKENS = true;
+}
+
+PARSER_BEGIN(VHDL2002Parser)
+
+/* 
+ * Copyright 2007-2009 by the authors indicated in the @author tags. 
+ * All rights reserved. 
+ * 
+ * See the LICENSE file for details.
+ * 
+ * 
+ */
+
+package org.zamia.vhdl.vhdl2002;
+
+import org.zamia.*;
+import org.zamia.zdb.*;
+import org.zamia.vhdl.ast.*;
+import org.zamia.vhdl.ast.OperationMath.MathOp;
+import org.zamia.vhdl.ast.OperationCompare.CompareOp;
+import org.zamia.vhdl.ast.OperationLogic.LogicOp;
+import org.zamia.vhdl.ast.OperationShift.ShiftOp;
+import org.zamia.vhdl.ast.OperationLiteral.LiteralCat;
+import org.zamia.vhdl.ast.InterfaceDeclaration.InterfaceKind;
+import org.zamia.vhdl.ast.EntityAspect.EntityAspectKind;
+import org.zamia.util.*;
+import java.util.*;
+import java.io.Reader;
+import java.io.IOException;
+import java.io.StringReader;
+import org.zamia.rtl.RTLPort.PortDir;
+
+/**
+ * @author Guenter Bartsch
+ */
+
+@SuppressWarnings("all")
+public class VHDL2002Parser implements IHDLParser {
+
+	private enum InterfaceContext { FUNCTION, PROCEDURE, PORT, GENERIC };
+	
+	public final static boolean dump = false;
+	private SourceFile sf;
+	private String lib;
+	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
+	private ZamiaProject zprj;
+    private DUManager dum;
+    private ERManager erm;
+    private HashSetArray<DUUID> dus;
+	private SimpleCharStream stream;
+	private int priority;
+	private boolean fUseFSCache;
+	private boolean bottomUp;
+	private ZDB zdb;
+	
+	public VHDL2002Parser() {
+		this (new SimpleCharStream(new StringReader("")));
+	}
+	
+    private long getLocation(Token token_) {
+    	
+    	return token_ == null ? 0 : (long) token_.beginLine | ((long) token_.beginColumn) << 32;
+    }
+    
+    private long getLocation () {
+    	Token t = getToken(0);
+    	if (t.next != null)
+    		t = t.next;
+    	return getLocation (t);
+    }
+    
+    
+	public HashSetArray<DUUID> parse(Reader aReader, String aLibId, SourceFile aSF, int aPriority, boolean aUseFSCache, boolean aBottomUp, ZamiaProject aZPrj) throws IOException {
+
+			logger.debug("VHDL2002Parser: parsing %s, target lib : %s", aSF, aLibId);
+    
+    		dus = new HashSetArray<DUUID>();
+
+			zprj = aZPrj;
+			dum = zprj.getDUM();    
+			erm = zprj.getERM();    
+			zdb = zprj.getZDB();
+            lib = aLibId;
+	    	stream = new SimpleCharStream(aReader);
+	    	priority = aPriority;
+	    	fUseFSCache = aUseFSCache;
+	    	bottomUp = aBottomUp;
+	    	sf = aSF;
+            
+            try {
+		            ReInit (stream);
+                    design_file ();
+            } catch (ZamiaException e2) {
+              erm.addError (new ZamiaException (e2.toString(), e2.getLocation()));
+            } catch (ParseException e3) {
+              erm.addError (new ZamiaException (e3.getMessage(), new SourceLocation(sf, getLocation(e3.currentToken.next))));
+            } catch (TokenMgrError e4) {
+              erm.addError (new ZamiaException (e4.getMessage(), new SourceLocation(sf,e4.line,e4.col)));
+            }
+            sf.setNumLines(stream.getEndLine());
+            sf.setNumChars(stream.getNumChars());
+            return dus;
+    }
+}
+
+PARSER_END(VHDL2002Parser)
+
+<REPORT_TICKS_MODE,DEFAULT>SKIP :
+{
+    " "
+  | "\n"
+  | "\r"
+  | "\t"
+  | "\b"
+  | "\0"
+  | "\f"
+  | "\u00a0"
+  | "\ufffd"
+}
+
+<REPORT_TICKS_MODE,DEFAULT>SPECIAL_TOKEN : {
+    < SINGLE_LINE_COMMENT: "--"(~["\n","\r"])* ("\n"|"\r"|"\r\n")? > 
+} 
+
+//<REPORT_TICKS_MODE,DEFAULT>SPECIAL_TOKEN :
+//{
+//  <COMMENT: "--" (~["\n"])* ("\n"|"\r\n"|<EOF>)> : DEFAULT
+//}
+
+<REPORT_TICKS_MODE,DEFAULT>TOKEN [IGNORE_CASE] :
+{
+    <IF:            "if"> : DEFAULT
+  | <IS:            "is"> : DEFAULT
+  | <IN:            "in"> : DEFAULT
+  | <TO:            "to"> : DEFAULT
+  | <OF:            "of"> : DEFAULT
+  | <ON:            "on"> : DEFAULT
+  | <OR:            "or"> : DEFAULT
+  | <FOR:           "for"> : DEFAULT
+  | <USE:           "use"> : DEFAULT
+  | <SLA:           "sla"> : DEFAULT
+  | <SLL:           "sll"> : DEFAULT
+  | <SRA:           "sra"> : DEFAULT
+  | <SRL:           "srl"> : DEFAULT
+  | <ROL:           "rol"> : DEFAULT
+  | <ROR:           "ror"> : DEFAULT
+  | <MAP:           "map"> : DEFAULT
+  | <BUS:           "bus"> : DEFAULT
+  | <ALL:           "all"> : DEFAULT
+  | <AND:           "and"> : DEFAULT
+  | <ABS:           "abs"> : DEFAULT
+  | <MOD:           "mod"> : DEFAULT 
+  | <NEW:           "new"> : DEFAULT
+  | <XOR:           "xor"> : DEFAULT
+  | <NOR:           "nor"> : DEFAULT
+  | <NOT:           "not"> : DEFAULT
+  | <REM:           "rem"> : DEFAULT
+  | <OUT:           "out"> : DEFAULT
+  | <NULL:          "null"> : DEFAULT
+  | <XNOR:          "xnor"> : DEFAULT
+  | <THEN:          "then"> : DEFAULT
+  | <NAND:          "nand"> : DEFAULT
+  | <PURE:          "pure"> : DEFAULT
+  | <OPEN:          "open"> : DEFAULT
+  | <END:           "end"> : DEFAULT
+  | <NEXT:          "next"> : DEFAULT
+  | <WAIT:          "wait"> : DEFAULT
+  | <WHEN:          "when"> : DEFAULT
+  | <CASE:          "case"> : DEFAULT
+  | <WITH:          "with"> : DEFAULT
+  | <FILE:          "file"> : DEFAULT
+  | <EXIT:          "exit"> : DEFAULT
+  | <PORT:          "port"> : DEFAULT
+  | <BODY:          "body"> : DEFAULT
+  | <TYPE:          "type"> : DEFAULT
+  | <LOOP:          "loop"> : DEFAULT
+  | <ELSE:          "else"> : DEFAULT
+  | <BEGIN:         "begin"> : DEFAULT
+  | <WHILE:         "while"> : DEFAULT
+  | <UNITS:         "units"> : DEFAULT
+  | <UNTIL:         "until"> : DEFAULT
+  | <AFTER:         "after"> : DEFAULT
+  | <INOUT:         "inout"> : DEFAULT
+  | <LABEL:         "label"> : DEFAULT
+  | <ARRAY:         "array"> : DEFAULT
+  | <RANGE:         "range"> : DEFAULT
+  | <ALIAS:         "alias"> : DEFAULT
+  | <GROUP:         "group"> : DEFAULT
+  | <BLOCK:         "block"> : DEFAULT
+  | <ELSIF:         "elsif"> : DEFAULT
+  | <OTHERS:        "others"> : DEFAULT
+  | <REJECT:        "reject"> : DEFAULT
+  | <REPORT:        "report"> : DEFAULT
+  | <BUFFER:        "buffer"> : DEFAULT
+  | <RETURN:        "return"> : DEFAULT
+  | <SELECT:        "select"> : DEFAULT
+  | <ACCESS:        "access"> : DEFAULT
+  | <ACROSS:        "across"> : DEFAULT
+  | <ASSERT:        "assert"> : DEFAULT
+  | <SIGNAL:        "signal"> : DEFAULT
+  | <SHARED:        "shared"> : DEFAULT
+  | <DOWNTO:        "downto"> : DEFAULT
+  | <IMPURE:        "impure"> : DEFAULT
+  | <RECORD:        "record"> : DEFAULT
+  | <ENTITY:        "entity"> : DEFAULT
+  | <LIBRARY:       "library"> : DEFAULT
+  | <LINKAGE:       "linkage"> : DEFAULT
+  | <LITERAL:       "literal"> : DEFAULT
+  | <PACKAGE:       "package"> : DEFAULT
+  | <GENERIC:       "generic"> : DEFAULT
+  | <PROCESS:       "process"> : DEFAULT
+  | <SUBTYPE:       "subtype"> : DEFAULT
+  | <GUARDED:       "guarded"> : DEFAULT
+  | <CONSTANT:      "constant"> : DEFAULT
+  | <REGISTER:      "register"> : DEFAULT
+  | <SEVERITY:      "severity"> : DEFAULT
+  | <FUNCTION:      "function"> : DEFAULT
+  | <GENERATE:      "generate"> : DEFAULT
+  | <INERTIAL:      "inertial"> : DEFAULT
+  | <POSTPONED:     "postponed"> : DEFAULT
+  | <ATTRIBUTE:     "attribute"> : DEFAULT
+  | <COMPONENT:     "component"> : DEFAULT
+  | <DISCONNECT:    "disconnect"> : DEFAULT
+  | <ARCHITECTURE:  "architecture"> : DEFAULT
+  | <CONFIGURATION: "configuration"> : DEFAULT
+  | <PROCEDURAL:    "procedural"> : DEFAULT
+  | <PROCEDURE:     "procedure"> : DEFAULT
+  | <PROTECTED:     "protected"> : DEFAULT
+  | <QUANTITY:      "quantity"> : DEFAULT
+  | <TRANSPORT:     "transport"> : DEFAULT
+  | <UNAFFECTED:    "unaffected"> : DEFAULT
+  | <VARIABLE:      "variable"> : DEFAULT
+} 
+
+
+<DEFAULT>TOKEN:
+{
+  <character_literal:                "'" (" ")*(<graphic_character>|"\"") (" ")* "'">
+}
+
+<REPORT_TICKS_MODE,DEFAULT>TOKEN :
+{
+
+    <#digit:                           ["0"-"9"]>
+  | <#hex_digit:                       ["0"-"9","A"-"F"]>
+  
+  | <#integer:                         <digit> (("_")? <digit>)*>
+  | <#base:                            <integer> >
+  | <#based_integer:                   (("_")? <hex_digit>)*>
+  | <#exponent:                        ("E" ("+")? <integer>) | ("E" "-" <integer>)>
+  | <based_literal:                    <base> "#" <based_integer> ("." <based_integer>)? "#" (<exponent>)?> : DEFAULT
+  | <decimal_literal:                  <integer> ( "." <integer>)? ( <exponent> )?> : DEFAULT
+
+  | <#base_specifier:                  ["B","O","X"]>
+  | <#bit_value:                       <hex_digit> ( ("_")* <hex_digit>)*>
+  | <bit_string_literal:               <base_specifier> "\"" <bit_value> "\""> : DEFAULT
+
+  | <#letter:                          ["a"-"z","A"-"Z"]>
+  | <#letter_or_digit:                 ["a"-"z","A"-"Z","0"-"9"]>
+  | <basic_identifier:                 <letter> ( ("_")? <letter_or_digit> )*> : REPORT_TICKS_MODE
+
+  | <#special_character:               ["#","&","'","(",")","*","+",",","-",".","/",":",";","<","=",">","[","]","_","|","!","$","%","@","?","^","`","{","}","~"," ","\u00a0"-"\uffff"]>
+  | <#format_effector:                 ["\n","\t","\b","\f","\r"]>
+  | <#egraphic_character:              (<letter_or_digit>|<special_character>|<format_effector>)>
+  | <#graphic_character:               (<egraphic_character>|"\\")>
+ 
+  | <extended_identifier:              "\\" (<egraphic_character> | "\\\\") ( (<egraphic_character> | "\\\\") )* "\\"> : REPORT_TICKS_MODE
+  
+  | <string_literal:                   "\"" (<graphic_character>|"\"\"")* "\""> : DEFAULT
+
+  | <EXP: "**"> : DEFAULT
+  | <MUL: "*"> : DEFAULT
+  | <DIV: "/"> : DEFAULT
+  | <ADD: "+"> : DEFAULT
+  | <SUB: "-"> : DEFAULT
+  | <CONCAT: "&"> : DEFAULT
+  | <EQ:  "="> : DEFAULT
+  | <NEQ: "/="> : DEFAULT
+  | <GE:  ">="> : DEFAULT
+  | <LE:  "<="> : DEFAULT
+  | <GT:  ">"> : DEFAULT
+  | <LO:  "<"> : DEFAULT
+  | <SEMICOLON: ";"> : DEFAULT
+  | <COMMA: ","> : DEFAULT
+  | <COLON: ":"> : DEFAULT
+  | <BOX: "<>"> : DEFAULT
+  | <APOSTROPHE: "'"> : DEFAULT
+  | <LPAREN: "("> : DEFAULT
+  | <RPAREN: ")"> : DEFAULT
+  | <LBRACKET: "["> : DEFAULT
+  | <RBRACKET: "]"> : DEFAULT
+  | <ASSIGN: ":="> : DEFAULT
+  | <PERIOD: "."> : DEFAULT
+  | <FOLLOWS: "=>"> : DEFAULT
+  | <PIPE: "|"> : DEFAULT
+} 
+
+void design_file() throws ZamiaException :
+{
+	boolean standardMode;
+	DesignUnit du;
+}
+{
+	{
+		if (dump) logger.debug ("Compiling %s", sf.toString());
+		
+		// are we compiling the "standard" package here?
+		// if so, according to IEEE Std 1076 we
+		// start with an empty context,
+		// otherwise all contexts are implicitly
+		// loaded with
+		// library STD, WORK; use STD.STANDARD.all;
+		standardMode = false;
+		if (sf != null) {
+			if (sf.getFileName().endsWith("standard.vhdl"))
+				standardMode = true;
+		}
+	}
+	
+    ( du = design_unit(standardMode) 
+      { 
+      	if (du!=null) {
+      	  dum.addDesignUnit(du, sf, lib, priority, fUseFSCache);
+      	  dus.add(du.getDUUID()); 
+      	}
+      } 
+    )* <EOF>
+}
+
+DesignUnit design_unit(boolean standardMode_) throws ZamiaException:
+{
+	Context context;
+	DesignUnit du;
+}
+{
+	{ if (dump) System.out.println (">>> design_unit, stdMode="+standardMode_); }
+	context = context_clause() 
+	du = library_unit(context)
+	{ 
+		
+		if (!(du instanceof Entity) && !standardMode_) {
+			// library STD, WORK;
+			context.addLibrary("STD", 0);
+			context.addLibrary("WORK", 0);
+			// use STD.STANDARD.all;
+			Name name = new Name("STD", null, 0);
+			name.addId("STANDARD", 0);
+			name.addId("ALL", 0);
+			context.addUse(name);
+		}
+		
+		
+		if (dump) System.out.println ("<<< design_unit"); 
+		return du;
+	}
+}
+
+Context context_clause() throws ZamiaException:
+{
+	Context context;
+}
+{
+	{
+		context = new Context(null, getLocation());
+	}
+	
+  	( context_item(context) )*
+  	
+  	{
+  		return context;
+  	}
+}
+
+void context_item(Context context_) throws ZamiaException:
+{
+	ArrayList<Name> l;
+}
+{
+	( library_clause(context_)
+	| l = use_clause()
+		{
+			int n = l.size();
+			for (int i = 0; i<n; i++) {
+				Name name = l.get(i);
+				context_.addUse (name);
+			}
+		}
+	)
+}
+
+void library_clause(Context context_) throws ZamiaException :
+{
+	Identifier id;
+	Token t;
+}
+{
+	t = <LIBRARY>  id=identifier() { context_.addLibrary(id.getImage(), getLocation(t)); } 
+	( "," id=identifier() { context_.addLibrary(id.getImage(), id.getLineCol()); } )* ";"
+}
+
+ArrayList<Name> use_clause() throws ZamiaException :
+{
+	ArrayList<Name> l = new ArrayList<Name>();
+	Name n;
+}
+{
+	<USE> n = name() { l.add(n);}
+	( "," n = name() { l.add(n); } )* ";"
+	{ return l ; }
+}
+
+DesignUnit library_unit(Context context_)  throws ZamiaException:
+{	DesignUnit lu;
+}
+{
+    ( LOOKAHEAD(<ENTITY> | <CONFIGURATION> | <PACKAGE> identifier() )
+		lu = primary_unit(context_)
+	| lu = secondary_unit(context_)
+	)
+	{ return lu; }
+}
+
+PrimaryUnit primary_unit(Context context_) throws ZamiaException:
+{
+	Entity entity;
+	VHDLPackage pkg;
+	PrimaryUnit pu = null;
+}
+{
+	{ if (dump) System.out.println (">>>>>>> primary_unit"); }
+	( entity = entity_declaration(context_)
+		{ pu = entity; }
+	| configuration_declaration(context_)
+	| LOOKAHEAD(<PACKAGE> identifier())
+		pkg = package_declaration(context_)
+		{  pu = pkg; }
+ 	)
+	{ if (dump) System.out.println ("<<<<<<< primary_unit");
+		return pu;
+	}
+}
+
+Entity entity_declaration(Context context_) throws ZamiaException :
+{
+	Identifier id, id2=null;
+	Entity entity;
+	Token t;
+}
+{
+	t=<ENTITY> id = identifier() <IS>
+  
+	{
+	  	entity = new Entity(context_, id.getImage(), sf, getLocation (t), lib, zdb);
+	}
+  
+	entity_header(entity)
+    entity_declarative_part(entity)
+    [ <BEGIN> entity_statement_part(entity) ]
+	<END> [ <ENTITY> ] [ id2=identifier() ] ";"
+  
+	{
+		if (id2 != null && !id2.equals(id)) {
+			erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id+"')", id2.getLocation()));
+		} 
+		return entity;
+	}
+}
+
+void entity_statement_part(Entity entity_) throws ZamiaException :
+{}
+{
+	( entity_statement(entity_) )*
+}
+
+void entity_statement(Entity entity_) throws ZamiaException:
+{
+	ConcurrentStatement stmt;
+}
+{   
+	( LOOKAHEAD( concurrent_assertion_statement() )
+		stmt = concurrent_assertion_statement()
+	| LOOKAHEAD([identifier() ":"] [<POSTPONED>] <PROCESS>)
+		stmt = process_statement()
+	| stmt = concurrent_procedure_call_statement()
+	)
+	{
+		entity_.add(stmt);
+	}
+}
+
+
+void entity_declarative_part(Entity entity_) throws ZamiaException:
+{
+	AttributeDeclaration ad;
+	TypeDeclaration type;
+	SubProgram sub;
+    ArrayList<ConstantDeclaration> lcd;	
+    ArrayList<SharedVariableDeclaration> lsv;
+    ArrayList<SignalDeclaration> lsd;	
+    BlockDeclarativeItem item;
+    AliasDeclaration aliasDecl;
+}
+{
+	(sub = subprogram()
+		{
+			entity_.add(sub);
+		}
+	| type = type_declaration()
+		{
+			entity_.add(type);
+		}
+	| type = subtype_declaration()
+		{
+			entity_.add(type);
+		}
+		
+	| lcd = constant_declaration() 
+		{
+			int n = lcd.size();
+            for (int i = 0; i<n; i++) {
+                    ConstantDeclaration c = lcd.get(i);
+                    entity_.add(c); 
+            }
+        }
+		
+    | lsd = signal_declaration()
+		{
+			n = lsd.size();
+            for (int i = 0; i<n; i++) {
+                    SignalDeclaration s = lsd.get(i);
+                    entity_.add(s); 
+            }
+        }
+    | lsv = shared_variable_declaration()
+		{
+			n = lsv.size();
+            for (int i = 0; i<n; i++) {
+                    SharedVariableDeclaration svd = lsv.get(i);
+                    entity_.add(svd); 
+            }
+        }
+//  | file_declaration()
+    | aliasDecl = alias_declaration()
+    	{
+    		entity_.add(aliasDecl);
+    	}
+	|	LOOKAHEAD(attribute_declaration())
+		ad = attribute_declaration()
+		{
+			entity_.add(ad);
+		}
+	| attribute_specification()
+//  | disconnection_specification()
+//  | use_clause()
+	| LOOKAHEAD(<GROUP> identifier() <IS>)		item = group_template_declaration()
+		{ entity_.add(item); }	| item = group_declaration()
+		{entity_.add(item);}
+
+    )*
+}
+
+
+void entity_header(Entity entity_) throws ZamiaException :
+{
+	InterfaceList ports;
+	InterfaceList generics = null;
+	int n;
+}
+{
+  [ generics = generic_clause() 
+    {
+    	entity_.setGenerics(generics);
+    }
+  ]
+  [ ports = port_clause() 
+    {
+    	entity_.setPorts(ports);
+    }
+  ]
+}
+
+ConfigurationDeclaration configuration_declaration(Context context_) throws ZamiaException:
+{
+	Identifier id, id2=null;
+	Name entityName;
+	ConfigurationDeclaration cd;
+	Token t;	
+}
+{
+	t=<CONFIGURATION> id=identifier() <OF> entityName=name() <IS>
+		{ cd = new ConfigurationDeclaration (context_, id.getImage(), entityName, sf, getLocation(t), lib, zdb); }
+		( configuration_declarative_item(cd) )*
+		block_configuration()
+	<END> [ <CONFIGURATION> ] [ id2=identifier() ] ";"
+	{ 
+		if (id2 != null && !id2.equals(id)) {
+			erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id+"')", id2.getLocation()));
+		} 
+		
+		return cd; 
+	}
+}
+
+void configuration_declarative_item(ConfigurationDeclaration cd_) throws ZamiaException:
+{
+	// AttributeSpecification as;
+	// GroupDeclaration gd;
+	ArrayList<Name> l;
+}
+{
+	try {
+		
+		l = use_clause()
+			{
+				int n = l.size();
+				for (int i = 0; i<n; i++) {
+					Name name = l.get(i);
+					cd_.getContext().addUse (name);
+				}
+			}
+		| attribute_specification()
+		| group_declaration()
+		
+	} catch(ParseException e) {
+		error_skipto(SEMICOLON, "syntax error in configuration declarative item",e);
+	}
+}
+
+void attribute_specification() throws ZamiaException :
+{}
+{
+	<ATTRIBUTE> identifier() <OF>
+	entity_specification() <IS> expression() ";"
+}
+
+void entity_specification() throws ZamiaException :
+{}
+{
+	entity_name_list() ":" entity_class()
+}
+
+void entity_name_list() throws ZamiaException :
+{}
+{
+	( entity_designator() ( "," entity_designator() )*
+	| <OTHERS>
+	| <ALL>
+	)
+}
+
+void entity_designator() throws ZamiaException :
+{}
+{
+	entity_tag() [ signature() ]
+}
+
+void entity_tag() throws ZamiaException :
+{}
+{
+	( identifier ()
+	| <character_literal>
+	| <string_literal>
+	)
+}
+
+void entity_class() throws ZamiaException :
+{}
+{
+	( <ENTITY> 
+	| <ARCHITECTURE> 
+	| <CONFIGURATION> 
+	| <PROCEDURE> 
+	| <FUNCTION> 
+	| <PACKAGE> 
+	| <TYPE> 
+	| <SUBTYPE> 
+	| <CONSTANT> 
+	| <SIGNAL> 
+	| <VARIABLE> 
+	| <COMPONENT> 
+	| <LABEL> 
+	| <LITERAL> 
+	| <UNITS> 
+	| <GROUP> 
+	| <FILE> 
+	)
+}
+
+void entity_class_entry() throws ZamiaException :
+{}
+{
+  entity_class() [ "<>" ]
+}
+
+
+void entity_class_entry_list()  throws ZamiaException :
+{}
+{
+  entity_class_entry() ( "," entity_class_entry() )*
+}
+
+
+void block_configuration() throws ZamiaException :
+{}
+{
+	<FOR> name()
+		( use_clause() )*
+		( configuration_item() )*
+	<END> <FOR> ";"
+}
+
+void configuration_item() throws ZamiaException:
+{}
+{
+	LOOKAHEAD(block_configuration())
+		block_configuration()
+	| component_configuration()
+}
+
+void component_configuration() throws ZamiaException:
+{}
+{
+	<FOR> component_specification()
+		[ binding_indication() ";" ]
+		[ block_configuration() ]
+	<END> <FOR> ";"
+}
+
+ComponentSpecification component_specification() throws ZamiaException:
+{
+	ArrayList<Identifier> il;
+	Name n;
+}
+{
+	il = instantiation_list() ":" n = name()
+	{
+		return new ComponentSpecification(il, n, il.get(0).getLineCol());
+	}	
+}
+
+ArrayList<Identifier> instantiation_list() throws ZamiaException:
+{
+	ArrayList<Identifier> ids = new ArrayList<Identifier>();
+	Identifier id;
+	Token t;
+}
+{
+	(
+	id = identifier() { ids.add(id); }
+	( "," id = identifier() { ids.add(id); })*
+	| t = <OTHERS> { ids.add(new Identifier("OTHERS", false, getLocation(t))); }
+	| t = <ALL> { ids.add(new Identifier("ALL", false, getLocation(t))); }
+	)
+	{
+		return ids;
+	}
+}
+
+
+BindingIndication binding_indication() throws ZamiaException:
+{
+	BindingIndication bi = null;
+	EntityAspect ea;
+	Token t;
+	AssociationList al;
+}
+{
+	[ t=<USE> ea = entity_aspect() 
+	  {
+	  	bi = new BindingIndication(getLocation(t));
+	  	bi.setEntityAspect(ea);
+	  }
+	]
+	[ al = generic_map_aspect()
+	  {
+	  	if (bi == null) {
+	  		bi = new BindingIndication(al.getAssociation(0).getLineCol());
+	  	}
+	  	bi.setGenericMapAspect(al);
+	  } 
+	]
+	[ al = port_map_aspect() 
+	  {
+	  	if (bi == null) {
+	  		bi = new BindingIndication(al.getAssociation(0).getLineCol());
+	  	}
+	  	bi.setPortMapAspect(al);
+	  } 
+	]
+	{
+		return bi;
+	}
+}
+
+EntityAspect entity_aspect() throws ZamiaException:
+{
+	EntityAspect ea=null;
+	Name n;
+	Token t;
+	Identifier id;
+}
+{
+	( t=<ENTITY> n=name()
+	  {
+	  	ea = new EntityAspect(EntityAspectKind.Entity, n, getLocation(t));
+	  }
+		 [ LOOKAHEAD("(" identifier() ")")
+			"(" id=identifier() ")" {ea.setId(id.getImage());} ]
+	| t=<CONFIGURATION> n=name()
+	  {
+	  	ea = new EntityAspect(EntityAspectKind.Configuration, n, getLocation(t));
+	  }
+	| t=<OPEN>
+	  {
+	  	ea = new EntityAspect(EntityAspectKind.Open, null, getLocation(t));
+	  }
+	)
+	{
+		return ea;
+	}
+}
+
+VHDLPackage package_declaration(Context context_) throws ZamiaException:
+{
+	Identifier id,id2=null;
+	VHDLPackage pkg;
+	Token t;
+}
+{
+	t = <PACKAGE> id = identifier() <IS>
+		{ pkg = new VHDLPackage (context_, id.getImage(), sf, getLocation(t), lib, zdb); }
+		( package_declarative_item(pkg) )*
+	<END> [ <PACKAGE> ] [ id2=identifier() ] ";"
+	{ 
+		if (id2 != null && !id2.equals(id)) {
+			erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id+"')", id2.getLocation()));
+		} 
+		return pkg; 
+	}
+}
+
+void package_declarative_item(VHDLPackage pkg_) throws ZamiaException:
+{
+	TypeDeclaration type;
+	ComponentDeclaration comp;
+	ArrayList<Name> l;
+	ArrayList<SignalDeclaration> lsd;
+	ArrayList<ConstantDeclaration> lcd;
+	ArrayList<FileDeclaration> lfd;
+	ArrayList<SharedVariableDeclaration> lsv;
+	AttributeDeclaration ad;
+	SubProgram sub;
+	BlockDeclarativeItem item;
+}
+{
+	try {
+	(sub = subprogram() { pkg_.add(sub); }
+	| type = type_declaration() { pkg_.add(type); }
+	| type = subtype_declaration() { pkg_.add(type); }
+	| lcd = constant_declaration() 
+		{
+			int n = lcd.size();
+			for (int i = 0; i<n; i++) {
+				ConstantDeclaration c = lcd.get(i);
+				pkg_.add(c); 
+			}
+		}
+	| lsd = signal_declaration() 
+		{
+			n = lsd.size();
+			for (int i = 0; i<n; i++) {
+				SignalDeclaration sd = lsd.get(i);
+			
+				pkg_.add(sd); 
+			}
+		}
+	| lsv = shared_variable_declaration()
+		{
+			n = lsv.size();
+			for (int i = 0; i<n; i++) {
+				SharedVariableDeclaration sd = lsv.get(i);
+				pkg_.add(sd); 
+			}
+		}
+	| lfd = file_declaration()
+		{
+			n = lfd.size();
+			for (int i = 0; i<n; i++) {
+				FileDeclaration fd = lfd.get(i);
+				pkg_.add(fd);
+			}
+		}
+
+	| item = alias_declaration()
+		{
+			pkg_.add(item);
+		} 
+	| comp = component_declaration() {pkg_.add(comp); }
+	| LOOKAHEAD( attribute_declaration() )
+		ad = attribute_declaration()
+		{pkg_.add(ad);}
+	| attribute_specification()
+		//FIXME { pkg_.add(item); }
+	| item = disconnection_specification()
+		{ pkg_.add(item); }
+	| l = use_clause()
+		{
+			n = l.size();
+			for (int i = 0; i<n; i++) {
+				Name name = l.get(i);
+			
+				pkg_.getContext().addUse(name); 
+			}
+		}
+	| LOOKAHEAD(<GROUP> identifier() <IS>)
+		item = group_template_declaration()
+		{ pkg_.add(item); }
+	| item = group_declaration()
+		{ pkg_.add(item); }
+	)
+	}
+	catch(ParseException e)
+	{
+		error_skipto(SEMICOLON, "syntax error in package declarative item:",e);
+	}
+}
+
+
+InterfaceList port_clause()  throws ZamiaException :
+{
+	InterfaceList ports;
+}
+{
+	<PORT> "(" ports = interface_list(InterfaceContext.PORT, PortDir.LINKAGE) ")" ";"
+  
+	{
+		return ports;
+	}
+}
+
+InterfaceList interface_list(InterfaceContext ic_, PortDir defaultDir_) throws ZamiaException:
+{
+	InterfaceList interfaces;
+	ArrayList<InterfaceDeclaration> ids;
+}
+{
+  ids = interface_declaration(ic_, defaultDir_) 
+  { 
+  	interfaces = new InterfaceList(null, ids.get(0).getLineCol());
+  	int n = ids.size();
+  	for (int i = 0; i<n; i++) {
+  		interfaces.add(ids.get(i));
+  	} 
+  }
+  
+  ( ("," | ";") [ids = interface_declaration(ic_, defaultDir_) 
+  { 
+  	n = ids.size();
+  	for (int i = 0; i<n; i++) {
+  		interfaces.add(ids.get(i));
+  	} 
+  } ] )*
+  
+  {
+  	return interfaces;
+  }
+}
+
+ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, PortDir defaultDir_) throws ZamiaException:
+{
+	ArrayList<InterfaceDeclaration> idds;
+	ArrayList<Identifier> ids;
+	InterfaceKind kind = null;
+	TypeDefinition td;
+	PortDir dir = defaultDir_;
+	Operation op = null;
+}
+{
+	
+	[ (<FILE> { kind = InterfaceKind.FILE; } 
+	  | <VARIABLE> { kind = InterfaceKind.VARIABLE; } 
+	  | <CONSTANT> { kind = InterfaceKind.CONSTANT; }
+	  | <SIGNAL> { kind = InterfaceKind.SIGNAL; }  ) ] ids = identifier_list() ":"
+	[ dir = mode() ] 
+	
+	{
+		if (kind == null) {
+			
+			switch (ic_) {
+			case FUNCTION:
+				if (dir != PortDir.IN) {
+					erm.addError (new ZamiaException ("Function parameters must have mode IN.", ids.get(0).getLocation()));
+				}
+				if (kind == null) {
+					kind = InterfaceKind.CONSTANT;
+				} else {
+					if (kind == InterfaceKind.VARIABLE) {
+						erm.addError (new ZamiaException ("Function parameters must be signals, constants or files.", ids.get(0).getLocation()));
+					}
+				}
+				break;
+			case PROCEDURE:
+				if (kind == null) {
+					if (dir == PortDir.IN) {
+						kind = InterfaceKind.CONSTANT;
+					} else {
+						kind = InterfaceKind.VARIABLE;
+					}
+				}
+				break;
+			case PORT:
+				if (kind == null) {
+					kind = InterfaceKind.SIGNAL;
+				}
+				break;
+			case GENERIC:
+				if (kind == null) {
+					kind = InterfaceKind.CONSTANT;
+				} else {
+					if (kind == InterfaceKind.CONSTANT) {
+						erm.addError (new ZamiaException ("Generics must be constants.", ids.get(0).getLocation()));
+					}
+				}
+				break;				
+			}
+		}
+	}
+	
+	td = subtype_indication() [ <BUS> ] [ ":=" op = expression() ]
+  
+	{
+		int num = ids.size();
+		idds = new ArrayList<InterfaceDeclaration>(num);  	
+		for (int i = 0; i<num; i++) {
+			Identifier id = ids.get(i);
+  		
+			InterfaceDeclaration isd = new InterfaceDeclaration (id.getImage(), td, dir, op, kind, null, id.getLineCol());
+			idds.add(isd);  		
+		}
+  	
+		return idds;
+	}
+}
+
+PortDir mode() throws ZamiaException :
+{ 
+	PortDir m = PortDir.LINKAGE;
+}
+{
+	(  <IN> { m = PortDir.IN; }
+	| <OUT> { m = PortDir.OUT; }
+	| <INOUT> { m = PortDir.INOUT; }
+	| <BUFFER> { m = PortDir.BUFFER; }
+	| <LINKAGE> { m = PortDir.LINKAGE; }
+	)
+	{ return m ; }
+}
+
+SecondaryUnit secondary_unit(Context context_) throws ZamiaException:
+{
+	SecondaryUnit su = null;
+}
+{
+	{if (dump) System.out.println ("secondary_unit"); }
+	
+	( su = architecture_body(context_) 
+	| su = package_body(context_)
+	)
+	{ return su; }
+}
+
+PackageBody package_body(Context context_) throws ZamiaException:
+{
+	Identifier id, id2=null;
+	Token t;
+	PackageBody body;
+}
+{
+	t=<PACKAGE> <BODY> id = identifier() <IS>
+		{
+				body = new PackageBody(context_, id.getImage(), sf, getLocation(t), lib, zdb);
+		}
+		package_body_declarative_part(body)
+	<END> [ <PACKAGE> <BODY> ] [ id2=identifier() ] ";"
+	{ 
+		if (id2 != null && !id2.equals(id)) {
+			erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id+"')", id2.getLocation()));
+		} 
+		
+		return body;
+	}
+}
+
+void package_body_declarative_item(PackageBody body_) throws ZamiaException:
+{
+	SubProgram sub = null;
+	TypeDeclaration td = null;
+	ConstantDeclaration cd = null;
+	ArrayList<Name> l;
+	ArrayList<ConstantDeclaration> l2;
+	ArrayList<FileDeclaration> l3;
+	ArrayList<SharedVariableDeclaration> lsv;
+	BlockDeclarativeItem item;
+}
+{
+	(sub = subprogram() {body_.add(sub);}
+	| td = type_declaration() { body_.add(td); }
+	| td = subtype_declaration() {body_.add(td); }
+	| l2 = constant_declaration() 
+	      {
+	          int n = l2.size();
+    	      for (int i = 0; i<n; i++) {
+	    	      ConstantDeclaration c = l2.get(i);
+            	  body_.add(c);
+	          }
+	      }
+	| lsv = shared_variable_declaration()
+	      {
+	          n = lsv.size();
+    	      for (int i = 0; i<n; i++) {
+	    	      SharedVariableDeclaration sd = lsv.get(i);
+            	  body_.add(sd);
+	          }
+	      }
+    | l3 = file_declaration()
+	      {
+	          n = l3.size();
+    	      for (int i = 0; i<n; i++) {
+	    	      FileDeclaration fd = l3.get(i);
+            	  body_.add(fd);
+	          }
+	      }
+    | item = alias_declaration()
+    	{
+    		body_.add(item);
+    	}
+	| l = use_clause()
+	      {
+	          n = l.size();
+    	      for (int i = 0; i<n; i++) {
+	    	      Name name = l.get(i);
+            	  body_.getContext().addUse (name);
+	          }
+	      }
+	| LOOKAHEAD(<GROUP> identifier() <IS>)
+		item = group_template_declaration()
+		{ body_.add(item); }
+	| item = group_declaration() 
+		{ body_.add(item); }
+	)
+}
+
+void package_body_declarative_part(PackageBody body_)  throws ZamiaException:
+{}
+{
+	( package_body_declarative_item(body_) )*
+}
+
+
+
+Architecture architecture_body(Context context_)  throws ZamiaException:
+{
+	Identifier id, id2=null;
+	Name entityName;
+	Architecture arch;
+	Token t;
+}
+{
+	t = <ARCHITECTURE> id = identifier() <OF> entityName = name() <IS> 
+		{ arch= new Architecture (context_, id.getImage(), entityName, zprj, sf, getLocation(t), lib, zdb);	}
+		architecture_declarative_part(arch)
+	try {
+		<BEGIN>
+			architecture_statement_part(arch)
+		<END> [ <ARCHITECTURE> ] [ id2 = identifier() ] ";"
+	} catch(ParseException e) {
+		error_skipto(SEMICOLON, "syntax error in architecture",e);
+	}
+	{ 
+		if (id2 != null) {
+			if (!id2.equals(id)) {
+			  erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id+"')", id2.getLocation()));
+			}
+		} 
+		return arch; 
+	}
+}
+
+void architecture_declarative_part(Architecture arch_) throws ZamiaException:
+{
+	ArrayList<BlockDeclarativeItem> l;
+	BlockDeclarativeItem item;
+}
+{
+	( l = block_declarative_item() 
+		{
+			int n = l.size();
+			for (int i = 0; i<n; i++) {
+				item = l.get(i);
+				arch_.add (item);
+			}
+		}
+	)*
+}
+
+ArrayList<BlockDeclarativeItem> block_declarative_item() throws ZamiaException :
+{
+	ArrayList<BlockDeclarativeItem> l = new ArrayList<BlockDeclarativeItem>();
+	ArrayList<ConstantDeclaration> lcd;
+	ArrayList<SignalDeclaration> lsd;
+	ArrayList<FileDeclaration> lfd;
+	ArrayList<SharedVariableDeclaration> lsv;
+	ArrayList<ConfigurationSpecification> lcs;
+	ArrayList<Name> uc;
+	BlockDeclarativeItem item;
+	int n;
+}
+{
+	( item = subprogram() { l.add(item); }
+	| item = type_declaration() { l.add (item); }
+	| item = subtype_declaration() { l.add (item); }
+	| lcd = constant_declaration()
+	{
+		n = lcd.size();
+		for (int i = 0; i<n; i++) {
+			l.add(lcd.get(i));
+		}
+	}
+	| lsd = signal_declaration()
+	{
+		n = lsd.size();
+		for (int i = 0; i<n; i++) {
+			l.add(lsd.get(i));
+		}
+	}
+	| lsv = shared_variable_declaration()
+	{
+		n = lsv.size();
+		for (int i = 0; i<n; i++) {
+			l.add(lsv.get(i));
+		}
+	}
+	| lfd = file_declaration()
+	{
+		n = lfd.size();
+		for (int i = 0; i<n; i++) {
+			l.add(lfd.get(i));
+		}
+	}
+	| item = alias_declaration()
+		{
+			l.add(item);
+		}
+	| item = component_declaration() { l.add (item); }
+	| LOOKAHEAD(attribute_declaration())
+		item = attribute_declaration()
+		{ l.add(item); }
+	| attribute_specification()
+	| lcs = configuration_specification()
+	{
+		n = lcs.size();
+		for (int i = 0; i<n; i++) {
+			l.add(lcs.get(i));
+		}
+	}
+	| item = disconnection_specification()
+		{ l.add(item); }
+	| uc = use_clause()
+	{
+		n = uc.size();
+		for (int i = 0; i<n; i++) {
+			Name name = uc.get(i);
+			l.add(new Use(name, null, name.getLineCol()));
+		}
+	}
+	| LOOKAHEAD(<GROUP> identifier() <IS>)
+	  item = group_template_declaration()
+	  { l.add(item); }
+	| item = group_declaration()
+	  { l.add(item); }
+	)
+  { return l; }
+}
+
+void architecture_statement_part(Architecture arch_)  throws ZamiaException:
+{
+	ConcurrentStatement stmt;
+}
+{
+	( 
+	  try {
+	    stmt = architecture_statement(arch_) {arch_.add(stmt);}
+	  } catch(ParseException e) {
+		error_skipto(SEMICOLON, "syntax error in architecture statement part.",e);
+	  }
+	   
+	)*
+}
+
+ConcurrentStatement architecture_statement(Architecture arch_) throws ZamiaException:
+{
+	ConcurrentStatement stmt=null;
+}
+{
+	(
+	LOOKAHEAD([identifier() ":"] <BLOCK>)
+		stmt = block_statement()
+	| LOOKAHEAD([identifier() ":"] [<POSTPONED>] <PROCESS>)
+		stmt = process_statement() 
+	| LOOKAHEAD([identifier() ":"] [<POSTPONED>] procedure_call() ";")
+	 	stmt = concurrent_procedure_call_statement()
+	| LOOKAHEAD([identifier() ":"] [<POSTPONED>] <ASSERT>)
+		stmt = concurrent_assertion_statement()
+//	| LOOKAHEAD([identifier() ":"] [<POSTPONED>] conditional_signal_assignment()|//		[identifier() ":"] [<POSTPONED>] selected_signal_assignment())//		stmt = concurrent_signal_assignment_statement()
+	| LOOKAHEAD([identifier() ":"] [<POSTPONED>] target() "<=" |
+		[identifier() ":"] [<POSTPONED>] <WITH>)
+		stmt = concurrent_signal_assignment_statement()
+	| LOOKAHEAD(identifier() ":" instantiated_unit() )
+		stmt = component_instantiation_statement()
+//	| LOOKAHEAD(generate_statement())
+	| LOOKAHEAD(identifier() ":" generation_scheme() <GENERATE>)
+		stmt = generate_statement()
+
+	/** 1076.1 extensions: */
+	// FIXME | LOOKAHEAD(concurrent_break_statement())
+	// FIXME 	concurrent_break_statement()
+	// FIXME | simultaneous_statement()
+	)
+  { return stmt; }
+}
+
+ConcurrentProcedureCall concurrent_procedure_call_statement() throws ZamiaException:
+{
+	ConcurrentProcedureCall stmt;
+	Name n;
+	boolean isPostponed = false;
+	Identifier label = null;
+	String sLabel = null;
+}
+{
+	[ LOOKAHEAD( identifier() ":") label = identifier() ":" { sLabel = label.getImage(); } ]
+	[ <POSTPONED> { isPostponed = true; } ] 
+	
+	n = name() ";"
+
+	{ 
+		stmt = new ConcurrentProcedureCall (n, sLabel, null, n.getLineCol());
+		stmt.setPostponed(isPostponed);
+		return stmt; 
+	}
+}
+
+
+Block block_statement() throws ZamiaException :
+{
+	Identifier id, id2=null;
+	Operation guard = null;
+	Block block;
+	BlockDeclarativeItem item;
+	ArrayList l;
+}
+{
+	id = identifier() ":"
+	<BLOCK> [ "(" guard = expression() ")" ] [ <IS> ]
+	{ block = new Block (id.getImage(), guard, null, id.getLineCol()); }
+		block_header(block)
+		( l = block_declarative_item() 
+			{ 
+				int n = l.size();
+				for (int i = 0; i<n; i++) {
+					item = (BlockDeclarativeItem) l.get(i);
+					block.add(item);
+				}
+			} )*
+	<BEGIN>
+		block_statement_part(block)
+	<END> <BLOCK> [ id2 = identifier() ] ";"
+	{ 
+		if (id2 != null) {
+			if (!id2.equals(id)) {
+			  erm.addError (new ZamiaException ( "Closing id doesn't match (was expecting '"+id+"')", id2.getLocation()));
+			}
+		} 
+		return block; 
+	}
+}
+
+void block_header(Block block_) throws ZamiaException :
+{
+	AssociationList l = null;
+	InterfaceList l2 = null;
+}
+{
+	[ l2 = generic_clause() { block_.setGenerics (l2); }
+		[ l = generic_map_aspect() ";" { block_.setGenericMap(l); } ] ]
+	[ l2 = port_clause() { block_.setPorts (l2); }
+		[ port_map_aspect() ";" { block_.setPortMap (l); } ] ]
+}
+
+void block_statement_part(Block block) throws ZamiaException:
+{
+	ConcurrentStatement stmt;
+}
+{
+	( stmt = architecture_statement(null) {block.add(stmt);} )*
+}
+
+
+InstantiatedUnit instantiated_unit(Identifier id_) throws ZamiaException:
+{
+	InstantiatedUnit iu = null;
+	Name n;
+	Identifier id=null;
+}
+{
+	(
+	[ <COMPONENT> ] n = name() { iu = new ComponentInstantiation (id_.getImage(), n, null, n.getLineCol()); }
+	| <ENTITY> n = name() [ "(" id = identifier() ")" ] { iu = new EntityInstantiation (id_.getImage(), n, id != null ? id.getImage() : null, null, n.getLineCol()); }
+	| <CONFIGURATION> n = name() { iu = new ConfigurationInstantiation (id_.getImage(), n, null, n.getLineCol()); }
+	)
+	{ return iu; }
+}
+
+InstantiatedUnit component_instantiation_statement() throws ZamiaException:
+{
+	Identifier id;
+	InstantiatedUnit iu;
+	AssociationList l;
+}
+{
+	id = identifier() ":" iu = instantiated_unit(id)
+		[ l = generic_map_aspect() 
+			{
+				iu.setGenericMapAspect(l);
+			}
+		]
+		[ l = port_map_aspect() 
+			{
+				iu.setPortMapAspect(l);
+			}	
+		] ";"
+	{ return iu; }
+}
+
+AssociationList port_map_aspect()  throws ZamiaException :
+{
+	AssociationList l;
+}
+{
+	<PORT> <MAP> "(" l=association_list() ")"
+	{ return l; }
+}
+
+AssociationList generic_map_aspect() throws ZamiaException :
+{
+	AssociationList l;
+}
+{
+	<GENERIC> <MAP> "(" l = association_list() ")"
+	{
+		return l;
+	}
+}
+
+AssociationList association_list()  throws ZamiaException :
+{
+	AssociationList l;
+	AssociationElement ae;
+}
+{
+	ae = association_element() { l = new AssociationList(null, ae.getLineCol()); l.add(ae); }
+	( "," ae=association_element() { l.add(ae); } )*
+	{ return l; }
+}
+
+AssociationElement association_element()  throws ZamiaException :
+{
+	AssociationElement ae;
+	Operation op;
+	FormalPart fp = null;
+}
+{
+	[ LOOKAHEAD( formal_part() "=>" ) fp = formal_part() "=>"  ]
+	op = actual_part()
+	{
+		if (fp != null) {
+			ae = new AssociationElement (null, fp.getLineCol()); 
+			ae.setFormalPart(fp);
+		} else if (op != null) {
+			ae = new AssociationElement (null, op.getLineCol()); 
+		} else { // OPEN
+			ae = new AssociationElement (null, 0); 
+		}
+		ae.setActualPart (op);
+		return ae;
+	}
+}
+
+FormalPart formal_part() throws ZamiaException :
+{
+	Name n1, n2;
+	FormalPart fp;
+}
+{
+	( LOOKAHEAD( name() "(" name() ")")
+		n1 = name() "(" n2 = name() ")" { fp = new FormalPart(n1, null, n1.getLineCol()); fp.setName2 (n2); }
+	| n1 = name() {  fp = new FormalPart(n1, null, n1.getLineCol()); }
+	)
+	{ return fp; }
+}
+
+Operation actual_part()  throws ZamiaException :
+{
+	Operation op;
+}
+{
+	// FIXME: really neccessary? expression 
+	// expands to function call and type conversion...
+	//( LOOKAHEAD( name() "(" actual_designator() ")")
+	//	name() "(" actual_designator() ")"
+	//| actual_designator()
+	//)
+	
+	op = actual_designator()
+	{ return op; }
+}
+
+Operation actual_designator() throws ZamiaException :
+{
+	Operation op = null;
+}
+{
+	( <OPEN>
+	| op = expression()
+	)
+	{ return op; }
+}
+
+
+
+ConditionalSignalAssignment conditional_signal_assignment() throws ZamiaException:
+{
+	Target target;
+	ArrayList wv;
+	ConditionalSignalAssignment csa;
+	long location;
+}
+{
+	
+	target = target() 
+	{
+		csa = new ConditionalSignalAssignment (target, null, target.getLineCol());
+	}
+	
+	"<=" options_(csa) wv=conditional_waveforms() ";"
+	
+	{
+		int n = wv.size();
+		for (int i = 0; i<n; i++) {
+			ConditionalWaveform cw = (ConditionalWaveform) wv.get(i);
+			csa.add(cw);
+		}
+		return csa;
+	}
+}
+
+void options_(ConcurrentSignalAssignment csa_) throws ZamiaException:
+{
+	DelayMechanism dm;
+}
+{
+	[ <GUARDED> { csa_.setGuarded(true);} ] 
+	[ dm = delay_mechanism() { csa_.setDelayMechanism(dm); } ]
+}
+
+DelayMechanism delay_mechanism() throws ZamiaException :
+{
+	boolean isInertial = true;
+	Operation reject = null;
+	Token t = null;
+	Token t2=null;
+}
+{
+	( t=<TRANSPORT> { isInertial = false;}
+	| [ t=<REJECT> reject=expression() ] t2=<INERTIAL> { if (t==null) t = t2; }
+	)
+	{ 
+		return new DelayMechanism(isInertial, reject, null, getLocation(t)); 
+	}
+}
+
+Target target() throws ZamiaException :
+{
+	Name name;
+	Aggregate aggregate;
+}
+{
+	( name = name() { return new Target(name, null, name.getLineCol()); }
+	| aggregate = aggregate()  { return new Target(aggregate, null, aggregate.getLineCol()); }
+	)
+}
+
+ArrayList<ConditionalWaveform> conditional_waveforms() throws ZamiaException :
+{
+	Waveform w;
+	ArrayList<ConditionalWaveform> l = new ArrayList<ConditionalWaveform>();
+	ConditionalWaveform cw;
+	Operation cond;
+}
+{
+	w = waveform()
+	{ cw = new ConditionalWaveform (w, null, w.getLineCol()); }
+	( LOOKAHEAD( <WHEN> expression() <ELSE>)
+		<WHEN> cond = expression() <ELSE> w = waveform() 
+		{ cw.setCond(cond); l.add (cw); cw = new ConditionalWaveform (w,null,w.getLineCol()); }		
+	)*
+    [ <WHEN> cond = expression() { cw.setCond(cond);}  ]
+    {
+    	l.add (cw);
+    	return l;
+    }
+}
+
+Waveform waveform() throws ZamiaException :
+{
+	Waveform w;
+	WaveformElement we;
+	long location;
+	Token t;
+}
+{
+	( we=waveform_element() 
+		{ 
+			w = new Waveform(null, we.getLineCol()); 
+			w.add(we);
+		}
+		( "," we=waveform_element() { w.add(we); } )*
+	| t=<UNAFFECTED>
+		{
+			w = new Waveform(null, getLocation(t)); 
+			w.setUnaffected(true);
+		}
+	)
+	{ return w; }
+}
+
+WaveformElement waveform_element() throws ZamiaException :
+{
+	Operation value=null;
+	Operation after=null;
+	long location;
+	Token t = null;
+}
+{
+	( LOOKAHEAD(<NULL>)
+		t=<NULL> [<AFTER> after=expression() ]
+	| value = expression() [ <AFTER> after = expression() ] 
+	)
+	
+	{ 
+		if (t != null)
+			location = getLocation(t);
+		else
+			location = value.getLineCol();
+		return new WaveformElement (value, after, null, location); 
+	}
+}
+
+ConcurrentStatement concurrent_assertion_statement() throws ZamiaException :
+{
+	Assertion ass;
+	long location;
+	Token t=null;
+	Identifier id=null;
+	boolean isPostponed=false;
+	ConcurrentAssertion ca;
+}
+{
+	[ id = identifier() ":" ] [ t=<POSTPONED> { isPostponed = true; }] ass = assertion() ";"
+	
+	{
+		location = ass.getLineCol();
+		if (id != null)
+			location = id.getLineCol();
+		else if (t != null) {
+			location = getLocation(t);
+		}
+		ca = new ConcurrentAssertion(ass, null, location);
+		ca.setPostponed(isPostponed);
+		return ca;
+	}
+}
+
+ConcurrentSignalAssignment concurrent_signal_assignment_statement() throws ZamiaException :
+{
+	//String id;
+	ConcurrentSignalAssignment stmt;
+	boolean postponed = false;
+	Identifier label=null;
+}
+{
+	[ LOOKAHEAD( identifier() ":") label=identifier() ":" ]
+	[ <POSTPONED> { postponed = true; } ]
+//	( LOOKAHEAD(  target() "<=" options_() conditional_waveforms() ";")
+	( LOOKAHEAD(  target() "<=" )
+	stmt = conditional_signal_assignment()
+	| stmt = selected_signal_assignment() )
+	{
+		stmt.setPostponed(postponed); 
+		if (label != null) {
+			stmt.setLabel(label.getImage());
+		}
+		return stmt; 
+	}
+}
+
+SelectedSignalAssignment selected_signal_assignment() throws ZamiaException :
+{
+	Operation expr;
+	Target target;
+	ArrayList<SelectedWaveform> waveforms;
+	Token t;
+	SelectedSignalAssignment ssa;
+}
+{
+	t=<WITH> expr=expression() <SELECT>
+	target = target()  
+	{
+		ssa = new SelectedSignalAssignment (expr, target, null, getLocation(t));
+	}
+	
+	"<=" options_(ssa) waveforms=selected_waveforms() ";"
+	
+	{
+		int n = waveforms.size();
+		for (int i = 0; i<n; i++) {
+		
+			SelectedWaveform wf = waveforms.get(i);
+			ssa.add (wf);
+		}
+		return ssa;
+	}		
+}
+
+ArrayList<SelectedWaveform> selected_waveforms() throws ZamiaException :
+{
+	ArrayList<SelectedWaveform> l = new ArrayList<SelectedWaveform>();
+	SelectedWaveform sw;
+	Waveform w;
+	ArrayList<Range> choices;
+}
+{
+	w=waveform() <WHEN> choices = choices()
+	
+	{
+		sw = new SelectedWaveform (w, choices, null, w.getLineCol());
+		l.add(sw);
+	}
+	
+	("," w=waveform() <WHEN> choices = choices() 
+		{
+			sw = new SelectedWaveform (w, choices, null, w.getLineCol());
+			l.add(sw);
+		}
+	)*
+	
+	{ return l; }
+}
+
+
+GenerateStatement generate_statement() throws ZamiaException :
+{
+	GenerateStatement gs;
+	ConcurrentStatement stmt;
+	Identifier label, id2=null;
+	ArrayList<BlockDeclarativeItem> decls;
+}
+{
+	label = identifier() ":"
+	gs = generation_scheme(label) <GENERATE>
+		[ LOOKAHEAD(2) ( decls = block_declarative_item() { gs.add(decls); } )* <BEGIN> ]
+		//[ LOOKAHEAD((block_declarative_item())* <BEGIN>) ( block_declarative_item() )* <BEGIN> ]
+		( stmt = architecture_statement(null) { gs.add(stmt);})*
+	<END> <GENERATE> [ id2 = identifier() ] ";"
+	{
+		if (id2 != null && !id2.equals(label)) {
+			erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+label+"')", id2.getLocation()));
+		} 
+		return gs; 
+	}
+}
+
+GenerateStatement generation_scheme(Identifier label_) throws ZamiaException :
+{
+	GenerateStatement gs = null;
+	Identifier id;
+	Range range;
+	Operation exp;
+	Token t;
+	Name n;
+}
+{
+	( t = <FOR> id = identifier() <IN> (LOOKAHEAD(range()) range = range() | n = name() {  range = new Range(n, null, n.getLineCol());})
+		{ gs = new GenerateStatement (id.getImage(), range, label_.getImage(), null, label_.getLineCol()); }
+	| t = <IF> exp = expression()
+		{ gs = new GenerateStatement (exp, label_.getImage(), null, label_.getLineCol()); }
+	)
+	{ return gs ; }
+}
+
+
+
+ArrayList<ConstantDeclaration> constant_declaration() throws ZamiaException :
+{
+	ArrayList<ConstantDeclaration> res;
+	ArrayList<Identifier> ids;
+	TypeDefinition type;
+	Operation value=null;
+}
+{
+	<CONSTANT> ids=identifier_list() ":" type=subtype_indication()
+	[ ":=" value=expression() ] ";"
+	{
+		int n = ids.size();
+		res = new ArrayList<ConstantDeclaration> (n);
+		for (int i = 0; i<n; i++) {
+			Identifier id = ids.get(i);
+			res.add (new ConstantDeclaration (id.getImage(), type, value, null, id.getLineCol()));
+		}
+		return res;
+	}
+}
+
+ArrayList<SignalDeclaration> signal_declaration() throws ZamiaException :
+{
+	ArrayList<Identifier> ids;
+	TypeDefinition type;
+	int kind = SignalDeclaration.KIND_NONE;
+	Operation value=null;
+	ArrayList<SignalDeclaration> res;
+}
+{
+	<SIGNAL> ids = identifier_list() ":"
+	type = subtype_indication() [ kind = signal_kind() ] [ ":=" value=expression() ] ";"
+	{
+		int n = ids.size();
+		res = new ArrayList<SignalDeclaration>(n);
+		for (int i = 0; i<n; i++) {
+			Identifier id = ids.get(i);
+			res.add (new SignalDeclaration (id.getImage(), type, kind, value, null, id.getLineCol()));
+		}
+		return res;
+	}
+}
+
+ArrayList <SharedVariableDeclaration> shared_variable_declaration() throws ZamiaException :
+{
+	ArrayList<Identifier> ids;
+	TypeDefinition type;
+	Operation value=null;
+	ArrayList<SharedVariableDeclaration> res;
+}
+{
+	[ <SHARED> ] <VARIABLE> ids = identifier_list() ":"
+	type = subtype_indication() [ ":=" value = expression() ] ";"
+	{
+		int n = ids.size();
+		res = new ArrayList<SharedVariableDeclaration>(n);
+		for (int i = 0; i<n; i++) {
+			Identifier id = ids.get(i);
+			res.add (new SharedVariableDeclaration (id.getImage(), type, value, null, id.getLineCol()));
+		}
+		return res;
+	}
+}
+
+
+int signal_kind() throws ZamiaException :
+{}
+{
+	( <REGISTER> { return SignalDeclaration.KIND_REGISTER; }
+	| <BUS> { return SignalDeclaration.KIND_BUS; }
+	)	
+}
+
+ComponentDeclaration component_declaration() throws ZamiaException :
+{
+	ComponentDeclaration comp;
+	Identifier id, id2 = null;
+	InterfaceList l;
+	Token t;
+}
+{
+	t=<COMPONENT> id = identifier() [ <IS> ]
+	{ comp = new ComponentDeclaration (id.getImage(), null, getLocation(t)); }
+	[ l = generic_clause() 
+		{
+			comp.setGenerics(l);
+		}
+	]
+	[ l = port_clause() 
+		{
+			comp.setInterfaces(l);
+		}
+	]
+	<END> <COMPONENT> [ id2 = identifier() ] ";"
+	
+	{
+		if (id2 != null) {
+			if (!id2.equals(id)) {
+			  erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id+"')", id2.getLocation()));
+			}
+		} 
+		 
+		return comp; 
+	}
+}
+
+InterfaceList generic_clause() throws ZamiaException :
+{
+	InterfaceList l;
+}
+{
+	<GENERIC> "(" l = interface_list(InterfaceContext.GENERIC, PortDir.IN) ")" ";"
+	{ return l; }
+}
+
+
+TypeDeclaration type_declaration() throws ZamiaException :
+{
+	TypeDeclaration td = null;
+	Identifier id;
+	Token t;
+}
+{
+	(  LOOKAHEAD( <TYPE> identifier() <IS> )
+		td = full_type_declaration()
+	| t=<TYPE> id = identifier() ";"
+		{
+			td = new TypeDeclaration(id.getImage(), new TypeDefinitionIncomplete(null, getLocation(t)), null, getLocation(t));
+		}
+	)
+	
+	{ return td; }
+}
+
+TypeDeclaration full_type_declaration() throws ZamiaException :
+{
+	Identifier id;
+	TypeDefinition td;
+	Token t;
+}
+{
+	t=<TYPE> id = identifier() <IS> td = type_definition() ";"
+	
+	{ return new TypeDeclaration (id.getImage(), td, null, getLocation(t)); }
+}
+
+TypeDeclaration subtype_declaration() throws ZamiaException :
+{
+	Identifier id;
+	TypeDefinition type;
+	Token t;
+}
+{
+	t=<SUBTYPE> id = identifier() <IS> type = subtype_indication() ";"
+	{ return new TypeDeclaration (id.getImage(), type, null, getLocation(t)); }
+}
+
+AttributeDeclaration attribute_declaration() throws ZamiaException :
+{
+	Identifier id;
+	Name type;
+}
+{
+	<ATTRIBUTE> id = identifier() ":" type = name() ";"
+	
+	{ return new AttributeDeclaration (id.getImage(), type, null, id.getLineCol()); }
+}
+
+TypeDefinitionSubType subtype_indication() throws ZamiaException :
+{
+	Name resf = null;
+	Name name;
+	ArrayList constr = null;
+}
+{
+	[ LOOKAHEAD (name() name()) resf = name() ] name = name() [ constr = constraint() ]
+   
+	{
+		TypeDefinitionSubType td = new TypeDefinitionSubType(name, null, name.getLineCol());
+
+		td.setResolutionFunction(resf);
+		td.setConstraint (constr);
+		
+		return td;
+	}
+}
+
+TypeDefinition type_definition() throws ZamiaException :
+{
+	TypeDefinition td;
+}
+{
+	( td = scalar_type_definition()
+	| td = composite_type_definition()
+	| td = access_type_definition()
+	| td = file_type_definition()
+	| td = protected_type_definition()
+	)
+	{ return td; }
+}
+
+TypeDefinition scalar_type_definition() throws ZamiaException :
+{
+	TypeDefinition td;
+	Range range;
+}
+{
+	( LOOKAHEAD(range_constraint() <UNITS> )
+	td = physical_type_definition()
+//	| LOOKAHEAD(enumeration_type_definition())
+	| LOOKAHEAD("(")
+    td = enumeration_type_definition()
+	/* integer_type_definition / floating_type_definition: */
+	| range = range_constraint()
+		{   td = new TypeDefinitionRange (range, null, range.getLineCol()); }	
+	)
+	{ return td; }
+}
+
+TypeDefinitionAccess access_type_definition() throws ZamiaException :
+{
+	TypeDefinition td;
+	Token t;
+}
+{
+	t=<ACCESS> td = subtype_indication()
+	{ return new TypeDefinitionAccess (td, null, getLocation(t)); }
+}
+
+TypeDefinitionFile file_type_definition() throws ZamiaException:
+{
+	Name name;
+	Token t;
+}
+{
+	t=<FILE> <OF> name = name()
+	{ return new TypeDefinitionFile (name, null, getLocation(t)); }
+}
+
+TypeDefinitionPhysical physical_type_definition() throws ZamiaException :
+{
+	TypeDefinitionPhysical tdp;
+	Range range;
+	String unit;
+}
+{
+	range = range_constraint()
+	<UNITS>
+	unit = base_unit_declaration()
+	{ tdp = new TypeDefinitionPhysical(range, unit, null, range.getLineCol());}
+	( secondary_unit_declaration(tdp) )*
+  	<END> <UNITS> [ identifier() ]
+  	{ return tdp; }
+}
+
+String base_unit_declaration() throws ZamiaException :
+{
+	Identifier unit;
+}
+{
+	unit = identifier() ";"
+	{ return unit.getImage(); }
+}
+
+void secondary_unit_declaration(TypeDefinitionPhysical td_) throws ZamiaException :
+{
+	Identifier id;
+	OperationLiteral pl;
+}
+{
+	id = identifier() "=" pl=physical_literal() ";"
+	{ td_.addUnit (id.getImage(), pl); }
+}
+
+
+TypeDefinitionEnum enumeration_type_definition() throws ZamiaException :
+{
+	TypeDefinitionEnum td;
+	long location;
+	OperationLiteral l;
+}
+{
+	"(" l = enumeration_literal() 
+		{ 
+			td = new TypeDefinitionEnum (null, l.getLineCol());
+			td.add(l);
+		} 
+		( "," l = enumeration_literal() { td.add(l);}  )* ")"
+	{ return td; }
+}
+
+
+
+TypeDefinition composite_type_definition() throws ZamiaException :
+{
+	TypeDefinition td;
+}
+{
+	( td = array_type_definition()
+	| td = record_type_definition()
+	)
+	{ return td; }
+}
+
+TypeDefinition array_type_definition() throws ZamiaException :
+{
+	TypeDefinition td;
+}
+{
+	( LOOKAHEAD(<ARRAY> "(" index_subtype_definition())
+	td = unconstrained_array_definition()
+	| td = constrained_array_definition()
+	)
+	{ return td; }
+}
+
+TypeDefinitionUnconstrainedArray unconstrained_array_definition() throws ZamiaException :
+{
+	TypeDefinitionUnconstrainedArray td;
+	Name isd;
+	TypeDefinition elementType;
+	Token t;
+}
+{
+	t = <ARRAY> "(" isd = index_subtype_definition()
+	{ td = new TypeDefinitionUnconstrainedArray (null, getLocation(t)); td.add(isd); }
+	( "," isd = index_subtype_definition() { td.add (isd); } )* 
+	")"
+	<OF> elementType = subtype_indication()
+	
+	{
+		td.setElementType (elementType);
+		return td;
+	}
+}
+
+Name index_subtype_definition() throws ZamiaException :
+{
+	Name n;
+}
+{
+	n = name() <RANGE> "<>"
+	{ return n; }
+}
+
+TypeDefinitionConstrainedArray constrained_array_definition() throws ZamiaException :
+{
+	TypeDefinitionConstrainedArray td;
+	TypeDefinition std;
+	ArrayList<DiscreteRange> constraints;
+	Token t;
+}
+{
+	t=<ARRAY> constraints = index_constraint() <OF> std = subtype_indication()
+  
+	{
+	  	td = new TypeDefinitionConstrainedArray (std, null, getLocation(t));
+	  	int n = constraints.size();
+	  	for (int i = 0; i<n; i++)
+	  		td.add (constraints.get(i));
+	  	return td;
+	}
+}
+
+TypeDefinitionRecord record_type_definition() throws ZamiaException :
+{
+	TypeDefinitionRecord td;
+	Token t;
+}
+{
+	t = <RECORD>
+	{ 
+		td = new TypeDefinitionRecord (null, getLocation(t));
+	}
+		( element_declaration(td) )+
+	<END> <RECORD> [ identifier() ]
+	{ return td; }
+}
+
+void element_declaration(TypeDefinitionRecord td_) throws ZamiaException :
+{
+	ArrayList<Identifier> ids;
+	TypeDefinition type;
+}
+{
+	ids = identifier_list() ":" type=subtype_indication() ";"
+	
+	{ 
+		int n = ids.size();
+		for (int i = 0; i<n; i++) {
+			Identifier id = ids.get(i);
+			td_.addElement (id.getImage(), type, id.getLineCol());
+		}
+	}
+}
+
+ArrayList<DiscreteRange> constraint() throws ZamiaException :
+{
+	ArrayList<DiscreteRange> ranges;
+	Range range;
+}
+{
+	(
+    	range = range_constraint() 
+    	{ ranges = new ArrayList<DiscreteRange>(1); ranges.add (new DiscreteRange(range, null, range.getLineCol()));}
+	| ranges = index_constraint()
+	)
+	{ return ranges; }
+}
+
+ArrayList<DiscreteRange> index_constraint() throws ZamiaException :
+{
+	ArrayList<DiscreteRange> ranges = new ArrayList<DiscreteRange> (1);
+	DiscreteRange dr;
+}
+{
+	"(" dr = discreteRange() { ranges.add (dr); }
+	( "," dr = discreteRange() { ranges.add(dr);}  )* ")"
+	{ 
+		return ranges; 
+	}
+}
+
+DiscreteRange discreteRange() throws ZamiaException :
+{
+	Range range;
+	TypeDefinitionSubType td;
+}
+{
+	( LOOKAHEAD(simple_expression() direction() )
+		range = range() {return new DiscreteRange (range, null, range.getLineCol());}
+	| LOOKAHEAD (name() name() constraint()) 		
+		td = subtype_indication() { return new DiscreteRange (td, null, td.getLineCol()); }
+	| LOOKAHEAD (name() constraint()) 		
+		td = subtype_indication() { return new DiscreteRange (td, null, td.getLineCol()); }
+	| LOOKAHEAD (name() name()) 		
+		td = subtype_indication() { return new DiscreteRange (td, null, td.getLineCol()); }
+	| LOOKAHEAD (name()) 		
+		td = subtype_indication() { return new DiscreteRange (td, null, td.getLineCol()); }
+//	| LOOKAHEAD( subtype_indication() )//		td = subtype_indication() { return new DiscreteRange (td, null, l); }
+	| range = range() {return new DiscreteRange (range, null, range.getLineCol());}
+	)
+}
+
+
+
+Range range_constraint() throws ZamiaException :
+{
+	Range range;
+	Name n;
+}
+{
+	<RANGE> (LOOKAHEAD(range()) range = range() | n = name() {range = new Range(n, null, n.getLineCol());})
+	{ return range; }
+}
+
+Range range() throws ZamiaException :
+{
+	Name name;
+	Operation left, right;
+	int dir;
+}
+{
+	(		LOOKAHEAD (simple_expression() direction() )
+		left = simple_expression() dir = direction() right = simple_expression()
+		
+		{ return new Range (left, dir, right, null, left.getLineCol()); }
+	|  		name = name() { return new Range (name, null, name.getLineCol()); }
+	)
+}
+
+int direction() throws ZamiaException :
+{}
+{
+	( <TO>  { return Range.DIR_UP; } | <DOWNTO> { return Range.DIR_DOWN; } )
+}
+
+Operation simple_expression() throws ZamiaException :
+{ 
+	Operation res = null, t;
+	boolean do_invert = false;
+	boolean do_pos = false;
+	long l;
+	MathOp op = MathOp.ADD;
+	boolean is_concat = false;
+	Token token = null;
+}
+{
+	[ ( token=<ADD> { do_pos = true; } | token=<SUB> { do_invert = true; } ) ] res = term()
+	{   
+		if (do_invert) {
+			res = new OperationMath(MathOp.NEG, res, null, getLocation(token));
+		} else if (do_pos) {
+			res = new OperationMath(MathOp.POS, res, null, getLocation(token));
+		}
+	}		
+   
+   
+//	(LOOKAHEAD(4)
+	(LOOKAHEAD (<ADD> | <SUB> | <CONCAT>)
+		( 
+		token=<ADD> { op = MathOp.ADD; is_concat = false;}
+		| token=<SUB> { op = MathOp.SUB; is_concat = false;}
+		| token=<CONCAT> { is_concat = true; }
+		)
+
+		t = term() 
+		{
+			if (!is_concat) {
+				res = new OperationMath(op, res, t, null, getLocation(token));
+			} else {
+				res = new OperationConcat(res, t, null, getLocation(token));
+			}
+		}
+    )*
+
+	{   
+		return res;
+	}
+}
+
+
+Operation term() throws ZamiaException :
+{ 
+	Operation res;
+	Operation f;
+	MultiplyingOperator mo;
+}
+{
+	res = factor() 
+	(LOOKAHEAD(4)
+		mo = multiplying_operator() 
+		f = factor()
+		{ res = new OperationMath(mo.getOp(), res, f, null, mo.getLineCol()); }
+	)*
+	
+	{ return res; }
+}
+
+MultiplyingOperator multiplying_operator() throws ZamiaException :
+{
+	Token t;
+}
+{
+	( 
+	t="*"     { return new MultiplyingOperator(MathOp.MUL, getLocation(t)); }
+	| t="/"     { return new MultiplyingOperator(MathOp.DIV, getLocation(t)); }
+	| t=<MOD>   { return new MultiplyingOperator(MathOp.MOD, getLocation(t)); }
+	| t=<REM>   { return new MultiplyingOperator(MathOp.REM, getLocation(t)); }
+	)
+}
+
+Operation factor() throws ZamiaException :
+{
+	Operation res;
+	Operation p;
+	Token t;
+}
+{
+	(
+		t= <ABS> p = primary() {res = new OperationMath(MathOp.ABS, p, null, getLocation(t)); }
+		| t=<NOT> p = primary() {res = new OperationLogic(LogicOp.NOT, p, null, null, getLocation(t)); }
+		| res = primary() 
+			[ LOOKAHEAD(<EXP> primary()) t=<EXP> p = primary() 
+				{ 
+					res = new OperationMath(MathOp.POWER, res, p, null, getLocation(t)); 
+				}
+			]
+	)
+  
+  { return res; }
+}
+
+Name name() throws ZamiaException:
+{
+	Identifier id;
+	Name name;
+	//Token t;
+	Signature signature = null;
+	Token t;
+	String img;
+}
+{
+
+	(
+	id = identifier() 
+	  { img = id.getImage(); 
+		name = new Name(id.getImage(), null, id.getLineCol());
+	  }
+	| t = <string_literal>
+		{ name = new Name(t.image.toUpperCase(), null, getLocation(t));}
+	)
+
+	[ LOOKAHEAD("[") signature = signature() ]
+
+	[ LOOKAHEAD( ("(" | "." | "'" )) name_extension(name, signature) ]
+	
+	{ return name; }
+}
+
+Name operation_call() throws ZamiaException:
+{
+	Name name;
+	Signature signature = null;
+	Token t;
+}
+{
+
+	t = <string_literal>
+	{ name = new Name(t.image.toUpperCase(), null, getLocation(t));}
+
+	[ LOOKAHEAD("[") signature = signature() ]
+
+	[ LOOKAHEAD( ("(" | "." | "'" )) name_extension(name, signature) ]
+	
+	{ return name; }
+}
+
+Name pure_name() throws ZamiaException:
+{
+	Identifier id;
+	Name name;
+	Signature signature = null;
+}
+{
+
+	id = identifier()
+	{ name = new Name(id.getImage(), null, id.getLineCol());}
+
+	[ LOOKAHEAD("[") signature = signature() ]
+
+	[ LOOKAHEAD( ("(" | "." | "'" )) name_extension(name, signature) ]
+	
+	{ return name; }
+}
+
+void name_extension(Name name, Signature signature_) throws ZamiaException:
+{
+	Identifier id;
+	Operation exp = null;
+	Suffix suffix;
+	Range range;
+	NameExtensionIndex nameExtensionIndex;
+	NameExtensionRange nameExtensionRange;
+	Token t;
+	Aggregate aggregate;
+	AssociationList al=null;	
+}
+{
+	(
+	  LOOKAHEAD("'" <RANGE> )
+		t="'" <RANGE>
+		[ LOOKAHEAD( "(" expression() ")") "(" exp = expression() ")"]
+		{
+			name.add (new NameExtensionAttribute ("RANGE", signature_, exp, null, getLocation(t)));
+		}
+	| LOOKAHEAD("'" identifier()) t = "'" id=identifier()
+		[ LOOKAHEAD( "(" expression() ")") "(" exp = expression() ")"]
+		{
+			name.add (new NameExtensionAttribute (id.getImage(), signature_, exp, null, getLocation(t)));
+		}
+	| LOOKAHEAD("'" "(" expression() ")")
+		t = "'" "(" exp = expression() ")"
+		{
+			name.add (new NameExtensionQualifiedExpression(exp,null, getLocation(t)));
+		}
+	| LOOKAHEAD("'")
+		t = "'" aggregate = aggregate()
+		{
+			name.add (new NameExtensionQualifiedExpression(aggregate,null, getLocation(t)));
+		}
+	
+	| t = "." suffix = suffix()
+		{
+			name.add (new NameExtensionSuffix (suffix, null, getLocation(t)));
+		}
+	| LOOKAHEAD( "(" range() ("," range() )* ")" )
+		t = "(" range = range() { nameExtensionRange = new NameExtensionRange(range, null, getLocation(t)); }
+		("," range = range() {nameExtensionRange.add (range);} )* ")"
+		{
+			name.add (nameExtensionRange);
+		}
+	| LOOKAHEAD( "(" expression() ("," expression() )* ")") 
+		t = "(" exp = expression() { nameExtensionIndex = new NameExtensionIndex(exp, null, getLocation(t));  }
+	        ("," exp = expression() { nameExtensionIndex.add (exp); } )* ")"
+		{
+			name.add (nameExtensionIndex);
+		}
+	| t = "(" al=association_list() ")" 
+		{
+			name.add(new NameExtensionFunctionCall(al, null, getLocation(t)));
+		}
+	)
+  [  LOOKAHEAD( ("'" | "." | "(" ) ) name_extension(name, null) ]
+}
+
+Signature signature() throws ZamiaException :
+{
+	Signature signature;
+	Name n;
+}
+{
+	"["
+	{ signature = new Signature (null, getLocation()); }
+	
+	( LOOKAHEAD(identifier())
+		n = name() { signature.add (n); }
+		( LOOKAHEAD ("," name() ) "," n = name() { signature.add (n); } )*
+		[ LOOKAHEAD (<RETURN>) <RETURN> n = name() { signature.setReturn (n);}]
+	| <RETURN> n = name() { signature.setReturn (n);}
+	)
+	"]"
+	{ return signature; }
+}
+
+Operation expression() throws ZamiaException :
+{ 
+	Operation res, op;
+	LogicOp lo;
+	Token t;
+}
+{
+	res = relation()
+	( LOOKAHEAD(1) 
+		( t=<AND>     { lo = LogicOp.AND; }
+		| t=<OR>      { lo = LogicOp.OR; }
+		| t=<NAND>    { lo = LogicOp.NAND; }
+		| t=<NOR>     { lo = LogicOp.NOR; }
+		| t=<XOR>     { lo = LogicOp.XOR; }
+		| t=<XNOR>    { lo = LogicOp.XNOR; }
+		)
+		op = relation() 
+		{
+			res = new OperationLogic(lo, res, op, null, res.getLineCol());
+		}
+	)*
+
+	{ 
+		return res;
+	}
+}
+
+LogicOp logical_operator():
+{}
+{
+	<AND>     	{ return LogicOp.AND; }
+	| <OR>      { return LogicOp.OR; }
+	| <NAND>    { return LogicOp.NAND; }
+	| <NOR>     { return LogicOp.NOR; }
+	| <XOR>     { return LogicOp.XOR; }
+	| <XNOR>    { return LogicOp.XNOR; }
+}
+
+Operation relation() throws ZamiaException :
+{ 
+	Operation res, o;
+	CompareOp op;
+}
+{
+	res = shift_expression() 
+	[ op = relational_operator() o = shift_expression() 
+	  { res = new OperationCompare(op, res, o, null, res.getLineCol()); }
+	]
+	
+	{return res;}
+}
+
+CompareOp relational_operator():
+{}
+{
+    <EQ>                { return CompareOp.EQUAL; }
+  | <NEQ>               { return CompareOp.NEQUAL; }
+  | <LO>                { return CompareOp.LESS; }
+  | <LE>                { return CompareOp.LESSEQ; }
+  | <GT>                { return CompareOp.GREATER; }
+  | <GE>                { return CompareOp.GREATEREQ; }
+}
+
+Operation shift_expression() throws ZamiaException :
+{ 
+	Operation res, o;
+	ShiftOp op;
+}
+{
+	res = simple_expression() 
+	[ 
+	  op = shift_operator() o = simple_expression() 
+	  
+	  { res = new OperationShift(op, res, o, null, res.getLineCol()); }
+	]
+	
+	{ return res; }
+}
+
+ShiftOp shift_operator() throws ZamiaException :
+{}
+{
+    <SLL>               { return ShiftOp.SLL; }
+  | <SRL>               { return ShiftOp.SRL; }
+  | <SLA>               { return ShiftOp.SLA; }
+  | <SRA>               { return ShiftOp.SRA; }
+  | <ROL>               { return ShiftOp.ROL; }
+  | <ROR>               { return ShiftOp.ROR; }
+}
+
+Operation primary() throws ZamiaException :
+{
+	Operation res;
+	Name n;
+	Aggregate aggregate;
+}
+{
+	( LOOKAHEAD(<NEW>) res = allocator()
+	| LOOKAHEAD(<string_literal> <LPAREN>)
+		n = operation_call() { res = new OperationName(n, null, n.getLineCol()); }
+	| LOOKAHEAD(numeric_literal() | <character_literal> | <string_literal> | <bit_string_literal> | <NULL>)
+		res = pure_literal()
+	| LOOKAHEAD(identifier())
+		n = pure_name() { res = new OperationName(n, null, n.getLineCol()); }
+	| aggregate = aggregate()
+		{
+			if (!aggregate.isAggregate()) {
+				res = aggregate.getElement(0).getExpression();
+				res.setParent(null, true);
+			} else { 
+				res = new OperationAggregate (aggregate, null, aggregate.getLineCol());
+			} 
+		}
+	)
+	{ return res; }
+}
+
+
+OperationAllocator allocator() throws ZamiaException:
+{
+	TypeDefinitionSubType td = null;
+	Token t;
+}
+{
+	t=<NEW>
+	td=subtype_indication()
+	
+	{
+		return new OperationAllocator(td, null, getLocation(t));
+	}
+}
+
+
+OperationLiteral literal() throws ZamiaException :
+{
+	OperationLiteral res;
+	Token t;
+}
+{
+	(
+	LOOKAHEAD( numeric_literal() )
+	res = numeric_literal()
+	| res = enumeration_literal()
+	| t = <bit_string_literal> 
+		{ 
+			String str = t.image.toUpperCase();
+			int len = str.length(); 
+			res = new OperationLiteral (str, LiteralCat.BIT_STRING, null, getLocation(t)); 
+		}
+	| t = <string_literal> 
+		{ 
+			str = t.image.toUpperCase();
+			len = str.length(); 
+			res = new OperationLiteral (str.substring(1,len-1), LiteralCat.STRING, null, getLocation(t)); 
+		}
+	| t=<NULL> { res = new OperationLiteral (null, LiteralCat.NULL, null, getLocation(t)); }
+	)
+	{ return res; }
+}
+
+// since enumeration_literal also contains identifier which is also covered by name,
+// we create this "pure" literal production for primaries:
+OperationLiteral pure_literal() throws ZamiaException :
+{
+	OperationLiteral res;
+	Token t;
+}
+{
+	(
+		LOOKAHEAD( numeric_literal() )
+		res = numeric_literal()
+		
+ 	| t=<character_literal>
+ 		{ 
+			res = new OperationLiteral (""+t.image.charAt(1), LiteralCat.CHAR, null, getLocation(t)); 
+ 		}
+	| t = <bit_string_literal> 
+		{ 
+			res = new OperationLiteral (t.image.toUpperCase(), LiteralCat.BIT_STRING, null, getLocation(t)); 
+		}
+	| t = <string_literal> 
+		{ 
+			String str = t.image.toUpperCase();
+			int len = str.length(); 
+			res = new OperationLiteral (str.substring(1,len-1), LiteralCat.STRING, null, getLocation(t)); 
+		}
+	| t=<NULL> { res = new OperationLiteral (null, LiteralCat.NULL, null, getLocation(t)); }
+	)
+	{ return res; }
+}
+
+OperationLiteral numeric_literal() throws ZamiaException :
+{
+	OperationLiteral res;
+}
+{
+	( LOOKAHEAD (physical_literal())
+	res = physical_literal()
+	| res = abstract_literal() )
+	{ return res; }
+}
+
+OperationLiteral physical_literal() throws ZamiaException :
+{
+	Name n;
+	OperationLiteral l = null;
+}
+{
+	l = abstract_literal() 
+	n = name()
+	{ 
+		if (l == null)
+			return new OperationLiteral (n.getId(), LiteralCat.STRING, null, n.getLineCol());
+		return new OperationLiteral (l, n, null, l.getLineCol()); 
+	}
+}
+
+OperationLiteral abstract_literal() throws ZamiaException :
+{
+	OperationLiteral res;
+	long location;
+	Token t;
+}
+{
+	( t = <decimal_literal>
+		{ res = new OperationLiteral (t.image, LiteralCat.DECIMAL, null, getLocation(t)); }
+	| t = <based_literal>
+		{ res = new OperationLiteral (t.image, LiteralCat.BASED, null, getLocation(t)); }
+	)
+	{ return res; }
+}
+
+OperationLiteral enumeration_literal() throws ZamiaException :
+{
+	OperationLiteral res;
+	Token t=null;
+	Identifier id;
+}
+{
+	( t = <character_literal>
+		{ res = new OperationLiteral (""+t.image.charAt(1), LiteralCat.CHAR, null, getLocation(t)); }
+		// also covered by name:
+	| id = identifier()		{ res = new OperationLiteral (id.getImage(), LiteralCat.ENUM, null, id.getLineCol()); }
+	)
+	{ return res; }
+}
+
+Aggregate aggregate() throws ZamiaException :
+{
+	Aggregate agg;
+	ElementAssociation ea;
+}
+{
+	{ agg = new Aggregate (null, getLocation()); }
+	"(" ea = element_association() {agg.add (ea);} 
+	( "," ea = element_association() {agg.add (ea);} )* ")"
+	{ return agg ;}
+}
+
+ElementAssociation element_association() throws ZamiaException :
+{
+	ArrayList<Range> choices = null;
+	Operation op=null,se=null,exp=null;
+	long location;
+	Range r;
+	Token t;
+	int dir;
+}
+{
+  ( t = <OTHERS> { choices = new ArrayList<Range>(); choices.add(null); location = getLocation(t);}
+  | op = expression() { location = op.getLineCol(); }
+    [ LOOKAHEAD (direction()) dir=direction() se=simple_expression() 
+	    {
+	    	r = new Range (op, dir, se, null, op.getLineCol());
+	    	choices = new ArrayList<Range>(); choices.add(r);
+	    	op = null;
+	    }
+	]
+  )
+
+  ( "|" r = choice() 
+      {
+      	 if (choices == null) {
+      		choices = new ArrayList<Range>();
+      		choices.add(new Range (op, op, false, null, op.getLineCol()));
+      		op = null;
+      	 }
+      	 choices.add(r);
+      } 
+  )*
+
+  [ "=>" exp = expression() ]
+
+  {
+  	if (exp == null) {
+  		if (choices != null || op == null) {
+  			throw new ZamiaException("Syntax error in element assocation: choices given but no expression.", new SourceLocation(sf, location));
+  		}
+  		exp = op;
+  	} else {
+  		if (choices == null){
+  			if (op == null) {
+  				throw new ZamiaException("Syntax error in element assocation: expression given but no choices.", exp.getLocation());
+  			}
+	   		choices = new ArrayList<Range>();
+   			choices.add(new Range (op, op, false, null, op.getLineCol()));
+  		}
+  	}
+  	
+  	
+	return new ElementAssociation (choices, exp, null, location); 
+  }
+}
+
+ArrayList<Range> choices() throws ZamiaException :
+{
+	ArrayList<Range> l = new ArrayList<Range>(1);
+	Range r;
+}
+{
+	r = choice() { l.add(r);}
+	( "|" r = choice() { l.add(r);} )*
+	{ return l; }
+}
+
+
+Range choice() throws ZamiaException :
+{
+	Operation op,se;
+	int dir;
+}
+{
+	(<OTHERS>
+		{ return null; }
+	| op = simple_expression()
+        
+        [ LOOKAHEAD(direction())
+          dir = direction()
+          se = simple_expression()
+          {
+	    	return new Range (op, dir, se, null, op.getLineCol());
+          }
+        ]	
+	
+		{ return new Range (op, op, false, null, op.getLineCol()); }
+	)
+}
+
+Suffix suffix() throws ZamiaException :
+{
+	Suffix suffix=null ;
+	Identifier id;
+	Token t;
+}
+{
+	(
+		id = identifier() 
+		{ 
+			suffix = new Suffix (id.getLineCol()); 
+			suffix.setId (id.getImage()); 
+		}
+	| t=<character_literal>
+		{ 
+			suffix = new Suffix (getLocation(t)); 
+			suffix.setCharLiteral (t.image.charAt(1)); 
+		}
+	| t = <string_literal>
+		{ 
+			suffix = new Suffix (getLocation(t)); 
+			suffix.setStringLiteral (t.image.toUpperCase()); 
+		}
+	| t=<ALL>
+		{ 
+			suffix = new Suffix (getLocation(t)); 
+			suffix.setAll(); 
+		}
+	)
+	
+	{ return suffix; }
+}
+
+Identifier identifier() throws ZamiaException :
+{ 
+	Token t; 
+	Identifier id;
+	boolean extended = false;
+
+}
+{  
+	(  t=<basic_identifier> 
+	|  t=<extended_identifier> { extended = true; }
+	)
+	{
+		id = new Identifier(t.image.toUpperCase(), extended, getLocation(t)); 
+		return id;
+	}
+}
+
+ArrayList<Identifier> identifier_list() throws ZamiaException :
+{
+	ArrayList<Identifier> ids = new ArrayList<Identifier>();
+	Identifier id;
+}
+{
+	id = identifier() { ids.add(id); }
+	( "," id=identifier() {ids.add (id);} )*
+  
+	{ return ids; }
+}
+
+/**
+ * processes
+ */
+ 
+SequentialProcess process_statement() throws ZamiaException :
+{
+	SequentialProcess proc;
+	ArrayList l;
+	SequenceOfStatements seq;
+	Token t;
+	String label = null;
+	Identifier id1 = null, id2 = null;
+	boolean isPostponed = false;
+}
+{
+	[ id1 = identifier() ":" { label = id1.getImage(); } ]
+	[ <POSTPONED> { isPostponed = true; } ] t=<PROCESS> 
+	{ 
+		proc = new SequentialProcess (null, getLocation(t));
+		proc.setPostponed(isPostponed);
+		if (label != null)  {
+			proc.setLabel(label);
+		}
+	}
+	[ "(" l = sensitivity_list() ")" 
+		{
+			int n = l.size();
+			for (int i = 0; i<n; i++) {
+				Name name = (Name) l.get(i);
+				proc.addSensitivity (name);
+			}
+		}
+	] [ <IS> ]
+		( process_declarative_item(proc) )*
+	<BEGIN>
+		seq = sequence_of_statements()
+		{ proc.setStatementSequence (seq); }
+	<END> [ <POSTPONED> ] <PROCESS> [ id2 = identifier() ] ";"
+	{ 
+		if (id2 != null) {
+			if (id1 == null) {
+				  erm.addError (new ZamiaException ("No label given at start of process.", id2.getLocation()));
+			} else {
+				if (!id2.equals(id1)) {
+				  erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id1+"')", id2.getLocation()));
+				}
+			}
+		} 
+		return proc; 
+	}
+}
+
+ArrayList<Name> sensitivity_list() throws ZamiaException :
+{
+	Name n;
+	ArrayList<Name> l = new ArrayList<Name>(1);
+}
+{
+	n = name() { l.add (n); } 
+	( "," n = name() { l.add (n); } )*
+	{ return l; }
+}
+
+void process_declarative_item(SequentialProcess proc_) throws ZamiaException :
+{
+	TypeDeclaration td;
+	ArrayList<ConstantDeclaration> lcd;
+	ArrayList<FileDeclaration> lfd;
+	ArrayList<VariableDeclaration> lvd;
+	ArrayList<Name> ln;
+	AttributeDeclaration ad;
+	SubProgram sub;
+	BlockDeclarativeItem item;
+}
+{
+	( sub = subprogram() { proc_.add(sub); }
+	| td = type_declaration() { proc_.add(td); }
+	| td = subtype_declaration() { proc_.add(td); }
+	| lcd = constant_declaration()
+		{
+			int n = lcd.size();
+			for (int i = 0; i<n; i++) {
+				item = lcd.get(i);
+				proc_.add(item);
+			}
+		}
+	| lvd = variable_declaration()
+		{
+			n = lvd.size();
+			for (int i = 0; i<n; i++) {
+				item = lvd.get(i); 
+				proc_.add (item);
+			}
+		}
+	| lfd = file_declaration()
+		{
+			n = lfd.size();
+			for (int i = 0; i<n; i++) {
+				item = lfd.get(i);
+				proc_.add(item);
+			}
+		}
+	| item = alias_declaration() 
+	 	{
+	 		proc_.add(item);
+	 	}
+	| LOOKAHEAD( attribute_declaration() )
+		ad = attribute_declaration() {proc_.add(ad); }
+	| attribute_specification()
+	| ln = use_clause() 
+		{
+			n = ln.size();
+			for (int i = 0; i<n; i++) {
+				Name name = ln.get(i); 
+				proc_.add(new Use (name, null, name.getLineCol()));
+			}
+		}
+	// FIXME | LOOKAHEAD( <GROUP> identifier() <IS> )
+	// FIXME   group_template_declaration()
+	| group_declaration()
+	)
+}
+
+ArrayList<FileDeclaration> file_declaration() throws ZamiaException :
+{
+	ArrayList<FileDeclaration> l;
+	ArrayList<Identifier> ids;
+	TypeDefinition t;
+	FileOpenInformation foi = null;
+}
+{
+	<FILE> ids=identifier_list() ":" t=subtype_indication() [ foi = file_open_information() ] ";"
+	{ 
+		int n = ids.size();
+		l = new ArrayList<FileDeclaration>(n);
+		for (int i=0; i<n; i++) {
+			Identifier id = ids.get(i);
+			FileDeclaration fd = new FileDeclaration(id.getImage(), t, foi, null, id.getLineCol());
+			l.add (fd);
+		}
+	  	return l ;
+	}
+}
+
+
+FileOpenInformation file_open_information() throws ZamiaException :
+{
+	Operation exp=null, exp2;
+	PortDir m=null;
+	Token t=null, t2;
+}
+{
+	// FIXME: VHDL87
+	[ t=<OPEN> exp = expression() ] t2=<IS> { if (t==null) t=t2; } [m = mode()] exp2=expression()
+	{
+		return new FileOpenInformation (exp, m, exp2, null, getLocation(t));
+	}
+}
+
+
+
+ArrayList<VariableDeclaration> variable_declaration() throws ZamiaException :
+{
+	ArrayList<VariableDeclaration> l;
+	ArrayList<Identifier> ids;
+	TypeDefinition t;
+	Operation exp=null;
+}
+{
+	[ <SHARED> ] <VARIABLE> ids = identifier_list() ":"
+	t = subtype_indication() [ ":=" exp = expression() ] ";"
+	{ 
+		int n = ids.size();
+		l = new ArrayList<VariableDeclaration> (n);
+		for (int i=0; i<n; i++) {
+			Identifier id = ids.get(i);
+			VariableDeclaration vd = new VariableDeclaration (id.getImage(), t, exp, null, id.getLineCol());
+			l.add (vd);
+		}
+	  	return l ;
+	}
+}
+
+SequenceOfStatements sequence_of_statements() throws ZamiaException :
+{
+	SequenceOfStatements seq=null ;
+	SequentialStatement stmt;
+}
+{
+	( stmt = sequential_statement() 
+		{ 
+			if (stmt != null) {
+				if (seq == null)
+					seq = new SequenceOfStatements (null, stmt.getLineCol());
+				seq.add(stmt); 
+			}
+		} 
+	)*
+	{ 
+		if (seq == null)
+			seq = new SequenceOfStatements (null, getLocation());
+		return seq; 
+	}
+}
+
+SequentialStatement sequential_statement() throws ZamiaException :
+{
+	SequentialStatement stmt = null;
+}
+{
+	(
+		LOOKAHEAD(3)
+		stmt = wait_statement()
+	| LOOKAHEAD(3)
+		stmt = assertion_statement()
+	| LOOKAHEAD([identifier() ":"] <REPORT>)
+	    stmt = report_statement()
+	| LOOKAHEAD(  [ identifier() ":" ] target() "<=" )
+		stmt = signal_assignment_statement()
+	| LOOKAHEAD(  [ identifier() ":" ] target() ":=" )
+		stmt = variable_assignment_statement()
+	| LOOKAHEAD([identifier() ":"] name() [ "(" association_list() ")" ] ";")
+	    stmt = procedure_call_statement()
+	| LOOKAHEAD(3)
+		stmt = if_statement()
+	| LOOKAHEAD(3)
+		stmt = case_statement()
+	| LOOKAHEAD(3)
+		stmt = loop_statement()
+	| LOOKAHEAD(3)
+		stmt = next_statement()
+	| LOOKAHEAD(3)
+	    stmt = exit_statement()
+	| LOOKAHEAD(3)
+		stmt = return_statement()
+	| LOOKAHEAD(3)
+		stmt = null_statement()
+	)
+	{ return stmt; }
+}
+
+SequentialNextStatement next_statement() throws ZamiaException:
+{
+	Token t;
+	Identifier id1=null, id2 = null;
+	Operation exp = null;
+}
+{                                                               
+	[ id1 = identifier() ":" ] t=<NEXT> [ id2 = identifier() ] [ <WHEN> exp = expression() ] ";"
+	
+	{
+		return new SequentialNextStatement ( id2 != null ? id2.getImage() : null, exp, id1 != null ? id1.getImage() : null, null, getLocation(t));
+	}
+	
+}
+
+SequentialReport report_statement() throws ZamiaException  :
+{
+	Operation exp, severity=null;
+	long location;
+	Identifier id=null;
+	Token t;
+	String label = null;
+}
+{
+	[ id = identifier() ":" ]  t=<REPORT> exp = expression()
+	[ <SEVERITY> severity = expression() ] ";"
+  
+	{
+		location = getLocation(t);
+		if (id != null) {
+			label = id.getImage();
+	  		location = id.getLineCol();
+		}
+  		return new SequentialReport (exp, severity, label, null, location);
+	}
+}
+
+
+SequentialProcedureCall procedure_call() throws ZamiaException:
+{
+	Name n;
+	AssociationList params = null;
+}
+{
+	n = name() 
+	{ return new SequentialProcedureCall (n, null, n.getLineCol()); }
+}
+
+SequentialProcedureCall procedure_call_statement() throws ZamiaException:
+{
+	SequentialProcedureCall pc;
+}
+{
+   [ LOOKAHEAD( identifier() ":") identifier() ":" ]
+   pc = procedure_call() ";"
+   { return pc; }
+}
+
+
+SequentialExit exit_statement() throws ZamiaException:
+{
+	Operation cond = null;
+	Token t;
+	Identifier l1=null, l2=null;
+}
+{
+  	[ l1=identifier() ":" ] t=<EXIT> [ l2=identifier() ]
+    [ <WHEN> cond = expression() ] ";"
+    {
+    	return new SequentialExit (l2 != null ? l2.getImage() : null, cond, l1 != null? l1.getImage():null, null, getLocation(t));
+    }
+}
+
+
+SequentialWait wait_statement() throws ZamiaException :
+{
+	SequentialWait stmt;
+	ArrayList l;
+	Operation op;
+	Token t;
+	Identifier label = null;
+}
+{
+	[ LOOKAHEAD( identifier() ) ":" label = identifier() ":"]
+	t = <WAIT> 
+	{ 
+		stmt = new SequentialWait (label != null ? label.getImage() : null, null, getLocation(t));
+	}
+	[ l = sensitivity_clause() { stmt.setSensitivityList (l); }]
+	[ op = condition_clause() { stmt.setConditionClause (op); }] 
+	[ op = timeout_clause() { stmt.setTimeoutClause (op); }] ";"
+	{ return stmt; }
+}
+
+ArrayList sensitivity_clause() throws ZamiaException :
+{
+	ArrayList l;
+}
+{
+	<ON> l = sensitivity_list()
+	{ return l; }
+}
+
+Operation condition_clause() throws ZamiaException :
+{
+	Operation exp;
+}
+{
+	<UNTIL> exp = expression()
+	{ return exp; }
+}
+
+Operation timeout_clause() throws ZamiaException :
+{
+	Operation exp;
+}
+{
+	<FOR> exp = expression()
+	{ return exp; }
+}
+
+
+SequentialAssert assertion_statement() throws ZamiaException :
+{
+	Assertion ass; 
+	SequentialAssert stmt;
+	Identifier id = null;
+	long location;
+}
+{
+	[ id = identifier() ":" ] ass = assertion() ";"
+	{ 
+		location = ass.getLineCol();
+		if (id != null)
+			location = id.getLineCol();
+		return new SequentialAssert(ass, id != null ? id.getImage() : null, null, location); 
+	}
+}
+
+Assertion assertion() throws ZamiaException :
+{
+	Assertion assertion;
+	Operation op;
+	Token t;
+}
+{
+	t = <ASSERT> op = expression()
+	{ assertion = new Assertion (op, null, getLocation(t)); }
+	[ <REPORT> op = expression() { assertion.setReport (op); } ]
+	[ <SEVERITY> op = expression() { assertion.setSeverity (op); } ]
+	{ return assertion; }
+}
+
+SequentialSignalAssignment signal_assignment_statement() throws ZamiaException :
+{
+	Target target;
+	Waveform waveform;
+	DelayMechanism dm=null;
+}
+{
+	[ LOOKAHEAD( identifier() ":") identifier() ":" ]
+	target = target() "<=" [ dm = delay_mechanism() ] waveform = waveform() ";"
+	
+	{ return new SequentialSignalAssignment (target, waveform, dm, null, target.getLineCol()); }
+}
+
+SequentialVariableAssignment variable_assignment_statement() throws ZamiaException :
+{
+	Target target; 
+	Operation exp;
+}
+{
+	[ LOOKAHEAD( identifier() ":") identifier() ":" ]
+	target = target() ":=" exp = expression() ";"
+	{ return new SequentialVariableAssignment (target, exp, null, target.getLineCol()); }
+}
+
+SequentialIf if_statement() throws ZamiaException :
+{
+	Operation cond;
+	long location;
+	SequenceOfStatements thenStmts, elseStmts;
+	SequentialIf stmt, stmt2, stmt3;
+	Token t;
+	Identifier id1 = null, id2 = null;
+}
+{
+	[ id1 = identifier() ":" ]
+	t=<IF> cond = expression() <THEN>
+		thenStmts = sequence_of_statements()
+	{ 
+		stmt = new SequentialIf (cond, thenStmts, id1 != null ? id1.getImage() : null, null, getLocation(t)); 
+		stmt2 = stmt;
+	}
+	( t=<ELSIF> cond = expression() <THEN>
+		thenStmts = sequence_of_statements() 
+		{
+			stmt3 = new SequentialIf (cond, thenStmts, null, null, getLocation(t)); 
+			
+			SequenceOfStatements elseSeq = new SequenceOfStatements(null, getLocation(t));
+
+			elseSeq.add (stmt3);			
+			
+			stmt2.setElse (elseSeq);
+			stmt2 = stmt3;
+		}
+	)*
+	[ <ELSE>
+		elseStmts = sequence_of_statements() 
+		{
+			SequenceOfStatements oldElse = stmt.getElseStmt();
+			if (oldElse == null)
+				stmt.setElse (elseStmts);
+			else
+				oldElse.append (elseStmts);
+		}
+	]
+	<END> <IF> [ id2 = identifier() ] ";"
+	{ 
+		if (id2 != null) {
+			if (id1 == null) {
+				  erm.addError (new ZamiaException ("No label given at start of if statement.", id2.getLocation()));
+			} else {
+				if (!id2.equals(id1)) {
+				  erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id1+"')", id2.getLocation()));
+				}
+			}
+		} 
+		return stmt; 
+	}
+}
+
+SequentialCase case_statement() throws ZamiaException :
+{
+	Operation exp;
+	SequentialCase stmt;
+	Token t;
+	Identifier id1=null, id2=null;	
+}
+{
+	[ id1 = identifier() ":" ]
+	t = <CASE> exp = expression() <IS>
+		{ stmt = new SequentialCase (exp, null, getLocation(t)); }
+		case_statement_alternative(stmt)
+		( case_statement_alternative(stmt) )*
+	<END> <CASE> [ id2 = identifier() ] ";"
+	
+	{ 
+		if (id2 != null) {
+			if (id1 == null) {
+				  erm.addError (new ZamiaException ("No label given at start of statement.", id2.getLocation()));
+			} else {
+				if (!id2.equals(id1)) {
+				  erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id1+"')", id2.getLocation()));
+				}
+			}
+		} 
+		return stmt; 
+	}
+}
+
+
+void case_statement_alternative(SequentialCase case_) throws ZamiaException :
+{
+	ArrayList choices;
+	SequenceOfStatements seq;
+	Token t;
+}
+{
+	t = <WHEN> choices=choices() "=>" seq=sequence_of_statements()
+	{
+		case_.addAlternative (choices, seq, getLocation(t));
+	}
+}
+
+SequentialLoop loop_statement() throws ZamiaException :
+{
+	SequentialLoop loop=null;
+	SequenceOfStatements seq;
+	Token t;
+	Identifier id1 = null, id2=null;
+	String loopLabel = null;
+}
+{
+	[ id1 = identifier() ":" { loopLabel = id1.getImage();}]
+	[ loop = iteration_scheme(loopLabel) ] t=<LOOP>
+		seq = sequence_of_statements()
+		{
+			if (loop == null)
+				loop = new SequentialLoop (loopLabel, null, getLocation(t));
+				 
+			loop.setBody (seq); 
+		}
+	<END> <LOOP> [ id2 = identifier() ] ";"
+	{ 
+		if (id2 != null) {
+			if (id1 == null) {
+				  erm.addError (new ZamiaException ("No label given at start of loop.", id2.getLocation()));
+			} else {
+				if (!id2.equals(id1)) {
+				  erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id1+"')", id2.getLocation()));
+				}
+			}
+		} 
+		
+		return loop ;
+	}
+}
+
+SequentialLoop iteration_scheme(String aLoopLabel) throws ZamiaException :
+{
+	SequentialLoop loop;
+	Operation cond;
+	Identifier id;
+	Range range;
+	Token t;
+	Name n;
+}
+{
+	( t=<WHILE> cond = expression() { loop = new SequentialWhile (cond, aLoopLabel, null, getLocation(t)); }
+	| t=<FOR> id = identifier() <IN> (LOOKAHEAD(range()) range=range() | n = name() {range = new Range(n, null, n.getLineCol());})
+		{
+			loop = new SequentialFor (id.getImage(), range, aLoopLabel, null, getLocation(t));
+		}
+	)
+	{ return loop; }
+}
+
+NullStatement null_statement() throws ZamiaException :
+{
+	Token t;
+}
+{
+	[ identifier() ":" ] t=<NULL> ";"
+	{
+		return new NullStatement(null, getLocation(t));
+	}
+}
+
+ReturnStatement return_statement() throws ZamiaException :
+{
+	Operation exp=null;
+	long location;
+	Token t;
+}
+{
+	[ identifier() ":" ] t=<RETURN> [ exp = expression() ] ";"
+	{ return new ReturnStatement (exp, null, getLocation(t)); }
+}
+
+/*
+ * subprograms
+ */
+
+Identifier designator() throws ZamiaException:
+{
+	Identifier res;
+	Token t;
+}
+{
+	( res = identifier()
+	| t = <string_literal> { res = new Identifier(t.image.toUpperCase(), false, getLocation(t)); }
+	)
+	{ return res;}
+}
+
+void subprogram_declarative_item(SubProgram sub_)  throws ZamiaException:
+{
+	ArrayList<VariableDeclaration> l;
+	ArrayList<ConstantDeclaration> l2;
+	ArrayList<FileDeclaration> l3;
+	TypeDeclaration td;
+	BlockDeclarativeItem item;
+}
+{
+	( item = subprogram()
+		{
+			sub_.add(item);
+		}
+	| td = type_declaration()
+		{
+			sub_.add(td);
+		}
+	| td = subtype_declaration()
+		{
+			sub_.add(td);
+		}
+	| l2 = constant_declaration()
+		{
+			int n = l2.size();
+			for (int i = 0; i<n; i++) {
+				sub_.add(l2.get(i));
+			}
+		}
+	| l = variable_declaration()	
+		{
+			n = l.size();
+			for (int i = 0; i<n; i++) {
+				sub_.add(l.get(i));
+			}
+		}
+	| l3 = file_declaration()
+		{
+			n = l3.size();
+			for (int i = 0; i<n; i++) {
+				sub_.add(l3.get(i));
+			}
+		}
+	| item = alias_declaration()
+		{
+			sub_.add(item);
+		}
+	| LOOKAHEAD(attribute_declaration())
+		attribute_declaration() // FIXME
+	| attribute_specification() // FIXME
+	| use_clause() // FIXME
+	//FIXME | LOOKAHEAD( <GROUP> identifier() <IS>)
+	//FIXME    group_template_declaration()
+	| group_declaration() // FIXME
+	)
+}
+
+void subprogram_declarative_part(SubProgram sub_) throws ZamiaException :
+{}
+{
+  ( subprogram_declarative_item(sub_) )*
+}
+
+
+void subprogram_statement_part(SubProgram sub_) throws ZamiaException :
+{
+	SequentialStatement stmt;
+	SequenceOfStatements seq = null;
+}
+{
+	{ 
+		seq = sub_.getCode(); 
+	}
+	( stmt = sequential_statement() 
+		{ 
+			seq.add(stmt); 
+		} 
+	)*
+}
+
+SubProgram subprogram() throws ZamiaException :
+{
+	Identifier id, id2=null;
+	InterfaceList interfaces=null;
+	Name n;
+	Token t, t2;
+	SubProgram sub;
+	boolean pure = true;
+}
+{
+	( t=<PROCEDURE> id=designator() [ "(" interfaces=interface_list(InterfaceContext.PROCEDURE, PortDir.IN) ")" ]
+		{ sub= new SubProgram (id.getImage(), interfaces	, null, false, null, getLocation(t)); }
+	| [ <PURE> | <IMPURE> { pure = false; } ] t=<FUNCTION> id=designator()
+		[ "(" interfaces = interface_list(InterfaceContext.FUNCTION, PortDir.IN) ")" ]
+                <RETURN> n = name()
+		{ sub = new SubProgram (id.getImage(), interfaces, n, pure, null, getLocation(t)); }
+    )
+    
+    (<IS>
+		subprogram_declarative_part(sub)
+		t2 = <BEGIN>
+			{
+				sub.setCode (new SequenceOfStatements(sub, getLocation(t2)));	
+			}
+			subprogram_statement_part(sub)
+		<END> [ ( <PROCEDURE> | <FUNCTION>) ] [ id2=designator() ] ";"
+	| ";"
+	)
+    
+    {
+    	if (id2 != null && !id2.equals(id)) {
+			erm.addError (new ZamiaException ("Closing id doesn't match (was expecting '"+id+"')", id2.getLocation()));
+		} 
+    	
+    	return sub;
+    }
+    
+}
+
+AliasDeclaration alias_declaration() throws ZamiaException :
+{
+	Identifier id;
+	TypeDefinition td = null;
+	Name n;
+	Signature s=null;	
+	Token t;
+}
+{
+	t=<ALIAS> id = designator()
+	[ ":" td=subtype_indication() ] <IS> n=name() [ s=signature() ] ";"
+	
+	{
+		return new AliasDeclaration(id.getImage(), td, n, s, getLocation(t));
+	}
+}
+
+ArrayList<ConfigurationSpecification> configuration_specification() throws ZamiaException :
+{
+	ArrayList<ConfigurationSpecification> res = new ArrayList<ConfigurationSpecification>();
+	ComponentSpecification cs;
+	BindingIndication bi;
+}
+{
+  <FOR> cs=component_specification() bi=binding_indication() ";"
+  {
+  	int n = cs.getNumIds();
+  	for (int i = 0; i<n; i++) {
+  		Identifier id = cs.getId(i);
+  		
+  		res.add(new ConfigurationSpecification(bi, cs.getName(), id.getImage(), null, id.getLineCol()));
+  	}
+  	
+  	return res;
+  }
+}
+
+DisconnectionSpecification disconnection_specification() throws ZamiaException :
+{
+	Token t;
+	Operation expr;
+	GuardedSignalSpecification gss;
+}
+{
+	t=<DISCONNECT> gss = guarded_signal_specification() <AFTER> expr = expression() ";"
+	{
+		return new DisconnectionSpecification(gss, expr, null, getLocation(t));
+	}
+}
+
+GuardedSignalSpecification guarded_signal_specification() throws ZamiaException :
+{
+	Name typeMark;
+	SignalList sl;
+}
+{
+	sl = signal_list() ":" typeMark = name()
+	{
+		return new GuardedSignalSpecification(sl, typeMark, null, sl.getLineCol());
+	}
+}
+
+SignalList signal_list() throws ZamiaException:
+{
+	SignalList res;
+	Name n;
+	Token t;
+}
+{
+	(
+	n = name() { res = new SignalList(n, null, n.getLineCol()); }
+		( "," n = name() { res.add(n); } )*
+	| t=<OTHERS>
+		{ res = new SignalList (SignalList.KIND_OTHERS, null, getLocation(t)); }
+	| t=<ALL>
+		{ res = new SignalList (SignalList.KIND_ALL, null, getLocation(t)); }
+	)	
+	{
+		return res;
+	}
+}
+
+GroupConstituent group_constituent() throws ZamiaException:
+{
+	Name name;
+	Token t;
+}
+{
+	( name = name() 
+		{ return new GroupConstituent(name, null, name.getLineCol());}
+	| t=<character_literal>  
+		{ return new GroupConstituent(t.image, null, getLocation(t)); }
+	)
+}
+
+ArrayList<GroupConstituent> group_constituent_list() throws ZamiaException:
+{
+	GroupConstituent gc;
+	ArrayList<GroupConstituent> res;
+}
+{
+	{ res = new ArrayList<GroupConstituent>(); }
+	gc = group_constituent() {res.add(gc);}
+	( "," gc=group_constituent()  {res.add(gc);})*
+	{ return res;}
+}
+
+
+GroupTemplateDeclaration group_template_declaration() throws ZamiaException :
+{
+	Identifier id;
+	Token t;
+}
+{
+	t=<GROUP> id=identifier() <IS> "(" entity_class_entry_list() ")" ";"
+	{ return new GroupTemplateDeclaration (id.getImage(), null, getLocation(t)); }
+}
+
+GroupDeclaration group_declaration() throws ZamiaException :
+{
+	Token t;
+	Identifier id;
+	Name n;
+}
+{
+	t=<GROUP> id=identifier() ":" n=name()
+	//"(" gcl = group_constituent_list() ")" already covered by name
+	";"
+	{
+		return new GroupDeclaration(id.getImage(),n,null,getLocation(t));
+	}
+}
+ 
+TypeDefinitionProtected protected_type_body () throws ZamiaException:
+{
+	Token t;
+}
+{
+	t=<PROTECTED> <BODY>
+           protected_type_body_declarative_part()
+	<END> <PROTECTED> <BODY> [ identifier() ]
+	{
+		return new TypeDefinitionProtected(null, getLocation(t));
+	}
+}
+ 
+void protected_type_body_declarative_item () throws ZamiaException:
+{
+}
+{
+	(
+       subprogram()
+       | type_declaration()
+       | subtype_declaration()
+       | constant_declaration()
+       | variable_declaration()
+       | file_declaration()
+       | alias_declaration()
+  	   | LOOKAHEAD(attribute_declaration())
+         attribute_declaration()
+       | attribute_specification()
+       | use_clause()
+   	   | LOOKAHEAD(<GROUP> identifier() <IS>)
+         group_template_declaration()
+       | group_declaration()
+	)
+}
+
+void protected_type_body_declarative_part() throws ZamiaException:
+{
+}
+{
+       ( protected_type_body_declarative_item() )*
+}
+
+TypeDefinitionProtected protected_type_declaration() throws ZamiaException:
+{
+	Token t;
+}
+{
+	t = <PROTECTED>
+             protected_type_declarative_part()
+	<END> <PROTECTED> [ identifier() ]
+	{
+		return new TypeDefinitionProtected(null, getLocation(t));
+	}
+}
+
+void protected_type_declarative_item() throws ZamiaException:
+{
+}
+{
+	(
+        subprogram()
+       | attribute_specification()
+       | use_clause()
+    )
+}
+
+void protected_type_declarative_part() throws ZamiaException:
+{
+}
+{
+	( protected_type_declarative_item() )*
+}
+
+TypeDefinitionProtected protected_type_definition() throws ZamiaException:
+{
+	TypeDefinitionProtected res;
+}
+{
+	(
+	LOOKAHEAD(<PROTECTED> <BODY>) res = protected_type_body()
+	| res = protected_type_declaration()
+	)
+	{
+		return res;
+	}
+}
+ 
+ 
+/**
+ *
+ * for error recovery:
+ *
+ */
+JAVACODE void error_skipto(int kind, String message, ParseException e)
+{
+  erm.addError (new ZamiaException (message+"\n"+e, new SourceLocation(sf, getLocation(e.currentToken.next))));
+  Token t;
+  do
+  {
+    t = getNextToken();
+  } while ((t.kind != kind) && t.kind != EOF);
+}
