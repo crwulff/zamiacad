@@ -1,0 +1,235 @@
+$date
+  Sun Jan 18 20:34:08 2009
+$end
+$version
+  GHDL v0
+$end
+$timescale
+  1 fs
+$end
+$var reg 4 ! a[3:0] $end
+$var reg 4 " b[3:0] $end
+$var reg 4 # s[3:0] $end
+$var reg 1 $ c $end
+$var reg 1 % co $end
+$scope module adder_0 $end
+$var reg 4 & a[3:0] $end
+$var reg 4 ' b[3:0] $end
+$var reg 1 ( c_in $end
+$var reg 4 ) s[3:0] $end
+$var reg 1 * c $end
+$var reg 1 + c1 $end
+$var reg 1 , c2 $end
+$var reg 1 - c3 $end
+$scope module va0 $end
+$var reg 1 . a $end
+$var reg 1 / b $end
+$var reg 1 0 c_in $end
+$var reg 1 1 s $end
+$var reg 1 2 c_out $end
+$var reg 1 3 s1 $end
+$var reg 1 4 s2 $end
+$var reg 1 5 s3 $end
+$var reg 1 6 sfoo $end
+$scope module ha1 $end
+$var reg 1 7 a $end
+$var reg 1 8 b $end
+$var reg 1 9 s $end
+$var reg 1 : c $end
+$upscope $end
+$scope module ha2 $end
+$var reg 1 ; a $end
+$var reg 1 < b $end
+$var reg 1 = s $end
+$var reg 1 > c $end
+$upscope $end
+$upscope $end
+$scope module va1 $end
+$var reg 1 ? a $end
+$var reg 1 @ b $end
+$var reg 1 A c_in $end
+$var reg 1 B s $end
+$var reg 1 C c_out $end
+$var reg 1 D s1 $end
+$var reg 1 E s2 $end
+$var reg 1 F s3 $end
+$var reg 1 G sfoo $end
+$scope module ha1 $end
+$var reg 1 H a $end
+$var reg 1 I b $end
+$var reg 1 J s $end
+$var reg 1 K c $end
+$upscope $end
+$scope module ha2 $end
+$var reg 1 L a $end
+$var reg 1 M b $end
+$var reg 1 N s $end
+$var reg 1 O c $end
+$upscope $end
+$upscope $end
+$scope module va2 $end
+$var reg 1 P a $end
+$var reg 1 Q b $end
+$var reg 1 R c_in $end
+$var reg 1 S s $end
+$var reg 1 T c_out $end
+$var reg 1 U s1 $end
+$var reg 1 V s2 $end
+$var reg 1 W s3 $end
+$var reg 1 X sfoo $end
+$scope module ha1 $end
+$var reg 1 Y a $end
+$var reg 1 Z b $end
+$var reg 1 [ s $end
+$var reg 1 \ c $end
+$upscope $end
+$scope module ha2 $end
+$var reg 1 ] a $end
+$var reg 1 ^ b $end
+$var reg 1 _ s $end
+$var reg 1 ` c $end
+$upscope $end
+$upscope $end
+$scope module va3 $end
+$var reg 1 a a $end
+$var reg 1 b b $end
+$var reg 1 c c_in $end
+$var reg 1 d s $end
+$var reg 1 e c_out $end
+$var reg 1 f s1 $end
+$var reg 1 g s2 $end
+$var reg 1 h s3 $end
+$var reg 1 i sfoo $end
+$scope module ha1 $end
+$var reg 1 j a $end
+$var reg 1 k b $end
+$var reg 1 l s $end
+$var reg 1 m c $end
+$upscope $end
+$scope module ha2 $end
+$var reg 1 n a $end
+$var reg 1 o b $end
+$var reg 1 p s $end
+$var reg 1 q c $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+b0 !
+b1 "
+b1 #
+0$
+0%
+b0000 &
+b0001 '
+0(
+b0001 )
+0*
+0+
+0,
+0-
+0.
+1/
+00
+11
+02
+13
+04
+05
+16
+07
+18
+19
+0:
+1;
+0<
+1=
+0>
+0?
+0@
+0A
+0B
+0C
+0D
+0E
+0F
+0G
+0H
+0I
+0J
+0K
+0L
+0M
+0N
+0O
+0P
+0Q
+0R
+0S
+0T
+0U
+0V
+0W
+0X
+0Y
+0Z
+0[
+0\
+0]
+0^
+0_
+0`
+0a
+0b
+0c
+0d
+0e
+0f
+0g
+0h
+0i
+0j
+0k
+0l
+0m
+0n
+0o
+0p
+0q
+#1000000
+b0011 !
+b0100 #
+b0011 &
+b0100 )
+1+
+1,
+1.
+01
+12
+03
+14
+06
+17
+09
+1:
+0;
+0=
+1?
+1A
+0B
+1C
+1D
+1F
+1G
+1H
+1J
+1L
+1M
+0N
+1O
+1R
+1S
+1^
+1_
+#2000000

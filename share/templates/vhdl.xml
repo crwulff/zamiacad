@@ -1,0 +1,725 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Defines an architecture block" 
+	enabled="true" 
+	id="org.zamia.plugin.editors.completion.vhdl.architecture"
+	name="architecture">architecture ${name} of ${entity} is &#13;
+	-- decl
+begin
+  ${cursor}
+end architecture ${name};
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Creates an alias declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.alias" 
+	enabled="true" 
+	name="alias">alias ${id} is ${name}; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert array type definition"
+	id="org.zamia.plugin.editors.completion.vhdl.array" 
+	enabled="true" 
+	name="array">array (${range}) OF ${type}; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert an assertion statement"
+	id="org.zamia.plugin.editors.completion.vhdl.assert" 
+	enabled="true" 
+	name="assert">assert (${condition}) REPORT ${string} SEVERITY ${severity}; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert an attribute declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.attributeDecl" 
+	enabled="true" 
+	name="attributedecl">attribute ${name} : ${type} ; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert an attribute specification"
+	id="org.zamia.plugin.editors.completion.vhdl.attributeSpec" 
+	enabled="true" 
+	name="attributespec">attribute ${name} of ${item} is ${expression} ; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a guarded block"
+	id="org.zamia.plugin.editors.completion.vhdl.blockGuarded" 
+	enabled="true" 
+	name="blockGuarded">block ( ${guard_expression} ) is 
+begin
+	${cursor} 
+end block ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a block"
+	id="org.zamia.plugin.editors.completion.vhdl.block" 
+	enabled="true" 
+	name="block">block is 
+begin
+	${cursor} 
+end block ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a block configuration statement"
+	id="org.zamia.plugin.editors.completion.vhdl.blockConfig" 
+	enabled="true" 
+	name="blockConfig">for ${block_name}  
+	${cursor} 
+end for ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a case statement"
+	id="org.zamia.plugin.editors.completion.vhdl.case" 
+	enabled="true" 
+	name="case">case ${expression} is  
+	when ${choices} =>
+	  ${cursor} 
+  
+end case ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a component configuration"
+	id="org.zamia.plugin.editors.completion.vhdl.componentConf" 
+	enabled="true" 
+	name="componentConf">for ${component_name}   
+	  ${cursor} 
+end for ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a component declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.componentDecl" 
+	enabled="true" 
+	name="componentDecl">component ${identifier} is   
+	  ${cursor} 
+end component ${identifier} ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a configuration declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.configDecl" 
+	enabled="true" 
+	name="configDecl">configuration ${identifier} of ${entity_name} is   
+	  ${cursor} 
+end configuration ${identifier} ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a constant declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.constantDecl" 
+	enabled="true" 
+	name="constantDecl">constant ${identifier_list} : ${subtype_indication} := ${expression} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a disconnection specification"
+	id="org.zamia.plugin.editors.completion.vhdl.disconnectSpec" 
+	enabled="true" 
+	name="disconnectSpec">disconnect ${signal} : ${type_mark} after ${time_expression} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert an else statement (conditional waveforms)"
+	id="org.zamia.plugin.editors.completion.vhdl.elseCond" 
+	enabled="true" 
+	name="elseCond">else
+${waveform} ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert an else statement (if)"
+	id="org.zamia.plugin.editors.completion.vhdl.else" 
+	enabled="true" 
+	name="else">else
+  ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert an elsif statement"
+	id="org.zamia.plugin.editors.completion.vhdl.elsif" 
+	enabled="true" 
+	name="elsif">elsif ${condition} then
+  ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Creates an entity block"
+	id="org.zamia.plugin.editors.completion.vhdl.entity" 
+	enabled="true" 
+	name="entity">entity ${name} is
+	port( ${cursor}
+	);
+end entity ${name};
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="exit label when condition"
+	id="org.zamia.plugin.editors.completion.vhdl.exitLabelWhen" 
+	enabled="true" 
+	name="exitLabelWhen">exit ${loop_label} when ${condition} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="exit when condition"
+	id="org.zamia.plugin.editors.completion.vhdl.exitWhen" 
+	enabled="true" 
+	name="exitWhen">exit when ${condition} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="exit label"
+	id="org.zamia.plugin.editors.completion.vhdl.exitLabel" 
+	enabled="true" 
+	name="exitLabel">exit ${loop_label} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="exit"
+	id="org.zamia.plugin.editors.completion.vhdl.exit" 
+	enabled="true" 
+	name="exit">exit ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a file declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.fileDecl" 
+	enabled="true" 
+	name="fileDecl">file ${id_list} : ${subtype_indication} is ${expression} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a file declaration (open)"
+	id="org.zamia.plugin.editors.completion.vhdl.fileDeclOpen" 
+	enabled="true" 
+	name="fileDeclOpen">file ${id_list} : ${subtype_indication} open ${expression} is ${expression2} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a for generate statement"
+	id="org.zamia.plugin.editors.completion.vhdl.forGen" 
+	enabled="true" 
+	name="forGen">for ${id} in ${range} generate 
+	-- block declarative items
+begin
+  ${cursor}
+end generate ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a for loop"
+	id="org.zamia.plugin.editors.completion.vhdl.forLoop" 
+	enabled="true" 
+	name="forLoop">for ${id} in ${range} loop 
+  ${cursor}
+end loop ; -- ${id}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a function declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.function" 
+	enabled="true" 
+	name="function">function ${designator} ( ${interface_list} ) return ${type_mark} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a function body"
+	id="org.zamia.plugin.editors.completion.vhdl.functionBody" 
+	enabled="true" 
+	name="functionBody">function ${designator} ( ${interface_list} ) return ${type_mark} is
+	-- decl
+begin
+  ${cursor}
+end function ${designator} ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a generic clause"
+	id="org.zamia.plugin.editors.completion.vhdl.genericClause" 
+	enabled="true" 
+	name="genericClause">generic ( ${cursor} ) ;  
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a generic map aspect"
+	id="org.zamia.plugin.editors.completion.vhdl.genericMap" 
+	enabled="true" 
+	name="genericMap">generic map ( ${association_list} ) ${cursor}  
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a group declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.groupDecl" 
+	enabled="true" 
+	name="groupDecl">group ${identifier} : ${name} ( ${group_constituent_list} ) ; ${cursor}  
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a group template declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.groupTempl" 
+	enabled="true" 
+	name="groupTempl">group ${identifier} is ( ${entity_class_entry_list} ) ; ${cursor}  
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert an if-generate statement"
+	id="org.zamia.plugin.editors.completion.vhdl.ifGen" 
+	enabled="true" 
+	name="ifGen">if ${condition} generate
+	-- decl
+begin
+  ${cursor}
+end generate ;  
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a sequential if statement"
+	id="org.zamia.plugin.editors.completion.vhdl.ifSeq" 
+	enabled="true" 
+	name="ifSeq">if ${condition} then
+  ${cursor}
+end if ;  
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a library clause"
+	id="org.zamia.plugin.editors.completion.vhdl.library" 
+	enabled="true" 
+	name="library">library ${identifier} ; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a bare loop"
+	id="org.zamia.plugin.editors.completion.vhdl.loop" 
+	enabled="true" 
+	name="loop">loop
+	${cursor} 
+end loop ;
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="map ( association list )"
+	id="org.zamia.plugin.editors.completion.vhdl.map" 
+	enabled="true" 
+	name="map">map ( ${cursor} )
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a next statement"
+	id="org.zamia.plugin.editors.completion.vhdl.next" 
+	enabled="true" 
+	name="next">next ; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a next statement with label and condition"
+	id="org.zamia.plugin.editors.completion.vhdl.nextLabelCond" 
+	enabled="true" 
+	name="nextLabelCond">next ${label} when ${cond} ; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a next statement with label"
+	id="org.zamia.plugin.editors.completion.vhdl.nextLabel" 
+	enabled="true" 
+	name="nextLabel">next ${label} ; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a next statement with condition"
+	id="org.zamia.plugin.editors.completion.vhdl.nextLabelCond" 
+	enabled="true" 
+	name="nextCond">next when ${cond} ; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="others =>"
+	id="org.zamia.plugin.editors.completion.vhdl.others" 
+	enabled="true" 
+	name="others">others => ${cursor}
+</template>
+
+<template
+	name="package"	
+	description="Insert a package declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.package"	
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	enabled="true">package ${name} is
+	${cursor}	
+end package ${name};
+</template>
+
+<template
+	name="packagebody"	
+	description="Insert a package body"
+	id="org.zamia.plugin.editors.completion.vhdl.packageBody"	
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	enabled="true">package body ${name} is
+	${cursor}
+end package body ${name};
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a port declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.port" 
+	enabled="true" 
+	name="port">port ( ${cursor} );
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a procedure declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.procedure" 
+	enabled="true" 
+	name="procedure">procedure ${designator} ( ${interface_list} ) ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a procedure body"
+	id="org.zamia.plugin.editors.completion.vhdl.procedureBody" 
+	enabled="true" 
+	name="procedureBody">procedure ${designator} ( ${interface_list} ) is
+	-- decl
+begin
+  ${cursor}
+end function ${designator} ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a process statement"
+	id="org.zamia.plugin.editors.completion.vhdl.process" 
+	enabled="true" 
+	name="process">${name} : process is
+begin
+	${cursor}
+end process ${name};
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a record type definition"
+	id="org.zamia.plugin.editors.completion.vhdl.record" 
+	enabled="true" 
+	name="record">record
+	${identifier_list} : ${subtype_indication} ; ${cursor}
+end record ${identifier}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a report statement"
+	id="org.zamia.plugin.editors.completion.vhdl.report" 
+	enabled="true" 
+	name="report">report ${expression} ; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a report statement with severity"
+	id="org.zamia.plugin.editors.completion.vhdl.reportSeverity" 
+	enabled="true" 
+	name="reportSeverity">report ${expression} severity ${severity} ; ${cursor}
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a return statement"
+	id="org.zamia.plugin.editors.completion.vhdl.return" 
+	enabled="true" 
+	name="return">return ${expression} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a selected signal assignment"
+	id="org.zamia.plugin.editors.completion.vhdl.select" 
+	enabled="true" 
+	name="select">select ${target} &lt;= ${cursor} ;
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a shared variable declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.sharedVar" 
+	enabled="true" 
+	name="sharedVar">shared variable ${identifier_list} : ${subtype_indication} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert an initialized shared variable declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.sharedVarInit" 
+	enabled="true" 
+	name="sharedVarInit">shared variable ${identifier_list} : ${subtype_indication} := ${expression} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a signal declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.signalDecl" 
+	enabled="true" 
+	name="signalDecl">signal ${identifier_list} : ${subtype_indication} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert an initialized signal declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.signalDeclInit" 
+	enabled="true" 
+	name="signalDeclInit">signal ${identifier_list} : ${subtype_indication} := ${expression} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a subtype declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.subtype" 
+	enabled="true" 
+	name="subtype">subtype ${identifier} is ${subtype_indication} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a type declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.type" 
+	enabled="true" 
+	name="type">type ${identifier} is ${type_definition} ; ${cursor} 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a use clause"
+	id="org.zamia.plugin.editors.completion.vhdl.use" 
+	enabled="true" 
+	name="use">use ${cursor} ; 
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a variable declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.varDecl" 
+	enabled="true" 
+	name="varDecl">variable ${identifier_list} : ${subtype_indication} ; ${cursor}  
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert an initialized variable declaration"
+	id="org.zamia.plugin.editors.completion.vhdl.varDeclInit" 
+	enabled="true" 
+	name="varDeclInit">variable ${identifier_list} : ${subtype_indication} := ${expression} ; ${cursor}  
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a wait statement"
+	id="org.zamia.plugin.editors.completion.vhdl.wait" 
+	enabled="true" 
+	name="wait">wait ${cursor} ;  
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a while loop"
+	id="org.zamia.plugin.editors.completion.vhdl.whileLoop" 
+	enabled="true" 
+	name="whileLoop">while ${condition} loop 
+	${cursor} 
+end loop ;  
+</template>
+
+<template 
+	autoinsert="false" 
+	context="org.zamia.plugin.editors.completion.vhdlContext" 
+	deleted="false" 
+	description="Insert a selected signal assignment"
+	id="org.zamia.plugin.editors.completion.vhdl.ssa2" 
+	enabled="true" 
+	name="ssa2">with ${expression} select ${target} &lt;= ${cursor} ; 
+</template>
+
+</templates>

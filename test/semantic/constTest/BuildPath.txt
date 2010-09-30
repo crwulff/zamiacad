@@ -1,0 +1,4 @@
+local GRLIB "grlib"
+
+toplevel TCTEST
+

@@ -1,0 +1,819 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   <extension point="org.eclipse.core.filesystem.filesystems">
+      <filesystem scheme="ZamiaEFS3">
+         <run class="org.zamia.plugin.efs.ZamiaFileSystem"/>
+      </filesystem>
+   </extension>
+
+   <extension point="org.eclipse.ui.contexts">
+      <context
+        name="Zamia Source"
+        description="In ZamiaCAD Editor"
+        parentId="org.eclipse.ui.textEditorScope"
+        id="org.zamia.plugin.ZamiaEditorScope" />
+      <context
+           name="Zamia Context"
+           description="Zamia context"
+           id="org.zamia.plugin.Context"
+           parentId="org.eclipse.ui.contexts.window">
+      </context>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            name="VHDL Editor"
+            extensions="vhdl,vhd"
+            icon="share/images/vhdl_source.gif"
+            class="org.zamia.plugin.editors.VHDLEditor"
+            contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
+            id="org.zamia.editors.VHDLEditor">
+      </editor>
+      <editor
+            default="true"
+            name="Zamia FSM Editor"
+            extensions="fsm"
+            icon="share/images/vhdl_source.gif"
+            class="org.zamia.plugin.views.fsm.ui.FSMEditor"
+            contributorClass="org.zamia.plugin.views.fsm.actions.FSMActionBarContributor"
+            id="org.zamia.plugin.views.fsm.ui.FSMEditor">
+      </editor>
+      <editor
+            class="org.zamia.plugin.editors.buildpath.BuildPathEditor"
+            default="true"
+            filenames="BuildPath.txt"
+            icon="share/images/bulldozer.gif"
+            id="org.zamia.editors.BuildPathEditor"
+            name="Build Path Editor">
+      </editor>
+   </extension>
+   
+   <extension point="org.eclipse.ui.perspectives">
+      <perspective
+            name="ZamiaCAD"
+            icon="share/images/zamia.gif"
+            class="org.zamia.plugin.perspective.ZamiaPerspectiveFactory"
+            id="org.zamia.plugin.ui.ZamiaPluginPerspective">
+      </perspective>                  
+   </extension>
+   
+   <extension point="org.eclipse.core.resources.builders"
+         id="zamiaBuilder"
+         name="ZamiaCAD Project Builder">
+      <builder
+            hasNature="true">
+         <run
+               class="org.zamia.plugin.build.ZamiaBuilder">
+         </run>
+      </builder>
+   </extension>
+   
+   <extension point="org.eclipse.core.resources.natures"
+         id="zamiaNature"
+         name="ZamiaCAD Project Nature">
+      <runtime>
+         <run
+               class="org.zamia.plugin.build.ZamiaNature">
+         </run>
+      </runtime>
+      <builder
+            id="org.zamia.plugin.zamiaBuilder">
+      </builder>
+   </extension>
+   
+   <extension point="org.eclipse.core.resources.markers"
+         id="syntaxProblem"
+         name="Syntax Problem">
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   <extension point="org.eclipse.core.resources.markers"
+         id="semanticProblem"
+         name="Semantic Problem" >
+      <super
+            type="org.eclipse.core.resources.problemmarker">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
+   
+   <extension point="org.eclipse.ui.newWizards">
+		<category name="Zamia"
+			id="org.zamia.plugin.newWizards">
+		</category>
+		<wizard
+        category="org.zamia.plugin.newWizards"
+        class="org.zamia.plugin.ui.NewZamiaProjectWizard"
+        finalPerspective="org.zamia.plugin.ui.ZamiaPluginPerspective"
+        icon="share/images/zamia.gif"
+        id="org.zamia.plugin.ui.NewZamiaProjectWizard"
+        name="ZamiaCAD Project"
+        preferredPerspectives="org.zamia.plugin.ui.ZamiaPluginPerspective"
+        project="true">
+		<description>Create a new ZamiaCAD project.</description>
+		</wizard>
+  		<category
+        	name="ZamiaCAD"
+        	id="org.zamia.plugin.newFileWizards"/>
+  		<wizard
+        	class="org.zamia.plugin.ui.NewFileWizard"
+        	icon="share/images/source.gif"
+        	category="org.zamia.plugin.newWizards"
+        	name="Source File"
+        	id="org.zamia.plugin.NewFileWizard">
+        <description>Create a new ZamiaCAD file (vhdl, vhd, v).</description>
+        </wizard>
+   </extension>
+   
+   <!--
+   <extension
+         point="org.eclipse.ui.propertyPages">
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            name="Zamia"
+            nameFilter="*"
+            class="org.zamia.plugin.ui.ZamiaPropertyPage"
+            id="org.zamia.plugin.ui.ZamiaPropertyPage">
+      </page>
+   </extension>
+   -->
+   
+   <extension point="org.eclipse.ui.views">
+      <category
+            name="Zamia"
+            id="org.zamia.plugin"/>
+      <view
+            class="org.zamia.plugin.views.rtl.RTLView"
+            icon="share/images/zamia.gif"
+            category="org.zamia.plugin"
+            name="RTL Graph Viewer"
+            id="org.zamia.plugin.views.rtl.RTLView">
+	  </view>
+      <view
+            name="ZamiaCAD Navigator"
+            icon="share/images/zamia.gif"
+            category="org.zamia.plugin"
+            class="org.zamia.plugin.views.navigator.ZamiaNavigator"
+            id="org.zamia.plugin.views.navigator.ZamiaNavigator">
+      </view>
+      <view
+            class="org.zamia.plugin.views.sim.SimulatorView"
+            icon="share/images/zamia.gif"
+            category="org.zamia.plugin"
+            name="Simulator"
+            id="org.zamia.plugin.views.sim.SimulatorView">
+      </view>
+      <view
+            class="org.zamia.plugin.views.rtl.RTLViewGEF"
+            icon="share/images/zamia.gif"
+            category="org.zamia.plugin"
+            name="RTLViewGEF"
+            id="org.zamia.plugin.views.rtl.RTLViewGEF">
+      </view>
+   </extension>
+   
+   <extension point="org.eclipse.ui.popupMenus">
+         <viewerContribution
+         	targetID="#ZamiaTextEditorContext"
+         	id="org.zamia.editors.TextEditorContext">
+         	<menu
+               label="Static Analysis"
+               path="additions"
+               id="staticAnalysisMenu">
+               <separator
+                  name="staticAnalysisGroup">
+               </separator>
+            </menu>
+         	
+         	<action label="Toggle Comment"
+         		class="org.zamia.plugin.editors.ToggleCommentAction"
+         		menubarPath="additions"
+         		definitionId="org.zamia.commands.comment"
+         		enablesFor="1"
+         		id="org.zamia.editors.ToggleCommentAction">
+       			<selection class="org.eclipse.jface.text.ITextSelection">
+       			</selection>
+       		</action>
+         	<action label="Open Declaration"
+         		class="org.zamia.plugin.editors.OpenDeclarationAction"
+         		menubarPath="staticAnalysisMenu/staticAnalysisGroup"
+         		definitionId="org.zamia.commands.openDeclaration"
+         		enablesFor="1"
+         		id="org.zamia.editors.OpenDeclarationAction">
+       			<selection class="org.eclipse.jface.text.ITextSelection">
+       			</selection>
+       		</action>
+         	<action label="Show in RTL Graph"
+         		class="org.zamia.plugin.editors.ShowInRTLGraphAction"
+         		menubarPath="additions"
+         		definitionId="org.zamia.commands.showInRTLGraph"
+         		enablesFor="1"
+         		id="org.zamia.editors.showInRTLGraph">
+       			<selection class="org.eclipse.jface.text.ITextSelection">
+       			</selection>
+       		</action>
+         	<action label="Show in Simulator View"
+         		class="org.zamia.plugin.editors.ShowInSimAction"
+         		menubarPath="additions"
+         		definitionId="org.zamia.commands.showInSim"
+         		enablesFor="1"
+         		id="org.zamia.editors.showInSim">
+       			<selection class="org.eclipse.jface.text.ITextSelection">
+       			</selection>
+       		</action>
+         	<action label="Show References..."
+         		class="org.zamia.plugin.editors.ShowReferencesAction"
+         		menubarPath="staticAnalysisMenu/staticAnalysisGroup"
+         		definitionId="org.zamia.commands.showReferences"
+         		enablesFor="1"
+         		id="org.zamia.editors.showReferences">
+       			<selection class="org.eclipse.jface.text.ITextSelection">
+       			</selection>
+       		</action>
+         	<action label="Show Initial Signal Declarations"
+         		class="org.zamia.plugin.editors.ShowInitialSignalDeclarationAction"
+         		menubarPath="staticAnalysisMenu/staticAnalysisGroup"
+         		definitionId="org.zamia.commands.showInitialSignalDeclaration"
+         		enablesFor="1"
+         		id="org.zamia.editors.showInitialSignalDeclaration">
+       			<selection class="org.eclipse.jface.text.ITextSelection">
+       			</selection>
+       		</action>
+       	</viewerContribution>
+       	
+   </extension>
+   
+   <extension point="org.eclipse.ui.editorActions">
+     <editorContribution id="org.zamia.actions" targetID="org.zamia.editors.VHDLEditor">
+         	<action 
+         	    label="Toggle Comment"
+         		class="org.zamia.plugin.editors.ToggleCommentAction"
+         		definitionId="org.zamia.commands.comment"
+         		id="org.zamia.editors.ToggleCommentAction">
+       		</action>
+     </editorContribution>
+     <editorContribution id="org.zamia.actions" targetID="org.zamia.editors.VHDLEditor">
+         	<action 
+         	    label="OpenDeclaration"
+         		class="org.zamia.plugin.editors.OpenDeclarationAction"
+         		definitionId="org.zamia.commands.openDeclaration"
+         		id="org.zamia.editors.OpenDeclarationAction">
+       		</action>
+     </editorContribution>
+     <editorContribution id="org.zamia.actions" targetID="org.zamia.editors.VHDLEditor">
+         	<action 
+         	    label="Show in RTL Graph"
+         		class="org.zamia.plugin.editors.ShowInRTLGraphAction"
+         		definitionId="org.zamia.commands.showInRTLGraph"
+         		id="org.zamia.editors.ShowInRTLGraphAction">
+       		</action>
+     </editorContribution>
+     <editorContribution id="org.zamia.actions" targetID="org.zamia.editors.VHDLEditor">
+         	<action 
+         	    label="Show in Sim View"
+         		class="org.zamia.plugin.editors.ShowInSimAction"
+         		definitionId="org.zamia.commands.showInSim"
+         		id="org.zamia.editors.ShowInSimAction">
+       		</action>
+     </editorContribution>
+     <editorContribution id="org.zamia.actions" targetID="org.zamia.editors.VHDLEditor">
+         	<action 
+         	    label="Show References..."
+         		class="org.zamia.plugin.editors.ShowReferencesAction"
+         		definitionId="org.zamia.commands.showReferences"
+         		id="org.zamia.editors.ShowReferencesAction">
+       		</action>
+     </editorContribution>
+     <editorContribution id="org.zamia.actions" targetID="org.zamia.editors.VHDLEditor">
+         	<action 
+         	    label="Show Initial Signal Declarations"
+         		class="org.zamia.plugin.editors.ShowInitialSignalDeclarationAction"
+         		definitionId="org.zamia.commands.showInitialSignalDeclaration"
+         		id="org.zamia.editors.ShowInitialSignalDeclarationAction">
+       		</action>
+     </editorContribution>
+   </extension>
+   
+   <extension point="org.eclipse.ui.commands">
+     <category name="Zamia Source" description="Zamia Editor Commands"
+       id="org.zamia.category.source">
+     </category>
+     <command
+       name="Toggle Comment Command"
+       description="(Un-) Comments the line"
+       categoryId="org.zamia.category.source"
+       id="org.zamia.commands.comment">
+     </command>
+     <command
+       name="Open Declaration"
+       description="Open Declaration"
+       categoryId="org.zamia.category.source"
+       id="org.zamia.commands.openDeclaration">
+     </command>
+     <command
+       name="Show In RTL Graph"
+       description="Show In RTL Graph"
+       categoryId="org.zamia.category.source"
+       id="org.zamia.commands.showInRTLGraph">
+     </command>
+     <command
+       name="Show In Simulator View"
+       description="Show In Simulator View"
+       categoryId="org.zamia.category.source"
+       id="org.zamia.commands.showInSim">
+     </command>
+     <command
+       name="Show References..."
+       description="Show References"
+       categoryId="org.zamia.category.source"
+       id="org.zamia.commands.showReferences">
+     </command>
+     <command
+       name="Open Unit..."
+       description="Open an Architecture/Entity"
+       categoryId="org.eclipse.ui.category.navigate"
+       id="org.zamia.commands.openUnit">
+     </command>
+     <command
+       name="Open Path..."
+       description="Open an Architecture/Entity by specifying it's path"
+       categoryId="org.eclipse.ui.category.navigate"
+       id="org.zamia.commands.openUnitByPath">
+     </command>
+     <command
+       name="Find Signal..."
+       description="Find a signal path"
+       categoryId="org.eclipse.ui.category.navigate"
+       id="org.zamia.commands.findSignal">
+     </command>
+     <command
+       name="Clear Cache"
+       description="Clear Cached Data"
+       categoryId="org.eclipse.ui.category.project"
+       id="org.zamia.commands.clearCache">
+     </command>
+     <command
+       name="Show Initial Signal Declaration"
+       description="Show Initial Signal Declaration"
+       categoryId="org.zamia.category.source"
+       id="org.zamia.commands.showInitialSignalDeclaration">
+     </command>
+     <command
+       name="External Build"
+       description="Invoke external build"
+       categoryId="org.eclipse.ui.category.project"
+       id="org.zamia.commands.externalBuild">
+     </command>
+     <command
+       name="Refresh External Sources"
+       description="Refresh external sources"
+       categoryId="org.eclipse.ui.category.project"
+       id="org.zamia.commands.refreshExternalSources">
+     </command>
+   </extension>
+   
+   <!--
+   
+   Key Bindings
+   
+   -->
+   
+   <extension point="org.eclipse.ui.bindings">
+		 <key sequence="Ctrl+/" 
+		   commandId="org.zamia.commands.comment" 
+		   schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+		   contextId="org.zamia.plugin.ZamiaEditorScope">
+	   </key>
+		 <key sequence="F3" 
+		   commandId="org.zamia.commands.openDeclaration" 
+		   schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+		   contextId="org.zamia.plugin.ZamiaEditorScope">
+	   </key>
+		 <key sequence="F4" 
+		   commandId="org.zamia.commands.showInRTLGraph" 
+		   schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+		   contextId="org.zamia.plugin.ZamiaEditorScope">
+	   </key>
+		 <key sequence="F5" 
+		   commandId="org.zamia.commands.showInSim" 
+		   schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+		   contextId="org.zamia.plugin.ZamiaEditorScope">
+	   </key>
+		 <key sequence="M1+M2+G" 
+		   commandId="org.zamia.commands.showReferences" 
+		   schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+		   contextId="org.zamia.plugin.ZamiaEditorScope">
+	   </key>
+		 <key sequence="M1+M2+Z" 
+		   commandId="org.zamia.commands.openUnit" 
+		   schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+		   contextId="org.zamia.plugin.ZamiaEditorScope">
+	   </key>
+		 <key sequence="M1+M2+P" 
+		   commandId="org.zamia.commands.openUnitByPath" 
+		   schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+		   contextId="org.zamia.plugin.ZamiaEditorScope">
+	   </key>
+		 <key sequence="M1+M2+S" 
+		   commandId="org.zamia.commands.findSignal" 
+		   schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+		   contextId="org.zamia.plugin.ZamiaEditorScope">
+	   </key>
+		 <key sequence="M1+M2+B" 
+		   commandId="org.zamia.commands.externalBuild" 
+		   schemeId="org.eclipse.ui.defaultAcceleratorConfiguration" 
+		   contextId="org.zamia.plugin.ZamiaEditorScope">
+	   </key>
+   </extension>
+   
+   <extension point="org.eclipse.debug.core.launchConfigurationTypes"
+        id="org.zamia.plugin.sim"
+        name="ZamiaCAD Simulation">
+        <launchConfigurationType
+            name="ZamiaCAD Simulation"
+            delegate="org.zamia.plugin.launch.SimLaunchConfigurationDelegate"
+            modes="run,debug"
+            public="true"
+            id="org.zamia.plugin.SimLaunchConfigurationDelegate">
+        </launchConfigurationType>
+    </extension>
+    
+    <extension point="org.eclipse.debug.ui.launchConfigurationTypeImages">
+		<launchConfigurationTypeImage
+			icon="share/images/zamia.gif"
+	        configTypeID="org.zamia.plugin.SimLaunchConfigurationDelegate"
+	        id="org.zamia.plugin.SimLaunchConfigurationIcon">
+     	</launchConfigurationTypeImage>
+	</extension>
+	
+	<extension point="org.eclipse.debug.ui.launchConfigurationTabGroups">
+    	<launchConfigurationTabGroup
+        	type="org.zamia.plugin.SimLaunchConfigurationDelegate"
+	        class="org.zamia.plugin.launch.ZamiaLaunchTabGroup"
+    	    id="org.zamia.plugin.ui.ZamiaTabGroup">
+	    </launchConfigurationTabGroup>
+	</extension>
+	
+    <extension point="org.eclipse.debug.ui.launchShortcuts">
+        <shortcut
+            class="org.zamia.plugin.launch.LaunchShortcut"
+            icon="share/images/zamia.gif"
+            id="org.zamia.plugin.LaunchShortcut"
+            label="ZamiaCAD Simulation"
+            modes="run, debug">
+
+         <perspective
+               id="org.zamia.plugin.ui.ZamiaPluginPerspective" />
+
+            <contextualLaunch>
+                <enablement>
+                    <with variable="selection">
+                        <count value="1" />
+                        <iterate>
+                            <or>
+                                <test
+                                    property="org.eclipse.debug.ui.matchesPattern"
+                                    value="*.vhdl" />
+
+                                <test
+                                    property="org.eclipse.debug.ui.matchesPattern"
+                                    value="*.v" />
+                            </or>
+                        </iterate>
+                    </with>
+                </enablement>
+            </contextualLaunch>
+        </shortcut>
+    </extension>
+    
+    <!--
+    
+    Action sets
+    
+    -->
+    
+    <extension point="org.eclipse.ui.actionSets">
+      <actionSet
+            label="ZamiaCAD_ActionSet"
+            description="ZamiaCAD Actions"
+            visible="false"
+            id="org.zamia.plugin.ZamiaActionSet">
+         <action
+               id="openUnit"
+               class="org.zamia.plugin.OpenUnitAction"
+               label="Open Entity/Architecture"
+               menubarPath="navigate/open.ext2"
+               tooltip="Open Entity/Architecture"
+               definitionId="org.zamia.commands.openUnit"
+               enablesFor="*">
+         </action>
+         <action
+               id="openUnitByPath"
+               class="org.zamia.plugin.OpenUnitByPathAction"
+               label="Open Entity/Architecture by path"
+               menubarPath="navigate/open.ext2"
+               tooltip="Open Entity/Architecture by path"
+               definitionId="org.zamia.commands.openUnitByPath"
+               enablesFor="*">
+         </action>
+         <action
+               id="findSignal"
+               class="org.zamia.plugin.FindSignalAction"
+               label="Find Signal"
+               menubarPath="navigate/open.ext2"
+               tooltip="Find a signal path"
+               definitionId="org.zamia.commands.findSignal"
+               enablesFor="*">
+         </action>
+         <action
+               id="clearCache"
+               class="org.zamia.plugin.ClearCacheAction"
+               label="Clear Cached Data"
+               menubarPath="project/additions"
+               tooltip="Clear Cached Data"
+               definitionId="org.zamia.commands.clearCache"
+               enablesFor="*">
+         </action>
+         <action
+               id="externalHDLTool"
+               class="org.zamia.plugin.ExternalBuildAction"
+               label="External Build"
+               menubarPath="project/additions"
+               tooltip="Invoke external build tool"
+               definitionId="org.zamia.commands.externalBuild"
+               enablesFor="*">
+         </action>
+         <action
+               id="refreshExternalSources"
+               class="org.zamia.plugin.RefreshExternalSourcesAction"
+               label="Refresh External Sources"
+               menubarPath="project/additions"
+               tooltip="Refresh external sources"
+               definitionId="org.zamia.commands.refreshExternalSources"
+               enablesFor="*">
+         </action>
+       </actionSet>
+    </extension>
+    
+    <!--
+    
+    Popup menu items
+    
+    -->
+    
+    <extension point="org.eclipse.ui.popupMenus">
+      <objectContribution adaptable="false" id="org.zamia.plugin.views.navigator.IGModuleWrapper" objectClass="org.zamia.plugin.views.navigator.IGModuleWrapper">
+        <action 
+          class="org.zamia.plugin.launch.LaunchIGModuleAction"
+          enablesFor="1"
+          id="org.zamia.plugin.LaunchIGNodeAction"
+          label="Elaborate and Launch Simulator"
+          menubarPath="group.edit"
+          tooltip="Elaborate this design unit and run simulator on it"/>
+      </objectContribution>
+    </extension>
+    
+    
+    <!--
+    
+    Zamia Navigator
+    
+    -->    
+	
+	<extension point="org.eclipse.ui.navigator.viewer">
+    	<viewer viewerId="org.zamia.plugin.views.navigator.ZamiaNavigator">
+	    	<!-- allowsPlatformContributions="true" allows it to show the cvs stuff 
+	        -->
+	        <!--
+	        <popupMenu allowsPlatformContributions="true" id="org.zamia.plugin.views.navigator.ZamiaNavigator#PopupMenu">  
+	             <insertionPoint name="group.new"/>
+	             <insertionPoint name="group.open" separator="true"/>
+	             <insertionPoint name="group.openWith"/>   
+	             <insertionPoint name="group.edit" separator="true"/>   
+	             <insertionPoint name="group.reorganize" />         
+	             <insertionPoint name="group.port" separator="true"/>     
+	             <insertionPoint name="group.build" separator="true"/> 
+	             <insertionPoint name="group.generate" separator="true"/> 
+	             <insertionPoint name="group.search" separator="true"/>              
+	             <insertionPoint name="additions" separator="true"/>              
+	             <insertionPoint name="group.properties" separator="true"/>             
+	        </popupMenu>
+	        -->
+	    </viewer>
+	    <viewerContentBinding viewerId="org.zamia.plugin.views.navigator.ZamiaNavigator">
+	        <includes>
+	            <contentExtension pattern="org.eclipse.ui.navigator.resourceContent"/>
+	            <contentExtension pattern="org.eclipse.ui.navigator.resources.filters.*"/>
+                <contentExtension pattern="org.zamia.plugin.views.navigator.*"/> 
+	            
+	            <!--
+	            <contentExtension pattern="org.python.pydev.navigator.pythoncontent"/>
+	            <contentExtension pattern="org.python.pydev.navigator.filters.*"/> 
+                <contentExtension pattern="org.python.pydev.navigator.actions.pythonLinkHelper"/>
+	            -->
+	        </includes>
+	    </viewerContentBinding>
+        <viewerActionBinding viewerId="org.zamia.plugin.views.navigator.ZamiaNavigator">
+            <includes>
+                <actionExtension pattern="org.zamia.plugin.views.navigator.*"/> 
+	            <actionExtension pattern="org.eclipse.ui.navigator.resources.*"/>
+            </includes>
+        </viewerActionBinding>
+        
+    </extension>
+<!--   
+    <extension point = "org.eclipse.ui.viewActions">
+      <viewContribution 
+         id="org.zamia.plugin.views.navigator.ShowInstantiationSitesVC" 
+         targetID="org.zamia.plugin.views.navigator.ZamiaNavigator">        
+	   <action id="org.zamia.plugin.views.navigator.ShowInstantiationSites" 
+          label="Show Instantiation Sites" 
+	      menubarPath="additions"
+          class="org.zamia.plugin.editors.ShowInstantiationSitesAction" 
+          enablesFor="1"> 
+		<selection class="org.zamia.instgraph.InstNode"/> 
+	   </action>
+      </viewContribution>
+    </extension>
+   -->
+
+    <!-- Declare a content extension that renders the contents of design files (vhdl...) -->
+    <extension point="org.eclipse.ui.navigator.navigatorContent">
+
+      <navigatorContent
+            id="org.zamia.plugin.views.navigator.zamiacontent"
+            name="Zamia Navigator Content"
+            icon="share/images/zamia.gif"
+            contentProvider="org.zamia.plugin.views.navigator.ZamiaContentProvider"
+            labelProvider="org.zamia.plugin.views.navigator.ZamiaLabelProvider"
+            activeByDefault="true"
+            priority="high">
+         <triggerPoints>
+           <or>
+                <instanceof value="org.eclipse.core.resources.IWorkspaceRoot" />
+                <and>
+                   <instanceof value="org.eclipse.core.resources.IProject"/>
+                   <test
+                         forcePluginActivation="true"
+                         property="org.eclipse.core.resources.projectNature"
+                         value="zamiaNature"/>
+                </and>
+                <instanceof value="org.eclipse.core.resources.IFolder"/>
+                <instanceof value="org.eclipse.core.resources.IStorage"/>
+                <instanceof value="org.eclipse.core.resources.IFile"/>
+                <instanceof value="org.eclipse.core.resources.IResource"/>
+                <instanceof value="org.zamia.vhdl.ast.ASTObject"/>
+                <instanceof value="org.eclipse.ui.IWorkingSet"/>
+           </or>
+         </triggerPoints>
+         <possibleChildren>
+            <or>
+                <instanceof value="org.zamia.vhdl.ast.ASTObject"/>
+                <instanceof value="org.zamia.plugin.views.navigator.IGModuleWrapper"/>
+            </or>
+         </possibleChildren>
+         <actionProvider
+               class="org.zamia.plugin.views.navigator.ZamiaActionProvider"
+               id="org.zamia.plugin.views.resources.ZamiaActionProvider"
+               overrides="org.eclipse.ui.navigator.resources.actions.EditActions"/>
+      </navigatorContent>
+  	  <commonFilter activeByDefault="true" 
+	  	  name="ZamiaCAD: Hide ZDB / .du files" 
+	  	  description="ZamiaCAD: Hide ZDB / .du files" 
+	  	  id="org.zamia.plugin.views.navigator.ZamiaFilter"
+	  	  class="org.zamia.plugin.views.navigator.ZamiaFilter"> 
+	  </commonFilter>
+    </extension>
+
+    <extension point="org.eclipse.ui.navigator.viewer">
+      <viewerContentBinding viewerId="org.zamia.plugin.views.navigator.ZamiaNavigator">
+         <includes>
+            <contentExtension pattern="org.zamia.plugin.views.navigator.zamiacontent"/>
+         </includes>
+      </viewerContentBinding>
+    </extension>
+    
+<!--
+    <extension point="org.eclipse.core.runtime.adapters">
+         <factory class="org.zamia.views.resources.ModelAdapter" adaptableType="org.zamia.views.resources.WrappedIntermediateObject">
+			<adapter type="org.eclipse.core.resources.IResource"/>
+			<adapter type="org.eclipse.core.resources.IFolder"/>
+			<adapter type="org.eclipse.core.resources.IContainer"/>
+			<adapter type="org.eclipse.core.resources.IFile"/>
+			<adapter type="org.eclipse.debug.ui.actions.ILaunchable"/>
+			<adapter type="org.eclipse.ui.IContributorResourceAdapter"/>
+         </factory>
+    </extension>
+	-->
+  <extension point="org.eclipse.ui.editors.documentProviders">
+    <provider
+ 	      inputTypes="org.zamia.plugin.editors.ExternalFileEditorInput"
+ 	      class="org.eclipse.ui.editors.text.TextFileDocumentProvider"
+ 	      id="org.zamia.plugin.editors.ExternalFileDocumentProvider">
+ 	</provider>
+  </extension>
+  <extension point="org.eclipse.ui.editors.documentProviders">
+    <provider
+ 	      inputTypes="org.zamia.plugin.editors.ExternalReaderEditorInput"
+ 	      class="org.zamia.plugin.editors.ReaderTextDocumentProvider"
+ 	      id="org.zamia.plugin.editors.ExternalStreamDocumentProvider">
+ 	</provider>
+  </extension>
+  <extension id="ZamiaSearchResultPage" point="org.eclipse.search.searchResultViewPages">
+	<viewPage
+		id="org.zamia.plugin.editors.ZamiaSearchResultPage"
+		searchResultClass="org.zamia.plugin.editors.ZamiaSearchResult"
+		class="org.zamia.plugin.editors.ZamiaSearchResultPage">
+	</viewPage>
+  </extension>
+  <extension
+        point="org.eclipse.ui.preferencePages">
+     <page
+           class="org.zamia.plugin.preferences.SyntaxColoringPreferencePage"
+           id="org.zamia.plugin.preferences.SyntaxColoringPreferencePage"
+           name="ZamiaCAD Preferences">
+     </page>
+  </extension>
+  <extension
+        point="org.eclipse.core.runtime.preferences">
+     <initializer
+           class="org.zamia.plugin.preferences.PreferenceInitializer">
+     </initializer>
+  </extension>
+
+   <extension
+         point="org.eclipse.ui.editors.templates">
+	  <contextType
+            name="VHDL"
+            class="org.zamia.plugin.editors.completion.VHDLContext"
+            id="org.zamia.plugin.editors.completion.vhdlContext">
+	  </contextType>
+      <include
+      		file="share/templates/vhdl.xml">      		
+      </include>
+   </extension>
+   <extension
+         id="product"
+         point="org.eclipse.core.runtime.products">
+      <product
+            application="org.eclipse.ui.ide.workbench"
+            name="ZamiaCAD">
+         <property
+               name="windowImages"
+               value="share/images/zamia.gif">
+         </property>
+         <property
+               name="aboutText"
+               value="ZamiaCAD is an integrated hardware design environment for&#x0A;&#x0A;    * design entry&#x0A;    * design analysis&#x0A;    * design integration&#x0A;    * simulation &#x0A;&#x0A;In these areas ZamiaCAD targets the automation of currently manual design and verification tasks. This increases register transfer level design and verification engineer productivity. Currently the complete VHDL standard is supported as hardware description language, but it may be extended by adding other frontends, e.g. for Verilog. &#x0A;&#x0A;http://www.zamia.org&#x0A;&#x0A;Main developer and project founder&#x0A;&#x0A;Guenter Bartsch&#x0A;Salzburger Str. 25&#x0A;70469 Stuttgart&#x0A;Phone: +49 711 8178844&#x0A;E-Mail: guenter@zamia.org">
+         </property>
+         <property
+               name="aboutImage"
+               value="logo/zamiacad_fern.png">
+         </property>
+         <property
+               name="appName"
+               value="ZamiaCAD">
+         </property>
+         <property
+               name="preferenceCustomization"
+		           value="plugin_customization.ini">
+         </property>
+         <property
+               name="startupProgressRect"
+               value="5,275,445,15">
+         </property>
+      </product>
+   </extension>
+   
+   <extension point="org.eclipse.ui.importWizards"> 
+      <wizard id="org.zamia.plugin.ui.ZDBImportWizard" 
+         name="ZDB Import Wizard" 
+         class="org.zamia.plugin.ui.ZDBImportWizard" 
+         icon="share/images/zamia.gif">
+         <description> 
+            Import ZDB dump 
+         </description>
+         <selection class="org.eclipse.core.resources.IResource"/> 
+      </wizard> 
+   </extension> 
+   
+   <extension point="org.eclipse.ui.exportWizards"> 
+      <wizard id="org.zamia.plugin.ui.ZDBExportWizard" 
+         name="ZDB Export Wizard" 
+         class="org.zamia.plugin.ui.ZDBExportWizard" 
+         icon="share/images/zamia.gif">
+         <description> 
+            Export ZDB dump 
+         </description>
+         <selection class="org.eclipse.core.resources.IResource"/> 
+      </wizard> 
+   </extension> 
+   
+</plugin>

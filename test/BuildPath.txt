@@ -1,0 +1,45 @@
+#
+# ZamiaCAD build configuration file
+#
+# Format:
+#
+# 
+# ( 'extern'|'local' ) library_name path_prefix
+#
+# environment variables are available bourne shell style ($var), local
+# variables can be assigned using '='
+
+# local variables
+LEON_SRC="$HOME/projects/workspace/zamia/examples/leon"
+
+# external sources
+extern GRLIB 		"$LEON_SRC/lib/grlib"
+extern TECHMAP 		"$LEON_SRC/lib/techmap"
+extern SPW 			"$LEON_SRC/lib/spw"
+extern OPENCORES 	"$LEON_SRC/lib/opencores"
+extern ESA 			"$LEON_SRC/lib/esa"
+extern GLEICHMANN 	"$LEON_SRC/lib/gleichmann"
+extern OPENCHIP 	"$LEON_SRC/lib/openchip"
+extern TECH			"$LEON_SRC/lib/tech"
+extern MICRON		"$LEON_SRC/lib/micron"
+extern CYPRESS		"$LEON_SRC/lib/cypress"
+extern HYNIX		"$LEON_SRC/lib/hynix"
+
+# gooofy just for fun / performance testing
+
+GOOOFY_SRC="$HOME/projects/workspace/zamia/examples/gooofy"
+
+#extern AC			"$GOOOFY_SRC/ac"
+#extern DC			"$GOOOFY_SRC/dc"
+#extern ELEMENTARY 	"$GOOOFY_SRC/elementary"
+#extern EX		 	"$GOOOFY_SRC/ex"
+#extern GC		 	"$GOOOFY_SRC/gc"
+#extern IX		 	"$GOOOFY_SRC/ix"
+#extern ME		 	"$GOOOFY_SRC/me"
+#extern MEMORY	 	"$GOOOFY_SRC/memory"
+#extern MM2X		 	"$GOOOFY_SRC/mm2x"
+#extern PERIPHERY 	"$GOOOFY_SRC/periphery"
+
+# library settings
+local GAISLER "gaisler"
+

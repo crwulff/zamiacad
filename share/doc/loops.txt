@@ -1,0 +1,49 @@
+
+for loop
+========
+
+for i := left asc? right do
+
+lloopinit:
+	pushref	i
+	push	left
+	pop
+
+lloop:
+	push	asc
+	jumpnc	lhdesc
+	push	i
+	push	right
+	binop 	leq
+	jumpnc  loopexit
+	jump	loopbody
+
+lhdesc:
+	push	i
+	push	right
+	binop	geq
+	jumpnc 	loopexit
+
+loopbody:
+	[...]
+
+	push 	asc
+	jumpnc	lfdesc
+	pushref	i
+	push 	i
+	push 	1
+	binop	add
+	pop
+	jump	loop
+
+lfdesc:
+	pushref i
+	push	i
+	push 	1
+	binop	sub
+	pop
+	jump loop
+	
+loopexit:
+
+

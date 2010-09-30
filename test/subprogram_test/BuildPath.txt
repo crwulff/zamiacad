@@ -1,0 +1,5 @@
+# library settings
+extern WORK "test/subprogram_test"
+
+toplevel SPT
+

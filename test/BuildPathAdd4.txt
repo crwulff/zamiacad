@@ -1,0 +1,4 @@
+extern readonly WORK "test/add4"
+
+toplevel ADD4
+

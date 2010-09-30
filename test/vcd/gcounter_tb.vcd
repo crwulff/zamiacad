@@ -1,0 +1,461 @@
+$date
+  Sun Sep 20 12:28:02 2009
+$end
+$version
+  GHDL v0
+$end
+$timescale
+  1 fs
+$end
+$var reg 1 " reset $end
+$var reg 4 # z[3:0] $end
+$scope module counter0 $end
+$var reg 1 $ reset $end
+$var reg 4 & z[3:0] $end
+$var reg 4 ' s[3:0] $end
+$var reg 4 ( s_next[3:0] $end
+$var reg 1 ) co $end
+$scope module addg $end
+$var reg 4 * a[3:0] $end
+$var reg 4 + b[3:0] $end
+$var reg 1 , c_in $end
+$var reg 4 - s[3:0] $end
+$var reg 1 . c $end
+$var reg 5 / carry[4:0] $end
+$scope module gen1(0) $end
+$scope module vai $end
+$var reg 1 0 a $end
+$var reg 1 1 b $end
+$var reg 1 2 c_in $end
+$var reg 1 3 s $end
+$var reg 1 4 c_out $end
+$var reg 1 5 s1 $end
+$var reg 1 6 s2 $end
+$var reg 1 7 s3 $end
+$scope module ha1 $end
+$var reg 1 8 a $end
+$var reg 1 9 b $end
+$var reg 1 : s $end
+$var reg 1 ; c $end
+$upscope $end
+$scope module ha2 $end
+$var reg 1 < a $end
+$var reg 1 = b $end
+$var reg 1 > s $end
+$var reg 1 ? c $end
+$upscope $end
+$upscope $end
+$upscope $end
+$scope module gen1(1) $end
+$scope module vai $end
+$var reg 1 @ a $end
+$var reg 1 A b $end
+$var reg 1 B c_in $end
+$var reg 1 C s $end
+$var reg 1 D c_out $end
+$var reg 1 E s1 $end
+$var reg 1 F s2 $end
+$var reg 1 G s3 $end
+$scope module ha1 $end
+$var reg 1 H a $end
+$var reg 1 I b $end
+$var reg 1 J s $end
+$var reg 1 K c $end
+$upscope $end
+$scope module ha2 $end
+$var reg 1 L a $end
+$var reg 1 M b $end
+$var reg 1 N s $end
+$var reg 1 O c $end
+$upscope $end
+$upscope $end
+$upscope $end
+$scope module gen1(2) $end
+$scope module vai $end
+$var reg 1 P a $end
+$var reg 1 Q b $end
+$var reg 1 R c_in $end
+$var reg 1 S s $end
+$var reg 1 T c_out $end
+$var reg 1 U s1 $end
+$var reg 1 V s2 $end
+$var reg 1 W s3 $end
+$scope module ha1 $end
+$var reg 1 X a $end
+$var reg 1 Y b $end
+$var reg 1 Z s $end
+$var reg 1 [ c $end
+$upscope $end
+$scope module ha2 $end
+$var reg 1 \ a $end
+$var reg 1 ] b $end
+$var reg 1 ^ s $end
+$var reg 1 _ c $end
+$upscope $end
+$upscope $end
+$upscope $end
+$scope module gen1(3) $end
+$scope module vai $end
+$var reg 1 ` a $end
+$var reg 1 a b $end
+$var reg 1 b c_in $end
+$var reg 1 c s $end
+$var reg 1 d c_out $end
+$var reg 1 e s1 $end
+$var reg 1 f s2 $end
+$var reg 1 g s3 $end
+$scope module ha1 $end
+$var reg 1 h a $end
+$var reg 1 i b $end
+$var reg 1 j s $end
+$var reg 1 k c $end
+$upscope $end
+$scope module ha2 $end
+$var reg 1 l a $end
+$var reg 1 m b $end
+$var reg 1 n s $end
+$var reg 1 o c $end
+$upscope $end
+$upscope $end
+$upscope $end
+$upscope $end
+$upscope $end
+$enddefinitions $end
+#0
+0!
+1"
+b0000 #
+1$
+0%
+b0000 &
+b0000 '
+b0001 (
+0)
+b0000 *
+b0001 +
+0,
+b0001 -
+0.
+b00000 /
+00
+11
+02
+13
+04
+15
+06
+07
+08
+19
+1:
+0;
+1<
+0=
+1>
+0?
+0@
+0A
+0B
+0C
+0D
+0E
+0F
+0G
+0H
+0I
+0J
+0K
+0L
+0M
+0N
+0O
+0P
+0Q
+0R
+0S
+0T
+0U
+0V
+0W
+0X
+0Y
+0Z
+0[
+0\
+0]
+0^
+0_
+0`
+0a
+0b
+0c
+0d
+0e
+0f
+0g
+0h
+0i
+0j
+0k
+0l
+0m
+0n
+0o
+#1000000
+0"
+0$
+#10000000
+1!
+b0001 #
+1%
+b0001 &
+b0001 '
+b0010 (
+b0001 *
+b0010 -
+b00010 /
+10
+03
+14
+05
+16
+18
+0:
+1;
+0<
+0>
+1B
+1C
+1M
+1N
+#20000000
+0!
+0%
+#30000000
+1!
+b0010 #
+1%
+b0010 &
+b0010 '
+b0011 (
+b0010 *
+b0011 -
+b00000 /
+00
+13
+04
+15
+06
+08
+1:
+0;
+1<
+1>
+1@
+0B
+1C
+0D
+1E
+0G
+1H
+1J
+1L
+0M
+1N
+0O
+0R
+0S
+0]
+0^
+#40000000
+0!
+0%
+#50000000
+1!
+b0011 #
+1%
+b0011 &
+b0011 '
+b0100 (
+b0011 *
+b0100 -
+b00110 /
+10
+03
+14
+05
+16
+18
+0:
+1;
+0<
+0>
+1B
+0C
+1D
+1G
+1M
+0N
+1O
+1R
+1S
+1]
+1^
+#60000000
+0!
+0%
+#70000000
+1!
+b0100 #
+1%
+b0100 &
+b0100 '
+b0101 (
+b0100 *
+b0101 -
+b00000 /
+00
+13
+04
+15
+06
+08
+1:
+0;
+1<
+1>
+0@
+0B
+0C
+0D
+0E
+0G
+0H
+0J
+0L
+0M
+0N
+0O
+1P
+0R
+1S
+0T
+1U
+0W
+1X
+1Z
+1\
+0]
+1^
+0_
+0b
+0c
+0m
+0n
+#80000000
+0!
+0%
+#90000000
+1!
+b0101 #
+1%
+b0101 &
+b0101 '
+b0110 (
+b0101 *
+b0110 -
+b00010 /
+10
+03
+14
+05
+16
+18
+0:
+1;
+0<
+0>
+1B
+1C
+1M
+1N
+#100000000
+0!
+0%
+#101000000
+1"
+1$
+#110000000
+1!
+b0000 #
+1%
+b0000 &
+b0000 '
+b0001 (
+b0000 *
+b0001 -
+b00000 /
+00
+13
+04
+15
+06
+08
+1:
+0;
+1<
+1>
+0B
+0C
+0M
+0N
+0P
+0S
+0U
+0X
+0Z
+0\
+0^
+#120000000
+0!
+0%
+#130000000
+1!
+1%
+#140000000
+0!
+0%
+#150000000
+1!
+1%
+#151000000
+#160000000
+0!
+0%
+#170000000
+1!
+1%
+#180000000
+0!
+0%
+#190000000
+1!
+1%
+#200000000
+0!
+0%
+#210000000
+1!
+1%
+#220000000
+0!
+0%
+#230000000
+1!
+1%
+#240000000
+0!
+0%
+#250000000
+1!
+1%
