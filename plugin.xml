@@ -775,7 +775,7 @@
          </property>
          <property
                name="aboutImage"
-               value="logo/zamiacad_fern.png">
+               value="share/images/zamiacad_fern.png">
          </property>
          <property
                name="appName"

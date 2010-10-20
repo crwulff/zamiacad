@@ -4,7 +4,7 @@
 <product name="ZamiaCAD" uid="org.zamia.plugin.product" id="org.zamia.plugin.product" application="org.eclipse.ui.ide.workbench" version="0.9.7.alpha1" useFeatures="false" includeLaunchers="true">
 
    <aboutInfo>
-      <image path="/zamia/logo/zamiacad_fern.png"/>
+      <image path="/zamiacad/share/images/zamiacad_fern.png"/>
       <text>
          ZamiaCAD is an integrated hardware design environment for
 
@@ -35,7 +35,7 @@ E-Mail: guenter@zamia.org
       <vmArgsMac>-XstartOnFirstThread -Dorg.eclipse.swt.internal.carbon.smallFonts</vmArgsMac>
    </launcherArgs>
 
-   <windowImages i16="/zamia/share/images/zamia.gif"/>
+   <windowImages i16="/zamiacad/share/images/zamia.gif"/>
 
    <splash
       location="org.zamia.plugin"
@@ -47,6 +47,7 @@ E-Mail: guenter@zamia.org
          <bmp/>
       </win>
    </launcher>
+
 
    <vm>
    </vm>
@@ -333,7 +334,6 @@ ZamiaCAD uses 3rd Party software covered by these licenses:
       <plugin id="org.eclipse.equinox.preferences"/>
       <plugin id="org.eclipse.equinox.registry"/>
       <plugin id="org.eclipse.equinox.security"/>
-      <plugin id="org.eclipse.equinox.weaving.hook" fragment="true"/>
       <plugin id="org.eclipse.gef"/>
       <plugin id="org.eclipse.help"/>
       <plugin id="org.eclipse.jface"/>
