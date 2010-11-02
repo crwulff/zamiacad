@@ -1,0 +1,3 @@
+#ifndef CONFIG_SPICTRL_ENABLE
+#define CONFIG_SPICTRL_ENABLE 0
+#endif

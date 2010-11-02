@@ -1,0 +1,14 @@
+LIB_MTC45000: /cad/alcatel/ads/ads97.2/cmos035/v1.6/vss3.4/MTC45000/vit3.0/$adsLibSimOrSyn_v
+LIB_MTC45100: /cad/alcatel/ads/ads97.2/cmos035/v1.6/vss3.4/MTC45100/vit3.0/$adsLibSimOrSyn_v
+LIB_MTC45200: /cad/alcatel/ads/ads97.2/cmos035/v1.6/vss3.4/MTC45200/vit3.0/$adsLibSimOrSyn_v
+
+LIB_GENERATORS: /scratch/libram
+LIB_chip: /scratch/libctrl
+LIB_CTRL: /scratch/libctrl
+LIB_RSA: /scratch/librsa
+LIB_DES: /scratch/libdes
+
+USE=../ctrl/ ../rsa/ ../des/ ../ram/
+
+WORK> LIB_GENERATORS
+CS_COMPILED=FALSE

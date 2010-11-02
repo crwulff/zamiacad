@@ -1,0 +1,9 @@
+
+  mainmenu_option next_comment
+  comment 'Synchronous SRAM_1x1 controller   '
+    bool 'Enable Synchronous SRAM controller    ' CONFIG_SRAM_1x1
+    if [ "$CONFIG_SRAM_1x1" = "y" ]; then
+      bool 'Enable 16-bit PROM support            ' CONFIG_SRAM_1x1_PROM16
+      bool 'Use SRAM_1x1 netlist     ' CONFIG_SRAM_1x1_NETLIST
+    fi
+  endmenu

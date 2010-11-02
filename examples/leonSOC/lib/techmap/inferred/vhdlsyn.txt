@@ -1,0 +1,4 @@
+memory_inferred.vhd
+tap_inferred.vhd
+ddr_inferred.vhd
+mul_inferred.vhd

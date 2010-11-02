@@ -1,0 +1,5 @@
+memory_apa3.vhd
+buffer_apa3.vhd
+pads_apa3.vhd
+clkgen_proasic3.vhd
+tap_proasic3.vhd

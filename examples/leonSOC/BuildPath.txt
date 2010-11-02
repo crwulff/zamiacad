@@ -1,0 +1,43 @@
+#
+# ZamiaCAD build configuration file
+#
+# Format:
+#
+# 
+# ( 'extern'|'local' ) library_name path_prefix
+#
+# environment variables are available bourne shell style ($var), local
+# variables can be assigned using '='
+
+# setup libraries 
+local GRLIB            "lib/grlib"
+local TECHMAP          "lib/techmap"
+local SPW              "lib/spw"
+local ATC18            "lib/tech/atc18"
+local APA              "lib/tech/apa"
+local DW02             "lib/tech/dw02"
+local VIRAGE           "lib/tech/virage"
+local EC               "lib/tech/ec"
+local UNISIM           "lib/tech/unisim"
+local UMC18            "lib/tech/umc18"
+local STRATIXII        "lib/tech/stratixii"
+local ECLIPSEE         "lib/tech/eclipsee"
+local CYCLONEIII       "lib/tech/cycloneiii"
+local AXCELERATOR      "lib/tech/axcelerator"
+local ALTERA_MF        "lib/tech/altera_mf"
+local PROASIC3         "lib/tech/proasic3"
+local ETH              "lib/eth"
+local OPENCORES        "lib/opencores"
+local ESA              "lib/esa"
+local GLEICHMANN       "lib/gleichmann"
+local OPENCHIP         "lib/openchip"
+local MICRON           "lib/micron"
+local CYPRESS          "lib/cypress"
+local HYNIX            "lib/hynix"
+local GAISLER          "lib/gaisler"
+local WORK             "designs/leon3-gr-xc3s-1500"
+
+# toplevel [libId "."] entityId ["(" archId ")"]
+
+toplevel WORK.LEON3MP(RTL)
+#toplevel ETH.GRETH_TX(RTL)

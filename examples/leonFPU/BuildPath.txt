@@ -1,0 +1,66 @@
+#
+# ZamiaCAD build configuration file
+#
+# Format:
+#
+# 
+# ( 'extern'|'local' ) library_name path_prefix
+#
+# environment variables are available bourne shell style ($var), local
+# variables can be assigned using '='
+
+# local variables
+LEON_SRC="$HOME/projects/workspace/zamia/examples/leonSOC"
+FPU_SRC="$HOME/projects/workspace/zamia/examples/leonFPU"
+
+# external sources
+extern GRLIB            $LEON_SRC/lib/grlib
+extern TECHMAP          $LEON_SRC/lib/techmap
+extern SPW              $LEON_SRC/lib/spw
+extern ATC18            $LEON_SRC/lib/techmap/atc18
+extern ATC18            $LEON_SRC/lib/tech/atc18
+extern APA              $LEON_SRC/lib/techmap/apa
+extern APA              $LEON_SRC/lib/tech/apa
+extern CLOCKS           $LEON_SRC/lib/techmap/clocks
+#extern CLOCKS           $LEON_SRC/lib/tech/clocks
+extern DW02             $LEON_SRC/lib/techmap/dw02
+extern DW02             $LEON_SRC/lib/tech/dw02
+extern VIRAGE           $LEON_SRC/lib/techmap/virage
+extern VIRAGE           $LEON_SRC/lib/tech/virage
+extern EC               $LEON_SRC/lib/techmap/ec
+extern EC               $LEON_SRC/lib/tech/ec
+extern UNISIM           $LEON_SRC/lib/techmap/unisim
+extern UNISIM           $LEON_SRC/lib/tech/unisim
+extern UMC18            $LEON_SRC/lib/techmap/umc18
+extern UMC18            $LEON_SRC/lib/tech/umc18
+extern STRATIXII        $LEON_SRC/lib/techmap/stratixii
+extern STRATIXII        $LEON_SRC/lib/tech/stratixii
+extern ECLIPSEE         $LEON_SRC/lib/techmap/eclipsee
+extern ECLIPSEE         $LEON_SRC/lib/tech/eclipsee
+extern CYCLONEIII       $LEON_SRC/lib/techmap/cycloneiii
+extern CYCLONEIII       $LEON_SRC/lib/tech/cycloneiii
+extern AXCELERATOR      $LEON_SRC/lib/techmap/axcelerator
+extern AXCELERATOR      $LEON_SRC/lib/tech/axcelerator
+extern ALTERA_MF        $LEON_SRC/lib/techmap/altera_mf
+extern ALTERA_MF        $LEON_SRC/lib/tech/altera_mf
+extern PROASIC3         $LEON_SRC/lib/techmap/proasic3
+extern PROASIC3         $LEON_SRC/lib/tech/proasic3
+extern ETH              $LEON_SRC/lib/eth
+extern OPENCORES        $LEON_SRC/lib/opencores
+extern ESA              $LEON_SRC/lib/esa
+extern GLEICHMANN       $LEON_SRC/lib/gleichmann
+extern OPENCHIP         $LEON_SRC/lib/openchip
+extern MICRON           $LEON_SRC/lib/micron
+extern CYPRESS          $LEON_SRC/lib/cypress
+extern HYNIX            $LEON_SRC/lib/hynix
+extern GAISLER          $LEON_SRC/lib/gaisler
+extern WORK             $LEON_SRC/designs/leon3-gr-xc3s-1500
+
+extern WORK		$FPU_SRC
+
+# toplevel [libId "."] entityId ["(" archId ")"]
+
+#toplevel WORK.LEON3MP(RTL)
+
+toplevel WORK.GRFPW_0_UNISIM
+

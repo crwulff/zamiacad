@@ -1,0 +1,13 @@
+vhdlan s*.vhd
+vhdlan ?.vhd
+vhdlan pc?.vhd
+vhdlan ip*.vhd
+vhdlan xor*.vhd
+vhdlan key*.vhd
+vhdlan Steuerwerk.vhd
+vhdlan desblock_jh.vhd
+vhdlan ecb_cbcblock_jh.vhd
+vhdlan des_gesamt_jh.vhd
+vhdlan des_toplevel.vhd
+vhdlan des_ENT.vhd
+vhdlan CFG_des.vhd

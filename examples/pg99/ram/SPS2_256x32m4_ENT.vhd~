@@ -1,0 +1,68 @@
+------------------------------------------------------------------------------
+--
+--              ModelVersion : 2.1.4
+--
+--              Release Date : Dec 03, 1996
+--
+------------------------------------------------------------------------------
+LIBRARY IEEE;                   USE IEEE.STD_LOGIC_1164.ALL;
+-- synopsys translate_off
+                                USE IEEE.STD_LOGIC_ARITH.ALL;
+                                USE IEEE.VITAL_TIMING.ALL;
+LIBRARY STVLIB;                 USE STVLIB.ST_TIMING.ALL;
+
+-- synopsys translate_on
+
+LIBRARY STVLIB;
+use STVLIB.ST_Timing.all;
+
+ENTITY  SPS2_256x32m4 IS
+
+--synopsys translate_off
+    GENERIC (
+        -- Propagation Delays
+        TPD_CK_Q : VitalDelayArrayType01Z(31 DOWNTO 0) := (OTHERS =>
+            (4.061 ns, 4.061 ns, 1.477 ns,  4.061 ns, 1.477 ns, 4.061 ns));
+        TPD_CK_Q_NT_WEN : VitalDelayArrayType01Z(31 DOWNTO 0) := (OTHERS =>
+            (3.089 ns, 3.089 ns, 1.477 ns,  3.089 ns, 1.477 ns, 3.089 ns));
+        TPD_OEN_Q : VitalDelayArrayType01Z(31 DOWNTO 0) := (OTHERS =>
+            (1.076 ns, 1.076 ns, 1.055 ns,  1.076 ns, 1.055 ns, 1.076 ns));
+        -- Timing Checks
+        TSETUP_A_CK_noedge_posedge : VitalDelayArrayType(7 DOWNTO 0) := (OTHERS => 2.771 ns);
+        THOLD_A_CK_noedge_posedge : VitalDelayArrayType(7 DOWNTO 0) := (OTHERS => 0.010 ns);
+        TSETUP_D_CK_noedge_posedge : VitalDelayArrayType(31 DOWNTO 0) := (OTHERS => 3.808 ns);
+        THOLD_D_CK_noedge_posedge : VitalDelayArrayType(31 DOWNTO 0) := (OTHERS => 0.010 ns);
+        TSETUP_CSN_CK_noedge_posedge : VitalDelayType := 4.311 ns;
+        THOLD_CSN_CK_noedge_posedge : VitalDelayType := 0.010 ns;
+        TSETUP_WEN_CK_noedge_posedge : VitalDelayType := 1.899 ns;
+        THOLD_WEN_CK_noedge_posedge : VitalDelayType := 0.010 ns;
+        TPW_CK_posedge : VitalDelayType := 1.066 ns;
+        TPW_CK_negedge : VitalDelayType := 2.636 ns;
+        TPERIOD_CK : VitalDelayType := 8.447 ns;
+        -- Interconnect Delays
+        TIPD_D : VitalDelayArrayType01(31 DOWNTO 0) := (OTHERS => (0 ns, 0 ns));
+        TIPD_A : VitalDelayArrayType01(7 DOWNTO 0) := (OTHERS => (0 ns, 0 ns));
+        TIPD_CK : VitalDelayType01 := (0 ns, 0 ns);
+        TIPD_CSN : VitalDelayType01 := (0 ns, 0 ns);
+        TIPD_WEN : VitalDelayType01 := (0 ns, 0 ns);
+        TIPD_OEN : VitalDelayType01 := (0 ns, 0 ns);
+        InstancePath : String := "SPS2_256x32m4";
+        TimingChecksOn : Boolean := DefaultTimingChecksOn;
+        XOn : Boolean := DefaultXOn;
+        MsgOn : Boolean := DefaultMsgOn
+    );
+--synopsys translate_on
+
+    PORT (
+        Q : OUT std_logic_vector(31 DOWNTO 0);
+        D : IN std_logic_vector(31 DOWNTO 0);
+        A : IN std_logic_vector(7 DOWNTO 0);
+        CK : IN std_logic;
+        CSN : IN std_logic;
+        WEN : IN std_logic;
+        OEN : IN std_logic
+    );
+-- synopsys translate_off
+    ATTRIBUTE VITAL_LEVEL0 OF SPS2_256x32m4 : ENTITY IS TRUE;
+-- synopsys translate_on
+END SPS2_256x32m4;

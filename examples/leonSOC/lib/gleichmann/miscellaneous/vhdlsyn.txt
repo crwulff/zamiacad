@@ -1,0 +1,5 @@
+vgaclkgen.vhd
+ocrcomp.vhd
+Clk100MhzTo40Mhz.vhd
+miscellaneous.vhd
+clockgenerator.vhd

@@ -1,0 +1,3 @@
+    bool 'Enable HapsTrak I/O Port                 ' CONFIG_HAPSTRAK_ENABLE
+    bool 'Enable TEST_1x2 interface                ' CONFIG_TEST_1X2_ENABLE
+

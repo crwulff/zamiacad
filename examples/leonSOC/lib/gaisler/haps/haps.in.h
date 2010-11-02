@@ -1,0 +1,9 @@
+#ifndef CONFIG_HAPSTRAK_ENABLE
+#define CONFIG_HAPSTRAK_ENABLE 0
+#endif
+
+#ifndef CONFIG_TEST_1X2_ENABLE
+#define CONFIG_TEST_1X2_ENABLE 0
+#endif
+
+

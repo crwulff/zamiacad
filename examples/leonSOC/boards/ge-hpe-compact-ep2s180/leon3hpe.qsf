@@ -1,0 +1,483 @@
+# Copyright (C) 1991-2005 Altera Corporation
+# Your use of Altera Corporation's design tools, logic functions 
+# and other software and tools, and its AMPP partner logic       
+# functions, and any output files any of the foregoing           
+# (including device programming or simulation files), and any    
+# associated documentation or information are expressly subject  
+# to the terms and conditions of the Altera Program License      
+# Subscription Agreement, Altera MegaCore Function License       
+# Agreement, or other applicable license agreement, including,   
+# without limitation, that your use is for the sole purpose of   
+# programming logic devices manufactured by Altera and sold by   
+# Altera or its authorized distributors.  Please refer to the    
+# applicable agreement for further details.
+
+
+# The default values for assignments are stored in the file
+#		leon3as2sdcb_assignment_defaults.qdf
+# If this file doesn't exist, and for assignments not listed, see file
+#		assignment_defaults.qdf
+
+# Altera recommends that you do not modify this file. This
+# file is updated automatically by the Quartus II software
+# and any changes you make may be lost or overwritten.
+
+
+
+# Pin & Location Assignments
+# ==========================
+set_location_assignment PIN_L20 -to address[0] -comment CB12_14
+set_location_assignment PIN_AM25 -to address[10] -comment A8
+set_location_assignment PIN_AL25 -to address[11] -comment A9
+set_location_assignment PIN_AK25 -to address[12] -comment A10
+set_location_assignment PIN_AJ25 -to address[13] -comment A11
+set_location_assignment PIN_AH25 -to address[14] -comment A12
+set_location_assignment PIN_AM26 -to address[15] -comment A13
+set_location_assignment PIN_AL26 -to address[16] -comment A14
+set_location_assignment PIN_AK26 -to address[17] -comment A15
+set_location_assignment PIN_AJ26 -to address[18] -comment A16
+set_location_assignment PIN_AH26 -to address[19] -comment A17
+set_location_assignment PIN_J19 -to address[1] -comment CB12F15
+set_location_assignment PIN_AM27 -to address[20] -comment A18
+set_location_assignment PIN_AL27 -to address[21] -comment A19
+set_location_assignment PIN_AK27 -to address[22] -comment A20
+set_location_assignment PIN_AJ27 -to address[23] -comment A21
+set_location_assignment PIN_AM28 -to address[24] -comment A22
+set_location_assignment PIN_AL28 -to address[25] -comment A23
+set_location_assignment PIN_AK28 -to address[26] -comment A24
+set_location_assignment PIN_AJ28 -to address[27] -comment A25
+set_location_assignment PIN_AM23 -to address[2] -comment A0
+set_location_assignment PIN_AL23 -to address[3] -comment A1
+set_location_assignment PIN_AK23 -to address[4] -comment A2
+set_location_assignment PIN_AJ23 -to address[5] -comment A3
+set_location_assignment PIN_AM24 -to address[6] -comment A4
+set_location_assignment PIN_AL24 -to address[7] -comment A5
+set_location_assignment PIN_AK24 -to address[8] -comment A6
+set_location_assignment PIN_AH24 -to address[9] -comment A7
+set_location_assignment PIN_AE25 -to bufdir -comment SMEM_DIR
+set_location_assignment PIN_AD27 -to bufoen -comment "SMEM_OE#"
+set_location_assignment PIN_AM16 -to clk -comment CLK6P_CPLD
+set_location_assignment PIN_AF29 -to data[0]
+set_location_assignment PIN_AB32 -to data[10]
+set_location_assignment PIN_AB31 -to data[11]
+set_location_assignment PIN_AB30 -to data[12]
+set_location_assignment PIN_AB29 -to data[13]
+set_location_assignment PIN_AB28 -to data[14]
+set_location_assignment PIN_AA32 -to data[15]
+set_location_assignment PIN_AA31 -to data[16]
+set_location_assignment PIN_AA30 -to data[17]
+set_location_assignment PIN_AA29 -to data[18]
+set_location_assignment PIN_Y31 -to data[19]
+set_location_assignment PIN_AE32 -to data[1]
+set_location_assignment PIN_Y30 -to data[20]
+set_location_assignment PIN_Y29 -to data[21]
+set_location_assignment PIN_Y28 -to data[22]
+set_location_assignment PIN_W32 -to data[23]
+set_location_assignment PIN_W31 -to data[24]
+set_location_assignment PIN_W29 -to data[25]
+set_location_assignment PIN_W28 -to data[26]
+set_location_assignment PIN_V31 -to data[27]
+set_location_assignment PIN_V30 -to data[28]
+set_location_assignment PIN_V29 -to data[29]
+set_location_assignment PIN_AE31 -to data[2]
+set_location_assignment PIN_V28 -to data[30]
+set_location_assignment PIN_U28 -to data[31]
+set_location_assignment PIN_AE30 -to data[3]
+set_location_assignment PIN_AE29 -to data[4]
+set_location_assignment PIN_AE28 -to data[5]
+set_location_assignment PIN_AD32 -to data[6]
+set_location_assignment PIN_AD31 -to data[7]
+set_location_assignment PIN_AC32 -to data[8]
+set_location_assignment PIN_AC31 -to data[9]
+set_location_assignment PIN_K19 -to dsuactn -comment CB11F0
+set_location_assignment PIN_AH11 -to dsubre -comment TST_STEP
+set_location_assignment PIN_A9 -to dsurx -comment RS_RXD0_TTL
+set_location_assignment PIN_D10 -to dsutx -comment RS_TXD0_TTL
+set_location_assignment PIN_F13 -to emdc -comment MDC
+set_location_assignment PIN_L14 -to emdio -comment MDIO
+set_location_assignment PIN_L19 -to errorn -comment CB11F1
+set_location_assignment PIN_C5 -to erxd[0] -comment RXD0
+set_location_assignment PIN_A5 -to erxd[1] -comment RXD1
+set_location_assignment PIN_D6 -to erxd[2] -comment RXD2
+set_location_assignment PIN_B6 -to erxd[3] -comment RXD3
+set_location_assignment PIN_U30 -to erx_clk -comment RXCLK
+set_location_assignment PIN_J14 -to erx_col -comment COL
+set_location_assignment PIN_K14 -to erx_crs
+set_location_assignment PIN_H14 -to erx_dv
+set_location_assignment PIN_E7 -to erx_er -comment RXER
+set_location_assignment PIN_D5 -to etxd[0]
+set_location_assignment PIN_B5 -to etxd[1]
+set_location_assignment PIN_E6 -to etxd[2]
+set_location_assignment PIN_C6 -to etxd[3]
+set_location_assignment PIN_U32 -to etx_clk
+set_location_assignment PIN_F14 -to etx_en
+set_location_assignment PIN_A6 -to etx_er
+set_location_assignment PIN_AJ32 -to iosn -comment "CS_BOOT#"
+set_location_assignment PIN_AG32 -to oen -comment "OE#"
+set_location_assignment PIN_AK17 -to pllref -comment CLK5p_CPLD
+set_location_assignment PIN_J21 -to ramoen[0] -comment CB12F8
+set_location_assignment PIN_K21 -to ramoen[1] -comment CB12F9
+set_location_assignment PIN_L21 -to ramoen[2] -comment CB12F10
+set_location_assignment PIN_H20 -to ramoen[3] -comment CB12F11
+set_location_assignment PIN_J20 -to ramoen[4] -comment CB12F12
+set_location_assignment PIN_AH30 -to ramsn[0] -comment "CS_SRAM#"
+set_location_assignment PIN_J22 -to ramsn[1] -comment CB12F4
+set_location_assignment PIN_K22 -to ramsn[2] -comment CB12F5
+set_location_assignment PIN_G21 -to ramsn[3] -comment CB12F6
+set_location_assignment PIN_H21 -to ramsn[4] -comment CB12F7
+set_location_assignment PIN_AG30 -to rben[0] -comment "BE0#"
+set_location_assignment PIN_AG29 -to rben[1] -comment "BE1#"
+set_location_assignment PIN_AF32 -to rben[2] -comment "BE2#"
+set_location_assignment PIN_AF31 -to rben[3] -comment "BE3#"
+set_location_assignment PIN_AC17 -to resetn -comment "HPE RESET#"
+set_location_assignment PIN_AH31 -to romsn[0] -comment "CS_FLASH#"
+set_location_assignment PIN_K20 -to romsn[1] -comment CB12F13
+set_location_assignment PIN_F23 -to rwen[0] -comment CB12F0
+set_location_assignment PIN_F22 -to rwen[1] -comment CB12F1
+set_location_assignment PIN_G22 -to rwen[2] -comment CB12F2
+set_location_assignment PIN_H22 -to rwen[3] -comment CB12F3
+set_location_assignment PIN_AH28 -to sdba[0] -comment SD_BA0
+set_location_assignment PIN_AM29 -to sdba[1] -comment SD_BA1
+set_location_assignment PIN_AM21 -to sdcasn -comment "SD_CAS#"
+set_location_assignment PIN_AK20 -to sdcke[0] -comment SD_CKE0
+set_location_assignment PIN_B21 -to sdcke[1] -comment CB11F12
+set_location_assignment PIN_AK16 -to sdclk[0] -comment F1_SDCLK0
+set_location_assignment PIN_AJ15 -to sdclk[1] -comment F1_SDCLK1
+set_location_assignment PIN_AL21 -to sdcsn[0] -comment "SD_CS0#"
+set_location_assignment PIN_AK21 -to sdcsn[1] -comment "SD_CS1#"
+set_location_assignment PIN_AJ21 -to sddqm[0] -comment SD_DQM0
+set_location_assignment PIN_AM22 -to sddqm[1] -comment SD_DQM1
+set_location_assignment PIN_AL22 -to sddqm[2] -comment SD_DQM2
+set_location_assignment PIN_AK22 -to sddqm[3] -comment SD_DQM3
+set_location_assignment PIN_AH20 -to sdrasn -comment "SD_RAS#"
+set_location_assignment PIN_AL20 -to sdwen -comment "SD_WE#"
+set_location_assignment PIN_AG31 -to writen -comment "WE#"
+set_location_assignment PIN_AB17 -to resoutn -comment "HPE_RESOUT#"
+set_location_assignment PIN_A11 -to can_txd -comment CAN_TXD
+set_location_assignment PIN_B11 -to can_rxd -comment CAN_RXD
+set_location_assignment PIN_D12 -to can_stb -comment CAN_STB
+set_location_assignment PIN_A10 -to rxd1 -comment RS_RXD1_TTL
+set_location_assignment PIN_E11 -to txd1 -comment RS_TXD1_TTL
+set_location_assignment PIN_K18 -to read -comment CB11_2
+
+set_location_assignment PIN_L15 -to dsw[0] -comment DSW0
+set_location_assignment PIN_K15 -to dsw[1] -comment DSW1
+set_location_assignment PIN_J15 -to dsw[2] -comment DSW2
+set_location_assignment PIN_F15 -to dsw[3] -comment DSW3
+set_location_assignment PIN_L16 -to dsw[4] -comment DSW4
+set_location_assignment PIN_K16 -to dsw[5] -comment DSW5
+set_location_assignment PIN_L17 -to dsw[6] -comment DSW6
+set_location_assignment PIN_K17 -to dsw[7] -comment DSW7
+set_location_assignment PIN_D7 -to led[0] -comment LED0#
+set_location_assignment PIN_C7 -to led[1] -comment LED1#
+set_location_assignment PIN_B7 -to led[2] -comment LED2#
+set_location_assignment PIN_A7 -to led[3] -comment LED3#
+set_location_assignment PIN_E8 -to led[4] -comment LED4#
+set_location_assignment PIN_D8 -to led[5] -comment LED5#
+set_location_assignment PIN_C8 -to led[6] -comment LED6#
+set_location_assignment PIN_B8 -to led[7] -comment LED7#
+set_location_assignment PIN_AJ7 -to sevensegment[0] -comment CB5_0_SEG_A#
+set_location_assignment PIN_AH7 -to sevensegment[1] -comment CB5_1_SEG_B#
+set_location_assignment PIN_AM8 -to sevensegment[2] -comment CB5_2_SEG_C#
+set_location_assignment PIN_AL8 -to sevensegment[3] -comment CB5_3_SEG_D#
+set_location_assignment PIN_AK8 -to sevensegment[4] -comment CB5_4_SEG_E#
+set_location_assignment PIN_AJ8 -to sevensegment[5] -comment CB5_5_SEG_F#
+set_location_assignment PIN_AH8 -to sevensegment[6] -comment CB5_6_SEG_G#
+set_location_assignment PIN_AM9 -to sevensegment[7] -comment CB5_7_SEG_DP#
+set_location_assignment PIN_AL9 -to sevensegment[8] -comment CB5_8_SEG_CA0#
+set_location_assignment PIN_AK9 -to sevensegment[9] -comment CB5_9_SEG_CA1#
+set_location_assignment PIN_AM12 -to lcd_enable -comment LCD_ENABLE
+set_location_assignment PIN_AK12 -to lcd_regsel -comment LCD_REGSEL
+set_location_assignment PIN_AL12 -to lcd_rw -comment LCD_RW
+set_location_assignment PIN_C4 -to tst_row[0] -comment TST_ROW0
+set_location_assignment PIN_B4 -to tst_row[1] -comment TST_ROW1
+set_location_assignment PIN_A4 -to tst_row[2] -comment TST_ROW2
+set_location_assignment PIN_E5 -to tst_row[3] -comment TST_ROW3
+set_location_assignment PIN_AL11 -to tst_col[0] -comment TST_COL0
+set_location_assignment PIN_AK11 -to tst_col[1] -comment TST_COL1
+set_location_assignment PIN_AJ11 -to tst_col[2] -comment TST_COL2
+set_location_assignment PIN_L18 -to sample_clock -comment CB11_3
+
+# Timing Assignments
+# ==================
+set_global_assignment -name IGNORE_CLOCK_SETTINGS ON
+set_global_assignment -name INCLUDE_EXTERNAL_PIN_DELAYS_IN_FMAX_CALCULATIONS OFF
+set_global_assignment -name FMAX_REQUIREMENT "100.0 MHz"
+
+# Analysis & Synthesis Assignments
+# ================================
+set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
+set_global_assignment -name DEVICE_FILTER_PIN_COUNT 1020
+set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 3
+set_global_assignment -name EDA_DESIGN_ENTRY_SYNTHESIS_TOOL "Synplify Pro"
+set_global_assignment -name FAMILY "Stratix II"
+set_global_assignment -name CYCLONE_OPTIMIZATION_TECHNIQUE AREA
+set_global_assignment -name STRATIX_OPTIMIZATION_TECHNIQUE SPEED
+set_global_assignment -name APEX20K_OPTIMIZATION_TECHNIQUE SPEED
+set_global_assignment -name TOP_LEVEL_ENTITY leon3hpe
+set_global_assignment -name VHDL_SHOW_LMF_MAPPING_MESSAGES OFF
+set_global_assignment -name AUTO_ENABLE_SMART_COMPILE on
+set_global_assignment -name VERILOG_SHOW_LMF_MAPPING_MESSAGES OFF
+
+# Fitter Assignments
+# ==================
+set_global_assignment -name DEVICE EP2S180F1020C3
+set_global_assignment -name STRATIX_II_CONFIGURATION_SCHEME "ACTIVE SERIAL"
+set_global_assignment -name CYCLONE_CONFIGURATION_SCHEME "PASSIVE SERIAL"
+set_global_assignment -name ENABLE_DEVICE_WIDE_RESET ON
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
+set_global_assignment -name RESERVE_DATA7_THROUGH_DATA1_AFTER_CONFIGURATION "AS INPUT TRI-STATED"
+set_global_assignment -name RESERVE_ASDO_AFTER_CONFIGURATION "AS OUTPUT DRIVING AN UNSPECIFIED SIGNAL"
+set_global_assignment -name OPTIMIZE_IOC_REGISTER_PLACEMENT_FOR_TIMING OFF
+set_global_assignment -name IO_PLACEMENT_OPTIMIZATION OFF
+set_global_assignment -name INC_PLC_MODE OFF
+set_global_assignment -name ROUTING_BACK_ANNOTATION_MODE OFF
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD LVTTL
+set_global_assignment -name ERROR_CHECK_FREQUENCY_DIVISOR 1
+
+# Timing Analysis Assignments
+# ===========================
+set_global_assignment -name MAX_SCC_SIZE 50
+
+# EDA Netlist Writer Assignments
+# ==============================
+set_global_assignment -name EDA_SIMULATION_TOOL "ModelSim (VHDL output from Quartus II)"
+set_global_assignment -name HARDCOPY_EXTERNAL_CLOCK_JITTER "0.0 NS"
+
+# Assembler Assignments
+# =====================
+set_global_assignment -name ON_CHIP_BITSTREAM_DECOMPRESSION ON
+set_global_assignment -name COMPRESSION_MODE ON
+set_global_assignment -name APEX20K_CONFIGURATION_DEVICE EPC2
+set_global_assignment -name EXCALIBUR_CONFIGURATION_DEVICE EPC2
+set_global_assignment -name MERCURY_CONFIGURATION_DEVICE EPC2
+set_global_assignment -name FLEX6K_CONFIGURATION_DEVICE EPC1
+set_global_assignment -name FLEX10K_CONFIGURATION_DEVICE EPC2
+set_global_assignment -name CYCLONE_CONFIGURATION_DEVICE EPC2
+set_global_assignment -name STRATIX_CONFIGURATION_DEVICE EPC8
+set_global_assignment -name EPROM_USE_CHECKSUM_AS_USERCODE ON
+set_global_assignment -name AUTO_INCREMENT_CONFIG_DEVICE_JTAG_USER_CODE OFF
+set_global_assignment -name DISABLE_NCS_AND_OE_PULLUPS_ON_CONFIG_DEVICE ON
+set_global_assignment -name GENERATE_TTF_FILE ON
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
+
+# Simulator Assignments
+# =====================
+set_global_assignment -name START_TIME 0NS
+set_global_assignment -name GLITCH_INTERVAL 1NS
+
+# Design Assistant Assignments
+# ============================
+set_global_assignment -name DRC_REPORT_TOP_FANOUT OFF
+set_global_assignment -name DRC_REPORT_FANOUT_EXCEEDING OFF
+set_global_assignment -name ASSG_CAT OFF
+set_global_assignment -name ASSG_RULE_MISSING_FMAX OFF
+set_global_assignment -name ASSG_RULE_MISSING_TIMING OFF
+set_global_assignment -name NONSYNCHSTRUCT_RULE_ASYN_RAM OFF
+set_global_assignment -name CLK_CAT OFF
+set_global_assignment -name CLK_RULE_COMB_CLOCK OFF
+set_global_assignment -name CLK_RULE_INV_CLOCK OFF
+set_global_assignment -name CLK_RULE_GATING_SCHEME OFF
+set_global_assignment -name CLK_RULE_INPINS_CLKNET OFF
+set_global_assignment -name CLK_RULE_CLKNET_CLKSPINES OFF
+set_global_assignment -name CLK_RULE_MIX_EDGES OFF
+set_global_assignment -name RESET_CAT OFF
+set_global_assignment -name RESET_RULE_INPINS_RESETNET OFF
+set_global_assignment -name RESET_RULE_UNSYNCH_EXRESET OFF
+set_global_assignment -name RESET_RULE_IMSYNCH_EXRESET OFF
+set_global_assignment -name RESET_RULE_COMB_ASYNCH_RESET OFF
+set_global_assignment -name RESET_RULE_UNSYNCH_ASYNCH_DOMAIN OFF
+set_global_assignment -name RESET_RULE_IMSYNCH_ASYNCH_DOMAIN OFF
+set_global_assignment -name TIMING_CAT OFF
+set_global_assignment -name TIMING_RULE_SHIFT_REG OFF
+set_global_assignment -name TIMING_RULE_COIN_CLKEDGE OFF
+set_global_assignment -name NONSYNCHSTRUCT_RULE_COMB_DRIVES_RAM_WE OFF
+set_global_assignment -name NONSYNCHSTRUCT_CAT OFF
+set_global_assignment -name NONSYNCHSTRUCT_RULE_COMBLOOP OFF
+set_global_assignment -name NONSYNCHSTRUCT_RULE_REG_LOOP OFF
+set_global_assignment -name NONSYNCHSTRUCT_RULE_DELAY_CHAIN OFF
+set_global_assignment -name NONSYNCHSTRUCT_RULE_RIPPLE_CLK OFF
+set_global_assignment -name NONSYNCHSTRUCT_RULE_ILLEGAL_PULSE_GEN OFF
+set_global_assignment -name NONSYNCHSTRUCT_RULE_MULTI_VIBRATOR OFF
+set_global_assignment -name NONSYNCHSTRUCT_RULE_SRLATCH OFF
+set_global_assignment -name NONSYNCHSTRUCT_RULE_LATCH_UNIDENTIFIED OFF
+set_global_assignment -name ACLK_CAT OFF
+set_global_assignment -name ACLK_RULE_NO_SZER_ACLK_DOMAIN OFF
+set_global_assignment -name ACLK_RULE_SZER_BTW_ACLK_DOMAIN OFF
+set_global_assignment -name ACLK_RULE_IMSZER_ADOMAIN OFF
+set_global_assignment -name HCPY_VREF_PINS OFF
+
+# Programmer Assignments
+# ======================
+set_global_assignment -name GENERATE_JAM_FILE ON
+set_global_assignment -name GENERATE_JBC_FILE ON
+
+# SignalTap II Assignments
+# ========================
+set_global_assignment -name ENABLE_SIGNALTAP off
+
+# LogicLock Region Assignments
+# ============================
+set_global_assignment -name LOGICLOCK_INCREMENTAL_COMPILE_ASSIGNMENT OFF
+
+# ---------------------------------------------
+# start EDA_TOOL_SETTINGS(eda_design_synthesis)
+
+	# Analysis & Synthesis Assignments
+	# ================================
+	set_global_assignment -name EDA_INPUT_DATA_FORMAT "VERILOG HDL" -section_id eda_design_synthesis
+	set_global_assignment -name EDA_LMF_FILE synplcty.lmf -section_id eda_design_synthesis
+
+	# EDA Netlist Writer Assignments
+	# ==============================
+	set_global_assignment -name EDA_OUTPUT_DATA_FORMAT EDIF -section_id eda_design_synthesis
+
+# end EDA_TOOL_SETTINGS(eda_design_synthesis)
+# -------------------------------------------
+
+# ---------------------------------------
+# start EDA_TOOL_SETTINGS(eda_simulation)
+
+	# EDA Netlist Writer Assignments
+	# ==============================
+	set_global_assignment -name EDA_INCLUDE_VHDL_CONFIGURATION_DECLARATION ON -section_id eda_simulation
+	set_global_assignment -name EDA_OUTPUT_DATA_FORMAT VHDL -section_id eda_simulation
+
+# end EDA_TOOL_SETTINGS(eda_simulation)
+# -------------------------------------
+
+# ----------------------
+# start ENTITY(leon3hpe)
+
+	# Timing Assignments
+	# ==================
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[0]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[1]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[2]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[3]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[4]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[5]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[6]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[7]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[8]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[9]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[10]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[11]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[12]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[13]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[14]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[15]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[16]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[17]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[18]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[19]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[20]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[21]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[22]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[23]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[24]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[25]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[26]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[27]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[28]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[29]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[30]
+	set_instance_assignment -name TSU_REQUIREMENT 10ns -from * -to data[31]
+
+	# Fitter Assignments
+	# ==================
+	set_instance_assignment -name PRESERVE_HIERARCHICAL_BOUNDARY FIRM -to "ahbrom:\\bpromgen:brom"
+
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sdclk[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[2]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[3]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[4]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[5]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[6]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[7]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[8]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[9]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[10]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[11]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[12]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[13]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[14]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[15]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[16]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[17]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[18]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[19]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[20]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[21]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[22]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[23]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[24]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[25]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[26]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to address[27]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to bufdir
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to bufoen
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[2]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[3]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[4]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[5]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[6]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[7]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[8]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[9]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[10]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[11]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[12]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[13]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[14]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[15]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[16]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[17]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[18]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[19]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[20]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[21]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[22]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[23]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[24]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[25]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[26]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[27]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[28]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[29]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[30]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to data[31]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to erx_clk
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to erxd[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to erxd[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to erxd[2]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to erxd[3]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to etx_clk
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to etxd[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to etxd[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to etxd[2]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to etxd[3]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to rwen[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to rwen[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to rwen[2]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to rwen[3]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sdba[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sdba[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sdcasn
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sdclk[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sdcsn[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sdcsn[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sddqm[0]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sddqm[1]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sddqm[2]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sddqm[3]
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sdrasn
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to sdwen
+	set_instance_assignment -name CURRENT_STRENGTH_NEW "STRENGTH 8MA" -to writen
+
+# end ENTITY(leon3hpe)
+# --------------------

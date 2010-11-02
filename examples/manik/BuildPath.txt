@@ -1,0 +1,4 @@
+local UNISIM "unisim" 
+
+toplevel MANIK_SOC
+

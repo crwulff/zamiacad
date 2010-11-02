@@ -1,0 +1,59 @@
+#ifndef CONFIG_DDRSP
+#define CONFIG_DDRSP 0
+#endif
+
+#ifndef CONFIG_DDRSP_INIT
+#define CONFIG_DDRSP_INIT 0
+#endif
+
+#ifndef CONFIG_DDRSP_FREQ
+#define CONFIG_DDRSP_FREQ 100
+#endif
+
+#ifndef CONFIG_DDRSP2_DATAWIDTH
+#define CONFIG_DDRSP2_DATAWIDTH 64
+#endif
+
+#ifndef CONFIG_DDRSP_COL
+#define CONFIG_DDRSP_COL 9
+#endif
+
+#ifndef CONFIG_DDRSP_MBYTE
+#define CONFIG_DDRSP_MBYTE 8
+#endif
+
+#ifndef CONFIG_DDRSP_RSKEW
+#define CONFIG_DDRSP_RSKEW 0
+#endif
+
+#ifndef CONFIG_DDRSP2_DELAY0
+#define CONFIG_DDRSP2_DELAY0 0
+#endif
+
+#ifndef CONFIG_DDRSP2_DELAY1
+#define CONFIG_DDRSP2_DELAY1 0
+#endif
+
+#ifndef CONFIG_DDRSP2_DELAY2
+#define CONFIG_DDRSP2_DELAY2 0
+#endif
+
+#ifndef CONFIG_DDRSP2_DELAY3
+#define CONFIG_DDRSP2_DELAY3 0
+#endif
+
+#ifndef CONFIG_DDRSP2_DELAY4
+#define CONFIG_DDRSP2_DELAY4 0
+#endif
+
+#ifndef CONFIG_DDRSP2_DELAY5
+#define CONFIG_DDRSP2_DELAY5 0
+#endif
+
+#ifndef CONFIG_DDRSP2_DELAY6
+#define CONFIG_DDRSP2_DELAY6 0
+#endif
+
+#ifndef CONFIG_DDRSP2_DELAY7
+#define CONFIG_DDRSP2_DELAY7 0
+#endif

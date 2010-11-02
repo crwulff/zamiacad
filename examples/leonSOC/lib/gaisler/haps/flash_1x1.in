@@ -1,0 +1,9 @@
+
+  mainmenu_option next_comment
+  comment 'FLASH_1x1 controller   '
+    bool 'Enable Flash PROM controller    ' CONFIG_FLASH_1x1
+    if [ "$CONFIG_FLASH_1x1" = "y" ]; then
+      bool 'Enable 16-bit PROM support            ' CONFIG_FLASH_1x1_PROM16
+      bool 'Use FLASH_1x1 netlist     ' CONFIG_FLASH_1x1_NETLIST
+    fi
+  endmenu

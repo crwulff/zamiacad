@@ -1,0 +1,61 @@
+This Document contains the License for all the VHDL-Files and a second 
+License for all Software in the directories /bin and /c_sources
+   
+    License for all VHDL-Files in these directories
+    
+    All VHDL-Codes of Crypto-Chip belongs to PG99
+    Copyright (C) 1999 by Dirk Allmendinger, Markus Busch, Tobias Enge,
+    Joerg Holzhauer, Jens Kuenzer, Thomas Schwarz, Thomas Stanka, Arno Wacker. 
+
+    This VHDL-Code is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; We allow to synthesize the VHDL-code for 
+    commercial use. If you use our VHDL-codes we like to be informed.
+    VHDL- or Verilog-files based upon our code has to be released 
+    on RT-level under the GPL. 
+
+    WE FORBID ANY RELEASE OF ONE OF THE VHDL-FILES WITHOUT THIS TEXT.
+
+    This VHDL-Code is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    If you want to use the VHDL-Code we like to get a short notice to
+    
+    PG99
+    Abteilung Rechnerarchitektur
+    Institut fuer Informatik
+    Universitaet Stuttgart
+    Breitwiesenstr. 20-22
+    70565 Stuttgart
+    Germany
+    Terra
+
+    email: pg99@ramona.informatik.uni-stuttgart.de
+           
+
+
+    License for all programs in directory /bin and /C-sources
+
+    Copyright (C) 1999 by Dirk Allmendinger, Markus Busch, Tobias Enge,
+    Joerg Holzhauer, Jens Kuenzer, Thomas Schwarz, Thomas Stanka, Arno Wacker.  
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    PG99
+    Abteilung Rechnerarchitektur
+    Institut fuer Informatik
+    Universitaet Stuttgart
+    Breitwiesenstr. 20-22
+    70565 Stuttgart
+    Germany
+    Terra

@@ -1,0 +1,11 @@
+HAPSTRAK port enable
+CONFIG_HAPSTRAK_ENABLE
+  Say Y here to enable one or more HapsTrak cores. The port is 119 bits
+  wide, whith each port signal individually programmable as input or output.
+
+TEST_1x2 interface enable
+CONFIG_TEST_1X2_ENABLE
+  Say Y here to enable one or more Test_1x2 cores. The core enables control of Synplicity's HAPS TEST_1x2 daughter board.
+
+
+

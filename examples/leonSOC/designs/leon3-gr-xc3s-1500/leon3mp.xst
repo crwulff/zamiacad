@@ -1,0 +1,5 @@
+elaborate -ifmt vhdl -ifn config.vhd
+elaborate -ifmt vhdl -ifn ahbrom.vhd
+elaborate -ifmt vhdl -ifn vga_clkgen.vhd
+elaborate -ifmt vhdl -ifn leon3mp.vhd
+run -read_cores yes -fsm_extract no -iob true -ifn leon3mp.vhd -bus_delimiter () -ifmt vhdl -p xc3s1500-fg456-4 -ofn leon3mp -sd ../../netlists/xilinx/spartan3/xst

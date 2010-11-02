@@ -1,0 +1,222 @@
+--------------------------------------------------------------------------
+--  Crypto Chip
+--  Copyright (C) 1999, Projektgruppe WS98/99
+--  University of Stuttgart / Department of Computer Science / IFI-RA
+--------------------------------------------------------------------------
+-- Designers : Thomas Schwarz
+-- Group     : RSA
+--------------------------------------------------------------------
+-- Design Unit Name : Montgomery Multiplizierer
+-- Purpose :  Part of the RSA-module-core for the cryptochip "pg99"
+-- 
+-- File Name :  montgomery.vhd
+--------------------------------------------------------------------
+-- Simulator : SYNOPSYS VHDL System Simulator (VSS) Version 3.2.a
+--------------------------------------------------------------------
+-- Date            | Changes
+--                 | 
+--                 |
+-----------------------------------------------------------------------
+
+--------------------------------------------------------------------------
+--  Was implementiert wird
+--  Modulare Multiplikation nach Montgomery und SRT-Division.
+--  Das Schaltnetz fuehrt jeweils einen Iterationsschritt der beiden
+--  Algorithmen durch, und speichert das Zwischenergenis in einer
+--  Carry-Save Darstellung. In JEDEM Takt wird ein Iterationsschritt
+--  berechnet.
+--
+--  Verwendet 32-Bit-Slices, damit die Synthese besser klappt!  
+--------------------------------------------------------------------------
+
+library IEEE;
+  use IEEE.std_logic_1164.all;
+  use IEEE.std_logic_arith.all;
+  use IEEE.std_logic_unsigned.all;
+
+
+--entity MONTGOMERY is
+--  port( AI     : in std_logic;
+--        B      : in std_logic_vector (767 downto 0);
+--        M      : in std_logic_vector (767 downto 0);
+--        SRTREM : in std_logic;
+--        CLK    : in std_logic;
+--        RESET  : in std_logic;
+--        ENABLE : in std_logic;
+--        RSAVE  : out std_logic_vector (767 downto 0);
+--        RCARRY : out std_logic_vector (767 downto 0)
+--      );
+--end MONTGOMERY;
+
+
+architecture RTL of MONTGOMERY is
+    constant NumBits : integer := 768;
+    constant Num32Slices : integer := (NumBits-32)/32;
+    constant Num128Slices : integer := (NumBits/128);
+
+
+    component MONT_128LOWSLICE port(
+        CLK, ENA_MONT, RESET_MONT, SRTREM : in std_logic;
+        AI, QI : in std_logic;
+        B      : in std_logic_vector (130 downto 0);
+        M      : in std_logic_vector (131 downto 0);
+        RS_132 : in std_logic;
+        C1_132, C2_132 : out std_logic;
+        QiMONT         : out std_logic;
+        RSAVE          : out std_logic_vector (131 downto 1);
+        RCARRY         : out std_logic_vector (131 downto 1)
+        );
+    end component;
+
+
+    component MONT_128SLICE  port(
+        CLK, ENA_MONT, RESET_MONT, SRTREM : in std_logic;
+        AI, QI    : in std_logic;
+        Bi_P      : in std_logic_vector (128 downto 1);
+        Mi_P      : in std_logic_vector (129 downto 2);
+        C1i_P1, C2i_P1 : in std_logic;
+        RSi_P130, RSi_P1, RCi_P1, RCi_P0 : in std_logic;
+        C1i_P129, C2i_P129 : out std_logic;
+        RSi_P : out std_logic_vector (129 downto 2);
+        RCi_P : out std_logic_vector (129 downto 2)
+        );
+    end component;
+
+
+    component MONT_128HIGHSLICE port(
+        CLK, ENA_MONT, RESET_MONT, SRTREM : in std_logic;
+        AI, QI                 : in std_logic;
+        B                      : in std_logic_vector (767 downto 643);
+        M                      : in std_logic_vector (767 downto 644);
+        C1_643, C2_643         : in std_logic;
+        RS_643, RC_643, RC_642 : in std_logic;
+        QiMINUS, QiPLUS : out std_logic;
+        RSAVE           : out std_logic_vector (768 downto 644);
+        RCARRY          : out std_logic_vector (767 downto 644)
+        );
+    end component;
+
+
+    signal RC : std_logic_vector (NumBits-1 downto 0);
+    signal RS : std_logic_vector(NumBits downto 1);
+    signal C1, C2 : std_logic_vector(Num128Slices-1 downto 1);
+    signal Ai1, Ai2, AiDist : std_logic;
+    signal Qi1, Qi2, QiDist : std_logic;
+    signal QiMINUS, QiPLUS, QiMONT : std_logic;
+    signal zero : std_logic;
+    
+begin
+    zero <= '0';
+    RC(0) <= zero;
+    RSAVE(NumBits-1 downto 0) <= RS(NumBits downto 1);
+    RCARRY(NumBits-1 downto 0) <= RC(NumBits-1 downto 0);
+
+
+UM128LS: MONT_128LOWSLICE port map (
+    CLK => CLK,
+    ENA_MONT => ENABLE,
+    RESET_MONT => RESET,
+    SRTREM => SRTREM,
+    AI => AiDist,
+    QI => QiDist,
+    B (130 downto 0) => B(130 downto 0),
+    M (131 downto 0) => M(131 downto 0),
+    RS_132 => RS(132),
+    C1_132 => C1(1),
+    C2_132 => C2(1),
+    QiMONT => QiMONT,
+    RSAVE (131 downto 1) => RS(131 downto 1),
+    RCARRY (131 downto 1) => RC(131 downto 1)
+    );
+    
+
+bigslices : for i in 1 to Num128Slices-2 generate
+    UM128S: MONT_128SLICE port map (
+        CLK => CLK,
+        ENA_MONT => ENABLE,
+        RESET_MONT => RESET,
+        SRTREM => SRTREM,
+        AI => AiDist,
+        QI => QiDist,
+        Bi_P (128 downto 1) => B((i*128)+130 downto (i*128)+3),
+        Mi_P (129 downto 2) => M((i*128)+131 downto (i*128)+4),
+        C1i_P1 => C1(i),
+        C2i_P1 => C2(i),
+        RSi_P130 => RS((i*128)+132),
+        RSi_P1 => RS((i*128)+3),
+        RCi_P1 => RC((i*128)+3),
+        RCi_P0 => RC((i*128)+2),
+        C1i_P129 => C1(i+1),
+        C2i_P129 => C2(i+1),
+        RSi_P (129 downto 2) => RS((i*128)+131 downto (i*128)+4),
+        RCi_P (129 downto 2) => RC((i*128)+131 downto (i*128)+4)
+        );
+end generate bigslices;
+
+
+UM128HS: MONT_128HIGHSLICE port map(
+    CLK => CLK,
+    ENA_MONT => ENABLE,
+    RESET_MONT => RESET,
+    SRTREM => SRTREM,
+    AI => AiDist,
+    QI => QiDist,
+    B (767 downto 643) => B(767 downto 643),
+    M (767 downto 644) => M(767 downto 644),
+    C1_643 => C1(Num128Slices-1),
+    C2_643 => C2(Num128Slices-1),
+    RS_643 => RS(643),
+    RC_643 => RC(643),
+    RC_642 => RC(642),
+    QiMINUS => QiMINUS,
+    QiPLUS  => QiPLUS,
+    RSAVE (768 downto 644) => RS(768 downto 644),
+    RCARRY (767 downto 644) => RC(767 downto 644)
+    );
+
+
+
+    Ai1 <= '0' when ENABLE = '1' else
+           QiMINUS;
+    Ai2 <= Ai1 when SRTREM = '1' else
+           AI;
+    Qi1 <= QiPLUS when SRTREM = '1' else
+           QiMONT;
+    Qi2 <= '0' when RESET='1' else
+           Qi1;
+
+-- purpose: erzeugt Pipeline-Register fuer Qi und Ai
+-- type:    memorizing
+-- inputs:  CLK, Ai2, Qi2
+-- outputs: AiDist, QiDist
+operatereg : process (CLK )
+    
+begin  -- process operatereg
+    -- activities triggered by rising edge of clock
+    if CLK'event and CLK = '1' then
+        AiDist <= Ai2;
+        QiDist <= Qi2;
+    end if;
+end process operatereg;
+
+end RTL;
+
+
+configuration CFG_MONT_TOPHIER of MONTGOMERY is
+    for RTL
+        for all : MONT_128LOWSLICE
+            use configuration WORK.CFG_MONT_128LOWSLICE;
+        end for;
+        for bigslices
+            for all : MONT_128SLICE
+                use configuration WORK.CFG_MONT_128SLICE;
+            end for;
+        end for;
+        for all : MONT_128HIGHSLICE
+            use configuration WORK.CFG_MONT_128HIGHSLICE;
+        end for;
+    end for;
+end CFG_MONT_TOPHIER;
+
+
+

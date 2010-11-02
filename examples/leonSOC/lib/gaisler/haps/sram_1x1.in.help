@@ -1,0 +1,15 @@
+SRAM_1x1 controller enable
+CONFIG_SRAM_1x1
+  Say Y here to enabled a 32-bit synchronous SRAM_1x1/SRAM (SSRAM) controller.
+  The controller is designed for piplined ZBT SSRAM.
+
+CONFIG_SRAM_1x1_PROM16
+  Say Y here to enabled a 16-bit PROM support. The PROM should be
+  connected to D[31:16] of the data bus.
+
+Netlists
+CONFIG_SRAM_1x1_NETLIST
+  Use the netlist version of SRAM_1x1. This option is required if
+  you have not licensed the source code of the SRAM_1x1 core.
+  Currently only supported for Xilinx Virtex FPGAs.
+  PROM width support for 16 bit wide memory should be enabled.
