@@ -4,3 +4,4 @@ syntax: glob
 *.du
 du.db
 ZDB
+test/vests
