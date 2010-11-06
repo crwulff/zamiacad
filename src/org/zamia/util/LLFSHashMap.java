@@ -62,7 +62,7 @@ public class LLFSHashMap {
 	public void put(long aKey, long aValue) {
 		int x = hash(aKey);
 
-		while (!fFree[x]) {
+		while (!fFree[x] && fKeys[x]!=aKey) {
 			x = (x + 1) % fAllocedSize;
 		}
 

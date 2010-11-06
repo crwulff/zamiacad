@@ -125,7 +125,7 @@ public class EHMPageManager {
 		EHMCacheEntry evictedEntry = fCache.remove(id);
 
 		if (evictedEntry == null) {
-			System.out.printf("EHM: Internal error: id %d was not part of cache.\n", id);
+			logger.error("EHM: Internal error: id %d was not part of cache.\n", id);
 		}
 
 		fCacheTail = fCacheTail.getPrev();
