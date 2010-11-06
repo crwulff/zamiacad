@@ -37,7 +37,6 @@ import org.zamia.util.ZHash;
 import org.zamia.util.ehm.EHMPageManager;
 import org.zamia.util.ehm.ExtendibleHashMap;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -61,6 +60,7 @@ public class ZDB {
 	public final static ExceptionLogger el = ExceptionLogger.getInstance();
 
 	private static final int CACHE_MAX_SIZE = 16384;
+
 	//private static final int CACHE_MAX_SIZE = 32768;
 
 	//private static final int CACHE_MAX_SIZE = 65536;
@@ -90,7 +90,7 @@ public class ZDB {
 	private Object fOwner;
 
 	// statistics:
-	
+
 	private HashMap<String, Integer> fNumObjectsByClass;
 
 	private HashMap<String, Integer> fSizeofObjectsByClass;
@@ -107,7 +107,7 @@ public class ZDB {
 	private EHMPageManager fEHMManager;
 
 	private HashMap<String, ExtendibleHashMap> fEHMs;
-	
+
 	private ExtendibleHashMap fOffsets;
 
 	public ZDB(File aDBDir, Object aOwner) throws ZDBException {
@@ -214,7 +214,7 @@ public class ZDB {
 
 		logger.info("ZDB: flush(): writing EHM pages...");
 
-	    fEHMManager.flush();
+		fEHMManager.flush();
 
 		logger.info("ZDB: flush(): writing EHM nodes...");
 
@@ -327,9 +327,7 @@ public class ZDB {
 
 		if (aObj instanceof ZDBIIDSaver) {
 			id = ((ZDBIIDSaver) aObj).getDBID();
-			if (id != 0) {
-				logger.error("ZDB: tried to re-save object '%s'", aObj);
-			} else {
+			if (id == 0) {
 				id = fPD.getNextId();
 			}
 
@@ -371,9 +369,22 @@ public class ZDB {
 	}
 
 	private synchronized void storeInMem(long aId, Object aObj, boolean aMarkDirty) {
+
+		// already in memory cache?
+
+		ZDBCacheEntry entry = fCache.get(aId);
+		if (entry != null) {
+
+			if (aMarkDirty) {
+				entry.setDirty(true);
+			}
+
+			return;
+		}
+
 		// put it into memory cache
 
-		ZDBCacheEntry entry = new ZDBCacheEntry(aId, aObj, aMarkDirty);
+		entry = new ZDBCacheEntry(aId, aObj, aMarkDirty);
 
 		fCache.put(aId, entry);
 
