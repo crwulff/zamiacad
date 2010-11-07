@@ -22,7 +22,6 @@ import org.zamia.ZamiaProjectBuilder;
 import org.zamia.ZamiaProject.VHDLLanguageSupport;
 import org.zamia.vhdl.ast.DUUID;
 
-
 /**
  * @author Guenter Bartsch
  */
@@ -226,7 +225,7 @@ public class IGTest extends TestCase {
 			fZPrj = null;
 		}
 	}
-	
+
 	// disabled for now (supposed to generate errors)
 	//	public void testInst() throws Exception {
 	//
@@ -238,15 +237,45 @@ public class IGTest extends TestCase {
 	//		runTest("test/semantic/instTest", 2);
 	//	}
 
+	// FIXME: disabled for now (PSL support is incomplete)
+	//	public void testPSL6() throws Exception {
+	//
+	//		if (!enablePSL6Test) {
+	//			fail("Test disabled");
+	//			return;
+	//		}
+	//
+	//		runTest("test/semantic/psl6Test", 1);
+	//	}
 
-	public void testPSL6() throws Exception {
+	public void testJOP() throws Exception {
 
-		if (!enablePSL6Test) {
+		if (!enableJOPTest) {
 			fail("Test disabled");
 			return;
 		}
 
-		runTest("test/semantic/psl6Test", 1);
+		runTest("examples/jop", 288);
+	}
+
+	public void testBP() throws Exception {
+
+		if (!enableBPTest) {
+			fail("Test disabled");
+			return;
+		}
+
+		runTest("test/semantic/bpTest", 1913);
+	}
+
+	public void testLeonExtern() throws Exception {
+
+		if (!enableLeonExternTest) {
+			fail("Test disabled");
+			return;
+		}
+
+		runTest("test/leonExtern", 1913);
 	}
 
 	public void testLiteral5() throws Exception {
@@ -317,26 +346,6 @@ public class IGTest extends TestCase {
 		}
 
 		runTest("examples/leonSOC", 1913);
-	}
-
-	public void testLeonExtern() throws Exception {
-
-		if (!enableLeonExternTest) {
-			fail("Test disabled");
-			return;
-		}
-
-		runTest("test/leonExtern", 1913);
-	}
-
-	public void testBP() throws Exception {
-
-		if (!enableBPTest) {
-			fail("Test disabled");
-			return;
-		}
-
-		runTest("test/semantic/bpTest", 1913);
 	}
 
 	public void testConcat6() throws Exception {
@@ -767,16 +776,6 @@ public class IGTest extends TestCase {
 		}
 
 		runTest("examples/itc99", 1);
-	}
-
-	public void testJOP() throws Exception {
-
-		if (!enableJOPTest) {
-			fail("Test disabled");
-			return;
-		}
-
-		runTest("examples/jop", 288, VHDLLanguageSupport.VHDL2002);
 	}
 
 	public void testDLX() throws Exception {
