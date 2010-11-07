@@ -31,7 +31,7 @@ import org.zamia.instgraph.IGType;
  * 
  */
 @SuppressWarnings("serial")
-public class Range extends ASTObject {
+public class Range extends VHDLNode {
 
 	public final static int DIR_UP = 1;
 
@@ -43,14 +43,14 @@ public class Range extends ASTObject {
 
 	private boolean fAscending;
 
-	public Range(Operation aLeft, int aDir, Operation aRight, ASTObject aParent, long aLocation) {
+	public Range(Operation aLeft, int aDir, Operation aRight, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		setLeft(aLeft);
 		setRight(aRight);
 		fAscending = (aDir == DIR_UP);
 	}
 
-	public Range(Name aName, ASTObject aParent, long aLocation) {
+	public Range(Name aName, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fName = aName;
 		if (fName != null) {
@@ -68,7 +68,7 @@ public class Range extends ASTObject {
 		fLeft.setParent(this);
 	}
 
-	public Range(Operation aLeft, Operation aRight, boolean aAscending, ASTObject aParent, long aLocation) {
+	public Range(Operation aLeft, Operation aRight, boolean aAscending, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		setLeft(aLeft);
 		setRight(aRight);
@@ -108,7 +108,7 @@ public class Range extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return fLeft;

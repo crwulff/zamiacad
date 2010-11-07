@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2009 by the authors indicated in the @author tags.
+ * Copyright 2005-2010 by the authors indicated in the @author tags.
  * All rights reserved.
  *
  * See the LICENSE file for details.
@@ -19,8 +19,11 @@ import org.zamia.analysis.ReferenceSite.RefType;
 import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
 import org.zamia.instgraph.IGContainer;
+import org.zamia.instgraph.IGDesignUnit;
 import org.zamia.instgraph.IGElaborationEnv;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.instgraph.IGManager;
+import org.zamia.instgraph.IGModule;
+import org.zamia.vhdl.ast.DMUID.LUType;
 import org.zamia.zdb.ZDB;
 
 
@@ -43,18 +46,28 @@ public class ConfigurationDeclaration extends PrimaryUnit {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return getContext();
 	}
 
 	@Override
-	public DUUID getDUUID(String aLibId) throws ZamiaException {
-		return new DUUID(LUType.Configuration, aLibId, getId(), null);
+	public DMUID getDMUID(String aLibId) throws ZamiaException {
+		return new DMUID(LUType.Configuration, aLibId, getId(), null);
 	}
 
 	@Override
 	public void findReferences(String aId, ObjectCat aCat, RefType aRefType, int aDepth, ZamiaProject aZPrj, IGContainer aContainer, IGElaborationEnv aEE,
 			ReferenceSearchResult aResult, ArrayList<SearchJob> aTODO) throws ZamiaException {
+		// FIXME: implement
+	}
+
+	@Override
+	public void computeIG(IGManager aIGM, IGDesignUnit aDesignModule) {
+		// FIXME: implement
+	}
+
+	@Override
+	public void computeStatementsIG(IGManager aIGM, IGModule aModule) {
 		// FIXME: implement
 	}
 

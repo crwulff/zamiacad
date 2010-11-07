@@ -10,7 +10,7 @@ package org.zamia.zil;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
 import org.zamia.zil.synthesis.VariableRemapping;
@@ -28,7 +28,7 @@ public class ZILOperationScalarTypeAttribute extends ZILOperation {
 	private ZILOperation fOperand;
 	private STAOp fOp;
 
-	public ZILOperationScalarTypeAttribute(STAOp aOp, ZILOperation aOperand, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILOperationScalarTypeAttribute(STAOp aOp, ZILOperation aOperand, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aType, aContainer, aSrc);
 		fOperand = aOperand;
 		fOp = aOp;

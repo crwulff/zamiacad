@@ -11,7 +11,7 @@ package org.zamia.zil;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
 
@@ -27,7 +27,7 @@ public class ZILFileObject extends ZILObject implements ZILIReferable {
 	private PortDir fMode;
 	private String fFilename;
 
-	public ZILFileObject(String aId, ZILType aType, String aFilename, PortDir aMode, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILFileObject(String aId, ZILType aType, String aFilename, PortDir aMode, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aId, aType, aContainer, aSrc);
 		fFilename = aFilename;
 		fMode = aMode;

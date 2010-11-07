@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.zamia.util.ZHash;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zil.ZILValue;
 
 
@@ -30,18 +30,18 @@ import org.zamia.zil.ZILValue;
 @SuppressWarnings("serial")
 public class ComponentStub implements Serializable {
 
-	private DUUID fDUUID; // the architecture we're referencing
+	private DMUID fDUUID; // the architecture we're referencing
 	private ArrayList <ZILValue> fActualGenerics;
 	private String fSignature;
 	
-	public ComponentStub(DUUID aDUUID) {
+	public ComponentStub(DMUID aDUUID) {
 		
 		fDUUID = aDUUID;
 		
 		fActualGenerics = new ArrayList<ZILValue>();
 	}
 
-	public DUUID getDUUID() {
+	public DMUID getDUUID() {
 		return fDUUID;
 	}
 	

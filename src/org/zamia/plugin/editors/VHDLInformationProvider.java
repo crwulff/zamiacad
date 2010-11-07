@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ide.ResourceUtil;
+import org.zamia.ASTNode;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
@@ -37,8 +38,7 @@ import org.zamia.analysis.SourceLocation2AST;
 import org.zamia.analysis.ast.ASTDeclarationSearch;
 import org.zamia.plugin.ZamiaPlugin;
 import org.zamia.plugin.ZamiaProjectMap;
-import org.zamia.vhdl.ast.ASTObject;
-
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * 
@@ -132,10 +132,10 @@ public class VHDLInformationProvider implements IInformationProvider, IInformati
 		try {
 			SourceLocation location = new SourceLocation(fSF, fLine, fCol);
 
-			ASTObject nearest = SourceLocation2AST.findNearestASTObject(location, true, fZPrj);
+			ASTNode nearest = SourceLocation2AST.findNearestASTNode(location, true, fZPrj);
 
 			if (nearest != null) {
-				ASTObject declaration = ASTDeclarationSearch.search(nearest, fZPrj);
+				VHDLNode declaration = ASTDeclarationSearch.search(nearest, fZPrj);
 				if (declaration != null) {
 					return declaration.toString();
 				}

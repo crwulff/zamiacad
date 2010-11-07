@@ -19,7 +19,7 @@ import java.io.Serializable;
  * 
  */
 
-@SuppressWarnings( { "serial", "unchecked" })
+@SuppressWarnings( { "serial", "rawtypes" })
 public class SourceFile implements Comparable, Serializable {
 
 	public final static ZamiaLogger logger = ZamiaLogger.getInstance();

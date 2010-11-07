@@ -20,7 +20,7 @@ public abstract class ConcurrentSignalAssignment extends ConcurrentStatement {
 
 	protected boolean guarded = false;
 	
-	public ConcurrentSignalAssignment(ASTObject parent_, long location_) {
+	public ConcurrentSignalAssignment(VHDLNode parent_, long location_) {
 		super(parent_, location_);
 	}
 

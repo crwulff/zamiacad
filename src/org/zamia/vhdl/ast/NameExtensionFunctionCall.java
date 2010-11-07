@@ -36,7 +36,7 @@ public class NameExtensionFunctionCall extends NameExtension {
 
 	private AssociationList al;
 
-	public NameExtensionFunctionCall(AssociationList al_, ASTObject parent_, long location_) throws ZamiaException {
+	public NameExtensionFunctionCall(AssociationList al_, VHDLNode parent_, long location_) throws ZamiaException {
 		super(parent_, location_);
 		al = al_;
 		al.setParent(this);
@@ -48,7 +48,7 @@ public class NameExtensionFunctionCall extends NameExtension {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return al.getAssociation(idx_);
 	}
 

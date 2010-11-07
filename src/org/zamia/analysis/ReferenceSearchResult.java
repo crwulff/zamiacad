@@ -15,7 +15,7 @@ import org.zamia.ToplevelPath;
 import org.zamia.ZamiaProject;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -112,7 +112,7 @@ public class ReferenceSearchResult {
 
 	public void dump(int aIndent, PrintStream aOut) {
 
-		ASTObject.printlnIndented("ReferenceSearchResult: " + fTitle, aIndent, aOut);
+		VHDLNode.printlnIndented("ReferenceSearchResult: " + fTitle, aIndent, aOut);
 
 		int n = getNumChildren();
 		for (int i = 0; i < n; i++) {

@@ -27,7 +27,7 @@ import org.zamia.instgraph.IGElaborationEnv;
  */
 
 @SuppressWarnings("serial")
-public class ComponentSpecification extends ASTObject {
+public class ComponentSpecification extends VHDLNode {
 
 	private ArrayList<Identifier> fIL;
 	private Name fName;
@@ -58,7 +58,7 @@ public class ComponentSpecification extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fIL.get(aIdx);
 	}
 

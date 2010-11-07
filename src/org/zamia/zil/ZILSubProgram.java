@@ -9,7 +9,7 @@
 package org.zamia.zil;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 
 
@@ -29,7 +29,7 @@ public class ZILSubProgram extends ZILContainer {
 	private ZILInterfaceList fParameters;
 	private ZILSequenceOfStatements fCode;
 
-	public ZILSubProgram (String aId, ZILInterfaceList aParameters, ZILType aReturnType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSubProgram (String aId, ZILInterfaceList aParameters, ZILType aReturnType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super (aId, aReturnType, aContainer, aSrc);
 		
 		fParameters = aParameters;

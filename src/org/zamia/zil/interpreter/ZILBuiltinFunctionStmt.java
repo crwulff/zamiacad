@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -27,7 +27,7 @@ public class ZILBuiltinFunctionStmt extends ZILStmt {
 
 	private BUILTINS f;
 
-	public ZILBuiltinFunctionStmt(BUILTINS f_, ASTObject src_) throws ZamiaException {
+	public ZILBuiltinFunctionStmt(BUILTINS f_, VHDLNode src_) throws ZamiaException {
 		super(src_);
 
 		f = f_;

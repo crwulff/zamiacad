@@ -11,7 +11,7 @@ package org.zamia.zil;
 import java.io.Serializable;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -25,7 +25,7 @@ import org.zamia.vhdl.ast.ASTObject;
 public abstract class ZILEnumLiteral extends ZILObject implements Serializable {
 	private int fOrd;
 	
-	public ZILEnumLiteral(int aOrd, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILEnumLiteral(int aOrd, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aType, aContainer, aSrc);
 		fOrd = aOrd;
 	}

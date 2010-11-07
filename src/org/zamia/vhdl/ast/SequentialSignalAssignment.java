@@ -39,7 +39,7 @@ public class SequentialSignalAssignment extends SequentialStatement {
 
 	private DelayMechanism delayMechanism;
 
-	public SequentialSignalAssignment(Target target_, Waveform waveform_, DelayMechanism delayMechanism_, ASTObject parent_, long location_) {
+	public SequentialSignalAssignment(Target target_, Waveform waveform_, DelayMechanism delayMechanism_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		target = target_;
 		delayMechanism = delayMechanism_;
@@ -74,7 +74,7 @@ public class SequentialSignalAssignment extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return target;

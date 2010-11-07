@@ -35,7 +35,7 @@ public class ConfigurationSpecification extends BlockDeclarativeItem {
 
 	private Name fComponentName;
 
-	public ConfigurationSpecification(BindingIndication aBI, Name aComponentName, String aId, ASTObject aParent, long aLocation) {
+	public ConfigurationSpecification(BindingIndication aBI, Name aComponentName, String aId, VHDLNode aParent, long aLocation) {
 		super(aId, aParent, aLocation);
 
 		fBI = aBI;
@@ -66,7 +66,7 @@ public class ConfigurationSpecification extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return aIdx == 0 ? fBI : fComponentName;
 	}
 

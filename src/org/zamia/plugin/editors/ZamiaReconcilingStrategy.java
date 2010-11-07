@@ -20,16 +20,16 @@ import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.ide.ResourceUtil;
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ExceptionLogger;
-import org.zamia.SFDUInfo;
+import org.zamia.IDesignModule;
+import org.zamia.SFDMInfo;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.plugin.ZamiaPlugin;
 import org.zamia.plugin.ZamiaProjectMap;
-import org.zamia.vhdl.ast.DesignUnit;
 
 
 /**
@@ -46,13 +46,13 @@ public class ZamiaReconcilingStrategy implements IReconcilingStrategy {
 
 	private IDocument fDocument;
 
-	private SFDUInfo fSFDUInfo;
+	private SFDMInfo fSFDUInfo;
 
 	private ZamiaEditor fEditor;
 
 	private ZamiaProject fZPrj;
 
-	private DUManager fDUM;
+	private DMManager fDUM;
 
 	//	private ArrayList<Position> fPositions;
 
@@ -93,7 +93,7 @@ public class ZamiaReconcilingStrategy implements IReconcilingStrategy {
 
 					if (file == null) {
 						logger.error("Input doesn't have a corresponding project file. Will not generate outline.");
-						fSFDUInfo = new SFDUInfo();
+						fSFDUInfo = new SFDMInfo();
 						return;
 					}
 
@@ -517,12 +517,12 @@ public class ZamiaReconcilingStrategy implements IReconcilingStrategy {
 	public int getNumRootElements() {
 		if (fSFDUInfo == null)
 			return 0;
-		return fSFDUInfo.getNumDUUIDs();
+		return fSFDUInfo.getNumDMUIDs();
 	}
 
-	public DesignUnit getRootElement(int aIdx) {
+	public IDesignModule getRootElement(int aIdx) {
 		try {
-			return fDUM.getDU(fSFDUInfo.getDUUID(aIdx));
+			return fDUM.getDM(fSFDUInfo.getDMUID(aIdx));
 		} catch (ZamiaException e) {
 			el.logException(e);
 		}
@@ -539,17 +539,17 @@ public class ZamiaReconcilingStrategy implements IReconcilingStrategy {
 			return empty;
 		}
 
-		int n = fSFDUInfo.getNumDUUIDs();
+		int n = fSFDUInfo.getNumDMUIDs();
 
-		ArrayList<DesignUnit> dua = new ArrayList<DesignUnit>(n);
+		ArrayList<IDesignModule> dua = new ArrayList<IDesignModule>(n);
 
 		for (int i = 0; i < n; i++) {
 			try {
 
-				DesignUnit du = fDUM.getDU(fSFDUInfo.getDUUID(i));
+				IDesignModule dm = fDUM.getDM(fSFDUInfo.getDMUID(i));
 
-				if (du != null) {
-					dua.add(du);
+				if (dm != null) {
+					dua.add(dm);
 				}
 			} catch (ZamiaException e) {
 				el.logException(e);

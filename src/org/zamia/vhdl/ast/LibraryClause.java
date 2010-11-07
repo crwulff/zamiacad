@@ -27,16 +27,16 @@ import org.zamia.instgraph.IGElaborationEnv;
  *
  */
 @SuppressWarnings("serial")
-public class LibraryClause extends ASTObject {
+public class LibraryClause extends VHDLNode {
 	private String id;
 
-	public LibraryClause(String id_, ASTObject parent_, long location_) {
+	public LibraryClause(String id_, VHDLNode parent_, long location_) {
 		super (parent_, location_);
 		id = id_;
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return null;
 	}
 

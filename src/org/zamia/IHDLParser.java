@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 
@@ -38,6 +38,6 @@ public interface IHDLParser {
 	 * @throws IOException
 	 */
 	
-	public HashSetArray<DUUID> parse(Reader aReader, String aLibId, SourceFile aSF, int aPriority, boolean aUseFSCache, boolean aBottomUp, ZamiaProject aZPrj) throws IOException;
+	public HashSetArray<DMUID> parse(Reader aReader, String aLibId, SourceFile aSF, int aPriority, boolean aUseFSCache, boolean aBottomUp, ZamiaProject aZPrj) throws IOException;
 	
 }

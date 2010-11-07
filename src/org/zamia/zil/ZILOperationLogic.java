@@ -12,7 +12,7 @@ import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLGraph;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.OperationLogic.LogicOp;
 import org.zamia.zil.ZILOperationSignalAttribute.SAOp;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
@@ -34,7 +34,7 @@ public class ZILOperationLogic extends ZILOperation {
 
 	private ZILOperation fB;
 
-	public ZILOperationLogic(LogicOp aOp, ZILOperation aA, ZILOperation aB, ZILType type, ZILIContainer container, ASTObject src) {
+	public ZILOperationLogic(LogicOp aOp, ZILOperation aA, ZILOperation aB, ZILType type, ZILIContainer container, VHDLNode src) {
 		super(type, container, src);
 
 		fOp = aOp;

@@ -8,7 +8,7 @@
  */
 package org.zamia.zil;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * A type attribute
@@ -20,13 +20,13 @@ public class ZILAttribute extends ZILObject {
 
 	private ZILValue fValue;
 	
-	public ZILAttribute (String aId, ZILValue aValue, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILAttribute (String aId, ZILValue aValue, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super (aId, aType, aContainer, aSrc);
 		fValue = aValue;
 		fId = aId;
 	}
 	
-	public ZILAttribute (String aId, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILAttribute (String aId, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		this (aId, null, aType, aContainer, aSrc); 
 	}
 	

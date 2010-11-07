@@ -33,7 +33,7 @@ import org.zamia.instgraph.IGStructure;
 @SuppressWarnings("serial")
 public class ConfigurationInstantiation extends InstantiatedUnit {
 
-	public ConfigurationInstantiation(String aLabel, Name aName, ASTObject aParent, long aLocation) {
+	public ConfigurationInstantiation(String aLabel, Name aName, VHDLNode aParent, long aLocation) {
 		super(aLabel, aName, aParent, aLocation);
 	}
 
@@ -51,7 +51,7 @@ public class ConfigurationInstantiation extends InstantiatedUnit {
 	}
 
 	@Override
-	public IGInstantiation computeIGInstantiation(DUUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
+	public IGInstantiation computeIGInstantiation(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
 		// FIXME
 		throw new ZamiaException("ConfigurationInstantiation.computeIG(): Sorry, not implemented yet.", this);
 	}

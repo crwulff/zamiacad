@@ -23,14 +23,13 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.zamia.ASTNode;
 import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.analysis.SourceLocation2AST;
 import org.zamia.plugin.ZamiaPlugin;
 import org.zamia.plugin.views.rtl.RTLView;
-import org.zamia.vhdl.ast.ASTObject;
-
 
 /**
  * 
@@ -61,7 +60,7 @@ public class ShowInRTLGraphAction extends StaticAnalysisAction {
 
 		protected IStatus run(IProgressMonitor monitor) {
 			try {
-				ASTObject nearest = SourceLocation2AST.findNearestASTObject(fAction.getLocation(), true, fZPrj);
+				ASTNode nearest = SourceLocation2AST.findNearestASTNode(fAction.getLocation(), true, fZPrj);
 				if (nearest != null) {
 
 					fAction.showInRTLGraph(nearest);
@@ -137,7 +136,7 @@ public class ShowInRTLGraphAction extends StaticAnalysisAction {
 		}
 	}
 
-	private void showInRTLGraph(ASTObject aIO) {
+	private void showInRTLGraph(ASTNode aIO) {
 
 		throw new RuntimeException("Sorry, RTL code is disabled for now.");
 

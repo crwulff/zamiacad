@@ -25,7 +25,7 @@ import org.zamia.instgraph.IGElaborationEnv;
  *
  */
 @SuppressWarnings("serial")
-public class SignalList extends ASTObject {
+public class SignalList extends VHDLNode {
 
 	public static final int KIND_SIGNAL_LIST = 0;
 	public static final int KIND_OTHERS = 1;
@@ -33,16 +33,16 @@ public class SignalList extends ASTObject {
 	
 	//private int kind = KIND_SIGNAL_LIST;
 
-	public SignalList(Name name_, ASTObject parent_, long location_) {
+	public SignalList(Name name_, VHDLNode parent_, long location_) {
 		super (parent_, location_);
 	}
 
-	public SignalList(int kind_, ASTObject parent_, long location_) {
+	public SignalList(int kind_, VHDLNode parent_, long location_) {
 		super (parent_, location_);
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		// TODO Auto-generated method stub
 		return null;
 	}

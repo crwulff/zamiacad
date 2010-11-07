@@ -67,7 +67,7 @@ public class AliasDeclaration extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 
 		switch (idx_) {
 		case 0:

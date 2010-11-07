@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.SimpleRegexp;
-import org.zamia.vhdl.ast.DUUID;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID;
+import org.zamia.vhdl.ast.DMUID.LUType;
 
 
 /**
@@ -449,7 +449,7 @@ public class BuildPath implements Serializable {
 
 		LUType type = archId != null ? LUType.Architecture : LUType.Entity;
 
-		DUUID duuid = new DUUID(type, libId, entityId, archId);
+		DMUID duuid = new DMUID(type, libId, entityId, archId);
 
 		fToplevels.add(new Toplevel(duuid, new SourceLocation(fSF, line, col)));
 

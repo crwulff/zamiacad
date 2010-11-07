@@ -23,14 +23,14 @@ import org.zamia.instgraph.IGElaborationEnv;
  */
 
 @SuppressWarnings("serial")
-public class GuardedSignalSpecification extends ASTObject {
+public class GuardedSignalSpecification extends VHDLNode {
 
-	public GuardedSignalSpecification(SignalList sl_, Name typeMark_, ASTObject parent_, long location_) {
+	public GuardedSignalSpecification(SignalList sl_, Name typeMark_, VHDLNode parent_, long location_) {
 		super (parent_, location_);
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		// TODO Auto-generated method stub
 		return null;
 	}

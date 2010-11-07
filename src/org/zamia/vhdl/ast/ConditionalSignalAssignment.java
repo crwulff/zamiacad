@@ -45,13 +45,13 @@ public class ConditionalSignalAssignment extends ConcurrentSignalAssignment {
 
 	private ArrayList<ConditionalWaveform> fCWS; // of ConditionalWaveform
 
-	public ConditionalSignalAssignment(Target aTarget, ASTObject aParent, long aLocation) {
+	public ConditionalSignalAssignment(Target aTarget, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fCWS = new ArrayList<ConditionalWaveform>();
 		setTarget(aTarget);
 	}
 
-	public ConditionalSignalAssignment(ASTObject aParent, long aLocation) {
+	public ConditionalSignalAssignment(VHDLNode aParent, long aLocation) {
 		this(null, aParent, aLocation);
 	}
 
@@ -142,7 +142,7 @@ public class ConditionalSignalAssignment extends ConcurrentSignalAssignment {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (idx_ >= fCWS.size())
 			return fTarget;
 		return fCWS.get(idx_);
@@ -169,7 +169,7 @@ public class ConditionalSignalAssignment extends ConcurrentSignalAssignment {
 		printlnIndented(toString(), aIndent, aOut);
 	}
 
-	public void computeIG(DUUID aDUUID, IGContainer aContainer, IGStructure aStruct, IGElaborationEnv aEE) throws ZamiaException {
+	public void computeIG(DMUID aDUUID, IGContainer aContainer, IGStructure aStruct, IGElaborationEnv aEE) throws ZamiaException {
 
 		/*
 		 * let's simply turn this into a small process

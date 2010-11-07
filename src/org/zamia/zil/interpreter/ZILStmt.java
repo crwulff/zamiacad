@@ -11,7 +11,7 @@ import java.io.Serializable;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILValue;
 
 
@@ -25,16 +25,16 @@ public abstract class ZILStmt implements Serializable {
 	
 	public enum ReturnStatus {CONTINUE, WAIT, RETURN};
 	
-	protected ASTObject fSrc;
+	protected VHDLNode fSrc;
 
-	public ZILStmt(ASTObject aSrc) {
+	public ZILStmt(VHDLNode aSrc) {
 		fSrc = aSrc;
 	}
 
 	public abstract ReturnStatus execute(Simulator aSim, ZILInterpreterRuntimeEnv aRuntime, ZILInterpreter aInterpreter)
 			throws ZamiaException;
 
-	public ASTObject getSource() {
+	public VHDLNode getSource() {
 		return fSrc;
 	}
 	

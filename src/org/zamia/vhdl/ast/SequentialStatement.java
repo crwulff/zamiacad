@@ -24,15 +24,15 @@ import org.zamia.instgraph.IGSequenceOfStatements;
  */
 
 @SuppressWarnings("serial")
-public abstract class SequentialStatement extends ASTObject {
+public abstract class SequentialStatement extends VHDLNode {
 	
 	private String label;
 
-	protected SequentialStatement (ASTObject aParent, long aLocation) {
+	protected SequentialStatement (VHDLNode aParent, long aLocation) {
 		this (null, aParent, aLocation);
 	}
 
-	protected SequentialStatement (String aLabel, ASTObject aParent, long aLocation) {
+	protected SequentialStatement (String aLabel, VHDLNode aParent, long aLocation) {
 		super (aParent, aLocation);
 		label = aLabel;
 	}

@@ -11,7 +11,7 @@ package org.zamia.rtl;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 
 
@@ -29,7 +29,7 @@ public class RTLTargetArraySelRange extends RTLModule {
 
 	private ZILType tIn, tOut;
 
-	public RTLTargetArraySelRange(ZILType tIn_, ZILType tOut_, int left_, int right_, boolean ascending_, RTLGraph parent_, String instanceName_, ASTObject src_) {
+	public RTLTargetArraySelRange(ZILType tIn_, ZILType tOut_, int left_, int right_, boolean ascending_, RTLGraph parent_, String instanceName_, VHDLNode src_) {
 		super(parent_, instanceName_, src_);
 
 		try {

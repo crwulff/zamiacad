@@ -14,7 +14,7 @@ import org.zamia.rtl.RTLGraph;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLSignalAE;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILPopStmt;
 import org.zamia.zil.synthesis.Bindings;
@@ -31,7 +31,7 @@ public class ZILTargetOperationSource extends ZILTargetOperation {
 
 	private ZILOperation fObj;
 
-	public ZILTargetOperationSource(ZILOperation aObj, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTargetOperationSource(ZILOperation aObj, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aObj.getType(), aContainer, aSrc);
 		fObj = aObj;
 	}

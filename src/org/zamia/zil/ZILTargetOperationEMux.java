@@ -15,7 +15,7 @@ import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLSignalAE;
 import org.zamia.rtl.RTLTargetEMux;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
 import org.zamia.zil.synthesis.VariableRemapping;
@@ -32,7 +32,7 @@ public class ZILTargetOperationEMux extends ZILTargetOperation {
 
 	private ZILTargetOperation fOldValue;
 
-	public ZILTargetOperationEMux(ZILTargetOperation aOldValue, ZILTargetOperation aValue, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTargetOperationEMux(ZILTargetOperation aOldValue, ZILTargetOperation aValue, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aOldValue.getType(), aContainer, aSrc);
 		fOldValue = aOldValue;
 		fValue = aValue;

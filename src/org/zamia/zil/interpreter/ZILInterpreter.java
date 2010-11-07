@@ -19,7 +19,7 @@ import org.zamia.rtl.RTLPort;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLPort.PortDir;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -41,7 +41,7 @@ public class ZILInterpreter extends RTLModule implements Serializable {
 		return INTCOMP_NAME;
 	}
 
-	public ZILInterpreter(RTLGraph aParent, ASTObject aSrc) throws ZamiaException {
+	public ZILInterpreter(RTLGraph aParent, VHDLNode aSrc) throws ZamiaException {
 		super(aParent, null, aSrc);
 		
 		fSignalMap = new HashMap<RTLSignal,RTLPort>();
@@ -55,7 +55,7 @@ public class ZILInterpreter extends RTLModule implements Serializable {
 		return fSignalMap.get (aSignal);
 	}
 	
-	public RTLPort connectToSignal (RTLSignal aSignal, ASTObject aSrc) throws ZamiaException {
+	public RTLPort connectToSignal (RTLSignal aSignal, VHDLNode aSrc) throws ZamiaException {
 		
 		RTLSignal signal = aSignal.getCurrent();
 		

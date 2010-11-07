@@ -38,7 +38,7 @@ public class ReturnStatement extends SequentialStatement {
 
 	private Operation exp;
 
-	public ReturnStatement(Operation exp_, ASTObject parent_, long location_) {
+	public ReturnStatement(Operation exp_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		exp = exp_;
 		if (exp != null)
@@ -51,7 +51,7 @@ public class ReturnStatement extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return exp;
 	}
 

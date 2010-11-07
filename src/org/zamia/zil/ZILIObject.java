@@ -8,7 +8,7 @@
  */
 package org.zamia.zil;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * 
@@ -18,7 +18,7 @@ import org.zamia.vhdl.ast.ASTObject;
 
 public interface ZILIObject {
 
-	public ASTObject getSrc();
+	public VHDLNode getSrc();
 
 	public ZILIContainer getContainer();
 

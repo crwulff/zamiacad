@@ -1,0 +1,1542 @@
+Package org.zamia.verilog;
+
+Helpers
+  all = [0 .. 127];
+  
+  letter = (['a'..'z'] | ['A'..'Z']);
+  digit = ['0'..'9'];
+  
+  ht  = 0x09;
+  lf  = 0x0a;
+  ff  = 0x0c;
+  cr  = 0x0d;
+  sp  = ' ';
+  
+  line_terminator = lf | cr ;
+
+  not_cr_lf = [ all - [ cr + lf ] ]; 
+
+  not_star = [all - '*'];
+  not_star_slash = [not_star - '/'];
+  not_star_paren = [not_star - ')'];
+
+  not_whitespace = [33..127];
+
+  decimal_base = ''' ([ 's' + 'S' ])? ['d' + 'D'] ;
+  binary_base = ''' ([ 's' + 'S' ])? ['b' + 'B'] ;
+  octal_base = ''' ([ 's' + 'S' ])? ['o' + 'O'] ;
+  hex_base = ''' ([ 's' + 'S' ])? ['h' + 'H'] ;
+
+  x_digit = [ 'x' + 'X' ] ;
+  z_digit = ( 'z' | 'Z' | '?' ) ;
+
+  non_zero_decimal_digit = ['1'..'9'];
+  decimal_digit = ['0'..'9'] ;
+  binary_digit = ( x_digit | z_digit | '0' | '1' ) ;
+  octal_digit = ( x_digit | z_digit | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' ) ;
+  hex_digit = ( x_digit | z_digit | '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'A' | 'B' | 'C' | 'D' | 'E' | 'F' ) ;
+
+  unsigned_number = decimal_digit ( '_' | decimal_digit )* ;
+  exp = ['e' + 'E'] ;
+  sign = [ '+' + '-' ];
+
+  non_zero_unsigned_number = non_zero_decimal_digit ( '_' | decimal_digit )* ;
+  size = non_zero_unsigned_number ;
+
+  binary_value = binary_digit ( '_' | binary_digit )* ;
+  octal_value = octal_digit ( '_' | octal_digit )* ;
+  hex_value = hex_digit ( '_' | hex_digit )* ;
+
+  zero_or_one = ( '0' | '1' );
+  z_or_x = ( 'x' | 'X' | 'z' | 'Z' );
+
+  ws = (sp | ht | ff | line_terminator)*;
+
+Tokens
+
+  white_space = (sp | ht | ff | line_terminator)*;
+
+  real_number = ( unsigned_number '.' unsigned_number
+                | unsigned_number ( '.' unsigned_number )? exp ( sign )? unsigned_number ) ;
+
+  decimal_number = ( unsigned_number
+  		   | ( size )? decimal_base unsigned_number
+		     | ( size )? decimal_base x_digit ( '_' )*
+  		   | ( size )? decimal_base z_digit ( '_' )* ) ;
+
+  binary_number = ( size )? binary_base ws* binary_value ;
+
+  octal_number = ( size )? octal_base ws* octal_value ;
+
+  hex_number = ( size )? hex_base ws* hex_value ;
+
+  t_edge_descriptor = ( '0' '1' | '1' '0' | z_or_x zero_or_one | zero_or_one z_or_x );
+
+  string = '"' [not_cr_lf - '"']* '"';
+
+  block_comment = '/*' not_star* '*'+ (not_star_slash not_star* '*'+)* '/';
+  
+  attribute_instance = '(*' not_star* '*'+ (not_star_paren not_star* '*'+)* ')';
+
+  one_line_comment = '//' not_cr_lf* line_terminator?;
+
+  t_ceq = '===';
+  t_eg = '=>';
+  t_eq = '==';
+  
+  t_contribute = '<+';
+  t_le = '<=';
+  t_ls = '<<' | '<<<';
+
+  t_ge = '>=';
+  t_rs = '>>';
+  t_rss = '>>>';
+  
+  t_cne = '!==';
+  t_ne = '!=';
+  
+  t_tand = '&&&';
+  t_land = '&&';
+  t_and = '&';
+
+  t_lor = '||';
+  t_nand = '~&';
+  t_nxor = '~^' | '^~';
+  t_rnor = '~|';
+  
+  t_sg = '*>';
+  t_pow = '**';
+  
+  t_xor = '^';
+ 
+  t_plus_colon = '+:';
+  t_minus_colon = '-:';
+  
+  t_trigger = '->';
+
+  t_comma = ',';
+  t_period = '.';
+  t_equals = '=';
+  t_semicolon = ';';
+  t_colon = ':';
+  t_lparen = '(';
+  t_rparen = ')';
+  t_hash = '#';
+  t_any = '(*)';
+  t_at_star = '@*';
+  t_at = '@';
+  t_lbracket = '[';
+  t_rbracket = ']';
+  t_lbrace  = '{';
+  t_rbrace = '}';
+  
+  t_plus = '+';
+  t_minus = '-';
+  t_tilde = '~';
+  t_excl = '!';
+  t_pipe = '|';
+  t_star = '*';
+  t_div = '/';
+  t_perc = '%';
+  t_gt = '>';
+  t_lt = '<';
+  t_question = '?';
+  t_underscore = '_';
+
+  k_swidth = '$width';
+  k_srecovery = '$recovery';
+  k_srecrem = '$recrem';
+  k_sremoval = '$removal';
+  k_shold = '$hold';
+  k_ssetup = '$setup';
+  k_ssetuphold = '$setuphold';
+  k_sskew = '$skew';
+  k_stimeskew = '$timeskew';
+  k_speriod = '$period';
+  k_sfullskew = '$fullskew';
+  k_snochange = '$nochange';
+
+  k_abs = 'abs';
+  k_abstol = 'abstol';
+  k_access = 'access';
+  k_acos = 'acos';
+  k_acosh = 'acosh';
+  k_always = 'always';
+  k_always_comb = 'always_comb';
+  k_always_ff = 'always_ff';
+  k_always_latch = 'always_latch';
+  k_analog = 'analog';
+  k_and = 'and';
+  k_asin = 'asin';
+  k_asinh = 'asinh';
+  k_assert = 'assert';
+  k_assign = 'assign';
+  k_atan2 = 'atan2';
+  k_atan = 'atan';
+  k_atanh = 'atanh';
+  k_automatic = 'automatic';
+  k_begin = 'begin';
+  k_bool = 'bool';
+  k_buf = 'buf';
+  k_bufif0 = 'bufif0';
+  k_bufif1 = 'bufif1';
+  k_case = 'case';
+  k_casex = 'casex';
+  k_casez = 'casez';
+  k_ceil = 'ceil';
+  k_cell = 'cell';
+  k_cmos = 'cmos';
+  k_config = 'config';
+  k_continuous = 'continuous';
+  k_cos = 'cos';
+  k_cosh = 'cosh';
+  k_ddt_nature = 'ddt_nature';
+  k_deassign = 'deassign';
+  k_default = 'default';
+  k_defparam = 'defparam';
+  k_design = 'design';
+  k_disable = 'disable';
+  k_discipline = 'discipline';
+  k_discrete = 'discrete';
+  k_domain = 'domain';
+  k_edge = 'edge';
+  k_else = 'else';
+  k_endcase = 'endcase';
+  k_endconfig = 'endconfig';
+  k_enddiscipline = 'enddiscipline';
+  k_end = 'end';
+  k_endfunction = 'endfunction';
+  k_endgenerate = 'endgenerate';
+  k_endmodule = 'endmodule';
+  k_endnature = 'endnature';
+  k_endprimitive = 'endprimitive';
+  k_endspecify = 'endspecify';
+  k_endtable = 'endtable';
+  k_endtask = 'endtask';
+  k_event = 'event';
+  k_exclude = 'exclude';
+  k_exp = 'exp';
+  k_floor = 'floor';
+  k_flow = 'flow';
+  k_force = 'force';
+  k_forever = 'forever';
+  k_for = 'for';
+  k_fork = 'fork';
+  k_from = 'from';
+  k_function = 'function';
+  k_generate = 'generate';
+  k_genvar = 'genvar';
+  k_ground = 'ground';
+  k_highz0 = 'highz0';
+  k_highz1 = 'highz1';
+  k_hypot = 'hypot';
+  k_idt_nature = 'idt_nature';
+  k_if = 'if';
+  k_ifnone = 'ifnone';
+  k_incdir = 'incdir';
+  k_include = 'include';
+  k_inf = 'inf';
+  k_initial = 'initial';
+  k_inout = 'inout';
+  k_input = 'input';
+  k_instance = 'instance';
+  k_integer = 'integer';
+  k_join = 'join';
+  k_large = 'large';
+  k_liblist = 'liblist';
+  k_library = 'library';
+  k_ln = 'ln';
+  k_localparam = 'localparam';
+  k_logic = 'logic';
+  k_log = 'log';
+  k_macromodule = 'macromodule';
+  k_max = 'max';
+  k_medium = 'medium';
+  k_min = 'min';
+  k_module = 'module';
+  k_nand = 'nand';
+  k_nature = 'nature';
+  k_negedge = 'negedge';
+  k_nmos = 'nmos';
+  k_nor = 'nor';
+  k_noshowcancelled = 'noshowcancelled';
+  k_notif0 = 'notif0';
+  k_notif1 = 'notif1';
+  k_not = 'not';
+  k_or = 'or';
+  k_output = 'output';
+  k_parameter = 'parameter';
+  k_pmos = 'pmos';
+  k_posedge = 'posedge';
+  k_potential = 'potential';
+  k_pow = 'pow';
+  k_primitive = 'primitive';
+  k_pull0 = 'pull0';
+  k_pull1 = 'pull1';
+  k_pulldown = 'pulldown';
+  k_pullup = 'pullup';
+  k_pulsestyle_ondetect = 'pulsestyle_ondetect';
+  k_pulsestyle_onevent = 'pulsestyle_onevent';
+  k_rcmos = 'rcmos';
+  k_real = 'real';
+  k_realtime = 'realtime';
+  k_reg = 'reg';
+  k_release = 'release';
+  k_repeat = 'repeat';
+  k_rnmos = 'rnmos';
+  k_rpmos = 'rpmos';
+  k_rtranif0 = 'rtranif0';
+  k_rtranif1 = 'rtranif1';
+  k_rtran = 'rtran';
+  k_scalared = 'scalared';
+  k_showcancelled = 'showcancelled';
+  k_signed = 'signed';
+  k_sinh = 'sinh';
+  k_sin = 'sin';
+  k_small = 'small';
+  k_specify = 'specify';
+  k_specparam = 'specparam';
+  k_sqrt = 'sqrt';
+  k_string = 'string';
+  k_strong0 = 'strong0';
+  k_strong1 = 'strong1';
+  k_supply0 = 'supply0';
+  k_supply1 = 'supply1';
+  k_table = 'table';
+  k_tanh = 'tanh';
+  k_tan = 'tan';
+  k_task = 'task';
+  k_time = 'time';
+  k_tranif0 = 'tranif0';
+  k_tranif1 = 'tranif1';
+  k_tran = 'tran';
+  k_tri0 = 'tri0';
+  k_tri1 = 'tri1';
+  k_triand = 'triand';
+  k_trior = 'trior';
+  k_trireg = 'trireg';
+  k_tri = 'tri';
+  k_units = 'units';
+  k_unsigned = 'unsigned';
+  k_use = 'use';
+  k_uwire = 'uwire';
+  k_vectored = 'vectored';
+  k_wait = 'wait';
+  k_wand = 'wand';
+  k_weak0 = 'weak0';
+  k_weak1 = 'weak1';
+  k_while = 'while';
+  k_wire = 'wire';
+  k_wone = 'wone';
+  k_wor = 'wor';
+  k_xnor = 'xnor';
+  k_xor = 'xor';
+
+  k_edge01 = '01' ;
+  k_edge0x = '0x' ;
+  k_edge0z = '0z' ;
+  k_edge10 = '10' ;
+  k_edge1x = '1x' ;
+  k_edge1z = '1z' ;
+  k_edgex0 = 'x0' ;
+  k_edgex1 = 'x1' ;
+  k_edgez0 = 'z0' ;
+  k_edgez1 = 'z1' ;
+
+  k_pathpulses = 'PATHPULSE$';
+
+  simple_identifier = (letter | '_') ( (letter | digit | '_' | '$') )* ;
+  escaped_identifier = '\' not_whitespace* ;
+  
+  system_function_identifier = '$' ( (letter | digit | '_' | '$') )* ;
+
+Ignored Tokens
+  white_space, 
+  block_comment, 
+  attribute_instance, 
+  one_line_comment;
+
+Productions
+  main = source_text  ;
+
+  // A.1 Source text
+  
+  // A.1.2 Verilog source text
+
+  source_text = description* ;
+  
+  description =
+    {module}   module_declaration
+    /* |
+    {udp}      udp_declaration    |
+    {config}   config_declaration
+    */
+  ;
+    
+  module_declaration = module_keyword identifier module_parameter_port_list? list_of_port_declarations? t_semicolon module_item* k_endmodule ;
+    
+  module_keyword =
+    {module} k_module | 
+    {macro}  k_macromodule
+  ;
+
+  // A.1.3 Module parameters and ports
+
+  module_parameter_port_list = t_hash t_lparen parameter_declarations? t_rparen ;
+  
+  parameter_declarations =
+    {p0} k_parameter k_signed? range? list_of_param_assignments |
+    {p1} k_parameter k_signed? range? list_of_param_assignments t_comma parameter_declarations
+  ;
+
+  list_of_port_declarations = t_lparen port_declarations? t_rparen ;
+ 
+  port_declarations = 
+    {p0} port_declaration_foo |
+    {p1} port_declaration_foo t_comma port_declarations
+  ;
+ 
+  port_declaration_foo = 
+    {p0}  port_declaration_s |
+    {p2}  identifier |
+    {p3}  identifier t_lbracket range_expression t_rbracket |
+    {p4}  identifier t_equals expression |
+    {p5}  t_lbrace port_reference port_expression_rep* t_rbrace |
+    {p6}  t_period identifier t_lparen port_expression? t_rparen
+  ;
+  
+  port_expression =
+    {p0}  port_reference |
+    {p1}  t_lbrace port_reference port_expression_rep* t_rbrace
+  ;
+  port_expression_rep = t_comma port_reference ;
+
+  port_reference = 
+    {p0} identifier |
+    {p1} identifier t_lbracket range_expression t_rbracket
+  ;
+  
+  port_declaration_s =
+    {p0}  inout_declaration_s |
+    {p1}  input_declaration_s |
+    {p2}  output_declaration_s
+  ;
+  
+  port_declaration =
+    {p0}  inout_declaration |
+    {p1}  input_declaration |
+    {p2}  output_declaration
+  ;
+  
+  // A.1.4 Module items
+  
+  module_item =   
+    {p0}  port_declaration t_semicolon |
+    {p1}  module_or_generate_item_declaration | 
+    /*
+    {p2}  local_parameter_declaration t_semicolon
+    {p3}  parameter_override | 
+    */
+    {p4}  continuous_assign |
+    {p5}  gate_instantiation  |
+    /*     
+    {p6}  udp_instantiation | */
+    {p7}  module_instantiation |
+    {p8}  initial_construct |
+    {p9}  always_construct |
+    /*
+    {p10}  loop_generate_construct |
+    {p11}  conditional_generate_construct |   
+    {p12}  generate_region |
+    */
+    {p13}  specify_block |
+    {p14}  parameter_declaration t_semicolon |
+    {p15}  specparam_declaration 
+  ;
+
+  module_or_generate_item_declaration =
+		{p0}  net_declaration |
+		{p1}  reg_declaration |
+		{p2}  integer_declaration |
+		{p3}  real_declaration |
+		{p4}  time_declaration |
+		{p5}  realtime_declaration |
+		{p6}  event_declaration |
+                /*
+		{p7}  genvar_declaration |
+                */
+		{p8}  task_declaration |
+		{p9}  function_declaration
+  ;
+
+  // A.2 Declarations
+  
+  // A.2.1 Declaration types
+  
+  // A.2.1.1 Module parameter declarations
+  
+  local_parameter_declaration =
+    {p0}  k_localparam k_signed? range? list_of_param_assignments |
+    {p1}  k_localparam parameter_type list_of_param_assignments
+  ;
+
+  parameter_declaration =
+    {p0}  k_parameter k_signed? range? list_of_param_assignments |
+    {p1}  k_parameter parameter_type list_of_param_assignments
+  ;
+  
+  specparam_declaration = k_specparam range? list_of_specparam_assignments t_semicolon ;
+
+  parameter_type = 
+    {int}      k_integer | 
+    {real}     k_real | 
+    {realtime} k_realtime | 
+    {time}     k_time 
+  ;
+
+  // A.2.1.2 Port declarations
+  
+  inout_declaration_s = k_inout net_type? k_signed? range? identifier ;
+  inout_declaration = k_inout net_type? k_signed? range? list_of_port_identifiers ;
+
+  input_declaration_s = k_input net_type? k_signed? range? identifier ;
+  input_declaration = k_input net_type? k_signed? range? list_of_port_identifiers ;
+
+  output_declaration_s = 
+    {p0}  k_output net_type? k_signed? range? identifier |
+    {p1}  k_output k_reg k_signed? range? identifier t_equals expression |
+    {p2}  k_output output_variable_type identifier t_equals expression |
+    {p3}  k_output output_variable_type identifier
+  ;
+
+  output_declaration =
+    {p0} k_output net_type? k_signed? range? list_of_port_identifiers |
+    {p1} k_output k_reg k_signed range? list_of_variable_port_identifiers |
+    {p2} k_output output_variable_type list_of_variable_port_identifiers
+  ;
+  
+  // A.2.1.3 Type declarations
+
+  event_declaration = k_event list_of_event_identifiers t_semicolon ;
+
+  integer_declaration = k_integer list_of_variable_identifiers t_semicolon ;
+
+  net_declaration = 
+    {p0}   net_type k_signed? delay3? list_of_net_identifiers t_semicolon |
+    {p1}   net_type drive_strength? k_signed? delay3? list_of_net_decl_assignments t_semicolon |
+    {p2}   net_type vectored_or_scalared? k_signed? range delay3? list_of_net_identifiers t_semicolon |
+    {p3}   net_type drive_strength? vectored_or_scalared? k_signed? range delay3? list_of_net_decl_assignments t_semicolon |
+    {p4}   k_trireg charge_strength? k_signed? delay3? list_of_net_identifiers t_semicolon |
+    {p5}   k_trireg drive_strength? k_signed? delay3? list_of_net_decl_assignments t_semicolon |
+    {p6}   k_trireg charge_strength? vectored_or_scalared? k_signed? range delay3? list_of_net_identifiers t_semicolon |
+    {p7}   k_trireg drive_strength? vectored_or_scalared? k_signed? range delay3? list_of_net_decl_assignments t_semicolon 
+  ;
+
+  vectored_or_scalared = {vec} k_vectored | {scalar} k_scalared ;
+
+  real_declaration = k_real list_of_real_identifiers t_semicolon ;
+  realtime_declaration = k_realtime list_of_real_identifiers t_semicolon ;
+  reg_declaration = k_reg k_signed? range? list_of_variable_identifiers t_semicolon ;
+  time_declaration = k_time list_of_variable_identifiers t_semicolon ;
+
+  // A.2.2 Declaration data types
+  
+  // A.2.2.1 Net and variable types
+
+  net_type = 
+    {p0}  k_supply0 | 
+    {p1}  k_supply1 | 
+    {p2}  k_tri | 
+    {p3}  k_triand | 
+    {p4}  k_trior | 
+    {p5}  k_tri0 | 
+    {p6}  k_tri1 | 
+    {p7}  k_uwire | 
+    {p8}  k_wire | 
+    {p9}  k_wand | 
+    {p10} k_wor
+  ;
+  
+  output_variable_type = 
+    {p0} k_integer | 
+    {p1} k_time
+  ;
+  
+  type = 
+    {p0}  identifier dimension* |
+    {p1}  identifier t_equals expression
+  ;
+
+  // A.2.2.2 Strengths
+	drive_strength =
+		{p0}  t_lparen strength0 t_comma strength1 t_rparen |
+		{p1}  t_lparen strength1 t_comma strength0 t_rparen | 
+		{p2}  t_lparen strength0 t_comma k_highz1 t_rparen |
+		{p3}  t_lparen strength1 t_comma k_highz0 t_rparen |
+		{p4}  t_lparen k_highz0 t_comma strength1 t_rparen |
+		{p5}  t_lparen k_highz1 t_comma strength0 t_rparen
+  ;
+	strength0 = 
+	  {p0}  k_supply0 | 
+	  {p1}  k_strong0 | 
+	  {p2}  k_pull0 | 
+	  {p3}  k_weak0
+	;
+	strength1 = 
+	  {p0}  k_supply1 | 
+	  {p1}  k_strong1 | 
+	  {p2}  k_pull1 | 
+	  {p3}  k_weak1
+	;
+	charge_strength = 
+	  {p0}  t_lparen k_small t_rparen | 
+	  {p1}  t_lparen k_medium t_rparen | 
+	  {p2}  t_lparen k_large t_rparen 
+	;
+	
+  // A.2.2.3 Delays
+  
+  delay3 =
+    {p0}  t_hash delay_value |
+    {p1}  t_hash t_lparen [e1]: mintypmax_expression [c1]: t_comma [e2]: mintypmax_expression [c2]: t_comma [e3]: mintypmax_expression t_rparen | 
+    {p2}  t_hash t_lparen [e1]: mintypmax_expression t_comma [e2]: mintypmax_expression t_rparen |
+    {p3}  t_hash t_lparen mintypmax_expression t_rparen 
+  ;
+  
+  delay2 =
+    {p0}  t_hash delay_value |
+    {p2}  t_hash t_lparen [e1]: mintypmax_expression t_comma [e2]: mintypmax_expression t_rparen | 
+    {p3}  t_hash t_lparen mintypmax_expression t_rparen 
+  ;
+    
+  delay_value =
+    {p0} decimal_number |
+    {p1} real_number |
+    {p2} identifier
+  ;
+
+  // A.2.3 Declaration lists
+  
+/*
+  list_of_defparam_assignments = 
+    {p0} defparam_assignment |
+    {p1} list_of_defparam_assignments t_comma defparam_assignment
+  ;
+  */
+  
+  list_of_net_decl_assignments = 
+    {p0} net_decl_assignment | 
+    {p1} list_of_net_decl_assignments t_comma net_decl_assignment
+  ;
+
+ 
+  list_of_port_identifiers = 
+    {p0} identifier t_comma list_of_port_identifiers |  
+    {p1} identifier  
+  ;
+
+ 
+  list_of_event_identifiers = 
+    {p0} identifier dimension* t_comma list_of_event_identifiers |  
+    {p1} identifier dimension* 
+  ;
+
+  list_of_net_identifiers = 
+    {p0} identifier dimension* t_comma list_of_net_identifiers |  
+    {p1} identifier dimension* 
+  ;
+
+  list_of_param_assignments = 
+    {p0} param_assignment | 
+    {p1} list_of_param_assignments t_comma param_assignment
+  ;
+  
+  list_of_specparam_assignments = 
+    {p0} specparam_assignment |
+    {p1} list_of_specparam_assignments t_comma specparam_assignment
+  ;
+
+  list_of_variable_port_identifiers = 
+    {p0} identifier | 
+    {p1} identifier t_equals expression |
+    {p2} list_of_variable_port_identifiers t_comma identifier |
+    {p3} list_of_variable_port_identifiers t_comma identifier t_equals expression
+  ;
+
+  list_of_variable_identifiers = 
+    {p0} type t_comma list_of_variable_identifiers |
+    {p1} type 
+  ;
+
+  list_of_real_identifiers = 
+    {p0} type t_comma list_of_real_identifiers |
+    {p1} type 
+  ;
+
+  // A.2.4 Declaration assignments
+  
+  /*
+  defparam_assignment ::= hierarchical_parameter_identifier = constant_mintypmax_expression
+  */
+  
+  net_decl_assignment = identifier t_equals expression ;
+  
+  param_assignment = identifier t_equals mintypmax_expression ;
+
+  specparam_assignment =
+    {p0} identifier t_equals mintypmax_expression 
+    /* FIXME |
+    {p1} pulse_control_specparam
+    */
+  ;
+
+  
+  /*    
+  pulse_control_specparam =
+    {p0} k_pathpulses = ( reject_limit_value [ , error_limit_value ] )  |
+    {p1} PATHPULSE$specify_input_terminal_descriptor$specify_terminal_descriptor = ( reject_limit_value [ , error_limit_value ] )
+  ;
+  error_limit_value ::= limit_value
+  reject_limit_value ::= limit_value
+  limit_value ::= constant_mintypmax_expression
+  */
+  
+  // A.2.5 Declaration ranges
+
+  dimension = t_lbracket [e1]: expression t_colon [e2]: expression t_rbracket ;
+  range = t_lbracket [e1]: expression t_colon [e2]: expression t_rbracket ;
+
+  // A.2.6 Function declarations
+
+  function_declaration =
+    k_function k_automatic? function_range_or_type? identifier function_declaration_l? t_semicolon
+      function_item_declaration*
+      statement
+    k_endfunction 
+  ;
+
+  function_declaration_l = t_lparen function_port_list t_rparen ;
+
+  function_item_declaration =
+    {p0} block_item_declaration |
+    {p1} tf_input_declaration t_semicolon
+  ;
+
+  function_port_list = 
+    {p0} function_port_list_item t_comma function_port_list |
+    {p1} function_port_list_item
+  ;
+
+  function_port_list_item = 
+    {p0} k_input k_reg? k_signed? range? identifier |
+    {p1} k_input task_port_type identifier |
+    {p2} identifier
+  ;
+
+  function_range_or_type =
+     {p0}  k_signed? range? |
+     {p1}  k_integer |
+     {p2}  k_real |
+     {p3}  k_realtime |
+     {p4}  k_time
+  ;
+
+  // A.2.7 Task declarations
+
+  task_declaration =
+    {p0} k_task k_automatic? identifier t_semicolon
+         task_item_declaration*
+         statement_or_null
+         k_endtask |
+    {p1} k_task k_automatic? identifier t_lparen task_port_list? t_rparen t_semicolon
+         block_item_declaration*
+         statement_or_null
+         k_endtask
+  ;
+
+  task_item_declaration =
+    {p0} block_item_declaration |
+    {p1} tf_input_declaration t_semicolon |
+    {p2} tf_output_declaration t_semicolon |
+    {p3} tf_inout_declaration t_semicolon
+  ;
+
+  task_port_list =  
+    {p0} task_port_item t_comma task_port_list |
+    {p1} task_port_item 
+  ;
+
+  task_port_item = 
+    {p0} k_input k_reg? k_signed? range? identifier |
+    {p1} k_input task_port_type identifier |
+    {p2} k_output k_reg? k_signed? range? identifier |
+    {p3} k_output task_port_type identifier |
+    {p4} k_inout k_reg? k_signed? range? identifier |
+    {p5} k_inout task_port_type identifier |
+    {p6} identifier
+  ;
+
+/*
+  task_port_item =
+    {p0} tf_input_declaration |
+    {p1} tf_output_declaration |
+    {p2} tf_inout_declaration
+  ;
+*/
+
+  tf_input_declaration =
+    {p0} k_input k_reg? k_signed? range? list_of_port_identifiers |
+    {p1} k_input task_port_type list_of_port_identifiers
+  ;
+
+  tf_output_declaration =
+    {p0} k_output k_reg? k_signed? range? list_of_port_identifiers |
+    {p1} k_output task_port_type list_of_port_identifiers
+  ;
+
+  tf_inout_declaration =
+    {p0} k_inout k_reg? k_signed? range? list_of_port_identifiers |
+    {p1} k_inout task_port_type list_of_port_identifiers
+  ;
+
+  task_port_type =
+    {p0} k_integer | 
+    {p1} k_real | 
+    {p2} k_realtime | 
+    {p3} k_time
+  ;
+
+  // A.2.8 Block item declarations
+
+  block_item_declaration =
+       {p0} k_reg k_signed? range? list_of_block_variable_identifiers t_semicolon |
+       {p1} k_integer list_of_block_variable_identifiers t_semicolon | 
+       {p2} k_time list_of_block_variable_identifiers t_semicolon | 
+       {p3} k_real list_of_block_real_identifiers t_semicolon | 
+       {p4} k_realtime list_of_block_real_identifiers t_semicolon |
+       {p5} event_declaration |
+       {p6} local_parameter_declaration t_semicolon |
+       {p7} parameter_declaration t_semicolon
+  ;
+
+  list_of_block_variable_identifiers = 
+    {p0} block_variable_type |
+    {p1} block_variable_type t_comma list_of_block_variable_identifiers
+  ;
+
+  list_of_block_real_identifiers = 
+    {p0} block_real_type |
+    {p1} block_real_type t_comma list_of_block_real_identifiers
+  ;
+
+  block_variable_type = identifier dimension* ;
+
+  block_real_type = identifier dimension* ;
+
+  // A.3 Primitive instances
+  
+  // A.3.1 Primitive instantiation and instances
+  
+  gate_instantiation = 
+    {cmos}     cmos_switchtype delay3? cmos_switch_instances t_semicolon |
+    {enable}   enable_gatetype drive_strength? delay3? enable_gate_instances t_semicolon |
+    {mos}      mos_switchtype delay3? mos_switch_instances t_semicolon |
+    {ninput}   n_input_gatetype drive_strength? delay2? n_input_gate_instances t_semicolon |
+    {noutput}  n_output_gatetype drive_strength? delay2? n_output_gate_instances t_semicolon |
+    {passen}   pass_en_switchtype delay2? pass_enable_switch_instances t_semicolon |
+    {pass}     pass_switchtype pass_switch_instances t_semicolon |
+    {pulldown} k_pulldown pulldown_strength? pull_gate_instances t_semicolon |
+    {pullup}   k_pullup pullup_strength? pull_gate_instances t_semicolon
+  ;
+  
+  cmos_switch_instances =
+    {p0}  cmos_switch_instance |
+    {p1}  cmos_switch_instance t_comma cmos_switch_instances
+  ;
+    
+  enable_gate_instances =
+    {p0} enable_gate_instance |
+    {p1} enable_gate_instance t_comma enable_gate_instances
+  ;
+  
+  mos_switch_instances =
+    {p0} mos_switch_instance |
+    {p1} mos_switch_instance t_comma mos_switch_instances
+  ;
+  
+  n_input_gate_instances =
+    {p0} n_input_gate_instance |
+    {p1} n_input_gate_instance t_comma n_input_gate_instances
+  ;
+  
+  n_output_gate_instances =
+    {p0} n_output_gate_instance |
+    {p1} n_output_gate_instance t_comma n_output_gate_instances
+  ;
+  
+  pass_enable_switch_instances = 
+    {p0} pass_enable_switch_instance |
+    {p1} pass_enable_switch_instance t_comma pass_enable_switch_instances
+  ;
+  
+  pass_switch_instances = 
+    {p0} pass_switch_instance |
+    {p1} pass_switch_instance t_comma pass_switch_instances
+  ;
+  
+  pull_gate_instances = 
+    {p0} pull_gate_instance |
+    {p1} pull_gate_instance t_comma pull_gate_instances
+  ;
+  
+    
+  cmos_switch_instance = name_of_gate_instance? t_lparen [t1]: terminal [c1]: t_comma [t2]: terminal [c2]: t_comma ncontrol_terminal [c3]: t_comma pcontrol_terminal t_rparen ;
+
+  enable_gate_instance = name_of_gate_instance? t_lparen [t1]: terminal [c1]: t_comma [t2]: terminal [c2]: t_comma enable_terminal t_rparen ;
+
+  mos_switch_instance = name_of_gate_instance? t_lparen [t1]: terminal [c1]: t_comma [t2]: terminal [c2]: t_comma enable_terminal t_rparen ;
+
+  n_input_gate_instance = name_of_gate_instance? t_lparen terminal t_comma terminals t_rparen ;
+
+  n_output_gate_instance = name_of_gate_instance? t_lparen terminals t_rparen ;
+
+  pass_switch_instance = name_of_gate_instance? t_lparen [t1]: terminal t_comma [t2]: terminal t_rparen ;
+
+  pass_enable_switch_instance = name_of_gate_instance? t_lparen [t1]: terminal [c1]: t_comma [t2]: terminal [c2]: t_comma enable_terminal t_rparen ;
+  
+  pull_gate_instance = name_of_gate_instance? t_lparen terminal t_rparen ;
+  
+  name_of_gate_instance = identifier range? ;
+
+  terminals =
+    {p0} terminal |
+    {p1} terminal t_comma terminals
+  ;
+
+  // A.3.2 Primitive strengths
+  
+  pulldown_strength =
+		{p0}  t_lparen strength0 t_comma strength1 t_rparen |
+		{p1}  t_lparen strength1 t_comma strength0 t_rparen |
+		{p2}  t_lparen strength0 t_rparen
+  ;
+
+	pullup_strength =
+		{p0}  t_lparen strength0 t_comma strength1 t_rparen | 
+		{p1}  t_lparen strength1 t_comma strength0 t_rparen |
+		{p2}  t_lparen strength1 t_rparen
+  ;
+		
+  // A.3.3 Primitive terminals
+	
+  terminal = 
+    {p0} expression 
+//    {p1} expression lvalue_rep2* t_lbracket range_expression t_rbracket | 
+//    {p2} hierarchical_identifier_rep* identifier |
+//    {p3} hierarchical_identifier_rep* identifier lvalue_rep2* t_lbracket range_expression t_rbracket | 
+  ;
+  
+	enable_terminal = expression ;
+	
+	ncontrol_terminal = expression ;
+	
+	pcontrol_terminal = expression ;
+	
+	// A.3.4 Primitive gate and switch types
+	
+	cmos_switchtype = 
+	  {cmos}  k_cmos | 
+	  {rcmos} k_rcmos 
+	;
+	  
+	enable_gatetype = 
+	  {p0}  k_bufif0 | 
+	  {p1}  k_bufif1 | 
+	  {p2}  k_notif0 | 
+	  {p3}  k_notif1 
+	;
+	
+	mos_switchtype = 
+	  {p0}  k_nmos | 
+	  {p1}  k_pmos | 
+	  {p2}  k_rnmos | 
+	  {p3}  k_rpmos 
+	;
+	
+	n_input_gatetype = 
+	  {p0}  k_and | 
+	  {p1}  k_nand | 
+	  {p2}  k_or | 
+	  {p3}  k_nor | 
+	  {p4}  k_xor | 
+	  {p5}  k_xnor 
+	;
+	
+	n_output_gatetype = 
+	  {p0}  k_buf | 
+	  {p1}  k_not 
+	;
+	
+	pass_en_switchtype = 
+	  {p0}  k_tranif0 | 
+	  {p1}  k_tranif1 | 
+	  {p2}  k_rtranif1 | 
+	  {p3}  k_rtranif0 
+	;
+	
+	pass_switchtype = 
+	  {p0}  k_tran | 
+	  {p1}  k_rtran 
+	;
+
+  // A.4 Module instantiation and generate construct
+
+  // A.4.1 Module instantiation
+
+  module_instantiation = identifier parameter_value_assignment? module_instances t_semicolon ;
+  module_instances = 
+    {p0} module_instance |
+    {p1} module_instance t_comma module_instances 
+  ;
+
+  parameter_value_assignment = t_hash t_lparen list_of_parameter_assignments t_rparen ;
+
+  list_of_parameter_assignments =
+    {p0} ordered_parameter_assignments |
+    {p1} named_parameter_assignments
+  ;
+
+  ordered_parameter_assignments = 
+    {p0} expression |
+    {p1} expression t_comma ordered_parameter_assignments
+  ;
+
+  named_parameter_assignments =
+    {p0} named_parameter_assignment |
+    {p1} named_parameter_assignment t_comma named_parameter_assignments
+  ;
+
+  named_parameter_assignment = t_period identifier t_lparen mintypmax_expression? t_rparen ;
+
+  module_instance = name_of_module_instance t_lparen port_connections t_rparen ;
+
+  name_of_module_instance = identifier range? ;
+
+  port_connections =
+    {p0} port_connection |
+    {p1} port_connection t_comma port_connections
+  ;
+
+  port_connection = 
+    {p0} expression |
+    {p1} t_period identifier t_lparen expression? t_rparen |
+    {p2}
+  ;
+
+  // A.6 Behavioral statements
+
+  // A.6.1 Continuous assignment statements
+
+  continuous_assign = k_assign drive_strength? delay3? list_of_assignments t_semicolon ;
+
+  list_of_assignments = 
+    {p0} assignment |
+    {p1} assignment t_comma list_of_assignments
+  ;
+
+  assignment = [e1]: lvalue t_equals [e2]: expression ;
+
+  // A.6.2 Procedural blocks and assignments
+
+  initial_construct = k_initial statement ;
+
+  always_construct = k_always statement ;
+
+  blocking_assignment = [e1]: lvalue t_equals delay_or_event_control? [e2]: expression ;
+
+  nonblocking_assignment = [e1]: lvalue t_le delay_or_event_control? [e2]: expression ;
+
+  procedural_continuous_assignments =
+        {p0} k_assign assignment |
+        {p1} k_deassign expression |
+        {p2} k_force assignment |
+        {p3} k_release expression 
+  ;
+
+  // A.6.3 Parallel and sequential blocks
+
+  par_block = k_fork block_id? statement* k_join ;
+
+  seq_block = k_begin block_id? statement* k_end ;
+
+  block_id = t_colon identifier block_item_declaration* ;
+
+  // A.6.4 Statements
+
+  statement =
+     {p0} statement_without_trailing_substatement |
+     {p1} if_then_statement |
+     {p2} if_then_else_statement |
+     {p3} loop_statement | 
+     {p4} wait_statement |
+     {p8} procedural_timing_control_statement 
+  ;
+
+  statement_no_short_if =
+     {p0} statement_without_trailing_substatement |
+     {p1} if_then_else_statement_nsf |
+     {p2} loop_statement_nsf | 
+     {p3} wait_statement_nsf |
+     {p8} procedural_timing_control_statement_nsf
+  ;
+
+  statement_without_trailing_substatement = 
+     {p0} blocking_assignment t_semicolon |
+     {p1} case_statement |
+     {p2} disable_statement | 
+     {p3} event_trigger | 
+     {p4} seq_block |
+     {p5} par_block |
+     {p6} nonblocking_assignment t_semicolon | 
+     {p7} procedural_continuous_assignments t_semicolon |
+     {p8} system_task_enable |
+     {p9} task_enable 
+   ; 
+
+  statement_or_null =
+       {p0} statement |
+       {p1} t_semicolon 
+  ;
+
+  statement_nsf_or_null =
+       {p0} statement_no_short_if |
+       {p1} t_semicolon 
+  ;
+
+  // A.6.5 Timing control statements
+
+  delay_control =
+       {p0} t_hash delay_value | 
+       {p1} t_hash t_lparen expression t_rparen
+  ;
+
+  delay_or_event_control =
+       {p0} delay_control |
+       {p1} event_control |
+       {p2} k_repeat t_lparen expression t_rparen event_control
+  ;
+
+  disable_statement =
+       {p0} k_disable hierarchical_identifier t_semicolon |
+       {p1} k_disable hierarchical_identifier t_semicolon
+  ;
+
+  event_control =
+       {p0} t_at hierarchical_identifier |
+       {p1} t_at t_lparen event_expression t_rparen |
+       {p2} t_at_star | 
+       {p3} t_at t_any
+  ;
+
+  event_trigger = t_trigger identifier event_trigger_expr t_semicolon ;
+
+  event_trigger_expr = 
+    {p1} t_period identifier |
+    {p2} t_lbracket expression t_rbracket |
+    {p3} t_period identifier event_trigger_expr |
+    {p4} t_lbracket expression t_rbracket event_trigger_expr
+  ;
+
+  event_expression =
+     {p0}  event_expression_term |
+     {p1}  event_expression_term k_or event_expression |
+     {p2}  event_expression_term t_comma event_expression
+  ;
+
+  event_expression_term = 
+     {p0}  expression |
+     {p1}  k_posedge expression |
+     {p2}  k_negedge expression 
+  ;
+
+
+  procedural_timing_control =
+     {p0} delay_control |
+     {p1} event_control
+  ;
+
+  procedural_timing_control_statement = procedural_timing_control statement_or_null ;
+  procedural_timing_control_statement_nsf = procedural_timing_control statement_nsf_or_null ;
+
+  wait_statement = k_wait t_lparen expression t_rparen statement_or_null ;
+  wait_statement_nsf = k_wait t_lparen expression t_rparen statement_nsf_or_null ;
+
+  // A.6.6 Conditional statements
+
+  if_then_statement =
+    k_if t_lparen expression t_rparen statement;
+
+  if_then_else_statement =
+    k_if t_lparen expression t_rparen statement_no_short_if k_else statement;
+
+  if_then_else_statement_nsf =
+    k_if t_lparen expression t_rparen [s1]:statement_no_short_if k_else [s2]:statement_no_short_if;
+
+  // A.6.7 Case statements
+
+  case_statement =
+       {p0} k_case t_lparen expression t_rparen [i1]: case_item [i2]: case_item* k_endcase |
+       {p1} k_casez t_lparen expression t_rparen [i1]: case_item [i2]: case_item* k_endcase |
+       {p2} k_casex t_lparen expression t_rparen [i1]: case_item [i2]: case_item* k_endcase
+  ;
+
+  case_item =
+       {p0} case_item_el t_colon statement_or_null | 
+       {p1} k_default t_colon? statement_or_null
+  ;
+
+  case_item_el = 
+       {p0} expression |
+       {p1} expression t_comma case_item_el
+  ;
+
+  // A.6.8 Looping statements
+
+  loop_statement =
+     {p0}  k_forever statement | 
+     {p1}  k_repeat t_lparen expression t_rparen statement | 
+     {p2}  k_while t_lparen expression t_rparen statement | 
+     {p3}  k_for t_lparen [a1]: assignment [c1]: t_semicolon expression [c2]: t_semicolon [a2]: assignment t_rparen statement
+  ;
+
+  loop_statement_nsf =
+     {p0}  k_forever statement_no_short_if | 
+     {p1}  k_repeat t_lparen expression t_rparen statement_no_short_if | 
+     {p2}  k_while t_lparen expression t_rparen statement_no_short_if | 
+     {p3}  k_for t_lparen [a1]: assignment [c1]: t_semicolon expression [c2]: t_semicolon [a2]: assignment t_rparen statement_no_short_if
+  ;
+
+  // A.6.9 Task enable statements
+
+  system_task_enable = 
+     {p0} system_function_identifier t_semicolon |
+     {p1} system_function_identifier t_lparen task_enable_el? t_rparen t_semicolon
+  ;
+
+  task_enable = 
+     {p0} identifier t_semicolon |
+     {p1} identifier t_lparen task_enable_el? t_rparen t_semicolon
+  ;
+  task_enable_el =
+       {p0} expression |
+       {p1} expression t_comma task_enable_el
+  ;
+
+  // A.7 Specify section
+
+  // A.7.1 Specify block declaration
+
+  specify_block = k_specify specify_item* k_endspecify ;
+
+  specify_item =
+    {p0} specparam_declaration |
+    {p1} pulsestyle_declaration | 
+    {p2} showcancelled_declaration  | 
+    {p3} path_declaration /*
+| 
+    {p4} system_timing_check */
+  ;
+
+  pulsestyle_declaration =
+    {p0} k_pulsestyle_onevent list_of_path_descriptors t_semicolon |
+    {p1} k_pulsestyle_ondetect list_of_path_descriptors t_semicolon
+  ;
+
+  showcancelled_declaration =
+    {p0} k_showcancelled list_of_path_descriptors t_semicolon |
+    {p1} k_noshowcancelled list_of_path_descriptors t_semicolon
+  ;
+
+  // A.7.2 Specify path declarations
+
+  path_declaration =
+    {p0} simple_path_declaration t_semicolon |
+    {p1} edge_sensitive_path_declaration t_semicolon |
+    {p2} state_dependent_path_declaration t_semicolon
+  ;
+
+  simple_path_declaration = 
+    {parallel_path} t_lparen [l1]: list_of_path_descriptors polarity_operator? t_eg [l2]: list_of_path_descriptors t_rparen |
+    {full_path} t_lparen [l1]: list_of_path_descriptors polarity_operator? t_sg [l2]: list_of_path_descriptors t_rparen 
+  ;
+
+
+  list_of_path_descriptors =
+   {p0} specify_terminal_descriptor t_comma list_of_path_descriptors |
+   {p1} specify_terminal_descriptor
+  ;
+
+  // A.7.3 Specify block terminals
+
+  specify_terminal_descriptor = 
+     {p0} identifier  |
+     {p1} identifier t_lbracket range_expression t_rbracket
+  ;
+
+  // A.7.4 Specify path delays
+
+  path_delay_value = 
+    {p0} delay_value_simple |
+    {p1} t_lparen list_of_path_delay_expressions t_rparen
+  ;
+
+  polarity_operator = 
+    {p} t_plus | 
+    {m} t_minus
+  ;
+
+  list_of_path_delay_expressions = 
+    {p0} mintypmax_expression t_comma list_of_path_delay_expressions |
+    {p1} mintypmax_expression
+  ;
+
+  edge_sensitive_path_declaration =
+    {parallel}  t_lparen edge_identifier? [l1]: list_of_path_descriptors t_eg [p2]: t_lparen [d2]: list_of_path_descriptors polarity_operator? t_colon expression [p3]: t_rparen [p4]: t_rparen t_equals path_delay_value |
+    {full}  t_lparen edge_identifier? [l1]: list_of_path_descriptors t_sg [p2]: t_lparen [d2]: list_of_path_descriptors polarity_operator? t_colon expression [p3]: t_rparen [p4]: t_rparen t_equals path_delay_value 
+  ;
+
+  delay_value_simple =
+    {num}      number |
+    {id}       primary_hierarchical_identifier  
+  ;
+
+  edge_identifier = 
+    {p} k_posedge | 
+    {n} k_negedge
+  ;
+
+  state_dependent_path_declaration =
+    {p0} k_if t_lparen module_path_expression t_rparen simple_path_declaration |
+    {p1} k_if t_lparen module_path_expression t_rparen edge_sensitive_path_declaration |
+    {p2} k_ifnone simple_path_declaration
+  ;
+
+  // A.8 Expressions
+  
+  // A.8.1 Concatenations
+  
+  concatenation = t_lbrace expression concatenation_rep* t_rbrace ;
+  concatenation_rep = t_comma expression ;
+  
+  module_path_concatenation = t_lbrace module_path_expression module_path_concatenation_rep* t_rbrace ;
+  module_path_concatenation_rep = t_comma module_path_expression ;
+
+  // FIXME: is there a difference ? module_path_multiple_concatenation = t_lbrace expression module_path_concatenation t_rbrace ;
+  module_path_multiple_concatenation = module_path_concatenation ;
+  
+  multiple_concatenation = t_lbrace expression concatenation t_rbrace ;
+
+  // A.8.2 Function calls
+  
+  system_function_call = 
+    {params}   system_function_identifier t_lparen expression system_function_call_rep* t_rparen |
+    {noparams} system_function_identifier
+  ;
+  system_function_call_rep = t_comma expression ;
+  
+  // A.8.3 Expressions
+
+  expression = 
+    {cond} conditional_expression |
+    {simple} expression1
+  ;
+
+  // conditional_expression = [e1]: expression t_question [e2]: expression t_colon [e3]: expression ;
+  conditional_expression = [e1]: expression1 t_question [e2]: expression t_colon [e3]: expression ;
+
+  expression1 =
+    {unary}   unary_expression |
+    {binary}  [e1]: expression1 binary_operator [e2]: unary_expression
+  ;
+
+  unary_expression =
+    {unary} unary_operator primary |
+    {primary} primary
+  ;
+
+  bracket_range = t_lbracket range_expression t_rbracket ;
+
+  range_expression =
+    {exp} expression |
+    {p1}  [e1]: expression t_colon [e2]: expression |
+    {p2}  [e1]: expression t_plus_colon [e2]: expression |
+    {p3}  [e1]: expression t_minus_colon [e2]: expression
+  ;
+
+  mintypmax_expression =
+    {exp}   expression |
+    {multi} [e1]: expression [c1]: t_colon [e2]: expression [c2]: t_colon [e3]: expression
+  ;
+
+  module_path_expression =
+    {cond} module_path_conditional_expression |
+    {simple} module_path_expression1
+  ;
+
+  module_path_conditional_expression = 
+    [e1]: module_path_expression1 t_question [e2]: module_path_expression t_colon [e3]: module_path_expression ;
+
+  module_path_expression1 =
+    {unary}   module_path_unary_expression |
+    {binary}  [e1]: module_path_expression1 binary_module_path_operator [e2]: module_path_unary_expression
+  ;
+
+  module_path_unary_expression =
+    {unary}   unary_module_path_operator module_path_primary |
+    {primary} module_path_primary
+  ;
+
+  module_path_mintypmax_expression =
+    {p0} module_path_expression | 
+    {p1} [e1]: module_path_expression [c1]: t_colon [e2]: module_path_expression [c2]: t_colon [e3]: module_path_expression
+  ;
+
+
+  // A.8.4 Primaries
+
+  primary =
+    {num}      number |
+    {id}       primary_hierarchical_identifier  |
+    {concat}   concatenation |
+    {mconcat}  multiple_concatenation |
+    {call}     primary_hierarchical_identifier t_lparen expression function_call_rep* t_rparen |
+    {syscall}  system_function_call |
+    {mtm}      t_lparen mintypmax_expression t_rparen |
+    {string}   string
+  ;
+  primary_rep1 = t_lbracket expression t_rbracket ;
+  function_call_rep = t_comma expression;
+
+  primary_hierarchical_identifier =
+    {p0} identifier bracket_range* |
+    {p1} identifier bracket_range* t_period primary_hierarchical_identifier 
+  ;
+
+  module_path_primary =
+    {p0} number | 
+    {p1} primary_hierarchical_identifier | 
+    {p2} module_path_concatenation | 
+    {p3} module_path_multiple_concatenation | 
+    {call} primary_hierarchical_identifier t_lparen expression function_call_rep* t_rparen |
+    {p5} system_function_call | 
+    {p6} t_lparen module_path_mintypmax_expression t_rparen
+  ;
+
+  // A.8.5 Expression left-side values
+
+  lvalue = 
+       {p0} hierarchical_identifier_mb |
+       {p1} t_lbrace lvalue lvalue_rep2* t_rbrace
+  ;
+
+  lvalue_rep2 = t_comma lvalue ;
+
+  // A.8.6 Operators
+  
+  unary_operator = 
+    {p0}  t_plus | 
+    {p1}  t_minus | 
+    {p2}  t_excl | 
+    {p3}  t_tilde | 
+    {p4}  t_and | 
+    {p5}  t_nand | 
+    {p6}  t_pipe | 
+    {p7}  t_rnor | 
+    {p8}  t_xor | 
+    {p9}  t_nxor
+    ;
+
+  binary_operator =
+    {p0}  t_plus  | 
+    {p1}  t_minus | 
+    {p2}  t_star  | 
+    {p3}  t_div   | 
+    {p4}  t_perc  | 
+    {p5}  t_eq    | 
+    {p6}  t_ne    | 
+    {p7}  t_ceq   | 
+    {p8}  t_cne   | 
+    {p9}  t_land  | 
+    {p10}  t_lor  | 
+    {p11}  t_pow  | 
+    {p12}  t_lt   | 
+    {p13}  t_le   | 
+    {p14}  t_gt   | 
+    {p15}  t_ge   | 
+    {p16}  t_and  | 
+    {p17}  t_pipe | 
+    {p18}  t_xor  | 
+    {p19}  t_nxor | 
+    {p21}  t_rs   | 
+    {p22}  t_ls   | 
+    {p23}  t_rss 
+    ;
+    
+  unary_module_path_operator =
+    {p0}  t_excl  | 
+    {p1}  t_tilde | 
+    {p2}  t_and   | 
+    {p3}  t_nand  | 
+    {p4}  t_pipe  | 
+    {p5}  t_rnor  | 
+    {p6}  t_xor   | 
+    {p7}  t_nxor 
+    ;
+    
+  binary_module_path_operator =
+    {p0} t_eq   | 
+    {p1} t_ne   | 
+    {p2} t_land | 
+    {p3} t_lor  | 
+    {p4} t_and  | 
+    {p5} t_pipe | 
+    {p6} t_xor  | 
+    {p8} t_nxor
+    ;
+
+  // A.8.7 Numbers
+
+  number = 
+    {dec}  decimal_number | 
+    {oct}  octal_number | 
+    {bin}  binary_number |
+    {hex}  hex_number |
+    {real} real_number
+  ;
+
+
+  // A.9 General
+  
+  // A.9.1 Attributes
+ 
+  // ignored by lexer 
+  
+  // A.9.3 Identifiers
+
+  identifier =
+    {simple}  simple_identifier | 
+    {escaped} escaped_identifier ;
+
+  hierarchical_identifier = 
+    {p0} identifier |
+    {p1} identifier t_period hierarchical_identifier |
+    {p2} identifier t_lbracket expression t_rbracket |
+    {p3} identifier t_lbracket expression t_rbracket t_period hierarchical_identifier
+  ;
+
+  hierarchical_identifier_mb = identifier hierarchical_identifier_mb_ext* ;
+  hierarchical_identifier_mb_ext =
+    {p0} t_period identifier |
+    {p1} t_lbracket range_expression t_rbracket
+  ;
+    

@@ -10,7 +10,7 @@
 package org.zamia.instgraph.interpreter;
 
 import org.zamia.SourceLocation;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -30,7 +30,7 @@ public class IGInterpreterException extends Exception {
 
 	private SourceLocation fLocation;
 
-	private ASTObject fSrc;
+	private VHDLNode fSrc;
 
 	private ExCat fCat = ExCat.FRONTEND;
 
@@ -47,11 +47,11 @@ public class IGInterpreterException extends Exception {
 		this(ExCat.FRONTEND, true, aMessage, aLocation);
 	}
 
-	public IGInterpreterException(ExCat aCat, boolean aError, String aMessage, ASTObject aSrc) {
+	public IGInterpreterException(ExCat aCat, boolean aError, String aMessage, VHDLNode aSrc) {
 		this(aCat, aError, aMessage, aSrc != null ? aSrc.getLocation() : null);
 	}
 
-	public IGInterpreterException(String aMessage, ASTObject aSrc) {
+	public IGInterpreterException(String aMessage, VHDLNode aSrc) {
 		this(ExCat.FRONTEND, true, aMessage, aSrc);
 	}
 
@@ -70,7 +70,7 @@ public class IGInterpreterException extends Exception {
 		return super.getMessage();
 	}
 
-	public ASTObject getSource() {
+	public VHDLNode getSource() {
 		return fSrc;
 	}
 

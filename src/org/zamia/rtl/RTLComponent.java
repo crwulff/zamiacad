@@ -11,7 +11,7 @@ package org.zamia.rtl;
 
 import org.zamia.ComponentStub;
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -27,7 +27,7 @@ public class RTLComponent extends RTLModule {
 
 //	private HashMap<RTLSignal, RTLPort> signalMap;
 
-	public RTLComponent(ComponentStub stub_, RTLGraph parent_, String instanceName_, ASTObject src_) throws ZamiaException {
+	public RTLComponent(ComponentStub stub_, RTLGraph parent_, String instanceName_, VHDLNode src_) throws ZamiaException {
 		super(parent_, instanceName_, src_);
 
 		stub = stub_;

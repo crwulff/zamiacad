@@ -27,13 +27,13 @@ import org.zamia.instgraph.IGElaborationEnv;
  */
 
 @SuppressWarnings("serial")
-public class DelayMechanism extends ASTObject {
+public class DelayMechanism extends VHDLNode {
 
 	private boolean isInertial;
 
 	private Operation rejectTime;
 
-	public DelayMechanism(boolean isInertial_, Operation rejectTime_, ASTObject parent_, long location_) {
+	public DelayMechanism(boolean isInertial_, Operation rejectTime_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 
 		isInertial = isInertial_;
@@ -58,7 +58,7 @@ public class DelayMechanism extends ASTObject {
 	}
 	
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return rejectTime;
 	}
 

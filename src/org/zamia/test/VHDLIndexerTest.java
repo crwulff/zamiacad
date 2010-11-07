@@ -17,7 +17,7 @@ import junit.framework.TestCase;
 import org.apache.log4j.Level;
 import org.zamia.BuildPath;
 import org.zamia.BuildPathEntry;
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.FSCache;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
@@ -43,7 +43,7 @@ public class VHDLIndexerTest extends TestCase {
 
 	private ZamiaProject fZPrj;
 
-	private DUManager fDUM;
+	private DMManager fDUM;
 
 	@Override
 	protected void setUp() throws Exception {

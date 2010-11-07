@@ -39,7 +39,7 @@ public class ConcurrentAssertion extends ConcurrentStatement {
 
 	private Assertion fAssertion;
 
-	public ConcurrentAssertion(Assertion aAssertion, ASTObject aParent, long aLocation) {
+	public ConcurrentAssertion(Assertion aAssertion, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fAssertion = aAssertion;
 		if (fAssertion != null) {
@@ -57,7 +57,7 @@ public class ConcurrentAssertion extends ConcurrentStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fAssertion;
 	}
 
@@ -76,7 +76,7 @@ public class ConcurrentAssertion extends ConcurrentStatement {
 		fAssertion.findReferences(aId, aCat, aRefType, aDepth + 1, aZPrj, aContainer, aEE, aRSR, aTODO);
 	}
 
-	public void computeIG(DUUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
+	public void computeIG(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
 
 		/*
 		 * let's simply turn this into a small process

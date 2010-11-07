@@ -22,7 +22,7 @@ import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGStackFrame;
 import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
 

@@ -40,12 +40,12 @@ public class NameExtensionQualifiedExpression extends NameExtension {
 
 	private Operation fExp;
 
-	public NameExtensionQualifiedExpression(Aggregate aAggregate, ASTObject aParent, long aLocation) {
+	public NameExtensionQualifiedExpression(Aggregate aAggregate, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fExp = new OperationAggregate(aAggregate, this, aLocation);
 	}
 
-	public NameExtensionQualifiedExpression(Operation aExpr, ASTObject aParent, long aLocation) {
+	public NameExtensionQualifiedExpression(Operation aExpr, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fExp = aExpr;
 		fExp.setParent(this);
@@ -57,7 +57,7 @@ public class NameExtensionQualifiedExpression extends NameExtension {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return null;
 	}
 

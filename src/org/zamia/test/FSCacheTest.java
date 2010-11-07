@@ -1,5 +1,5 @@
 /* 
- * Copyright 2008-2009 by the authors indicated in the @author tags. 
+ * Copyright 2008-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -23,11 +23,9 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
-import org.zamia.ZamiaProject.VHDLLanguageSupport;
 import org.zamia.instgraph.IGManager;
 import org.zamia.util.ZamiaTmpDir;
-import org.zamia.vhdl.ast.DUUID;
-
+import org.zamia.vhdl.ast.DMUID;
 
 /**
  * 
@@ -272,7 +270,7 @@ public class FSCacheTest extends TestCase {
 
 	private ZamiaProject fZPrj;
 
-	public void setupTest(String aBasePath, String buildPath, VHDLLanguageSupport aVHDLLanguageSupport) throws Exception {
+	public void setupTest(String aBasePath, String buildPath) throws Exception {
 		ZamiaLogger.setup(Level.DEBUG);
 
 		File f = new File(buildPath);
@@ -281,16 +279,12 @@ public class FSCacheTest extends TestCase {
 
 		SourceFile sf = new SourceFile(f);
 
-		fZPrj = new ZamiaProject("Offline Build test", aBasePath, sf, null, aVHDLLanguageSupport);
+		fZPrj = new ZamiaProject("Offline Build test", aBasePath, sf, null);
 		fZPrj.clean();
 
 	}
 
-	public void setupTest(String aBasePath, String buildPath) throws Exception {
-		setupTest(aBasePath, buildPath, VHDLLanguageSupport.VHDL2008);
-	}
-
-	private DUUID getUID(ZamiaProject aZPrj) {
+	private DMUID getUID(ZamiaProject aZPrj) {
 		BuildPath bp = aZPrj.getBuildPath();
 
 		Toplevel tl = bp.getToplevel(0);
@@ -321,7 +315,7 @@ public class FSCacheTest extends TestCase {
 
 		IGManager igm = fZPrj.getIGM();
 
-		DUUID duuid = getUID(fZPrj);
+		DMUID duuid = getUID(fZPrj);
 
 		assertNotNull(duuid);
 
@@ -374,7 +368,7 @@ public class FSCacheTest extends TestCase {
 
 		fFSCache.cleanAll();
 
-		setupTest(tmpDir, "test/BuildPathLeonSOCExtern.txt", VHDLLanguageSupport.VHDL2002);
+		setupTest(tmpDir, "test/BuildPathLeonSOCExtern.txt");
 
 		ZamiaProjectBuilder builder = fZPrj.getBuilder();
 
@@ -391,7 +385,7 @@ public class FSCacheTest extends TestCase {
 
 		IGManager igm = fZPrj.getIGM();
 
-		DUUID duuid = getUID(fZPrj);
+		DMUID duuid = getUID(fZPrj);
 
 		assertNotNull(duuid);
 
@@ -408,7 +402,7 @@ public class FSCacheTest extends TestCase {
 
 		// and build again
 
-		setupTest(tmpDir, "test/BuildPathLeonSOCExtern.txt", VHDLLanguageSupport.VHDL2002);
+		setupTest(tmpDir, "test/BuildPathLeonSOCExtern.txt");
 
 		builder = fZPrj.getBuilder();
 

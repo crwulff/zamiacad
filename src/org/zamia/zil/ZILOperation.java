@@ -12,7 +12,7 @@ import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLGraph;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILInterpreterRuntimeEnv;
 import org.zamia.zil.interpreter.ZILStackFrame;
@@ -27,7 +27,7 @@ import org.zamia.zil.synthesis.VariableRemapping;
  */
 public abstract class ZILOperation extends ZILObject {
 
-	public ZILOperation(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILOperation(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aType, aContainer, aSrc);
 	}
 
@@ -164,11 +164,11 @@ public abstract class ZILOperation extends ZILObject {
 
 	public abstract void computeReadSignals(HashSetArray<ZILSignal> aReadSignals) ;
 
-	public long getLong(ASTObject aSrc) throws ZamiaException {
+	public long getLong(VHDLNode aSrc) throws ZamiaException {
 		return computeConstant().getLong(aSrc);
 	}
 
-	public int getInt(ASTObject aSrc) throws ZamiaException {
+	public int getInt(VHDLNode aSrc) throws ZamiaException {
 		return computeConstant().getInt(aSrc);
 	}
 }

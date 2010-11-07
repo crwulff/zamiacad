@@ -12,7 +12,7 @@ import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLGraph;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.OperationLogic.LogicOp;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILNotStmt;
@@ -30,7 +30,7 @@ public class ZILOperationNot extends ZILOperation {
 	private ZILOperation fA;
 
 	public ZILOperationNot(ZILOperation aA, ZILIContainer container,
-			ASTObject src) {
+			VHDLNode src) {
 		super(aA.getType(), container, src);
 
 		fA = aA;

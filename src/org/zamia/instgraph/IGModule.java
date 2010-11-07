@@ -20,7 +20,7 @@ import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
 import org.zamia.util.ZStack;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zdb.ZDB;
 
 
@@ -38,7 +38,7 @@ public class IGModule extends IGDesignUnit {
 	
 	private boolean fStatementsElaborated = false;
 
-	public IGModule(ToplevelPath aPath, DUUID aDUUID, SourceLocation aLocation, ZDB aZDB) {
+	public IGModule(ToplevelPath aPath, DMUID aDUUID, SourceLocation aLocation, ZDB aZDB) {
 		super(aDUUID, aLocation, aZDB);
 		fStructure = new IGStructure(new IGInterpreterContext(), aPath, 0, "", aLocation, aZDB);
 		fActualGenerics = new ArrayList<IGStaticValue>();
@@ -109,13 +109,15 @@ public class IGModule extends IGDesignUnit {
 
 					IGInstantiation inst = (IGInstantiation) stmt;
 
-					IGModule module = igm.findModule(inst.getSignature());
+					String signature = inst.getSignature();
+					
+					IGModule module = igm.findModule(signature);
 					if (module == null) {
 						throw new ZamiaException("IGModule: accept(): ERROR: detected missing module: "+ inst);
 					}
 
 					if (!module.isStatementsElaborated()) {
-						throw new ZamiaException("IGModule: accept(): ERROR: detected uninstantiaded module: "+ inst);
+						throw new ZamiaException("IGModule: accept(): ERROR: detected uninstantiated module: "+ inst + " module DBID: "+module.getDBID());
 					}
 					
 					stack.push(new VisitJob(path.append(inst.getLabel()), module.getStructure()));

@@ -39,13 +39,17 @@ import org.zamia.instgraph.IGObject.OIDir;
  */
 
 @SuppressWarnings("serial")
-public class AssociationList extends ASTObject {
+public class AssociationList extends VHDLNode {
 
 	private ArrayList<AssociationElement> associations;
 
-	public AssociationList(ASTObject parent_, long location_) {
-		super(parent_, location_);
-
+	public AssociationList(VHDLNode aParent, long aLineCol) {
+		super(aParent, aLineCol);
+		
+		if (aParent != null) {
+			setSource(aParent.getSource());
+		}
+		
 		associations = new ArrayList<AssociationElement>(1);
 	}
 
@@ -55,7 +59,7 @@ public class AssociationList extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return associations.get(idx_);
 	}
 

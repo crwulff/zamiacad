@@ -36,7 +36,7 @@ public class ComponentDeclaration extends BlockDeclarativeItem {
 
 	private InterfaceList generics;
 
-	public ComponentDeclaration(String id_, ASTObject parent_, long location_) {
+	public ComponentDeclaration(String id_, VHDLNode parent_, long location_) {
 		super(id_, parent_, location_);
 	}
 
@@ -78,7 +78,7 @@ public class ComponentDeclaration extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (idx_ == 0)
 			return generics;
 		return interfaces;

@@ -13,7 +13,7 @@ import java.math.BigInteger;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
 /**

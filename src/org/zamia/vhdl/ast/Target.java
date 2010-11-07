@@ -31,23 +31,23 @@ import org.zamia.instgraph.IGType;
  * 
  */
 @SuppressWarnings("serial")
-public class Target extends ASTObject {
+public class Target extends VHDLNode {
 
 	private Name fName;
 
 	private Aggregate fAggregate;
 
-	public Target(Name aName, ASTObject aParent, long aLocation) {
+	public Target(Name aName, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		setName(aName);
 	}
 
-	public Target(Aggregate aAggregate, ASTObject aParent, long aLocation) {
+	public Target(Aggregate aAggregate, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		setAggregate(aAggregate);
 	}
 
-	public Target(ASTObject aParent, long aLocation) {
+	public Target(VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 	}
 
@@ -85,7 +85,7 @@ public class Target extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fName != null ? fName : fAggregate;
 	}
 

@@ -12,7 +12,7 @@ package org.zamia.rtl;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 
 
@@ -30,7 +30,7 @@ public class RTLMux extends RTLModule {
 	private RTLPort d1, d2, s, z;
 	private ZILType type;
 
-	public RTLMux (ZILType type_, RTLGraph parent_, String instanceName_, ASTObject src_) {
+	public RTLMux (ZILType type_, RTLGraph parent_, String instanceName_, VHDLNode src_) {
 		super(parent_, instanceName_, src_);
 
 		type = type_;

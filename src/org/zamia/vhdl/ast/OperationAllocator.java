@@ -39,7 +39,7 @@ public class OperationAllocator extends Operation {
 
 	private TypeDefinitionSubType fTD;
 
-	public OperationAllocator(TypeDefinitionSubType aTD, ASTObject aParent, long aLocation) {
+	public OperationAllocator(TypeDefinitionSubType aTD, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fTD = aTD;
 		fTD.setParent(this);
@@ -51,7 +51,7 @@ public class OperationAllocator extends Operation {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return null;
 	}
 

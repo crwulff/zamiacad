@@ -42,7 +42,7 @@ public class NameExtensionIndex extends NameExtension {
 
 	private ArrayList<Operation> fIndices = new ArrayList<Operation>(2);
 
-	public NameExtensionIndex(Operation aExp, ASTObject aParent, long aLocation) {
+	public NameExtensionIndex(Operation aExp, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		add(aExp);
 	}
@@ -63,7 +63,7 @@ public class NameExtensionIndex extends NameExtension {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fIndices.get(aIdx);
 	}
 

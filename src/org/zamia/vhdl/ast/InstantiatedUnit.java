@@ -55,7 +55,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 
 	protected AssociationList fPMS, fGMS;
 
-	public InstantiatedUnit(String aLabel, Name aName, ASTObject aParent, long aLocation) {
+	public InstantiatedUnit(String aLabel, Name aName, VHDLNode aParent, long aLocation) {
 		super(aLabel, aParent, aLocation);
 		fName = aName;
 		fName.setParent(this);
@@ -100,7 +100,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return fName;
@@ -142,7 +142,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 
 		IGManager igm = aZPrj.getIGM();
 
-		DUUID duuid = aArch.getDUUID();
+		DMUID duuid = aArch.getDMUID();
 
 		String signature = IGInstantiation.computeSignature(duuid, null);
 
@@ -186,7 +186,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 
 						if (aTODO != null) {
 
-							duuid = aArch.getDUUID();
+							duuid = aArch.getDMUID();
 
 							aTODO.add(new SearchJob(intf.getId(), duuid, aDepth + 1, aResult));
 						}
@@ -201,19 +201,19 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 
 	}
 
-	public final void computeIG(DUUID aDUUID, IGContainer aParentContainer, IGStructure aParentStructure, IGElaborationEnv aEE) throws ZamiaException {
+	public final void computeIG(DMUID aDUUID, IGContainer aParentContainer, IGStructure aParentStructure, IGElaborationEnv aEE) throws ZamiaException {
 		IGInstantiation inst = computeIGInstantiation(aDUUID, aParentContainer, aParentStructure, aEE);
 		if (inst != null) {
 			aParentStructure.addStatement(inst);
 		}
 	}
 	
-	public abstract IGInstantiation computeIGInstantiation(DUUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException;
+	public abstract IGInstantiation computeIGInstantiation(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException;
 	
-	protected IGInstantiation instantiateIGModule(Architecture aArch, DUUID aParentDUUID, IGContainer aParentContainer, IGStructure aParentStructure, IGElaborationEnv aParentEE) {
+	protected IGInstantiation instantiateIGModule(Architecture aArch, DMUID aParentDUUID, IGContainer aParentContainer, IGStructure aParentStructure, IGElaborationEnv aParentEE) {
 
 		try {
-			DUUID duuid = aArch.getDUUID();
+			DMUID duuid = aArch.getDMUID();
 			
 			SourceLocation location = getLocation();
 
@@ -380,7 +380,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 		return null;
 	}
 
-	public final DUUID getChildDUUID(IGContainer aContainer, IGElaborationEnv aCache) {
+	public final DMUID getChildDUUID(IGContainer aContainer, IGElaborationEnv aCache) {
 		try {
 			IGDUUID zduuid = fName.computeIGAsDesignUnit(aContainer, aCache, ASTErrorMode.RETURN_NULL, new ErrorReport());
 			if (zduuid == null)

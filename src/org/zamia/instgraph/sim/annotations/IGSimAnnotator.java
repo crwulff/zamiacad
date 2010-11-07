@@ -10,9 +10,10 @@ package org.zamia.instgraph.sim.annotations;
 
 import java.math.BigInteger;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ExceptionLogger;
-import org.zamia.SFDUInfo;
+import org.zamia.IDesignModule;
+import org.zamia.SFDMInfo;
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
 import org.zamia.Toplevel;
@@ -30,11 +31,11 @@ import org.zamia.instgraph.IGManager;
 import org.zamia.instgraph.IGMapping;
 import org.zamia.instgraph.IGModule;
 import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGObject.IGObjectCat;
+import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.IGTypeStatic;
-import org.zamia.instgraph.IGObject.IGObjectCat;
-import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterContext;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
@@ -44,12 +45,12 @@ import org.zamia.util.HashMapArray;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.Pair;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.vhdl.ast.Architecture;
 import org.zamia.vhdl.ast.Block;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.vhdl.ast.DeclarativeItem;
-import org.zamia.vhdl.ast.DesignUnit;
 import org.zamia.vhdl.ast.GenerateStatement;
 import org.zamia.vhdl.ast.Name;
 import org.zamia.vhdl.ast.NameExtension;
@@ -59,7 +60,6 @@ import org.zamia.vhdl.ast.NameExtensionSuffix;
 import org.zamia.vhdl.ast.Operation;
 import org.zamia.vhdl.ast.OperationLiteral;
 import org.zamia.vhdl.ast.Range;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
 
@@ -81,7 +81,7 @@ public class IGSimAnnotator {
 
 	private ZamiaProject fZPrj;
 
-	private DUManager fDUM;
+	private DMManager fDMM;
 
 	private IGInterpreterContext fGlobalPackageContext;
 
@@ -127,9 +127,9 @@ public class IGSimAnnotator {
 
 		fZPrj = aZPrj;
 		fZDB = fZPrj.getZDB();
-		fDUM = fZPrj.getDUM();
+		fDMM = fZPrj.getDUM();
 		fIGM = fZPrj.getIGM();
-		fGlobalPackageContext = fDUM.getGlobalPackageContext();
+		fGlobalPackageContext = fDMM.getGlobalPackageContext();
 	}
 
 	private void initValues(IGContainer aContainer, IGInterpreterRuntimeEnv aEnv, IGISimulator aSim, BigInteger aTimeOffset, PathName aPathPrefix) throws ZamiaException {
@@ -312,22 +312,22 @@ public class IGSimAnnotator {
 	public boolean genAnnotationsEnv(SourceFile aSF, ToplevelPath aPath, IGISimulator aSim, BigInteger aTimeOffset) {
 
 		try {
-			SFDUInfo info = fDUM.compileFile(aSF, null);
+			SFDMInfo info = fDMM.compileFile(aSF, null);
 
-			int n = info.getNumDUUIDs();
+			int n = info.getNumDMUIDs();
 
 			Pair<IGItem, ToplevelPath> pair = null;
 
 			for (int i = 0; i < n; i++) {
 
-				DUUID duuid = info.getDUUID(i);
+				DMUID duuid = info.getDMUID(i);
 
-				DesignUnit du = fDUM.getDU(duuid);
-				if (!(du instanceof Architecture)) {
+				IDesignModule dm = fDMM.getDM(duuid);
+				if (!(dm instanceof Architecture)) {
 					continue;
 				}
 
-				fArch = (Architecture) du;
+				fArch = (Architecture) dm;
 
 				SourceLocation location = fArch.getLocation();
 
@@ -581,7 +581,7 @@ public class IGSimAnnotator {
 		return null;
 	}
 
-	private void genAnnotationsRek(ASTObject aASTO, PathName aPathPrefix, int aDepth, HashSetArray<IGSimAnnotation> aRes) {
+	private void genAnnotationsRek(VHDLNode aASTO, PathName aPathPrefix, int aDepth, HashSetArray<IGSimAnnotation> aRes) {
 
 		if (aASTO == null) {
 			return;
@@ -627,7 +627,7 @@ public class IGSimAnnotator {
 		for (int i = 0; i < n; i++) {
 
 			try {
-				ASTObject child = aASTO.getChild(i);
+				VHDLNode child = aASTO.getChild(i);
 
 				if (child == null) {
 					continue;

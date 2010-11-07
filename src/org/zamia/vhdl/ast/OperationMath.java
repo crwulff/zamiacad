@@ -43,7 +43,7 @@ public class OperationMath extends Operation {
 
 	private Operation fA, fB;
 
-	public OperationMath(MathOp aOp, Operation aA, Operation aB, ASTObject aParent, long aLocation) {
+	public OperationMath(MathOp aOp, Operation aA, Operation aB, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fOp = aOp;
 		setA(aA);
@@ -62,7 +62,7 @@ public class OperationMath extends Operation {
 			fA.setParent(this);
 	}
 
-	public OperationMath(MathOp aOp, Operation aA, ASTObject aParent, long aLocation) {
+	public OperationMath(MathOp aOp, Operation aA, VHDLNode aParent, long aLocation) {
 		this(aOp, aA, null, aParent, aLocation);
 	}
 
@@ -85,7 +85,7 @@ public class OperationMath extends Operation {
 	@Override
 	public void dump(PrintStream aOut, int aIndent) {
 		printSpaces(aOut, aIndent);
-		aOut.print("OperationMath, cnt=" + cnt + ", op=" + getMathOpId());
+		aOut.print("OperationMath, cnt=" + getCnt() + ", op=" + getMathOpId());
 		fA.dump(aOut, aIndent + 2);
 		if (fB != null)
 			fB.dump(aOut, aIndent + 2);
@@ -101,7 +101,7 @@ public class OperationMath extends Operation {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fA;

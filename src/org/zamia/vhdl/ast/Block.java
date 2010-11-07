@@ -65,7 +65,7 @@ public class Block extends ConcurrentStatement {
 
 	private AssociationList fGMS;
 
-	public Block(String aLabel, Operation aGuard, ASTObject aParent, long aLocation) {
+	public Block(String aLabel, Operation aGuard, VHDLNode aParent, long aLocation) {
 		super(aLabel, aParent, aLocation);
 		fGuard = aGuard;
 	}
@@ -118,7 +118,7 @@ public class Block extends ConcurrentStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		int n1 = fDecls != null ? fDecls.size() : 0;
 		int n2 = fGenerics != null ? fGenerics.getNumInterfaces() : 0;
 		int n3 = fPorts != null ? fPorts.getNumInterfaces() : 0;
@@ -195,7 +195,7 @@ public class Block extends ConcurrentStatement {
 	}
 
 	@Override
-	public void computeIG(DUUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
+	public void computeIG(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
 
 		String label = getLabel();
 		ToplevelPath path = aStructure.getPath();

@@ -39,7 +39,7 @@ public class TypeDefinitionUnconstrainedArray extends TypeDefinition {
 
 	private TypeDefinition fElementType; /* array */
 
-	public TypeDefinitionUnconstrainedArray(ASTObject aParent, long aLocation) {
+	public TypeDefinitionUnconstrainedArray(VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 	}
 
@@ -71,7 +71,7 @@ public class TypeDefinitionUnconstrainedArray extends TypeDefinition {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (idx_ == 0)
 			return fElementType;
 		return fIndexTypes.get(idx_ - 1);

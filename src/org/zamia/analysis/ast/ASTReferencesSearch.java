@@ -11,8 +11,10 @@ package org.zamia.analysis.ast;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import org.zamia.DUManager;
+import org.zamia.ASTNode;
+import org.zamia.DMManager;
 import org.zamia.ExceptionLogger;
+import org.zamia.IDesignModule;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
@@ -26,7 +28,8 @@ import org.zamia.instgraph.IGInstantiation;
 import org.zamia.instgraph.IGManager;
 import org.zamia.instgraph.IGModule;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.vhdl.ast.Architecture;
 import org.zamia.vhdl.ast.AssociationElement;
 import org.zamia.vhdl.ast.AssociationList;
@@ -34,9 +37,8 @@ import org.zamia.vhdl.ast.Block;
 import org.zamia.vhdl.ast.BlockDeclarativeItem;
 import org.zamia.vhdl.ast.ComponentInstantiation;
 import org.zamia.vhdl.ast.ConcurrentStatement;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.vhdl.ast.DeclarativeItem;
-import org.zamia.vhdl.ast.DesignUnit;
 import org.zamia.vhdl.ast.Entity;
 import org.zamia.vhdl.ast.EntityInstantiation;
 import org.zamia.vhdl.ast.FormalPart;
@@ -48,7 +50,6 @@ import org.zamia.vhdl.ast.Name;
 import org.zamia.vhdl.ast.Operation;
 import org.zamia.vhdl.ast.TypeDeclaration;
 import org.zamia.vhdl.ast.VariableDeclaration;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
 
 
 /**
@@ -68,7 +69,7 @@ public class ASTReferencesSearch {
 
 	private ZamiaProject fZPrj;
 
-	private DUManager fDUM;
+	private DMManager fDUM;
 
 	private IGManager fIGM;
 
@@ -168,13 +169,13 @@ public class ASTReferencesSearch {
 		return res;
 	}
 
-	private HashSetArray<IdDUUIDTuple> searchInstantiators(DUUID aChildDUUID, String aPortID) throws ZamiaException {
+	private HashSetArray<IdDUUIDTuple> searchInstantiators(DMUID aChildDUUID, String aPortID) throws ZamiaException {
 
 		logger.debug("SA: ASTReferencesSearch.searchInstantiators(): looking for instantiators of %s, port id is '%s'", aChildDUUID, aPortID);
 
 		HashSetArray<IdDUUIDTuple> res = new HashSetArray<IdDUUIDTuple>();
 
-		HashSetArray<DUUID> instantiators = fIGM.findInstantiators(aChildDUUID.getUID());
+		HashSetArray<DMUID> instantiators = fIGM.findInstantiators(aChildDUUID.getUID());
 
 		if (instantiators == null) {
 			return null;
@@ -184,11 +185,11 @@ public class ASTReferencesSearch {
 
 		for (int j = 0; j < m; j++) {
 
-			DUUID parentDUUID = instantiators.get(j);
+			DMUID parentDUUID = instantiators.get(j);
 
 			logger.debug("SA: ASTReferencesSearch.searchInstantiators(): Found instantiator: '%s'", parentDUUID);
 
-			DesignUnit parentDU = fDUM.getDU(parentDUUID);
+			IDesignModule parentDU = fDUM.getDM(parentDUUID);
 			if (!(parentDU instanceof Architecture)) {
 				logger.error("SA: ASTReferencesSearch.searchInstantiators(): Architecture for %s not found: %s.", parentDUUID, parentDU);
 				continue;
@@ -217,24 +218,24 @@ public class ASTReferencesSearch {
 		return res;
 	}
 
-	private void searchInstantiationsUp(ConcurrentStatement aStmt, DUUID aParentDUUID, DUUID aWantedChildDUUID, String aFormalId, IGContainer aContainer, IGElaborationEnv aCache,
+	private void searchInstantiationsUp(ConcurrentStatement aStmt, DMUID aParentDUUID, DMUID aWantedChildDUUID, String aFormalId, IGContainer aContainer, IGElaborationEnv aCache,
 			HashSetArray<IdDUUIDTuple> aRes) throws ZamiaException {
 
-		DUUID wantedChildEntityDUUID = aWantedChildDUUID.getEntityDUUID();
+		DMUID wantedChildEntityDUUID = aWantedChildDUUID.getEntityDUUID();
 
 		if (aStmt instanceof InstantiatedUnit) {
 
 			InstantiatedUnit iu = (InstantiatedUnit) aStmt;
 
-			DUUID childDUUID = iu.getChildDUUID(aContainer, aCache);
-			DUUID childEntityDUUID = childDUUID.getEntityDUUID();
+			DMUID childDUUID = iu.getChildDUUID(aContainer, aCache);
+			DMUID childEntityDUUID = childDUUID.getEntityDUUID();
 			if (childEntityDUUID.equals(wantedChildEntityDUUID)) {
 
 				// compute mapping
 
 				AssociationList pms = iu.getPMS();
 
-				Entity childEntity = (Entity) fDUM.getDU(childEntityDUUID);
+				Entity childEntity = (Entity) fDUM.getDM(childEntityDUUID);
 				if (childEntity == null) {
 					logger.error("SA: ASTReferencesSearch.searchInstantiationsUp: Entity of %s not found.", childDUUID);
 					return;
@@ -273,7 +274,7 @@ public class ASTReferencesSearch {
 		}
 	}
 
-	private ArrayList<IdDUUIDTuple> searchInitialSignalDeclarations(DUUID aDUUID, String aPortId) throws ZamiaException {
+	private ArrayList<IdDUUIDTuple> searchInitialSignalDeclarations(DMUID aDUUID, String aPortId) throws ZamiaException {
 
 		ArrayList<IdDUUIDTuple> globalResult = new ArrayList<IdDUUIDTuple>();
 
@@ -293,7 +294,7 @@ public class ASTReferencesSearch {
 			todo.remove(cur);
 			done.add(cur);
 
-			DUUID duuid = cur.fDUUID;
+			DMUID duuid = cur.fDUUID;
 
 			HashSetArray<IdDUUIDTuple> instantiators = searchInstantiators(duuid, cur.fId);
 
@@ -314,12 +315,12 @@ public class ASTReferencesSearch {
 		return globalResult;
 	}
 
-	private void searchSignalReferences(String aId, DUUID aDUUID, boolean aSearchUpward, boolean aSearchDownward, ReferenceSearchResult aResult) throws ZamiaException {
+	private void searchSignalReferences(String aId, DMUID aDUUID, boolean aSearchUpward, boolean aSearchDownward, ReferenceSearchResult aResult) throws ZamiaException {
 
 		logger.debug("SA: ReferencesSearch.searchSignalReferences (id='%s', duuid='%s', searchUpward=%b, searchDownward=%b)", aId, aDUUID, aSearchUpward, aSearchDownward);
 
 		String id = aId;
-		DUUID duuid = aDUUID;
+		DMUID duuid = aDUUID;
 
 		if (aSearchUpward) {
 
@@ -358,7 +359,7 @@ public class ASTReferencesSearch {
 			id = job.fID;
 			ReferenceSearchResult parent = job.parent;
 
-			Architecture arch = (Architecture) fDUM.getDU(duuid);
+			Architecture arch = (Architecture) fDUM.getDM(duuid);
 
 			ReferenceSearchResult rss = new ReferenceSearchResult(arch.toString() + ": " + id, arch.getLocation(), arch.getId().length());
 
@@ -371,11 +372,11 @@ public class ASTReferencesSearch {
 		}
 	}
 
-	private void searchInstantiationSites(DUUID aChildDUUID, ReferenceSearchResult aResult) throws ZamiaException {
+	private void searchInstantiationSites(DMUID aChildDUUID, ReferenceSearchResult aResult) throws ZamiaException {
 
 		logger.debug("SA: ReferencesSearch.searchInstantiationSites(duuid='%s')", aChildDUUID);
 
-		HashSetArray<DUUID> instantiators = fIGM.findInstantiators(aChildDUUID.getUID());
+		HashSetArray<DMUID> instantiators = fIGM.findInstantiators(aChildDUUID.getUID());
 
 		if (instantiators == null) {
 			logger.debug("SA: ReferencesSearch.searchInstantiationSites(): Was never instantiated: '%s'", aChildDUUID);
@@ -386,11 +387,11 @@ public class ASTReferencesSearch {
 
 		for (int j = 0; j < m; j++) {
 
-			DUUID parentDUUID = instantiators.get(j);
+			DMUID parentDUUID = instantiators.get(j);
 
 			logger.debug("SA: ReferencesSearch.searchInstantiationSites(): Found instantiator: '%s'", parentDUUID);
 
-			DesignUnit parentDU = fDUM.getDU(parentDUUID);
+			IDesignModule parentDU = fDUM.getDM(parentDUUID);
 			if (!(parentDU instanceof Architecture)) {
 				logger.error("SA: ReferencesSearch.searchInstantiationSites(): Architecture for %s not found: %s.", parentDUUID, parentDU);
 				continue;
@@ -418,16 +419,16 @@ public class ASTReferencesSearch {
 		}
 	}
 
-	private void searchInstantiationSites(ConcurrentStatement aStmt, DUUID aParentDUUID, DUUID aWantedChildDUUID, IGContainer aContainer, IGElaborationEnv aEE,
+	private void searchInstantiationSites(ConcurrentStatement aStmt, DMUID aParentDUUID, DMUID aWantedChildDUUID, IGContainer aContainer, IGElaborationEnv aEE,
 			ReferenceSearchResult aRes) throws ZamiaException {
 
-		DUUID wantedChildEntityDUUID = aWantedChildDUUID.getEntityDUUID();
+		DMUID wantedChildEntityDUUID = aWantedChildDUUID.getEntityDUUID();
 
 		if (aStmt instanceof InstantiatedUnit) {
 
 			InstantiatedUnit iu = (InstantiatedUnit) aStmt;
 
-			DUUID childDUUID = null;
+			DMUID childDUUID = null;
 
 			try {
 				if (iu instanceof EntityInstantiation) {
@@ -444,7 +445,7 @@ public class ASTReferencesSearch {
 				el.logException(t);
 			}
 			if (childDUUID != null) {
-				DUUID childEntityDUUID = childDUUID.getEntityDUUID();
+				DMUID childEntityDUUID = childDUUID.getEntityDUUID();
 
 				if (childEntityDUUID.equals(wantedChildEntityDUUID)) {
 					aRes.add(new ReferenceSite(iu, RefType.Instantiation));
@@ -495,15 +496,15 @@ public class ASTReferencesSearch {
 
 			Architecture arch = (Architecture) aDeclaration;
 
-			searchInstantiationSites(arch.getDUUID(), result);
+			searchInstantiationSites(arch.getDMUID(), result);
 
 		} else if (aDeclaration instanceof Entity) {
 
 			Entity entity = (Entity) aDeclaration;
 
-			DUUID duuid = entity.getDUUID();
+			DMUID duuid = entity.getDMUID();
 
-			DUUID archDUUID = fDUM.getArchDUUID(duuid);
+			DMUID archDUUID = fDUM.getArchDUUID(duuid);
 
 			searchInstantiationSites(archDUUID, result);
 
@@ -511,7 +512,7 @@ public class ASTReferencesSearch {
 
 			InterfaceDeclaration idecl = (InterfaceDeclaration) aDeclaration;
 
-			ASTObject parent = idecl.getParent();
+			ASTNode parent = idecl.getParent();
 			if (parent instanceof InterfaceList) {
 				parent = parent.getParent();
 			}
@@ -529,7 +530,7 @@ public class ASTReferencesSearch {
 					return null;
 				}
 
-				DUUID duuid = arch.getDUUID();
+				DMUID duuid = arch.getDMUID();
 
 				searchSignalReferences(idecl.getId(), duuid, aSearchUpward, aSearchDownward, result);
 
@@ -544,7 +545,7 @@ public class ASTReferencesSearch {
 
 			BlockDeclarativeItem bdi = (BlockDeclarativeItem) aDeclaration;
 
-			ASTObject scope = bdi.getParent();
+			ASTNode scope = bdi.getParent();
 
 			String id = bdi.getId();
 
@@ -560,11 +561,15 @@ public class ASTReferencesSearch {
 
 				Architecture arch = (Architecture) scope;
 
-				DUUID duuid = arch.getDUUID();
+				DMUID duuid = arch.getDMUID();
 
 				searchSignalReferences(id, duuid, false, aSearchDownward, result);
 			} else {
-				scope.findReferences(id, cat, RefType.ReadWrite, 0, fZPrj, null, null, result, null);
+				if (scope instanceof VHDLNode) {
+					VHDLNode vhdlscope = (VHDLNode) scope;
+					
+					vhdlscope.findReferences(id, cat, RefType.ReadWrite, 0, fZPrj, null, null, result, null);
+				}
 			}
 
 		} else {

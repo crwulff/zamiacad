@@ -16,6 +16,7 @@ import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.Match;
+import org.zamia.ASTNode;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
 import org.zamia.ToplevelPath;
@@ -23,9 +24,9 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite;
+import org.zamia.analysis.ReferenceSite.RefType;
 import org.zamia.analysis.SourceLocation2AST;
 import org.zamia.analysis.SourceLocation2IG;
-import org.zamia.analysis.ReferenceSite.RefType;
 import org.zamia.analysis.ast.ASTDeclarationSearch;
 import org.zamia.analysis.ast.ASTReferencesSearch;
 import org.zamia.analysis.ig.IGReferencesSearch;
@@ -34,7 +35,6 @@ import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperationObject;
 import org.zamia.plugin.ZamiaPlugin;
 import org.zamia.util.Pair;
-import org.zamia.vhdl.ast.ASTObject;
 import org.zamia.vhdl.ast.DeclarativeItem;
 
 
@@ -165,7 +165,7 @@ public class ReferencesSearchQuery implements ISearchQuery {
 				 * information or the user requested ir
 				 */
 
-				ASTObject nearest = SourceLocation2AST.findNearestASTObject(fLocation, true, zprj);
+				ASTNode nearest = SourceLocation2AST.findNearestASTNode(fLocation, true, zprj);
 
 				if (nearest != null) {
 					declaration = ASTDeclarationSearch.search(nearest, zprj);

@@ -68,9 +68,9 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.zamia.BuildPath;
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ExceptionLogger;
-import org.zamia.SFDUInfo;
+import org.zamia.SFDMInfo;
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
 import org.zamia.Toplevel;
@@ -91,9 +91,9 @@ import org.zamia.plugin.editors.annotations.AnnotatedDocument;
 import org.zamia.plugin.views.sim.SimulatorView;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.ASTObject;
-import org.zamia.vhdl.ast.DUUID;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.VHDLNode;
+import org.zamia.vhdl.ast.DMUID;
+import org.zamia.vhdl.ast.DMUID.LUType;
 
 
 /**
@@ -206,17 +206,17 @@ public class ZamiaEditor extends TextEditor implements IShowInTargetList {
 					//SourceFile sf = new SourceFile(new File(filename));
 
 					IGManager igm = fZPrj.getIGM();
-					DUManager dum = fZPrj.getDUM();
+					DMManager dum = fZPrj.getDUM();
 
-					SFDUInfo info = dum.compileFile(fSF, null);
+					SFDMInfo info = dum.compileFile(fSF, null);
 
 					if (info != null) {
 						// use first architecture we can find that provides a path
 
-						int n = info.getNumDUUIDs();
+						int n = info.getNumDMUIDs();
 						for (int i = 0; i < n; i++) {
 
-							DUUID duuid = info.getDUUID(i);
+							DMUID duuid = info.getDMUID(i);
 							if (duuid.getType() != LUType.Architecture) {
 								continue;
 							}
@@ -554,8 +554,8 @@ public class ZamiaEditor extends TextEditor implements IShowInTargetList {
 		ISelection selection = aEvent.getSelection();
 		selectedObject = ((IStructuredSelection) selection).getFirstElement();
 
-		if (selectedObject instanceof ASTObject) {
-			ASTObject io = (ASTObject) selectedObject;
+		if (selectedObject instanceof VHDLNode) {
+			VHDLNode io = (VHDLNode) selectedObject;
 
 			SourceLocation location = io.getLocation();
 			if (location != null) {

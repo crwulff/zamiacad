@@ -10,7 +10,7 @@ package org.zamia.vhdl.ast;
 
 import java.util.ArrayList;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
@@ -29,13 +29,13 @@ import org.zamia.instgraph.IGLibraryImport;
  */
 
 @SuppressWarnings("serial")
-public class Context extends ASTObject {
+public class Context extends VHDLNode {
 
 	private ArrayList<LibraryClause> fLibraries = new ArrayList<LibraryClause>();
 
 	private ArrayList<Use> fUses = new ArrayList<Use>(); // of Use
 
-	public Context(ASTObject parent_, long location_) {
+	public Context(VHDLNode parent_, long location_) {
 		super(parent_, 0l);
 	}
 
@@ -70,7 +70,7 @@ public class Context extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		int n = fLibraries.size();
 		if (idx_ >= n) {
 			idx_ -= n;
@@ -87,7 +87,7 @@ public class Context extends ASTObject {
 	@Override
 	public DeclarativeItem findDeclaration(String id_, ZamiaProject zprj_) {
 
-		DUManager dum = zprj_.getDUM();
+		DMManager dum = zprj_.getDUM();
 
 		// int n = libraries.size();
 		// for (int i = 0; i<n; i++) {

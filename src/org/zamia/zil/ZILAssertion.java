@@ -9,7 +9,7 @@
 package org.zamia.zil;
 
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -22,7 +22,7 @@ public class ZILAssertion extends ZILObject {
 
 	private ZILOperation fOp, fReport, fSeverity;
 
-	public ZILAssertion(ZILOperation aOp, ZILOperation aReport, ZILOperation aSeverity, ZILIContainer container, ASTObject src) {
+	public ZILAssertion(ZILOperation aOp, ZILOperation aReport, ZILOperation aSeverity, ZILIContainer container, VHDLNode src) {
 		super(ZILTypeVoid.getInstance(), container, src);
 		fOp = aOp;
 		fReport = aReport;

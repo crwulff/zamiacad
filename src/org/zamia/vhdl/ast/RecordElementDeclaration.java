@@ -27,20 +27,20 @@ import org.zamia.instgraph.IGElaborationEnv;
  */
 
 @SuppressWarnings("serial")
-public class RecordElementDeclaration extends ASTObject {
+public class RecordElementDeclaration extends VHDLNode {
 
 	private String id;
 
 	private TypeDefinition td;
 
-	public RecordElementDeclaration(String id_, TypeDefinition t_, ASTObject parent_, long location_) {
+	public RecordElementDeclaration(String id_, TypeDefinition t_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		id = id_;
 		td = t_;
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return td;
 	}
 

@@ -27,7 +27,6 @@ import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
-import org.zamia.ZamiaProject.VHDLLanguageSupport;
 import org.zamia.util.ZamiaTmpDir;
 import org.zamia.zdb.ZDBException;
 
@@ -99,7 +98,7 @@ public class Zamia {
 		logger.debug("projectId is %s", fProjectId);
 
 		try {
-			fZPrj = new ZamiaProject(fProjectId, projectBasePath, new SourceFile(new File(projectBuildPath)), projectDataPath, VHDLLanguageSupport.VHDL2008);
+			fZPrj = new ZamiaProject(fProjectId, projectBasePath, new SourceFile(new File(projectBuildPath)), projectDataPath);
 
 		} catch (ZDBException e) {
 			el.logException(e);

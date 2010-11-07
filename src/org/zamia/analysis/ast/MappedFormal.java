@@ -7,7 +7,7 @@
  */
 package org.zamia.analysis.ast;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.InterfaceDeclaration;
 /**
  * @author guenter bartsch
@@ -16,9 +16,9 @@ import org.zamia.vhdl.ast.InterfaceDeclaration;
 public class MappedFormal {
 
 	public InterfaceDeclaration fFormal;
-	public ASTObject fASTObject;
+	public VHDLNode fASTObject;
 	
-	public MappedFormal(InterfaceDeclaration aFormal, ASTObject aASTObject) {
+	public MappedFormal(InterfaceDeclaration aFormal, VHDLNode aASTObject) {
 		
 		fFormal = aFormal;
 		fASTObject = aASTObject;

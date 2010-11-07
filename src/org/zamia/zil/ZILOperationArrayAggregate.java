@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
 import org.zamia.zil.synthesis.VariableRemapping;
@@ -46,7 +46,7 @@ public class ZILOperationArrayAggregate extends ZILOperation {
 	private ArrayList<ZILOperation> fPositionalEntries;
 	private ZILOperation fOthers;
 
-	public ZILOperationArrayAggregate(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILOperationArrayAggregate(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aType, aContainer, aSrc);
 		fEntries = new ArrayList<AggEntry>();
 		fPositionalEntries = new ArrayList<ZILOperation>();

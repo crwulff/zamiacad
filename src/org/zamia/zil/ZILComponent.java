@@ -8,7 +8,7 @@
  */
 package org.zamia.zil;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * 
@@ -20,7 +20,7 @@ public class ZILComponent extends ZILObject{
 	private ZILInterfaceList fInterfaces;
 	private ZILInterfaceList fGenerics;
 
-	public ZILComponent(String aId, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILComponent(String aId, ZILIContainer aContainer, VHDLNode aSrc) {
 		super (aId, null, aContainer, aSrc);
 	}
 

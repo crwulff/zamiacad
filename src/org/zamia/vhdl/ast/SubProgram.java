@@ -56,7 +56,7 @@ public class SubProgram extends BlockDeclarativeItem {
 
 	private boolean pure;
 
-	public SubProgram(String id_, InterfaceList interfaces_, Name returnType_, boolean pure_, ASTObject parent_, long location_) throws ZamiaException {
+	public SubProgram(String id_, InterfaceList interfaces_, Name returnType_, boolean pure_, VHDLNode parent_, long location_) throws ZamiaException {
 		super(id_, parent_, location_);
 		pure = pure_;
 		returnType = returnType_;
@@ -96,7 +96,7 @@ public class SubProgram extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (idx_ == 0)
 			return returnType;
 		if (idx_ == 1)

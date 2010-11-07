@@ -22,7 +22,7 @@ import org.zamia.instgraph.IGType;
 @SuppressWarnings("serial")
 public class TypeDefinitionIncomplete extends TypeDefinition {
 
-	public TypeDefinitionIncomplete(ASTObject parent_, long location_) {
+	public TypeDefinitionIncomplete(VHDLNode parent_, long location_) {
 		super(parent_, location_);
 	}
 
@@ -32,7 +32,7 @@ public class TypeDefinitionIncomplete extends TypeDefinition {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return null;
 	}
 

@@ -11,7 +11,7 @@ package org.zamia;
 import java.io.Serializable;
 
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 /**
@@ -56,7 +56,7 @@ public class ToplevelPath implements Serializable {
 			throw new ZamiaException("ToplevelPath: Couldn't parse: " + aString + " #parts: " + parts.length);
 		}
 
-		DUUID duuid = DUUID.parse(parts[0]);
+		DMUID duuid = DMUID.parse(parts[0]);
 
 		fToplevel = new Toplevel(duuid, null);
 		if (parts.length > 1) {

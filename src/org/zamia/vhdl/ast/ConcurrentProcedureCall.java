@@ -11,7 +11,7 @@ package org.zamia.vhdl.ast;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ErrorReport;
 import org.zamia.ToplevelPath;
 import org.zamia.ZamiaException;
@@ -43,7 +43,7 @@ public class ConcurrentProcedureCall extends ConcurrentStatement {
 
 	private Name fName;
 
-	public ConcurrentProcedureCall(Name aName, String aLabel, ASTObject aParent, long aLocation) {
+	public ConcurrentProcedureCall(Name aName, String aLabel, VHDLNode aParent, long aLocation) {
 		super(aLabel, aParent, aLocation);
 		fName = aName;
 		fName.setParent(this);
@@ -71,7 +71,7 @@ public class ConcurrentProcedureCall extends ConcurrentStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fName;
 	}
 
@@ -86,7 +86,7 @@ public class ConcurrentProcedureCall extends ConcurrentStatement {
 		fName.findReferences(aId, aCat, aRefType, aDepth + 1, aZPrj, aContainer, aEE, aResult, aTODO);
 	}
 
-	public void computeIG(DUUID aDUUID, IGContainer aContainer, IGStructure aStruct, IGElaborationEnv aEE) throws ZamiaException {
+	public void computeIG(DMUID aDUUID, IGContainer aContainer, IGStructure aStruct, IGElaborationEnv aEE) throws ZamiaException {
 
 		/*
 		 * let's simply turn this into a small process
@@ -106,7 +106,7 @@ public class ConcurrentProcedureCall extends ConcurrentStatement {
 				throw new ZamiaException("Subprogram invocation expected here.\n" + report, this);
 			} else {
 
-				DUUID duuid = du.getDUUID();
+				DMUID duuid = du.getDUUID();
 				
 				IGInstantiation inst = new IGInstantiation(aDUUID, duuid, getLabel(), getLocation(), aEE.getZDB());
 				inst.computeSignature();
@@ -115,7 +115,7 @@ public class ConcurrentProcedureCall extends ConcurrentStatement {
 				ToplevelPath path = aStruct.getPath().append(getLabel());
 
 				ZamiaProject zprj = aEE.getZamiaProject();
-				DUManager dum = zprj.getDUM();
+				DMManager dum = zprj.getDUM();
 				IGManager igm = zprj.getIGM();
 				
 				Architecture arch = dum.getArchitecture(duuid.getLibId(), duuid.getId(), duuid.getArchId());
@@ -124,7 +124,7 @@ public class ConcurrentProcedureCall extends ConcurrentStatement {
 					throw new ZamiaException ("Architecture not found for "+duuid, getLocation());
 				}
 				
-				igm.getOrCreateIGModule(path, aDUUID, arch.getDUUID(), inst.getSignature(), inst.getActualGenerics(), true, getLocation());
+				igm.getOrCreateIGModule(path, aDUUID, arch.getDMUID(), inst.getSignature(), inst.getActualGenerics(), true, getLocation());
 				
 			}
 		} else {

@@ -27,9 +27,9 @@ import org.zamia.instgraph.IGOperationCache;
  */
 
 @SuppressWarnings("serial")
-public abstract class NameExtension extends ASTObject {
+public abstract class NameExtension extends VHDLNode {
 
-	public NameExtension(ASTObject aParent, long aLocation) {
+	public NameExtension(VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 	}
 

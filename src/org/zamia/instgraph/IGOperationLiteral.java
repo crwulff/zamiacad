@@ -19,7 +19,7 @@ import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGPushStmt;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 
 
 /**

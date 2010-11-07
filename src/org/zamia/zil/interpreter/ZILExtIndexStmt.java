@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 import org.zamia.zil.ZILTypeArray;
 import org.zamia.zil.ZILTypeDiscrete;
@@ -33,7 +33,7 @@ public class ZILExtIndexStmt extends ZILStmt {
 		return subType;
 	}
 
-	public ZILExtIndexStmt(ZILType type_, ZILType subType_, ASTObject src_) {
+	public ZILExtIndexStmt(ZILType type_, ZILType subType_, VHDLNode src_) {
 		super(src_);
 		// resType = type_;
 		subType = subType_;

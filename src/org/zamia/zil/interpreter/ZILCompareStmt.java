@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.OperationCompare.CompareOp;
 import org.zamia.zil.ZILType;
 import org.zamia.zil.ZILValue;
@@ -27,7 +27,7 @@ public class ZILCompareStmt extends ZILStmt {
 
 	private CompareOp op;
 
-	public ZILCompareStmt(CompareOp op_, ASTObject src_) {
+	public ZILCompareStmt(CompareOp op_, VHDLNode src_) {
 		super(src_);
 		op = op_;
 	}

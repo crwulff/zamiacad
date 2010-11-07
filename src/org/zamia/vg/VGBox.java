@@ -21,7 +21,7 @@ import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -90,7 +90,7 @@ public class VGBox {
 
 	public void dump(int aI, PrintStream aOut) {
 
-		ASTObject.printlnIndented(fTitle + " {", aI, aOut);
+		VHDLNode.printlnIndented(fTitle + " {", aI, aOut);
 
 		int n = fSignals.size();
 		for (int i = 0; i < n; i++) {
@@ -104,7 +104,7 @@ public class VGBox {
 			child.dump(aI + 2, aOut);
 		}
 
-		ASTObject.printlnIndented("}", aI, aOut);
+		VHDLNode.printlnIndented("}", aI, aOut);
 	}
 
 	public int countBoxes() {

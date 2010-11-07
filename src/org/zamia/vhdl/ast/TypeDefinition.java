@@ -30,9 +30,9 @@ import org.zamia.instgraph.IGSubProgram.IGBuiltin;
  */
 
 @SuppressWarnings("serial")
-public abstract class TypeDefinition extends ASTObject {
+public abstract class TypeDefinition extends VHDLNode {
 
-	public TypeDefinition(ASTObject aParent, long aLocation) {
+	public TypeDefinition(VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 	}
 	

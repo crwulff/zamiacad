@@ -62,26 +62,26 @@ public class OperationLiteral extends Operation {
 
 	// private Range range;
 
-	public OperationLiteral(String value_, LiteralCat category_, ASTObject parent_, long location_) throws ZamiaException {
+	public OperationLiteral(String value_, LiteralCat category_, VHDLNode parent_, long location_) throws ZamiaException {
 		super(parent_, location_);
 		setImage(value_, category_);
 	}
 
 	// convenience
-	public OperationLiteral(int value_, ASTObject parent_, long location_) throws ZamiaException {
+	public OperationLiteral(int value_, VHDLNode parent_, long location_) throws ZamiaException {
 		super(parent_, location_);
 		cat = LiteralCat.DECIMAL;
 		image = "" + value_;
 	}
 
 	// convenience
-	public OperationLiteral(double value_, ASTObject parent_, long location_) throws ZamiaException {
+	public OperationLiteral(double value_, VHDLNode parent_, long location_) throws ZamiaException {
 		super(parent_, location_);
 		image = "" + value_;
 		cat = LiteralCat.DECIMAL;
 	}
 
-	public OperationLiteral(OperationLiteral value_, Name name_, ASTObject parent_, long location_) throws ZamiaException {
+	public OperationLiteral(OperationLiteral value_, Name name_, VHDLNode parent_, long location_) throws ZamiaException {
 		super(parent_, location_);
 		if (value_ != null) {
 			value_.setParent(this);
@@ -265,7 +265,7 @@ public class OperationLiteral extends Operation {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return unitN;
 	}
 

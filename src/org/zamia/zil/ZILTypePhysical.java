@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 
 import org.zamia.ZamiaException;
 import org.zamia.util.HashMapArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -27,7 +27,7 @@ public class ZILTypePhysical extends ZILTypeScalar {
 
 	private HashMapArray<String, ZILValue> fUnits = new HashMapArray<String, ZILValue>(1);
 
-	public ZILTypePhysical(ZILRange aRange, ZILType aBaseTyppe, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTypePhysical(ZILRange aRange, ZILType aBaseTyppe, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aRange, aBaseTyppe, aDeclaration, aContainer, aSrc);
 	}
 
@@ -142,7 +142,7 @@ public class ZILTypePhysical extends ZILTypeScalar {
 	}
 
 	@Override
-	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		ZILTypePhysical tp = new ZILTypePhysical(aRange, this, aDeclaration, aContainer, aSrc);
 		
 		tp.setUnits(getUnits()); 

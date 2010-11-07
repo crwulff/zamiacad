@@ -33,18 +33,18 @@ import org.zamia.util.HashMapArray;
 @SuppressWarnings("serial")
 public class Library extends DeclarativeItem {
 
-	private HashMapArray<String, DUUID> fDUs;
+	private HashMapArray<String, DMUID> fDUs;
 
 	public Library(String aId) {
 		super(aId, null, 0l);
-		fDUs = new HashMapArray<String, DUUID>();
+		fDUs = new HashMapArray<String, DMUID>();
 	}
 
 	public int getNumDUs() {
 		return fDUs.size();
 	}
 
-	public DUUID getDU(int aIdx) {
+	public DMUID getDU(int aIdx) {
 		return fDUs.get(aIdx);
 	}
 
@@ -81,7 +81,7 @@ public class Library extends DeclarativeItem {
 	 */
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -92,7 +92,7 @@ public class Library extends DeclarativeItem {
 		return 0;
 	}
 
-	public void add(DUUID aDUUID) {
+	public void add(DMUID aDUUID) {
 		fDUs.put(aDUUID.getUID(), aDUUID);
 	}
 

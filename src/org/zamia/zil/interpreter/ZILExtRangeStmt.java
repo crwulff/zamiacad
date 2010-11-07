@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILTypeArray;
 import org.zamia.zil.ZILTypeDiscrete;
 import org.zamia.zil.ZILValue;
@@ -27,7 +27,7 @@ public class ZILExtRangeStmt extends ZILStmt {
 
 	private ZILTypeArray resType;
 
-	public ZILExtRangeStmt(ZILTypeArray resType_, ASTObject src_) {
+	public ZILExtRangeStmt(ZILTypeArray resType_, VHDLNode src_) {
 		super(src_);
 		resType = resType_;
 	}

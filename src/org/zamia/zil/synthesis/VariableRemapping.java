@@ -13,7 +13,7 @@ import java.util.HashMap;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLGraph;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILIContainer;
 import org.zamia.zil.ZILType;
 import org.zamia.zil.ZILVariable;
@@ -51,7 +51,7 @@ public class VariableRemapping {
 		return null;
 	}
 	
-	public ZILVariable remap(ZILVariable aOldVariable, ZILIContainer aContainer, ASTObject aSource) {
+	public ZILVariable remap(ZILVariable aOldVariable, ZILIContainer aContainer, VHDLNode aSource) {
 
 		ZILVariable nVar = new ZILVariable(aOldVariable.getId()+"(remapped)", aOldVariable.getType(), aOldVariable.getInitialValue(), aContainer, aSource);
 

@@ -12,7 +12,7 @@ package org.zamia.vhdl.ast;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
@@ -37,7 +37,7 @@ public class EntityInstantiation extends InstantiatedUnit {
 
 	private String fArchId;
 
-	public EntityInstantiation(String aLabel, Name aName, String aArchId, ASTObject aParent, long aLocation) {
+	public EntityInstantiation(String aLabel, Name aName, String aArchId, VHDLNode aParent, long aLocation) {
 		super(aLabel, aName, aParent, aLocation);
 		fArchId = aArchId;
 	}
@@ -60,7 +60,7 @@ public class EntityInstantiation extends InstantiatedUnit {
 	}
 
 	@Override
-	public IGInstantiation computeIGInstantiation(DUUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) {
+	public IGInstantiation computeIGInstantiation(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) {
 		try {
 			IGDUUID igDUUID = fName.computeIGAsDesignUnit(aContainer, aEE, ASTErrorMode.EXCEPTION, null);
 
@@ -68,9 +68,9 @@ public class EntityInstantiation extends InstantiatedUnit {
 				throw new ZamiaException("Entity name expected here.", fName);
 			}
 
-			DUUID duuid = igDUUID.getDUUID();
+			DMUID duuid = igDUUID.getDUUID();
 
-			DUManager duManager = aEE.getZamiaProject().getDUM();
+			DMManager duManager = aEE.getZamiaProject().getDUM();
 
 			Architecture arch = duManager.getArchitecture(duuid.getLibId(), duuid.getId(), fArchId);
 
@@ -96,9 +96,9 @@ public class EntityInstantiation extends InstantiatedUnit {
 			throw new ZamiaException("Entity name expected here.", fName);
 		}
 
-		DUUID duuid = igDUUID.getDUUID();
+		DMUID duuid = igDUUID.getDUUID();
 
-		DUManager duManager = aCache.getZamiaProject().getDUM();
+		DMManager duManager = aCache.getZamiaProject().getDUM();
 
 		Architecture arch = duManager.getArchitecture(duuid.getLibId(), duuid.getId(), fArchId);
 

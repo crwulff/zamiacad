@@ -11,7 +11,7 @@ package org.zamia.zil.interpreter;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILIReferable;
 import org.zamia.zil.ZILType;
 import org.zamia.zil.ZILValue;
@@ -32,17 +32,17 @@ public class ZILPushStmt extends ZILStmt {
 
 	private RTLSignal fSignal;
 
-	public ZILPushStmt(ZILIReferable aObject, ASTObject aSrc) {
+	public ZILPushStmt(ZILIReferable aObject, VHDLNode aSrc) {
 		super(aSrc);
 		fObject = aObject;
 	}
 
-	public ZILPushStmt(RTLSignal aSignal, ASTObject aSrc) {
+	public ZILPushStmt(RTLSignal aSignal, VHDLNode aSrc) {
 		super(aSrc);
 		fSignal = aSignal;
 	}
 
-	public ZILPushStmt(ZILType aType, ASTObject aSrc) {
+	public ZILPushStmt(ZILType aType, VHDLNode aSrc) {
 		super(aSrc);
 		fType = aType;
 	}

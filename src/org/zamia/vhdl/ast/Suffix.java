@@ -27,7 +27,7 @@ import org.zamia.instgraph.IGElaborationEnv;
  *
  */
 @SuppressWarnings("serial")
-public class Suffix extends ASTObject {
+public class Suffix extends VHDLNode {
 	
 	public enum SuffixType {ID, STRING_LITERAL, CHAR_LITERAL, ALL}
 	
@@ -77,7 +77,7 @@ public class Suffix extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return null;
 	}
 

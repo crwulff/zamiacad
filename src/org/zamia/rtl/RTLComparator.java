@@ -12,7 +12,7 @@ package org.zamia.rtl;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.OperationCompare.CompareOp;
 import org.zamia.zil.ZILType;
 
@@ -29,7 +29,7 @@ public class RTLComparator extends RTLModule {
 	private RTLPort a, b, z;
 	private ZILType type;
 
-	public RTLComparator (CompareOp op_, ZILType type_, RTLGraph parent_, String instanceName_, ASTObject src_) {
+	public RTLComparator (CompareOp op_, ZILType type_, RTLGraph parent_, String instanceName_, VHDLNode src_) {
 		super(parent_, instanceName_, src_);
 
 		op = op_;

@@ -16,7 +16,7 @@ import org.zamia.IHDLParser;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaProject;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.vhdl.vhdl2008.VHDL2008Parser;
 
 
@@ -40,7 +40,7 @@ public class ParserBenchmark {
 
 			long startTime = System.currentTimeMillis();
 			
-			HashSetArray<DUUID> dus = aParser.parse(rd, "WORK", sf, 1, false, true, zprj);
+			HashSetArray<DMUID> dus = aParser.parse(rd, "WORK", sf, 1, false, true, zprj);
 
 			long stopTime = System.currentTimeMillis();
 

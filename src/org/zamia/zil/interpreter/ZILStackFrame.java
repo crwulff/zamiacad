@@ -13,7 +13,7 @@ import java.io.Serializable;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.PortVarWriter;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILFileObject;
 import org.zamia.zil.ZILType;
 import org.zamia.zil.ZILValue;
@@ -84,7 +84,7 @@ public class ZILStackFrame implements Serializable {
 	public int getInt(Simulator aSimulator) throws ZamiaException {
 		ZILValue v = getValue(aSimulator);
 
-		return v.getInt((ASTObject) null);
+		return v.getInt((VHDLNode) null);
 	}
 	
 	public ZILType getType() {

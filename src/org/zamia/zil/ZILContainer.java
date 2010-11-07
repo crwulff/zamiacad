@@ -8,14 +8,14 @@
  */
 package org.zamia.zil;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
+import org.zamia.IDesignModule;
 import org.zamia.ZamiaException;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
-import org.zamia.vhdl.ast.DUUID;
-import org.zamia.vhdl.ast.DesignUnit;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.VHDLNode;
+import org.zamia.vhdl.ast.DMUID;
+import org.zamia.vhdl.ast.DMUID.LUType;
 
 
 /**
@@ -28,14 +28,14 @@ public abstract class ZILContainer extends ZILObject implements ZILIContainer {
 
 	private HashMapArray<String, ZILIObject> fItems;
 	private HashSetArray<String> fImporters;
-	private DUManager fDUM;
+	private DMManager fDUM;
 
-	public ZILContainer(String aId, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILContainer(String aId, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aId, aType, aContainer, aSrc);
 		fItems = new HashMapArray<String, ZILIObject>();
 	}
 
-	public void addEntityImporter(String aLibId, DUManager aDUM) {
+	public void addEntityImporter(String aLibId, DMManager aDUM) {
 		if (fImporters == null) {
 			fImporters = new HashSetArray<String>();
 		}
@@ -43,7 +43,7 @@ public abstract class ZILContainer extends ZILObject implements ZILIContainer {
 		fDUM = aDUM;
 	}
 
-	public void add(ZILIObject aObject, ASTObject aSrc) throws ZamiaException {
+	public void add(ZILIObject aObject, VHDLNode aSrc) throws ZamiaException {
 
 		String id = aObject.getId();
 
@@ -111,10 +111,10 @@ public abstract class ZILContainer extends ZILObject implements ZILIContainer {
 
 				String libId = fImporters.get(i);
 
-				DUUID duuid = new DUUID(LUType.Entity, libId, aId, null);
+				DMUID duuid = new DMUID(LUType.Entity, libId, aId, null);
 				
 				try {
-					DesignUnit du = fDUM.getDU(duuid);
+					IDesignModule du = fDUM.getDM(duuid);
 					
 					if (du != null) {
 						return new ZILDUUID(aId, duuid);

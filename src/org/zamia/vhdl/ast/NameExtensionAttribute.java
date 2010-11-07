@@ -45,7 +45,7 @@ public class NameExtensionAttribute extends NameExtension {
 
 	private Operation fExp;
 
-	public NameExtensionAttribute(String aId, Signature aSignature, Operation aExp, ASTObject aParent, long aLocation) {
+	public NameExtensionAttribute(String aId, Signature aSignature, Operation aExp, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 
 		fId = aId;
@@ -67,7 +67,7 @@ public class NameExtensionAttribute extends NameExtension {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fExp;

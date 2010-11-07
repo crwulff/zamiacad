@@ -12,29 +12,30 @@ package org.zamia.vhdl.ast;
 import java.util.ArrayList;
 
 import org.apache.log4j.Level;
-import org.zamia.DUManager;
+import org.zamia.DMManager;
+import org.zamia.IDesignModule;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite.RefType;
-import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
+import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGContainerItem;
+import org.zamia.instgraph.IGDesignUnit;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGManager;
+import org.zamia.instgraph.IGModule;
 import org.zamia.instgraph.IGObject;
-import org.zamia.instgraph.IGPackage;
-import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGSubProgram.IGBuiltin;
+import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGType.TypeCat;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID.LUType;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * 
@@ -59,7 +60,7 @@ public class VHDLPackage extends PrimaryUnit {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return getContext();
@@ -85,8 +86,8 @@ public class VHDLPackage extends PrimaryUnit {
 	}
 
 	@Override
-	public DUUID getDUUID(String libId_) throws ZamiaException {
-		return new DUUID(LUType.Package, libId_, getId(), null);
+	public DMUID getDMUID(String libId_) throws ZamiaException {
+		return new DMUID(LUType.Package, libId_, getId(), null);
 	}
 
 	@Override
@@ -99,7 +100,8 @@ public class VHDLPackage extends PrimaryUnit {
 
 	}
 
-	public void computeIG(IGManager aIGM, IGPackage aPkg) {
+	@Override
+	public void computeIG(IGManager aIGM, IGDesignUnit aPkg) {
 
 		boolean bootstrapMode = getLibId().equals("STD") && getId().equals("STANDARD");
 
@@ -155,11 +157,11 @@ public class VHDLPackage extends PrimaryUnit {
 		try {
 			// look for package body
 
-			DUUID duuid = new DUUID(LUType.PackageBody, getLibId(), getId(), null);
+			DMUID duuid = new DMUID(LUType.PackageBody, getLibId(), getId(), null);
 
-			DUManager dum = zprj.getDUM();
+			DMManager dum = zprj.getDUM();
 
-			DesignUnit bodyDU = dum.getDU(duuid);
+			IDesignModule bodyDU = dum.getDM(duuid);
 
 			if (bodyDU != null) {
 
@@ -280,6 +282,10 @@ public class VHDLPackage extends PrimaryUnit {
 		} catch (ZamiaException e) {
 			el.logZamiaException(e);
 		}
+	}
+
+	@Override
+	public void computeStatementsIG(IGManager aIGM, IGModule aModule) {
 	}
 
 }

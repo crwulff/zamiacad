@@ -9,7 +9,7 @@ package org.zamia.zil;
 
 import org.zamia.ZamiaException;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILLabel;
 import org.zamia.zil.synthesis.Bindings;
@@ -28,7 +28,7 @@ public class ZILSequentialWhile extends ZILSequentialStatement {
 
 	private ZILOperation fCond;
 
-	public ZILSequentialWhile(ZILOperation aCond, ZILSequenceOfStatements aStmtSequence, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSequentialWhile(ZILOperation aCond, ZILSequenceOfStatements aStmtSequence, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aContainer, aSrc);
 		fCond = aCond;
 		fStmtSequence = aStmtSequence;

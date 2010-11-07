@@ -8,9 +8,9 @@
  */
 package org.zamia.zil;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -23,9 +23,9 @@ public interface ZILIContainer extends ZILIObject {
 
 	public ZILIObject resolve(String aId);
 
-	public void add(ZILIObject object, ASTObject aSrc) throws ZamiaException;
+	public void add(ZILIObject object, VHDLNode aSrc) throws ZamiaException;
 	
 	public ZILIContainer getContainer();
 
-	public void addEntityImporter(String aLibId, DUManager aDU);
+	public void addEntityImporter(String aLibId, DMManager aDU);
 }

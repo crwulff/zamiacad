@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2009 by the authors indicated in the @author tags.
+ * Copyright 2006-2010 by the authors indicated in the @author tags.
  * All rights reserved.
  *
  * See the LICENSE file for details.
@@ -11,7 +11,8 @@ package org.zamia.vhdl.ast;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
+import org.zamia.IDesignModule;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
@@ -29,9 +30,9 @@ import org.zamia.zdb.ZDB;
  */
 
 @SuppressWarnings("serial")
-public abstract class DesignUnit extends DeclarativeItem {
+public abstract class DesignUnit extends DeclarativeItem implements IDesignModule {
 
-	protected transient DUUID fDUUID = null;
+	protected transient DMUID fDUUID = null;
 
 	private transient ZDB fZDB;
 
@@ -189,7 +190,7 @@ public abstract class DesignUnit extends DeclarativeItem {
 		}
 
 		if (aId.equals("WORK")) {
-			DUManager dum = getZPrj().getDUM();
+			DMManager dum = getZPrj().getDUM();
 			return dum.getLibrary(fLibId);
 		}
 
@@ -200,18 +201,17 @@ public abstract class DesignUnit extends DeclarativeItem {
 		return super.findDeclaration(aId, aZPrj);
 	}
 
-	public final DUUID getDUUID() throws ZamiaException {
+	@Override
+	public final DMUID getDMUID() throws ZamiaException {
 
 		if (fDUUID != null) {
 			return fDUUID;
 		}
 
-		fDUUID = getDUUID(fLibId);
+		fDUUID = getDMUID(fLibId);
 
 		return fDUUID;
 	}
-
-	public abstract DUUID getDUUID(String aLibId) throws ZamiaException;
 
 	@Override
 	public final IGContainerItem computeIG(ArrayList<IGContainerItem> aSpecItems, IGContainer aContainer, IGElaborationEnv aCache) throws ZamiaException {

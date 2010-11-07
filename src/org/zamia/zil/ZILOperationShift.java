@@ -11,7 +11,7 @@ package org.zamia.zil;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
 import org.zamia.zil.synthesis.VariableRemapping;
@@ -30,7 +30,7 @@ public class ZILOperationShift extends ZILOperation {
 
 	private ZILOperation fB;
 
-	public ZILOperationShift(int aOp, ZILOperation aA, ZILOperation aB, ZILType type, ZILIContainer container, ASTObject src) {
+	public ZILOperationShift(int aOp, ZILOperation aA, ZILOperation aB, ZILType type, ZILIContainer container, VHDLNode src) {
 		super(type, container, src);
 
 		fOp = aOp;

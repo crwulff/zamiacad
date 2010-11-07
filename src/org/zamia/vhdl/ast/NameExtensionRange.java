@@ -32,7 +32,7 @@ import org.zamia.instgraph.IGOperationRange;
 import org.zamia.instgraph.IGOperationTypeConversion;
 import org.zamia.instgraph.IGSubProgram;
 import org.zamia.instgraph.IGType;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID.LUType;
 
 
 /**
@@ -46,7 +46,7 @@ public class NameExtensionRange extends NameExtension {
 
 	private ArrayList<Range> fRanges = new ArrayList<Range>();
 
-	public NameExtensionRange(Range aRange, ASTObject aParent, long aLocation) {
+	public NameExtensionRange(Range aRange, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		add(aRange);
 	}
@@ -82,7 +82,7 @@ public class NameExtensionRange extends NameExtension {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fRanges.get(aIdx);
 	}
 
@@ -196,8 +196,8 @@ public class NameExtensionRange extends NameExtension {
 				return;
 			}
 
-			DUUID entityDUUID = ((IGDUUID) obj).getDUUID();
-			DUUID archDUUID = new DUUID(LUType.Architecture, entityDUUID.getLibId(), entityDUUID.getId(), name.getId());
+			DMUID entityDUUID = ((IGDUUID) obj).getDUUID();
+			DMUID archDUUID = new DMUID(LUType.Architecture, entityDUUID.getLibId(), entityDUUID.getId(), name.getId());
 
 			aResult.add(new IGDUUID(archDUUID, getLocation(), aEE.getZDB()));
 			return;

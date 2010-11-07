@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 import org.zamia.zil.ZILTypeArray;
 import org.zamia.zil.ZILTypeDiscrete;
@@ -30,7 +30,7 @@ public class RTLArrayAggregate extends RTLModule {
 	private RTLPort z;
 	private ArrayList<RTLPort> inputs;
 	
-	public RTLArrayAggregate (ZILTypeArray resType_, RTLGraph parent_, String instanceName_, ASTObject src_) throws ZamiaException {
+	public RTLArrayAggregate (ZILTypeArray resType_, RTLGraph parent_, String instanceName_, VHDLNode src_) throws ZamiaException {
 		super(parent_, instanceName_, src_);
 		
 		resType = resType_;

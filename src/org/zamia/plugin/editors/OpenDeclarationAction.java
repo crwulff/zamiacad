@@ -13,6 +13,7 @@ import java.io.IOException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.ui.IWorkbenchPage;
+import org.zamia.ASTNode;
 import org.zamia.SourceLocation;
 import org.zamia.ToplevelPath;
 import org.zamia.ZamiaException;
@@ -28,7 +29,6 @@ import org.zamia.instgraph.IGOperationObject;
 import org.zamia.instgraph.IGType;
 import org.zamia.plugin.ZamiaPlugin;
 import org.zamia.util.Pair;
-import org.zamia.vhdl.ast.ASTObject;
 import org.zamia.vhdl.ast.DeclarativeItem;
 
 
@@ -136,7 +136,7 @@ public class OpenDeclarationAction extends StaticAnalysisAction {
 				logger.info("=======================");
 				logger.info("SourceLocation: %s", fLocation);
 
-				ASTObject nearest = SourceLocation2AST.findNearestASTObject(fLocation, true, fZPrj);
+				ASTNode nearest = SourceLocation2AST.findNearestASTNode(fLocation, true, fZPrj);
 
 				if (nearest != null) {
 					DeclarativeItem declaration = ASTDeclarationSearch.search(nearest, fZPrj);

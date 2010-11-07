@@ -21,7 +21,7 @@ import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.sim.IGISimCursor;
 import org.zamia.plugin.views.sim.SimulatorView.TraceDisplayMode;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 
 
 /**

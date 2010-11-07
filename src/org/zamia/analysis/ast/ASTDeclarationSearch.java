@@ -11,11 +11,11 @@ package org.zamia.analysis.ast;
 
 import java.io.IOException;
 
-import org.zamia.DUManager;
+import org.zamia.ASTNode;
+import org.zamia.DMManager;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
-import org.zamia.vhdl.ast.ASTObject;
 import org.zamia.vhdl.ast.Architecture;
 import org.zamia.vhdl.ast.AssociationElement;
 import org.zamia.vhdl.ast.AssociationList;
@@ -34,7 +34,6 @@ import org.zamia.vhdl.ast.NameExtensionSuffix;
 import org.zamia.vhdl.ast.OperationName;
 import org.zamia.vhdl.ast.VHDLPackage;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -49,9 +48,9 @@ public class ASTDeclarationSearch {
 	private ASTDeclarationSearch() {
 	}
 
-	public static DeclarativeItem search(ASTObject aNearest, ZamiaProject aZPrj) throws ZamiaException, IOException {
+	public static DeclarativeItem search(ASTNode aNearest, ZamiaProject aZPrj) throws ZamiaException, IOException {
 
-		DUManager dum = aZPrj.getDUM();
+		DMManager dum = aZPrj.getDUM();
 
 		if (aNearest instanceof NameExtension) {
 			aNearest = aNearest.getParent();
@@ -85,7 +84,7 @@ public class ASTDeclarationSearch {
 			aNearest = ((OperationName) aNearest).getName();
 		}
 
-		ASTObject parent = aNearest.getParent();
+		ASTNode parent = aNearest.getParent();
 		if (parent instanceof FormalPart) {
 
 			if (dump) {
@@ -201,7 +200,7 @@ public class ASTDeclarationSearch {
 
 			String id = name.getId();
 
-			declaration = aNearest.findDeclaration(id, aZPrj);
+			declaration = name.findDeclaration(id, aZPrj);
 
 			if (dump) {
 				logger.debug("SA: findDeclaration() returned: '%s' ", declaration);

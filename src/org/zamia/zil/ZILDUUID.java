@@ -10,8 +10,8 @@ package org.zamia.zil;
 
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
-import org.zamia.vhdl.ast.ASTObject;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.VHDLNode;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 
 
@@ -24,10 +24,10 @@ public class ZILDUUID implements ZILIObject{
 
 	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
-	private DUUID fDUUID;
+	private DMUID fDUUID;
 	private String fId;
 
-	public ZILDUUID(String aId, DUUID aDUUID) {
+	public ZILDUUID(String aId, DMUID aDUUID) {
 		fId = aId;
 		fDUUID = aDUUID;
 	}
@@ -36,7 +36,7 @@ public class ZILDUUID implements ZILIObject{
 		return fId;
 	}
 
-	public DUUID getDUUID() {
+	public DMUID getDUUID() {
 		return fDUUID;
 	}
 	
@@ -44,7 +44,7 @@ public class ZILDUUID implements ZILIObject{
 		return null;
 	}
 
-	public ASTObject getSrc() {
+	public VHDLNode getSrc() {
 		return null;
 	}
 

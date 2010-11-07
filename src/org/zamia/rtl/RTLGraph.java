@@ -22,9 +22,9 @@ import org.zamia.ZamiaProject;
 import org.zamia.rtl.RTLPort.PortDir;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.Architecture;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.vhdl.ast.SignalDeclaration;
 import org.zamia.vhdl.ast.OperationCompare.CompareOp;
 import org.zamia.vhdl.ast.OperationLogic.LogicOp;
@@ -78,7 +78,7 @@ public class RTLGraph extends RTLModule {
 
 	public final static boolean enableSanityChecks = false;
 
-	public RTLGraph(String instanceName_, String className_, ASTObject src_, Architecture arch_) {
+	public RTLGraph(String instanceName_, String className_, VHDLNode src_, Architecture arch_) {
 		super(null, instanceName_, src_);
 		className = className_;
 		arch = arch_;
@@ -206,7 +206,7 @@ public class RTLGraph extends RTLModule {
 	 * @throws ZamiaException
 	 */
 
-	public RTLSignal sigJoin(RTLSignal driving_, RTLSignal receiving, ASTObject src_) throws ZamiaException {
+	public RTLSignal sigJoin(RTLSignal driving_, RTLSignal receiving, VHDLNode src_) throws ZamiaException {
 
 		ZILType drivingT = driving_.getType().simplify();
 		ZILType receivingT = receiving.getType().simplify();
@@ -289,7 +289,7 @@ public class RTLGraph extends RTLModule {
 					System.out.println("Signal '" + res + "' claims to be connected to " + conn.getId() + " but in fact the port is connected to " + conn.getSignal());
 
 			}
-			ASTObject src = victim.getSource();
+			VHDLNode src = victim.getSource();
 			if (src instanceof SignalDeclaration)
 				res.setSource(src);
 
@@ -299,7 +299,7 @@ public class RTLGraph extends RTLModule {
 		}
 	}
 
-	public RTLSignal placeOperationMath(MathOp op_, RTLSignal a_, RTLSignal b_, ZILType outType_, ASTObject src_) throws ZamiaException {
+	public RTLSignal placeOperationMath(MathOp op_, RTLSignal a_, RTLSignal b_, ZILType outType_, VHDLNode src_) throws ZamiaException {
 
 		RTLOperationMath module = new RTLOperationMath(op_, a_.getType(), outType_, this, null, src_);
 		add(module);
@@ -319,7 +319,7 @@ public class RTLGraph extends RTLModule {
 		return res;
 	}
 
-	public RTLSignal placeOperationLogic(LogicOp op_, RTLSignal a_, RTLSignal b_, ASTObject src_) throws ZamiaException {
+	public RTLSignal placeOperationLogic(LogicOp op_, RTLSignal a_, RTLSignal b_, VHDLNode src_) throws ZamiaException {
 
 		RTLOperationLogic module = new RTLOperationLogic(op_, a_.getType(), this, null, src_);
 		add(module);
@@ -339,7 +339,7 @@ public class RTLGraph extends RTLModule {
 		return res;
 	}
 
-	public RTLSignal placeComparator(CompareOp op_, RTLSignal a_, RTLSignal b_, ASTObject src_) throws ZamiaException {
+	public RTLSignal placeComparator(CompareOp op_, RTLSignal a_, RTLSignal b_, VHDLNode src_) throws ZamiaException {
 
 		RTLComparator module = new RTLComparator(op_, a_.getType(), this, null, src_);
 		add(module);
@@ -358,7 +358,7 @@ public class RTLGraph extends RTLModule {
 		return res;
 	}
 
-	public RTLArrayAggregate placeArrayAggregate(ZILTypeArray resType_, ASTObject src_) throws ZamiaException {
+	public RTLArrayAggregate placeArrayAggregate(ZILTypeArray resType_, VHDLNode src_) throws ZamiaException {
 
 		RTLArrayAggregate module = new RTLArrayAggregate(resType_, this, null, src_);
 		add(module);
@@ -366,7 +366,7 @@ public class RTLGraph extends RTLModule {
 		return module;
 	}
 
-	public RTLRecordAggregate placeRecordAggregate(ZILTypeRecord resType_, ASTObject src_) throws ZamiaException {
+	public RTLRecordAggregate placeRecordAggregate(ZILTypeRecord resType_, VHDLNode src_) throws ZamiaException {
 
 		RTLRecordAggregate module = new RTLRecordAggregate(resType_, this, null, src_);
 		add(module);
@@ -374,7 +374,7 @@ public class RTLGraph extends RTLModule {
 		return module;
 	}
 
-	public RTLOperationConcat placeConcat(RTLSignal a_, RTLSignal b_, RTLSignal res_, ASTObject src_) throws ZamiaException {
+	public RTLOperationConcat placeConcat(RTLSignal a_, RTLSignal b_, RTLSignal res_, VHDLNode src_) throws ZamiaException {
 
 		RTLOperationConcat module = new RTLOperationConcat(a_.getType(), b_.getType(), res_.getType(), this, null, src_);
 		add(module);
@@ -389,7 +389,7 @@ public class RTLGraph extends RTLModule {
 		return module;
 	}
 
-	public RTLTypeCast placeOperationTypeCast(RTLSignal a_, RTLSignal result_, ASTObject src_) throws ZamiaException {
+	public RTLTypeCast placeOperationTypeCast(RTLSignal a_, RTLSignal result_, VHDLNode src_) throws ZamiaException {
 
 		RTLTypeCast module = new RTLTypeCast(a_.getType(), result_.getType(), this, null, src_);
 		add(module);
@@ -402,7 +402,7 @@ public class RTLGraph extends RTLModule {
 		return module;
 	}
 
-	public RTLSignal placeBitSel(RTLSignal s_, int offset_, int width_, ZILType resType_, ASTObject src_) throws ZamiaException {
+	public RTLSignal placeBitSel(RTLSignal s_, int offset_, int width_, ZILType resType_, VHDLNode src_) throws ZamiaException {
 		RTLBitSel module = new RTLBitSel(s_.getType(), offset_, width_, resType_, this, null, src_);
 		add(module);
 
@@ -417,7 +417,7 @@ public class RTLGraph extends RTLModule {
 		return res;
 	}
 
-	public void placeArraySel(RTLSignal s_, RTLSignal sel_, RTLSignal result_, ZILType subType_, ASTObject src_) throws ZamiaException {
+	public void placeArraySel(RTLSignal s_, RTLSignal sel_, RTLSignal result_, ZILType subType_, VHDLNode src_) throws ZamiaException {
 		RTLArraySel module = new RTLArraySel(s_.getType(), sel_.getType(), subType_, this, null, src_);
 		add(module);
 
@@ -431,7 +431,7 @@ public class RTLGraph extends RTLModule {
 		pz.setSignal(result_);
 	}
 
-	public RTLSignal placeRecordSel(RTLSignal s_, String id_, ZILType subType_, ASTObject src_) throws ZamiaException {
+	public RTLSignal placeRecordSel(RTLSignal s_, String id_, ZILType subType_, VHDLNode src_) throws ZamiaException {
 		RTLRecordSel module = new RTLRecordSel(s_.getType(), subType_, this, null, src_);
 		add(module);
 
@@ -446,7 +446,7 @@ public class RTLGraph extends RTLModule {
 		return res;
 	}
 
-	public RTLSignal placeArrayRangeSel(RTLSignal s_, int left_, int right_, boolean ascending_, ZILType resType_, ASTObject src_) throws ZamiaException {
+	public RTLSignal placeArrayRangeSel(RTLSignal s_, int left_, int right_, boolean ascending_, ZILType resType_, VHDLNode src_) throws ZamiaException {
 		RTLArrayRangeSel module = new RTLArrayRangeSel(s_.getType(), left_, right_, ascending_, resType_, this, null, src_);
 		add(module);
 
@@ -461,7 +461,7 @@ public class RTLGraph extends RTLModule {
 		return res;
 	}
 
-	public RTLSignal placeRegister(RTLSignal asyncD_, RTLSignal asyncE_, RTLSignal syncD_, RTLSignal syncE_, RTLSignal clk_, ASTObject src_) throws ZamiaException {
+	public RTLSignal placeRegister(RTLSignal asyncD_, RTLSignal asyncE_, RTLSignal syncD_, RTLSignal syncE_, RTLSignal clk_, VHDLNode src_) throws ZamiaException {
 
 		ZILType t;
 		if (asyncD_ != null)
@@ -502,7 +502,7 @@ public class RTLGraph extends RTLModule {
 		return res;
 	}
 
-	public RTLSignal placeLiteral(ZILValue v_, ASTObject src_) throws ZamiaException {
+	public RTLSignal placeLiteral(ZILValue v_, VHDLNode src_) throws ZamiaException {
 
 		RTLLiteral module = new RTLLiteral(v_, this, null, src_);
 
@@ -515,15 +515,15 @@ public class RTLGraph extends RTLModule {
 		return res;
 	}
 
-	public RTLSignal placeOne(ZILType t_, ASTObject src_) throws ZamiaException {
+	public RTLSignal placeOne(ZILType t_, VHDLNode src_) throws ZamiaException {
 		return placeLiteral(ZILValue.generateValue(ZILValue.BIT_1, t_.getEnableType(), null, src_), src_);
 	}
 
-	public RTLSignal placeZero(ZILType t_, ASTObject src_) throws ZamiaException {
+	public RTLSignal placeZero(ZILType t_, VHDLNode src_) throws ZamiaException {
 		return placeLiteral(ZILValue.generateValue(ZILValue.BIT_0, t_.getEnableType(), null, src_), src_);
 	}
 
-	private RTLPortModule createPortModule(RTLPort p_, ASTObject src_) throws ZamiaException {
+	private RTLPortModule createPortModule(RTLPort p_, VHDLNode src_) throws ZamiaException {
 		RTLPortModule pg = null;
 		RTLPort internalPort;
 
@@ -557,7 +557,7 @@ public class RTLGraph extends RTLModule {
 	}
 
 	@Override
-	public RTLPort createPort(String id_, ZILType type_, PortDir direction_, ASTObject src_) throws ZamiaException {
+	public RTLPort createPort(String id_, ZILType type_, PortDir direction_, VHDLNode src_) throws ZamiaException {
 
 		if (ports.containsKey(id_)) {
 			throw new ZamiaException("Port " + id_ + " was already defined.", src_);
@@ -569,7 +569,7 @@ public class RTLGraph extends RTLModule {
 		return port;
 	}
 
-	public RTLSignal createSignal(String id_, ZILType type_, ASTObject src_) throws ZamiaException {
+	public RTLSignal createSignal(String id_, ZILType type_, VHDLNode src_) throws ZamiaException {
 
 		// FIXME: remove sanity check
 		if (type_.isOpen()) {
@@ -583,12 +583,12 @@ public class RTLGraph extends RTLModule {
 		return signal;
 	}
 
-	public RTLSignal createUnnamedSignal(ZILType type_, ASTObject src_) throws ZamiaException {
+	public RTLSignal createUnnamedSignal(ZILType type_, VHDLNode src_) throws ZamiaException {
 		String id = getUnnamedSignalId();
 		return createSignal(id, type_, src_);
 	}
 
-	public RTLSignalAE createUnnamedSignalAE(ZILType type_, ASTObject src_) throws ZamiaException {
+	public RTLSignalAE createUnnamedSignalAE(ZILType type_, VHDLNode src_) throws ZamiaException {
 		return new RTLSignalAE(createUnnamedSignal(type_, src_), createUnnamedSignal(type_.getEnableType(), src_));
 	}
 

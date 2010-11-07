@@ -14,7 +14,7 @@ import org.zamia.SourceLocation;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -61,11 +61,11 @@ public class VGSignal {
 		fExternalConns.add(aSignal);
 	}
 	public void dump(int aI, PrintStream aOut) {
-		ASTObject.printlnIndented("SIGNAL " + fTitle, aI, aOut);
+		VHDLNode.printlnIndented("SIGNAL " + fTitle, aI, aOut);
 		int n = fConns.size();
 		for (int i = 0; i < n; i++) {
 			VGSignal conn = fConns.get(i);
-			ASTObject.printlnIndented("CONN " + conn, aI + 2, aOut);
+			VHDLNode.printlnIndented("CONN " + conn, aI + 2, aOut);
 		}
 	}
 

@@ -11,7 +11,7 @@ package org.zamia.zil;
 
 import org.zamia.ZamiaException;
 import org.zamia.util.HashMapArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -26,20 +26,20 @@ public class ZILTypeEnum extends ZILTypeDiscrete {
 
 	private boolean isCharEnum = false;
 
-	public ZILTypeEnum(ZILTypeEnum aBaseType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTypeEnum(ZILTypeEnum aBaseType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(new ZILRange(aContainer, aSrc), aBaseType, aDeclaration, aContainer, aSrc);
 
 		enumLiterals = new HashMapArray<String, ZILEnumLiteral>();
 	}
 
 	// enum stuff
-	public void addEnumLiteral(String aLiteral, ZILIContainer aContainer, ASTObject aSrc) {
+	public void addEnumLiteral(String aLiteral, ZILIContainer aContainer, VHDLNode aSrc) {
 		ZILEnumLiteral el = new ZILEnumIdLiteral(aLiteral, enumLiterals.size(), this, aContainer, aSrc);
 		addEnumLiteral(el);
 	}
 
 	// enum stuff
-	public void addEnumLiteral(char aLiteral, ZILIContainer aContainer, ASTObject aSrc) {
+	public void addEnumLiteral(char aLiteral, ZILIContainer aContainer, VHDLNode aSrc) {
 		ZILEnumLiteral el = new ZILEnumCharLiteral(aLiteral, enumLiterals.size(), this, aContainer, aSrc);
 		addEnumLiteral(el);
 	}
@@ -73,7 +73,7 @@ public class ZILTypeEnum extends ZILTypeDiscrete {
 		return enumLiterals.size();
 	}
 
-	public ZILEnumLiteral getEnumLiteral(int aIdx, ASTObject aSrc) throws ZamiaException {
+	public ZILEnumLiteral getEnumLiteral(int aIdx, VHDLNode aSrc) throws ZamiaException {
 		if (aIdx >= enumLiterals.size())
 			throw new ZamiaException("Enum ord out of bounds: " + aIdx);
 		return enumLiterals.get(aIdx);
@@ -120,14 +120,14 @@ public class ZILTypeEnum extends ZILTypeDiscrete {
 	}
 
 	@Override
-	public ZILType convertType(ZILType aExp, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType convertType(ZILType aExp, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		if (aExp == this)
 			return this;
 		throw new ZamiaException("Type conversion for enum types is not allowed.", aSrc);
 	}
 
 	@Override
-	public ZILType qualifyType(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType qualifyType(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		if (!(aType instanceof ZILTypeEnum)) {
 			throw new ZamiaException("Tried to qualify an enum type as " + aType, aSrc);
 		}
@@ -163,7 +163,7 @@ public class ZILTypeEnum extends ZILTypeDiscrete {
 	}
 
 	@Override
-	public int getOrd(ZILValue aValue, ASTObject aSrc) throws ZamiaException {
+	public int getOrd(ZILValue aValue, VHDLNode aSrc) throws ZamiaException {
 		ZILEnumLiteral el = findEnumLiteral(aValue.getEnumLiteral().getId());
 		if (el == null)
 			throw new ZamiaException("Literal " + aValue + " not found in enum type " + this, aSrc);
@@ -194,7 +194,7 @@ public class ZILTypeEnum extends ZILTypeDiscrete {
 	}
 
 	@Override
-	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		ZILTypeEnum et = new ZILTypeEnum(this, aDeclaration, aContainer, aSrc);
 
 		ZILValue left = aRange.getLeft().computeConstant();

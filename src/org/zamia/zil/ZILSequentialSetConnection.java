@@ -10,7 +10,7 @@ package org.zamia.zil;
 
 import org.zamia.ZamiaException;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILLabel;
 import org.zamia.zil.interpreter.ZILSetConnectionStmt;
@@ -26,7 +26,7 @@ public class ZILSequentialSetConnection extends ZILSequentialStatement {
 
 	private boolean fDoConnect = false;
 
-	public ZILSequentialSetConnection(boolean aDoConnect, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSequentialSetConnection(boolean aDoConnect, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aContainer, aSrc);
 		fDoConnect = aDoConnect;
 	}

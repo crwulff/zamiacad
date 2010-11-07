@@ -47,7 +47,7 @@ public class SequentialProcess extends ConcurrentStatement {
 
 	private ArrayList<BlockDeclarativeItem> fDeclarations = new ArrayList<BlockDeclarativeItem>();
 
-	public SequentialProcess(ASTObject aParent, long aLocation) {
+	public SequentialProcess(VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fStatementSequence = null;
 	}
@@ -83,7 +83,7 @@ public class SequentialProcess extends ConcurrentStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fStatementSequence;
@@ -191,7 +191,7 @@ public class SequentialProcess extends ConcurrentStatement {
 	}
 
 	@Override
-	public void computeIG(DUUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
+	public void computeIG(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
 		IGProcess proc = new IGProcess(fPostponed, aContainer.getDBID(), fLabel, getLocation(), aEE.getZDB());
 
 		IGContainer container = proc.getContainer();

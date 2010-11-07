@@ -9,7 +9,7 @@ package org.zamia.rtl;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 
 
@@ -25,7 +25,7 @@ public class RTLOperationConcat extends RTLModule {
 	private RTLPort a, b, z;
 	private ZILType aType, bType, zType;
 
-	public RTLOperationConcat (ZILType aType_, ZILType bType_, ZILType zType_, RTLGraph parent_, String instanceName_, ASTObject src_) {
+	public RTLOperationConcat (ZILType aType_, ZILType bType_, ZILType zType_, RTLGraph parent_, String instanceName_, VHDLNode src_) {
 		super(parent_, instanceName_, src_);
 
 		aType = aType_;

@@ -8,7 +8,7 @@
  */
 package org.zamia.zil;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -23,7 +23,7 @@ public class ZILEnumCharLiteral extends ZILEnumLiteral {
 
 	private char fChar;
 	
-	public ZILEnumCharLiteral(char aChar, int aOrd, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILEnumCharLiteral(char aChar, int aOrd, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aOrd, aType, aContainer, aSrc);
 		fChar=aChar;
 	}

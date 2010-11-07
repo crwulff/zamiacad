@@ -13,7 +13,7 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGOperationUnary.UnaryOp;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
 

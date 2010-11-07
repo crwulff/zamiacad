@@ -27,7 +27,7 @@ import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.PathName;
 import org.zamia.util.SimpleRegexp;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 
 
 /**

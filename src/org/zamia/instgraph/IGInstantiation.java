@@ -14,7 +14,7 @@ import java.util.List;
 import org.zamia.SourceLocation;
 import org.zamia.util.Pair;
 import org.zamia.util.ZHash;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zdb.ZDB;
 
 
@@ -32,11 +32,11 @@ public class IGInstantiation extends IGConcurrentStatement {
 
 	private ArrayList<Pair<String, IGStaticValue>> fActualGenerics = new ArrayList<Pair<String, IGStaticValue>>();
 
-	private DUUID fDUUID, fChildDUUID;
+	private DMUID fDUUID, fChildDUUID;
 
 	private String fSignature;
 
-	public IGInstantiation( DUUID aDUUID, DUUID aChildDUUID, String aLabel, SourceLocation aLocation, ZDB aZDB) {
+	public IGInstantiation( DMUID aDUUID, DMUID aChildDUUID, String aLabel, SourceLocation aLocation, ZDB aZDB) {
 		super(aLabel, aLocation, aZDB);
 
 		fDUUID = aDUUID;
@@ -49,14 +49,14 @@ public class IGInstantiation extends IGConcurrentStatement {
 
 	@Override
 	public String toString() {
-		return getLabel() + ": " + fChildDUUID;
+		return getLabel() + ": " + fSignature;
 	}
 
-	public DUUID getChildDUUID() {
+	public DMUID getChildDUUID() {
 		return fChildDUUID;
 	}
 
-	public DUUID getDUUID() {
+	public DMUID getDUUID() {
 		return fDUUID;
 	}
 
@@ -64,7 +64,7 @@ public class IGInstantiation extends IGConcurrentStatement {
 		fActualGenerics.add(new Pair<String, IGStaticValue>(aId, aActualGeneric));
 	}
 
-	public static String computeSignature(DUUID aDUUID, List<Pair<String, IGStaticValue>> aActualGenerics) {
+	public static String computeSignature(DMUID aDUUID, List<Pair<String, IGStaticValue>> aActualGenerics) {
 		StringBuilder buf = new StringBuilder();
 
 		if (aActualGenerics != null) {

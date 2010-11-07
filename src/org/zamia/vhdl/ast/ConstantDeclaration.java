@@ -44,7 +44,7 @@ public class ConstantDeclaration extends BlockDeclarativeItem {
 
 	private Operation fValue;
 
-	public ConstantDeclaration(String aId, TypeDefinition aType, Operation aValue, ASTObject aParent, long aLocation) {
+	public ConstantDeclaration(String aId, TypeDefinition aType, Operation aValue, VHDLNode aParent, long aLocation) {
 		super(aId, aParent, aLocation);
 		setType(aType);
 		setValue(aValue);
@@ -89,7 +89,7 @@ public class ConstantDeclaration extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fType;

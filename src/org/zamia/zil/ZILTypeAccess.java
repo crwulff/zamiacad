@@ -10,7 +10,7 @@
 package org.zamia.zil;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.Range;
 
 
@@ -25,7 +25,7 @@ public class ZILTypeAccess extends ZILType {
 
 	private ZILType fSubtype;
 
-	public ZILTypeAccess (ZILType aSubtype, ZILTypeDeclaration aDefinition, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTypeAccess (ZILType aSubtype, ZILTypeDeclaration aDefinition, ZILIContainer aContainer, VHDLNode aSrc) {
 		super (aDefinition, aContainer, aSrc);
 		fSubtype = aSubtype;
 	}
@@ -49,7 +49,7 @@ public class ZILTypeAccess extends ZILType {
 	}
 
 	@Override
-	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		throw new ZamiaException ("Cannot create subtypes from acces type.", aSrc);
 	}
 
@@ -59,14 +59,14 @@ public class ZILTypeAccess extends ZILType {
 	}
 
 	@Override
-	public ZILType convertType(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType convertType(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		if (aType == this)
 			return this;
 		throw new ZamiaException ("Type conversion for access types is not allowed.", aSrc);
 	}
 
 	@Override
-	public ZILType qualifyType(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType qualifyType(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		if (aType == this)
 			return this;
 		throw new ZamiaException ("Type qualification for access types is not allowed.", aSrc);

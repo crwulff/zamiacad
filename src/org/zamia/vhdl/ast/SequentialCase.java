@@ -40,12 +40,12 @@ import org.zamia.instgraph.IGOperationBinary.BinOp;
 @SuppressWarnings("serial")
 public class SequentialCase extends SequentialStatement {
 
-	static class Alternative extends ASTObject {
+	static class Alternative extends VHDLNode {
 		public ArrayList<Range> choices;
 
 		public SequenceOfStatements seq;
 
-		public Alternative(ArrayList<Range> choices_, SequenceOfStatements seq_, ASTObject parent_, long location_) {
+		public Alternative(ArrayList<Range> choices_, SequenceOfStatements seq_, VHDLNode parent_, long location_) {
 			super(parent_, location_);
 			choices = choices_;
 			int n = choices.size();
@@ -65,7 +65,7 @@ public class SequentialCase extends SequentialStatement {
 		}
 
 		@Override
-		public ASTObject getChild(int idx_) {
+		public VHDLNode getChild(int idx_) {
 			switch (idx_) {
 			case 0:
 				return seq;
@@ -92,7 +92,7 @@ public class SequentialCase extends SequentialStatement {
 
 	private ArrayList<Alternative> alternatives; // of Alternative
 
-	public SequentialCase(Operation expr_, ASTObject parent_, long location_) {
+	public SequentialCase(Operation expr_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		expr = expr_;
 		expr.setParent(this);
@@ -131,7 +131,7 @@ public class SequentialCase extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (idx_ == 0)
 			return expr;
 		return alternatives.get(idx_ - 1);

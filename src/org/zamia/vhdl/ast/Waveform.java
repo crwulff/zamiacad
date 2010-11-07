@@ -34,13 +34,13 @@ import org.zamia.instgraph.IGType;
  */
 
 @SuppressWarnings("serial")
-public class Waveform extends ASTObject {
+public class Waveform extends VHDLNode {
 
 	private ArrayList<WaveformElement> fElements; // of WaveformElement
 
 	private boolean fUnaffected = false;
 
-	public Waveform(ASTObject aParent, long aLocation) {
+	public Waveform(VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fElements = new ArrayList<WaveformElement>();
 	}
@@ -68,7 +68,7 @@ public class Waveform extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fElements.get(aIdx);
 	}
 

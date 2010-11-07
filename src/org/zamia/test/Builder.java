@@ -15,15 +15,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ERManager;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
-import org.zamia.ZamiaProject.VHDLLanguageSupport;
+import org.zamia.ZamiaProjectBuilder;
 import org.zamia.util.ZamiaTmpDir;
-
 
 /**
  * Simple helper class to drive the Zamia compilation/elaboration infrastructure
@@ -43,7 +42,7 @@ public class Builder {
 
 	private ERManager fERM;
 
-	private DUManager fDUM;
+	private DMManager fDUM;
 
 	private PrintStream fOut;
 
@@ -55,10 +54,10 @@ public class Builder {
 
 	private String fWorkLibId;
 
-	public Builder(PrintStream aOut, VHDLLanguageSupport aVHDLLanguageSupport) {
+	public Builder(PrintStream aOut) {
 		fOut = aOut;
 		try {
-			fZPrj = new ZamiaProject("Builder Tmp Project", tmpDir, null, null, aVHDLLanguageSupport);
+			fZPrj = new ZamiaProject("Builder Tmp Project", tmpDir, null, null);
 			fDUM = fZPrj.getDUM();
 			fERM = fZPrj.getERM();
 			fZPrj.clean();
@@ -68,10 +67,6 @@ public class Builder {
 		setWorkLibId("WORK");
 		fNumFiles = 0;
 		fStartTime = System.currentTimeMillis();
-	}
-
-	public Builder(PrintStream aOut) {
-		this(aOut, VHDLLanguageSupport.VHDL2008);
 	}
 
 	public int compileDir(File aDir, String aWorkLibId) throws IOException, ZamiaException {
@@ -91,7 +86,7 @@ public class Builder {
 			} else {
 				String filename = f.getName();
 
-				if ((filename.endsWith(".vhdl") || filename.endsWith(".vhd")) && !filename.endsWith("in.vhd")) {
+				if (ZamiaProjectBuilder.fileNameAcceptable(filename)) {
 
 					try {
 						nErrors += compileFile(f);
@@ -207,7 +202,7 @@ public class Builder {
 		return fZPrj;
 	}
 
-	public DUManager getDUM() {
+	public DMManager getDUM() {
 		return fDUM;
 	}
 

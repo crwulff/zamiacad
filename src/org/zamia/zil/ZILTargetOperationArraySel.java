@@ -16,7 +16,7 @@ import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLSignalAE;
 import org.zamia.rtl.RTLTargetArraySel;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILPushRefStmt;
 import org.zamia.zil.synthesis.Bindings;
@@ -36,7 +36,7 @@ public class ZILTargetOperationArraySel extends ZILTargetOperation {
 	private ZILType fSourceType;
 	private ZILTargetOperation fSource;
 
-	public ZILTargetOperationArraySel(ZILOperation aIndexExpression, ZILType aSourceType, ZILType aDestinationType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTargetOperationArraySel(ZILOperation aIndexExpression, ZILType aSourceType, ZILType aDestinationType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aDestinationType, aContainer, aSrc);
 		fSourceType = aSourceType;
 		fIndexExpression = aIndexExpression;

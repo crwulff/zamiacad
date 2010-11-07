@@ -10,7 +10,7 @@
 package org.zamia.zil;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -21,7 +21,7 @@ import org.zamia.vhdl.ast.ASTObject;
 @SuppressWarnings("serial")
 public class ZILTypeReal extends ZILTypeScalar {
 
-	public ZILTypeReal(ZILRange aRange, ZILType aBaseType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTypeReal(ZILRange aRange, ZILType aBaseType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aRange, aBaseType, aDeclaration, aContainer, aSrc);
 	}
 
@@ -80,7 +80,7 @@ public class ZILTypeReal extends ZILTypeScalar {
 	}
 
 	@Override
-	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		return new ZILTypeReal(aRange, this, aDeclaration, aContainer, aSrc);
 	}
 }

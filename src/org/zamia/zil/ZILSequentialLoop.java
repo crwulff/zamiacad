@@ -9,7 +9,7 @@ package org.zamia.zil;
 
 import org.zamia.ZamiaException;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILLabel;
 import org.zamia.zil.synthesis.VariableRemapping;
@@ -25,7 +25,7 @@ public class ZILSequentialLoop extends ZILSequentialStatement {
 
 	private ZILSequenceOfStatements fStmtSequence;
 
-	public ZILSequentialLoop(ZILSequenceOfStatements aStmtSequence, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSequentialLoop(ZILSequenceOfStatements aStmtSequence, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aContainer, aSrc);
 		fStmtSequence = aStmtSequence;
 	}

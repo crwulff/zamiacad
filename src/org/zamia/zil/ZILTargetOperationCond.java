@@ -15,7 +15,7 @@ import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLSignalAE;
 import org.zamia.rtl.RTLTargetCond;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
 import org.zamia.zil.synthesis.VariableRemapping;
@@ -32,7 +32,7 @@ public class ZILTargetOperationCond extends ZILTargetOperation {
 
 	private ZILOperation fCond;
 
-	public ZILTargetOperationCond(ZILTargetOperation aTOP, ZILOperation aCond, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTargetOperationCond(ZILTargetOperation aTOP, ZILOperation aCond, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aTOP.getType(), aContainer, aSrc);
 		fTOP = aTOP;
 		fCond = aCond;

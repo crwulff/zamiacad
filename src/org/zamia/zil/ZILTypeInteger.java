@@ -10,7 +10,7 @@
 package org.zamia.zil;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -21,7 +21,7 @@ import org.zamia.vhdl.ast.ASTObject;
 @SuppressWarnings("serial")
 public class ZILTypeInteger extends ZILTypeDiscrete {
 
-	public ZILTypeInteger(ZILRange aRange, ZILTypeInteger aBaseType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTypeInteger(ZILRange aRange, ZILTypeInteger aBaseType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aRange, aBaseType, aDeclaration, aContainer, aSrc);
 	}
 
@@ -70,7 +70,7 @@ public class ZILTypeInteger extends ZILTypeDiscrete {
 	}
 
 	@Override
-	public int getOrd(ZILValue aValue, ASTObject aSrc) throws ZamiaException {
+	public int getOrd(ZILValue aValue, VHDLNode aSrc) throws ZamiaException {
 		return aValue.getInt(aSrc) - (int) getLow().getInt(aSrc);
 	}
 
@@ -79,7 +79,7 @@ public class ZILTypeInteger extends ZILTypeDiscrete {
 	}
 
 	@Override
-	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		return new ZILTypeInteger (aRange, this, aDeclaration, aContainer, aSrc);
 	}
 

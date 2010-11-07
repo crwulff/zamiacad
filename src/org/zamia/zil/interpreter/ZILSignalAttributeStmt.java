@@ -15,7 +15,7 @@ import org.zamia.rtl.sim.SignalChange;
 import org.zamia.rtl.sim.SignalInfo;
 import org.zamia.rtl.sim.SignalLogEntry;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILTypePhysical;
 import org.zamia.zil.ZILValue;
 import org.zamia.zil.ZILOperationSignalAttribute.SAOp;
@@ -35,7 +35,7 @@ public class ZILSignalAttributeStmt extends ZILStmt {
 	private RTLPort fPort;
 	private ZILTypePhysical fTimeType;
 
-	public ZILSignalAttributeStmt(SAOp aOperation, RTLSignal aSignal, long aTime, ZILTypePhysical aTimeType, ASTObject aSrc) {
+	public ZILSignalAttributeStmt(SAOp aOperation, RTLSignal aSignal, long aTime, ZILTypePhysical aTimeType, VHDLNode aSrc) {
 		super(aSrc);
 		fOperation = aOperation;
 		fSignal = aSignal;

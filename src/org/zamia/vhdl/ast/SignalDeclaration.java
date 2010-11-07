@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2009 by the authors indicated in the @author tags.
+ * Copyright 2004-2010 by the authors indicated in the @author tags.
  * All rights reserved.
  *
  * See the LICENSE file for details.
@@ -52,10 +52,9 @@ public class SignalDeclaration extends BlockDeclarativeItem {
 
 	private int kind;
 
-	public SignalDeclaration(String id_, TypeDefinition td_, int kind_, Operation initialValue_, ASTObject parent_, long location_) {
+	public SignalDeclaration(String id_, TypeDefinition td_, int kind_, Operation initialValue_, VHDLNode parent_, long location_) {
 		super(id_, parent_, location_);
 		setType(td_);
-		location = location_;
 		initialValue = initialValue_;
 		if (initialValue != null)
 			initialValue.setParent(this);
@@ -89,7 +88,7 @@ public class SignalDeclaration extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return initialValue;

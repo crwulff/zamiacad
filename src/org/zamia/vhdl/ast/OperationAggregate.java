@@ -36,17 +36,17 @@ public class OperationAggregate extends Operation {
 
 	private Aggregate fAggregate;
 
-	public OperationAggregate(Aggregate aAggregate, ASTObject aParent, long aLocation) {
+	public OperationAggregate(Aggregate aAggregate, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fAggregate = aAggregate;
 		fAggregate.setParent(this);
 	}
 
-	public OperationAggregate(ASTObject aParent, long aLocation) {
+	public OperationAggregate(VHDLNode aParent, long aLocation) {
 		this(new Aggregate(aParent, aLocation), aParent, aLocation);
 	}
 
-	public OperationAggregate(Operation aOp, ASTObject aParent, long aLocation) throws ZamiaException {
+	public OperationAggregate(Operation aOp, VHDLNode aParent, long aLocation) throws ZamiaException {
 		this(aParent, aLocation);
 		add(new ElementAssociation(aOp, aParent, aLocation));
 	}
@@ -68,14 +68,14 @@ public class OperationAggregate extends Operation {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fAggregate;
 	}
 
 	@Override
 	public void dump(PrintStream aOut, int aIndent) {
 		printSpaces(aOut, aIndent);
-		aOut.println("OperationAggregate cnt=" + cnt);
+		aOut.println("OperationAggregate cnt=" + getCnt());
 		fAggregate.dump(aOut, aIndent + 2);
 	}
 

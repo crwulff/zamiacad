@@ -16,7 +16,7 @@ import org.zamia.ZamiaLogger;
 import org.zamia.rtl.RTLPort.PortDir;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 
 
@@ -37,14 +37,14 @@ public abstract class RTLModule implements Serializable {
 
 	protected RTLGraph parent;
 
-	private ASTObject src;
+	private VHDLNode src;
 
 	protected HashMapArray<String, RTLPort> ports;
 
 	// test output on/ off
 	// private boolean dump;
 
-	public RTLModule(RTLGraph parent_, String instanceName_, ASTObject src_) {
+	public RTLModule(RTLGraph parent_, String instanceName_, VHDLNode src_) {
 		parent = parent_;
 		src = src_;
 		if (instanceName_ != null)
@@ -85,7 +85,7 @@ public abstract class RTLModule implements Serializable {
 		parent = parent_;
 	}
 
-	public RTLPort createPort(String id_, ZILType type_, PortDir direction_, ASTObject src_) throws ZamiaException {
+	public RTLPort createPort(String id_, ZILType type_, PortDir direction_, VHDLNode src_) throws ZamiaException {
 
 		RTLPort port = new RTLPort(this, id_, type_, direction_);
 
@@ -98,11 +98,11 @@ public abstract class RTLModule implements Serializable {
 		ports.put(port.getId(), port);
 	}
 
-	public ASTObject getSource() {
+	public VHDLNode getSource() {
 		return src;
 	}
 
-	public void setSource(ASTObject src_) {
+	public void setSource(VHDLNode src_) {
 		src = src_;
 	}
 

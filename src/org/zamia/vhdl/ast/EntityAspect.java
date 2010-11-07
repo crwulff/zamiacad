@@ -27,7 +27,7 @@ import org.zamia.instgraph.IGElaborationEnv;
  */
 
 @SuppressWarnings("serial")
-public class EntityAspect extends ASTObject {
+public class EntityAspect extends VHDLNode {
 
 	public enum EntityAspectKind {
 		Entity, Configuration, Open
@@ -73,7 +73,7 @@ public class EntityAspect extends ASTObject {
 	
 	
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fName;
 	}
 

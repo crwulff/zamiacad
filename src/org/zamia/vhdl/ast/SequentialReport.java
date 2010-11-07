@@ -38,7 +38,7 @@ public class SequentialReport extends SequentialStatement {
 
 	private Operation severity;
 
-	public SequentialReport(Operation exp_, Operation severity_, String label_, ASTObject parent_, long location_) {
+	public SequentialReport(Operation exp_, Operation severity_, String label_, VHDLNode parent_, long location_) {
 		super(label_, parent_, location_);
 		exp = exp_;
 		exp.setParent(this);
@@ -55,7 +55,7 @@ public class SequentialReport extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return exp;

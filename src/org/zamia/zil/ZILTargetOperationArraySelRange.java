@@ -12,7 +12,7 @@ package org.zamia.zil;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignalAE;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILPushRefStmt;
 import org.zamia.zil.interpreter.ZILPushStmt;
@@ -35,7 +35,7 @@ public class ZILTargetOperationArraySelRange extends ZILTargetOperation {
 	private ZILType fSourceType;
 	private ZILTargetOperation fSource;
 
-	public ZILTargetOperationArraySelRange(int aLeft, int aRight, boolean aAscending, ZILType aSourceType, ZILType aDestinationType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTargetOperationArraySelRange(int aLeft, int aRight, boolean aAscending, ZILType aSourceType, ZILType aDestinationType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super (aDestinationType, aContainer, aSrc);
 		fLeft = aLeft;
 		fRight = aRight;

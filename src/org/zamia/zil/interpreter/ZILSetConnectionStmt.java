@@ -9,7 +9,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -22,7 +22,7 @@ public class ZILSetConnectionStmt extends ZILStmt {
 
 	private boolean fConnect;
 
-	public ZILSetConnectionStmt(boolean aConnect, ASTObject aSrc) {
+	public ZILSetConnectionStmt(boolean aConnect, VHDLNode aSrc) {
 		super(aSrc);
 		fConnect = aConnect;
 	}

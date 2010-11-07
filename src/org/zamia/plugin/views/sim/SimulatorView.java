@@ -110,7 +110,7 @@ import org.zamia.plugin.editors.ReferencesSearchQuery;
 import org.zamia.plugin.editors.ZamiaEditor;
 import org.zamia.plugin.launch.SimRunnerConfig;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 /**
  * 
@@ -1339,7 +1339,7 @@ public class SimulatorView extends ViewPart implements IGISimObserver {
 
 				int sim = fConfig.getSimulator();
 
-				DUUID tlDUUID = fConfig.getToplevel();
+				DMUID tlDUUID = fConfig.getToplevel();
 				// String libId = tlDUUID.getLibId();
 				// String entityId = tlDUUID.getId();
 				// String archId = tlDUUID.getArchId();
@@ -1618,7 +1618,7 @@ public class SimulatorView extends ViewPart implements IGISimObserver {
 		if (fConfig == null)
 			return null;
 
-		DUUID duuid = fConfig.getToplevel();
+		DMUID duuid = fConfig.getToplevel();
 
 		return new Toplevel(duuid, null);
 	}

@@ -12,7 +12,7 @@ package org.zamia.rtl;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 
 
@@ -31,7 +31,7 @@ public class RTLBitSel extends RTLModule {
 	private int width;
 	private ZILType resType;
 
-	public RTLBitSel (ZILType inType_, int offset_, int width_, ZILType resType_, RTLGraph parent_, String instanceName_, ASTObject src_) {
+	public RTLBitSel (ZILType inType_, int offset_, int width_, ZILType resType_, RTLGraph parent_, String instanceName_, VHDLNode src_) {
 		super(parent_, instanceName_, src_);
 
 		inType = inType_;

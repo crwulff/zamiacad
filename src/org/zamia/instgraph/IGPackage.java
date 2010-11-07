@@ -9,7 +9,7 @@
 package org.zamia.instgraph;
 
 import org.zamia.SourceLocation;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zdb.ZDB;
 
 
@@ -26,7 +26,7 @@ public class IGPackage extends IGDesignUnit {
 
 	private transient IGContainer fContainer = null;
 
-	public IGPackage(DUUID aDUUID, SourceLocation aLocation, ZDB aZDB) {
+	public IGPackage(DMUID aDUUID, SourceLocation aLocation, ZDB aZDB) {
 		super(aDUUID, aLocation, aZDB);
 
 		fContainer = new IGContainer(0, aLocation, aZDB);

@@ -29,7 +29,7 @@ import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.IGType;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 /**
@@ -47,7 +47,7 @@ public class IGModuleWrapper implements Comparable<IGModuleWrapper> {
 
 	private IGMWOp fOp;
 
-	private DUUID fDUUID;
+	private DMUID fDUUID;
 
 	private String fSignature;
 
@@ -67,7 +67,7 @@ public class IGModuleWrapper implements Comparable<IGModuleWrapper> {
 
 	private IGModuleWrapperCache fCache;
 
-	public IGModuleWrapper(IGMWOp aOp, String aSignature, DUUID aDUUID, ToplevelPath aPath, IGModuleWrapperCache aCache) {
+	public IGModuleWrapper(IGMWOp aOp, String aSignature, DMUID aDUUID, ToplevelPath aPath, IGModuleWrapperCache aCache) {
 		fSignature = aSignature;
 		fDUUID = aDUUID;
 		fPath = aPath;
@@ -164,11 +164,11 @@ public class IGModuleWrapper implements Comparable<IGModuleWrapper> {
 		return fOp == IGMWOp.BLUEIG ? getDUUID().hashCode() : super.hashCode();
 	}
 
-	public DUUID getDUUID() {
+	public DMUID getDUUID() {
 		return fDUUID;
 	}
 
-	public void setDUUID(DUUID aDUUID) {
+	public void setDUUID(DMUID aDUUID) {
 		fDUUID = aDUUID;
 	}
 

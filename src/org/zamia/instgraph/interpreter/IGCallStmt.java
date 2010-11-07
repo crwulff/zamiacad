@@ -13,7 +13,7 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGSubProgram;
 import org.zamia.instgraph.IGSubProgram.IGBuiltin;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
 

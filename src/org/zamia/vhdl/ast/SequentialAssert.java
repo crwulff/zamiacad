@@ -36,7 +36,7 @@ public class SequentialAssert extends SequentialStatement {
 
 	private Assertion assertion;
 	
-	public SequentialAssert (Assertion assertion_, String label_, ASTObject parent_, long location_) {
+	public SequentialAssert (Assertion assertion_, String label_, VHDLNode parent_, long location_) {
 		super (label_, parent_, location_);
 		assertion = assertion_;
 		assertion.setParent(this);
@@ -49,7 +49,7 @@ public class SequentialAssert extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return assertion;
 	}
 

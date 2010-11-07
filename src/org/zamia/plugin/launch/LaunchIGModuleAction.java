@@ -24,7 +24,7 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.plugin.ZamiaProjectMap;
 import org.zamia.plugin.views.navigator.IGModuleWrapper;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 /**
@@ -74,7 +74,7 @@ public class LaunchIGModuleAction extends org.eclipse.ui.actions.ActionDelegate 
 			ILaunchConfiguration config = null;
 			// if the configuration already exists, delete it
 
-			DUUID duuid = fWrapper.getDUUID();
+			DMUID duuid = fWrapper.getDUUID();
 			
 			String id = duuid.toString();
 

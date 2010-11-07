@@ -37,7 +37,7 @@ public class SequentialFor extends SequentialLoop {
 
 	private Range fRange;
 
-	public SequentialFor(String aVarId, Range aRange, String aLabel, ASTObject aParent, long aLocation) {
+	public SequentialFor(String aVarId, Range aRange, String aLabel, VHDLNode aParent, long aLocation) {
 		super(aLabel, aParent, aLocation);
 		fVarId = aVarId;
 		fRange = aRange;

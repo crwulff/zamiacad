@@ -38,7 +38,7 @@ public class SequentialLoop extends SequentialStatement {
 
 	protected SequenceOfStatements body;
 
-	public SequentialLoop(String label_, ASTObject parent_, long location_) {
+	public SequentialLoop(String label_, VHDLNode parent_, long location_) {
 		super(label_, parent_, location_);
 	}
 
@@ -53,7 +53,7 @@ public class SequentialLoop extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return body;
 	}
 

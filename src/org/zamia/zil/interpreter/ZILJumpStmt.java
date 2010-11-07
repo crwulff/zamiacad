@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -23,7 +23,7 @@ public class ZILJumpStmt extends ZILStmt {
 
 	protected int adr;
 
-	public ZILJumpStmt(ZILLabel label_, ASTObject src_) {
+	public ZILJumpStmt(ZILLabel label_, VHDLNode src_) {
 		super(src_);
 		adr = label_.getAdr(this);
 	}

@@ -10,7 +10,7 @@ package org.zamia.zil;
 
 import org.zamia.ZamiaException;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILAssertStmt;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILLabel;
@@ -27,7 +27,7 @@ public class ZILSequentialAssert extends ZILSequentialStatement {
 
 	private ZILAssertion fAssertion;
 	
-	public ZILSequentialAssert(ZILAssertion aAssertion, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSequentialAssert(ZILAssertion aAssertion, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aContainer, aSrc);
 		fAssertion = aAssertion;
 	}

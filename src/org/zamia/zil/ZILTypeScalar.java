@@ -9,7 +9,7 @@
 package org.zamia.zil;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -25,7 +25,7 @@ public abstract class ZILTypeScalar extends ZILType {
 
 	protected ZILRange fRange;
 
-	public ZILTypeScalar(ZILRange aRange, ZILType aBaseType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTypeScalar(ZILRange aRange, ZILType aBaseType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aDeclaration, aContainer, aSrc);
 		
 		fRange = aRange;
@@ -33,7 +33,7 @@ public abstract class ZILTypeScalar extends ZILType {
 	}
 
 	@Override
-	public ZILType convertType(ZILType aExpT, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType convertType(ZILType aExpT, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		if (!(aExpT instanceof ZILTypeScalar))
 			throw new ZamiaException("Type conversion between scalar and non-scalar type is not allowed.", getSrc());
 		return aExpT;
@@ -90,7 +90,7 @@ public abstract class ZILTypeScalar extends ZILType {
 	}
 
 	public int getCardinality() throws ZamiaException {
-		return getLength().getInt((ASTObject) null);
+		return getLength().getInt((VHDLNode) null);
 	}
 
 	public ZILValue getLength() throws ZamiaException {

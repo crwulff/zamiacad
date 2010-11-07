@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.InterfaceDeclaration;
 import org.zamia.vhdl.ast.Name;
 
@@ -35,7 +35,7 @@ public class MappedInterfaces {
 		fReverseMap = new HashMap<String, HashSetArray<MappedFormal>>();
 	}
 	
-	private void add(InterfaceDeclaration aFormal, String aActual, ASTObject aASTObject) {
+	private void add(InterfaceDeclaration aFormal, String aActual, VHDLNode aASTObject) {
 		
 		HashSetArray<String> l = fMap.get(aFormal);
 		if (l == null) {
@@ -60,7 +60,7 @@ public class MappedInterfaces {
 	}
 
 
-	public void add(InterfaceDeclaration aFormal, ASTObject aObject, HashSet<ASTObject> aDone) {
+	public void add(InterfaceDeclaration aFormal, VHDLNode aObject, HashSet<VHDLNode> aDone) {
 		
 		if (aObject == null || aDone.contains(aObject)) {
 			return;
@@ -74,7 +74,7 @@ public class MappedInterfaces {
 		
 		int n = aObject.getNumChildren();
 		for (int i = 0; i<n; i++) {
-			ASTObject child = aObject.getChild(i);
+			VHDLNode child = aObject.getChild(i);
 			if (child == null) {
 				continue;
 			}
@@ -82,9 +82,9 @@ public class MappedInterfaces {
 		}
 	}	
 	
-	public void add(InterfaceDeclaration aFormal, ASTObject aObject) {
+	public void add(InterfaceDeclaration aFormal, VHDLNode aObject) {
 		
-		add (aFormal, aObject, new HashSet<ASTObject>());
+		add (aFormal, aObject, new HashSet<VHDLNode>());
 		
 	}
 

@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
 import org.zamia.instgraph.IGManager;
 import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.VHDLIndexer;
-import org.zamia.vhdl.ast.DUUID;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID;
+import org.zamia.vhdl.ast.DMUID.LUType;
 
 /**
  * 
@@ -56,7 +56,7 @@ public class ZamiaProjectBuilder {
 
 	private HashSet<String> fTodoList; // for debug output only
 
-	private final DUManager fDUM;
+	private final DMManager fDUM;
 
 	private IZamiaMonitor fMonitor = null;
 
@@ -439,7 +439,7 @@ public class ZamiaProjectBuilder {
 
 	public static boolean fileNameAcceptable(String aFileName) {
 		String fn = aFileName.toLowerCase();
-		boolean acceptable = fn.endsWith(".vhd") || fn.endsWith(".vhdl");
+		boolean acceptable = fn.endsWith(".vhd") || fn.endsWith(".vhdl") || fn.endsWith(".v");
 
 		if (dump) {
 			logger.debug("File '%s' is acceptable: %s", aFileName, acceptable ? "yes" : "no");
@@ -583,10 +583,10 @@ public class ZamiaProjectBuilder {
 		}
 	}
 
-	private SFDUInfo compileFile(SourceFile aSF, boolean aIsFullBuild) throws IOException, ZamiaException {
+	private SFDMInfo compileFile(SourceFile aSF, boolean aIsFullBuild) throws IOException, ZamiaException {
 		BuildPath aBuildPath = fZPrj.getBuildPath();
 
-		SFDUInfo info = null;
+		SFDMInfo info = null;
 
 		if (fileAcceptable(aSF.getFile(), aBuildPath)) {
 
@@ -763,7 +763,7 @@ public class ZamiaProjectBuilder {
 
 		ZamiaProfiler.getInstance().startTimer("Parsing");
 
-		HashSetArray<DUUID> affectedDUUIDs = new HashSetArray<DUUID>();
+		HashSetArray<DMUID> affectedDUUIDs = new HashSetArray<DMUID>();
 
 		boolean needFullBuild = false;
 
@@ -772,11 +772,11 @@ public class ZamiaProjectBuilder {
 			SourceFile sf = changed.get(i);
 			logger.info("ZamiaProjectBuilder: Changed source file %2d/%2d: %s", i + 1, n, sf);
 
-			SFDUInfo info = fDUM.removeStubs(sf);
+			SFDMInfo info = fDUM.removeStubs(sf);
 			if (info != null) {
-				int m = info.getNumDUUIDs();
+				int m = info.getNumDMUIDs();
 				for (int j = 0; j < m; j++) {
-					DUUID duuid = info.getDUUID(j);
+					DMUID duuid = info.getDMUID(j);
 
 					if (!needFullBuild) {
 						if (duuid.getType() != LUType.Entity && duuid.getType() != LUType.Architecture) {
@@ -795,9 +795,9 @@ public class ZamiaProjectBuilder {
 				info = compileFile(sf, false);
 
 				if (!needFullBuild && info != null) {
-					int m = info.getNumDUUIDs();
+					int m = info.getNumDMUIDs();
 					for (int j = 0; j < m; j++) {
-						DUUID duuid = info.getDUUID(j);
+						DMUID duuid = info.getDMUID(j);
 
 						if (duuid.getType() != LUType.Entity && duuid.getType() != LUType.Architecture) {
 							logger.info("ZamiaProjectBuilder: Non-Entity/Architecture DU '%s' was changed => need a full rebuild.", duuid);

@@ -12,7 +12,7 @@ package org.zamia.zil;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignalAE;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILPushRefStmt;
 import org.zamia.zil.synthesis.Bindings;
@@ -34,7 +34,7 @@ public class ZILTargetOperationRecordSel extends ZILTargetOperation {
 
 	private ZILTargetOperation fSource;
 
-	public ZILTargetOperationRecordSel(ZILRecordField aRF, ZILType aSourceType, ZILType aDestinationType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTargetOperationRecordSel(ZILRecordField aRF, ZILType aSourceType, ZILType aDestinationType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aDestinationType, aContainer, aSrc);
 		fRF = aRF;
 		fSourceType = aSourceType;

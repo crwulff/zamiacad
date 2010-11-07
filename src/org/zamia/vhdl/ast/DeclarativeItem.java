@@ -23,11 +23,11 @@ import org.zamia.instgraph.IGElaborationEnv;
  */
 
 @SuppressWarnings("serial")
-public abstract class DeclarativeItem extends ASTObject {
+public abstract class DeclarativeItem extends VHDLNode {
 
 	protected String id;
 	
-	public DeclarativeItem(String aId, ASTObject aParent, long aLocation) {
+	public DeclarativeItem(String aId, VHDLNode aParent, long aLocation) {
 		super (aParent, aLocation);
 		id = aId;
 	}

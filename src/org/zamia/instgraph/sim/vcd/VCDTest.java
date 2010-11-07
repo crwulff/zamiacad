@@ -14,7 +14,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.apache.log4j.Level;
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ERManager;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
@@ -24,11 +24,10 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
-import org.zamia.ZamiaProject.VHDLLanguageSupport;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.sim.IGISimCursor;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 /**
@@ -44,7 +43,7 @@ public class VCDTest extends TestCase {
 
 	private ERManager fERM;
 
-	private DUManager fDUM;
+	private DMManager fDUM;
 
 	private VCDImport fImport;
 
@@ -57,7 +56,7 @@ public class VCDTest extends TestCase {
 
 		SourceFile sf = new SourceFile(f);
 
-		fZPrj = new ZamiaProject("VCD Test Tmp Project", aTestDir, sf, null, VHDLLanguageSupport.VHDL2008);
+		fZPrj = new ZamiaProject("VCD Test Tmp Project", aTestDir, sf, null);
 		fZPrj.clean();
 		fERM = fZPrj.getERM();
 		fDUM = fZPrj.getDUM();
@@ -66,7 +65,7 @@ public class VCDTest extends TestCase {
 
 		builder.build(true, true, null);
 
-		DUUID duuid = DUUID.parse(aToplevel);
+		DMUID duuid = DMUID.parse(aToplevel);
 
 		duuid = fDUM.getArchDUUID(duuid);
 

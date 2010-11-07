@@ -38,13 +38,13 @@ import org.zamia.instgraph.IGType;
  */
 
 @SuppressWarnings("serial")
-public class Aggregate extends ASTObject {
+public class Aggregate extends VHDLNode {
 
 	private ArrayList<ElementAssociation> fEAs; // of ElementAssociation
 
 	private Operation fOthers;
 
-	public Aggregate(ASTObject aParent, long aLocation) {
+	public Aggregate(VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fEAs = new ArrayList<ElementAssociation>();
 	}
@@ -138,7 +138,7 @@ public class Aggregate extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		if (aIdx == 0)
 			return fOthers;
 		return fEAs.get(aIdx - 1);

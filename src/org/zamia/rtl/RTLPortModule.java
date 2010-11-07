@@ -9,7 +9,7 @@
 
 package org.zamia.rtl;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * 
@@ -22,7 +22,7 @@ public abstract class RTLPortModule extends RTLModule {
 
 	protected RTLPort internalPort, externalPort;
 
-	public RTLPortModule (RTLGraph parent_, RTLPort p, ASTObject src_) {
+	public RTLPortModule (RTLGraph parent_, RTLPort p, VHDLNode src_) {
 		super(parent_, p.getId(), src_);
 	}
 	

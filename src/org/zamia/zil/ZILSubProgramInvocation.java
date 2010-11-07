@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILCallStmt;
 import org.zamia.zil.interpreter.ZILEnterNewContextStmt;
 import org.zamia.zil.interpreter.ZILExitContextStmt;
@@ -34,7 +34,7 @@ public class ZILSubProgramInvocation extends ZILOperation {
 
 	private ArrayList<ZILTargetOperationDestination> fParams;
 
-	public ZILSubProgramInvocation(ZILSubProgram aSub, ArrayList<ZILTargetOperationDestination> aParams, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSubProgramInvocation(ZILSubProgram aSub, ArrayList<ZILTargetOperationDestination> aParams, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aSub.getType(), aContainer, aSrc);
 		fSub = aSub;
 		fParams = aParams;

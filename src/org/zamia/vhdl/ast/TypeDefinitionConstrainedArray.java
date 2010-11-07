@@ -50,14 +50,14 @@ public class TypeDefinitionConstrainedArray extends TypeDefinition {
 
 	private TypeDefinition fElementType; /* array */
 
-	public TypeDefinitionConstrainedArray(TypeDefinition aElementType, ASTObject aParent, long aLocation) {
+	public TypeDefinitionConstrainedArray(TypeDefinition aElementType, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fRanges = new ArrayList<DiscreteRange>();
 		fElementType = aElementType;
 		fElementType.setParent(this);
 	}
 
-	public TypeDefinitionConstrainedArray(DiscreteRange aRange, TypeDefinition aElementType, ASTObject aParent, long aLocation) {
+	public TypeDefinitionConstrainedArray(DiscreteRange aRange, TypeDefinition aElementType, VHDLNode aParent, long aLocation) {
 		this(aElementType, aParent, aLocation);
 		add(aRange);
 	}
@@ -81,7 +81,7 @@ public class TypeDefinitionConstrainedArray extends TypeDefinition {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		if (aIdx == 0)
 			return fElementType;
 		return fRanges.get(aIdx - 1);

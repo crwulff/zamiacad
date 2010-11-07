@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -21,7 +21,7 @@ import org.zamia.vhdl.ast.ASTObject;
 @SuppressWarnings("serial")
 public class ZILReturnStmt extends ZILStmt {
 
-	public ZILReturnStmt(ASTObject aSrc) {
+	public ZILReturnStmt(VHDLNode aSrc) {
 		super(aSrc);
 	}
 

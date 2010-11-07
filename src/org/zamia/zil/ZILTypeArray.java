@@ -8,7 +8,7 @@
 package org.zamia.zil;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -26,7 +26,7 @@ public class ZILTypeArray extends ZILType {
 
 	private boolean fUnconstrained;
 
-	public ZILTypeArray(ZILTypeDiscrete aIndexType, ZILType aElementType, boolean aUnconstrained, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTypeArray(ZILTypeDiscrete aIndexType, ZILType aElementType, boolean aUnconstrained, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aDeclaration, aContainer, aSrc);
 		fElementType = aElementType;
 		fIndexType = aIndexType;
@@ -101,7 +101,7 @@ public class ZILTypeArray extends ZILType {
 	}
 
 	@Override
-	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 
 		ZILTypeDiscrete idxType = null;
 		if (fIndexType == null) {
@@ -119,7 +119,7 @@ public class ZILTypeArray extends ZILType {
 	}
 
 	@Override
-	public ZILType convertType(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType convertType(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 
 		if (!(aType instanceof ZILTypeArray)) {
 			throw new ZamiaException("Type conversion between array and non-array types is not allowed.", getSrc());
@@ -144,7 +144,7 @@ public class ZILTypeArray extends ZILType {
 	}
 
 	@Override
-	public ZILType qualifyType(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType qualifyType(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 
 		if (!(aType instanceof ZILTypeArray)) {
 			throw new ZamiaException("Type qualification between array type " + this + " and non-array type " + aType + " is not allowed.", getSrc());

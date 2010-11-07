@@ -19,10 +19,13 @@ import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGContainerItem;
+import org.zamia.instgraph.IGDesignUnit;
 import org.zamia.instgraph.IGElaborationEnv;
+import org.zamia.instgraph.IGManager;
+import org.zamia.instgraph.IGModule;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID.LUType;
 import org.zamia.zdb.ZDB;
 
 
@@ -41,7 +44,7 @@ public class PackageBody extends SecondaryUnit {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return getDeclaration(aIdx);
 	}
 
@@ -65,8 +68,8 @@ public class PackageBody extends SecondaryUnit {
 	}
 
 	@Override
-	public DUUID getDUUID(String aLibId) throws ZamiaException {
-		return new DUUID(LUType.PackageBody, aLibId, getId(), null);
+	public DMUID getDMUID(String aLibId) throws ZamiaException {
+		return new DMUID(LUType.PackageBody, aLibId, getId(), null);
 	}
 
 	public void computePackageBodyIG(IGContainer aContainer, IGElaborationEnv aCache) throws ZamiaException {
@@ -106,5 +109,13 @@ public class PackageBody extends SecondaryUnit {
 	@Override
 	public String toString() {
 		return "PACKAGE BODY "+getId();
+	}
+
+	@Override
+	public void computeIG(IGManager aIGM, IGDesignUnit aDesignModule) {
+	}
+
+	@Override
+	public void computeStatementsIG(IGManager aIGM, IGModule aModule) {
 	}
 }

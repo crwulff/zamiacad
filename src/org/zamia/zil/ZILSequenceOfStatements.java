@@ -12,7 +12,7 @@ import java.util.ArrayList;
 
 import org.zamia.ZamiaException;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILLabel;
 import org.zamia.zil.synthesis.Bindings;
@@ -30,7 +30,7 @@ public class ZILSequenceOfStatements extends ZILSequentialStatement {
 
 	private ArrayList<ZILSequentialStatement> fStatements;
 
-	public ZILSequenceOfStatements(ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSequenceOfStatements(ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aContainer, aSrc);
 
 		fStatements = new ArrayList<ZILSequentialStatement>();

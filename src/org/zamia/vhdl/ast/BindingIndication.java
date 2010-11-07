@@ -27,7 +27,7 @@ import org.zamia.instgraph.IGElaborationEnv;
  */
 
 @SuppressWarnings("serial")
-public class BindingIndication extends ASTObject {
+public class BindingIndication extends VHDLNode {
 
 	private AssociationList fGMA;
 
@@ -80,7 +80,7 @@ public class BindingIndication extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fEA;

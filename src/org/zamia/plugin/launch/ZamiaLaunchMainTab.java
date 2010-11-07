@@ -40,7 +40,7 @@ import org.zamia.Toplevel;
 import org.zamia.ZamiaException;
 import org.zamia.plugin.ZamiaPlugin;
 import org.zamia.plugin.views.sim.TopLevelDialog;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 /**
@@ -347,7 +347,7 @@ public class ZamiaLaunchMainTab extends AbstractLaunchConfigurationTab {
 					String value = fToplevelField.getText();
 
 					try {
-						DUUID.parse(value);
+						DMUID.parse(value);
 					} catch (ZamiaException e1) {
 						setErrorMessage(e1.getMessage());
 					}

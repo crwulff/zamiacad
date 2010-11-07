@@ -43,7 +43,7 @@ public class VariableDeclaration extends BlockDeclarativeItem {
 
 	private Operation fInitialValue;
 
-	public VariableDeclaration(String aId, TypeDefinition aTD, Operation aInitialValue, ASTObject aParent, long aLocation) {
+	public VariableDeclaration(String aId, TypeDefinition aTD, Operation aInitialValue, VHDLNode aParent, long aLocation) {
 		super(aId, aParent, aLocation);
 		fTD = aTD;
 		fTD.setParent(this);
@@ -59,7 +59,7 @@ public class VariableDeclaration extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fTD;
 	}
 

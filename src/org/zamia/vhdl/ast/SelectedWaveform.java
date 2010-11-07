@@ -29,12 +29,12 @@ import org.zamia.instgraph.IGElaborationEnv;
 
 
 @SuppressWarnings("serial")
-public class SelectedWaveform extends ASTObject {
+public class SelectedWaveform extends VHDLNode {
 
 	private Waveform waveform;
 	private ArrayList<Range> choices;
 	
-	public SelectedWaveform (Waveform waveform_, ArrayList<Range> choices_, ASTObject parent_, long location_) {
+	public SelectedWaveform (Waveform waveform_, ArrayList<Range> choices_, VHDLNode parent_, long location_) {
 		super (parent_, location_);
 		waveform = waveform_;
 		waveform.setParent(this);
@@ -63,7 +63,7 @@ public class SelectedWaveform extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (idx_ == 0)
 			return waveform;
 		return choices.get(idx_-1);

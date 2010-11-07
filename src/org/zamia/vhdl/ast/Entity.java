@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2009 by the authors indicated in the @author tags.
+ * Copyright 2004-2010 by the authors indicated in the @author tags.
  * All rights reserved.
  *
  * See the LICENSE file for details.
@@ -10,7 +10,7 @@ package org.zamia.vhdl.ast;
 
 import java.util.ArrayList;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
@@ -20,6 +20,7 @@ import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGContainerItem;
+import org.zamia.instgraph.IGDesignUnit;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGInstantiation;
 import org.zamia.instgraph.IGItem;
@@ -31,7 +32,7 @@ import org.zamia.instgraph.IGResolveResult;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID.LUType;
 import org.zamia.zdb.ZDB;
 
 
@@ -101,7 +102,7 @@ public class Entity extends PrimaryUnit {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 
 		switch (aIdx) {
 		case 0:
@@ -133,9 +134,9 @@ public class Entity extends PrimaryUnit {
 
 			IGManager igm = aZPrj.getIGM();
 
-			DUUID duuid = getDUUID();
+			DMUID duuid = getDMUID();
 
-			DUManager dum = aZPrj.getDUM();
+			DMManager dum = aZPrj.getDUM();
 
 			duuid = dum.getArchDUUID(duuid);
 
@@ -190,8 +191,8 @@ public class Entity extends PrimaryUnit {
 	}
 
 	@Override
-	public DUUID getDUUID(String aLibId) throws ZamiaException {
-		return new DUUID(LUType.Entity, aLibId, getId(), null);
+	public DMUID getDMUID(String aLibId) throws ZamiaException {
+		return new DMUID(LUType.Entity, aLibId, getId(), null);
 	}
 
 	@Override
@@ -329,5 +330,13 @@ public class Entity extends PrimaryUnit {
 		//			cs.computeIG(aContainer, aCache);
 		//		}
 
+	}
+
+	@Override
+	public void computeIG(IGManager aIGM, IGDesignUnit aDesignModule) {
+	}
+
+	@Override
+	public void computeStatementsIG(IGManager aIGM, IGModule aModule) {
 	}
 }

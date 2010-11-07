@@ -21,7 +21,7 @@ import java.io.PrintStream;
 @SuppressWarnings("serial")
 public abstract class BlockDeclarativeItem extends DeclarativeItem {
 
-	public BlockDeclarativeItem (String aId, ASTObject aParent, long aLocation) {
+	public BlockDeclarativeItem (String aId, VHDLNode aParent, long aLocation) {
 		super(aId, aParent, aLocation);
 	}
 	

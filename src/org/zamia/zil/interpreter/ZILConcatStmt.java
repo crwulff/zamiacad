@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 import org.zamia.zil.ZILTypeArray;
 import org.zamia.zil.ZILTypeDiscrete;
@@ -28,7 +28,7 @@ public class ZILConcatStmt extends ZILStmt {
 
 	private ZILType type;
 
-	public ZILConcatStmt(ZILType type_, ASTObject src_) {
+	public ZILConcatStmt(ZILType type_, VHDLNode src_) {
 		super(src_);
 		type = type_;
 	}

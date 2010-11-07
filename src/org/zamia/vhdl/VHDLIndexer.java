@@ -12,12 +12,12 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
-import org.zamia.vhdl.ast.DUUID;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID;
+import org.zamia.vhdl.ast.DMUID.LUType;
 
 
 /**
@@ -58,7 +58,7 @@ public class VHDLIndexer {
 
 	private String fTargetLib;
 
-	private DUManager fDUM;
+	private DMManager fDUM;
 
 	private int fPriority;
 
@@ -122,7 +122,7 @@ public class VHDLIndexer {
 		}
 
 		if (fBottomUp || checkFileName(entityId)) {
-			DUUID duuid = new DUUID(LUType.Architecture, fTargetLib, entityId, archId);
+			DMUID duuid = new DMUID(LUType.Architecture, fTargetLib, entityId, archId);
 			fDUM.addDesignUnitSource(duuid, fSF, fPriority, fUseFSCache);
 		}
 	}
@@ -146,7 +146,7 @@ public class VHDLIndexer {
 		if (dump)
 			logger.debug("VHDLIndexer: Configuration %s.%s(%s) found in '%s'", fTargetLib, entityId, cfgId, fPath);
 
-		DUUID duuid = new DUUID(LUType.Configuration, fTargetLib, entityId, null);
+		DMUID duuid = new DMUID(LUType.Configuration, fTargetLib, entityId, null);
 
 		fDUM.addDesignUnitSource(duuid, fSF, fPriority, fUseFSCache);
 	}
@@ -174,7 +174,7 @@ public class VHDLIndexer {
 				logger.debug("VHDLIndexer: Package body %s.%s found in '%s'", fTargetLib, pkgId, fPath);
 
 			if (fBottomUp || checkFileName(pkgId)) {
-				DUUID duuid = new DUUID(LUType.PackageBody, fTargetLib, pkgId, null);
+				DMUID duuid = new DMUID(LUType.PackageBody, fTargetLib, pkgId, null);
 				fDUM.addDesignUnitSource(duuid, fSF, fPriority, fUseFSCache);
 			}
 
@@ -184,7 +184,7 @@ public class VHDLIndexer {
 				logger.debug("VHDLIndexer: Package %s.%s found in '%s'", fTargetLib, pkgId, fPath);
 			
 			if (fBottomUp || checkFileName(pkgId)) {
-				DUUID duuid = new DUUID(LUType.Package, fTargetLib, pkgId, null);
+				DMUID duuid = new DMUID(LUType.Package, fTargetLib, pkgId, null);
 				fDUM.addDesignUnitSource(duuid, fSF, fPriority, fUseFSCache);
 			}
 		}
@@ -204,12 +204,12 @@ public class VHDLIndexer {
 			logger.debug("VHDLIndexer: Entity found: %s.%s", fTargetLib, entityId);
 
 		if (fBottomUp || checkFileName(entityId)) {
-			DUUID duuid = new DUUID(LUType.Entity, fTargetLib, entityId, null);
+			DMUID duuid = new DMUID(LUType.Entity, fTargetLib, entityId, null);
 			fDUM.addDesignUnitSource(duuid, fSF, fPriority, fUseFSCache);
 		}
 	}
 
-	public void parse(Reader aReader, String aTargetLib, SourceFile aSF, int aPriority, boolean aUseFSCache, boolean aBottomUp, DUManager aDUM) throws IOException, ZamiaException {
+	public void parse(Reader aReader, String aTargetLib, SourceFile aSF, int aPriority, boolean aUseFSCache, boolean aBottomUp, DMManager aDUM) throws IOException, ZamiaException {
 
 		//if (dump)
 			logger.debug("VHDLIndexer: indexing '%s', target lib : '%s'", aSF.getAbsolutePath(), aTargetLib);

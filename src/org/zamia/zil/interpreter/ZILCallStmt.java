@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -23,7 +23,7 @@ public class ZILCallStmt extends ZILStmt {
 
 	private ZILInterpreterCode fCode;
 
-	public ZILCallStmt(ZILInterpreterCode aCode, ASTObject aSrc) {
+	public ZILCallStmt(ZILInterpreterCode aCode, VHDLNode aSrc) {
 		super(aSrc);
 
 		fCode = aCode;

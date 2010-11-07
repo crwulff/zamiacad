@@ -8,7 +8,7 @@
 package org.zamia.zil;
 
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILNewObjectStmt;
 
@@ -23,7 +23,7 @@ public class ZILInterfaceVariable extends ZILVariable implements ZILInterface {
 	
 	private PortDir fDir;
 
-	public ZILInterfaceVariable(String aId, ZILType aType, PortDir aDir, ZILValue aInitialValue, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILInterfaceVariable(String aId, ZILType aType, PortDir aDir, ZILValue aInitialValue, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aId, aType, aInitialValue, aContainer, aSrc);
 		
 		fDir = aDir;

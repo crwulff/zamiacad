@@ -29,11 +29,11 @@ import org.zamia.instgraph.IGElaborationEnv;
  *
  */
 @SuppressWarnings("serial")
-public class Signature extends ASTObject {
+public class Signature extends VHDLNode {
 	
 	private ArrayList<Name> names = new ArrayList<Name>(1);
 	
-	public Signature (ASTObject parent_, long location_) {
+	public Signature (VHDLNode parent_, long location_) {
 		super (parent_, location_);
 	}
 	
@@ -50,7 +50,7 @@ public class Signature extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return names.get(idx_);
 	}
 

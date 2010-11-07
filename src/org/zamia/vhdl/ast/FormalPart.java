@@ -27,11 +27,11 @@ import org.zamia.instgraph.IGElaborationEnv;
  *
  */
 @SuppressWarnings("serial")
-public class FormalPart extends ASTObject {
+public class FormalPart extends VHDLNode {
 	
 	private Name n, n2;
 	
-	public FormalPart (Name n_, ASTObject parent_, long location_) {
+	public FormalPart (Name n_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		setName(n_);
 	}
@@ -55,7 +55,7 @@ public class FormalPart extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (idx_ == 0)
 			return n;
 		return n2;

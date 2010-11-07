@@ -29,12 +29,12 @@ import org.zamia.instgraph.IGElaborationEnv;
  */
 
 @SuppressWarnings("serial")
-public class AssociationElement extends ASTObject {
+public class AssociationElement extends VHDLNode {
 
 	private FormalPart fp;
 	private Operation ap;
 	
-	public AssociationElement (Name n_, Operation op_, ASTObject parent_, long location_) {
+	public AssociationElement (Name n_, Operation op_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		if (n_ != null)
 			setFormalPart(new FormalPart (n_, this, location_));
@@ -43,7 +43,7 @@ public class AssociationElement extends ASTObject {
 		setActualPart(op_);
 	}
 	
-	public AssociationElement (ASTObject parent_, long location_) {
+	public AssociationElement (VHDLNode parent_, long location_) {
 		super(parent_, location_);
 	}
 
@@ -71,7 +71,7 @@ public class AssociationElement extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (idx_ == 0)
 			return ap;
 		return fp;

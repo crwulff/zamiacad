@@ -42,7 +42,7 @@ public class OperationCompare extends Operation {
 
 	private Operation fA, fB;
 
-	public OperationCompare(CompareOp aOp, Operation aA, Operation aB, ASTObject aParent, long aLocation) {
+	public OperationCompare(CompareOp aOp, Operation aA, Operation aB, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fOp = aOp;
 		fA = aA;
@@ -94,7 +94,7 @@ public class OperationCompare extends Operation {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return fA;
@@ -107,7 +107,7 @@ public class OperationCompare extends Operation {
 	@Override
 	public void dump(PrintStream aOut, int aIndent) {
 		printSpaces(aOut, aIndent);
-		aOut.print("OperationCompare, cnt=" + cnt + ", op=" + getCompareOpId());
+		aOut.print("OperationCompare, cnt=" + getCnt() + ", op=" + getCompareOpId());
 		fA.dump(aOut, aIndent + 2);
 		fB.dump(aOut, aIndent + 2);
 	}

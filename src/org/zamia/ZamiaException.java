@@ -9,7 +9,7 @@
 
 package org.zamia;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * A unified Exception class for all source/intermediate-object related
@@ -43,11 +43,11 @@ public class ZamiaException extends Exception {
 		this(ExCat.FRONTEND, true, aMessage, aLocation);
 	}
 
-	public ZamiaException(ExCat aCat, boolean aError, String aMessage, ASTObject aSrc) {
+	public ZamiaException(ExCat aCat, boolean aError, String aMessage, VHDLNode aSrc) {
 		this(aCat, aError, aMessage, aSrc != null ? aSrc.getLocation() : null);
 	}
 
-	public ZamiaException(String aMessage, ASTObject aSrc) {
+	public ZamiaException(String aMessage, VHDLNode aSrc) {
 		this(ExCat.FRONTEND, true, aMessage, aSrc);
 	}
 

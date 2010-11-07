@@ -29,10 +29,11 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.zamia.BuildPath;
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ExceptionLogger;
 import org.zamia.FSCache;
-import org.zamia.SFDUInfo;
+import org.zamia.IDesignModule;
+import org.zamia.SFDMInfo;
 import org.zamia.SourceFile;
 import org.zamia.Toplevel;
 import org.zamia.ZamiaException;
@@ -41,9 +42,7 @@ import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
 import org.zamia.plugin.ZamiaPlugin;
 import org.zamia.plugin.ZamiaProjectMap;
-import org.zamia.vhdl.ast.DUUID;
-import org.zamia.vhdl.ast.DesignUnit;
-
+import org.zamia.vhdl.ast.DMUID;
 
 /**
  * 
@@ -92,7 +91,7 @@ public class ZamiaContentProvider extends BaseWorkbenchContentProvider implement
 
 				ArrayList<Object> res = new ArrayList<Object>();
 
-				DUManager dum = zprj.getDUM();
+				DMManager dum = zprj.getDUM();
 				BuildPath bp = zprj.getBuildPath();
 				if (bp != null) {
 
@@ -102,7 +101,7 @@ public class ZamiaContentProvider extends BaseWorkbenchContentProvider implement
 
 						Toplevel tl = bp.getToplevel(i);
 
-						DUUID duuid = dum.getArchDUUID(tl);
+						DMUID duuid = dum.getArchDUUID(tl);
 
 						if (duuid != null) {
 							res.add(cache.getRedWrapper(tl, duuid));
@@ -137,7 +136,7 @@ public class ZamiaContentProvider extends BaseWorkbenchContentProvider implement
 
 			IProject prj = file.getProject();
 			ZamiaProject zprj = ZamiaProjectMap.getZamiaProject(prj);
-			DUManager dum = zprj.getDUM();
+			DMManager dum = zprj.getDUM();
 
 			try {
 
@@ -158,8 +157,8 @@ public class ZamiaContentProvider extends BaseWorkbenchContentProvider implement
 		return super.getChildren(element);
 	}
 
-	private Object[] getDUs(DUManager aDUM, SourceFile aSF) throws IOException {
-		SFDUInfo info = null;
+	private Object[] getDUs(DMManager aDUM, SourceFile aSF) throws IOException {
+		SFDMInfo info = null;
 		try {
 			info = aDUM.compileFile(aSF, null);
 		} catch (ZamiaException e) {
@@ -168,25 +167,25 @@ public class ZamiaContentProvider extends BaseWorkbenchContentProvider implement
 
 		if (info != null) {
 
-			int n = info.getNumDUUIDs();
+			int n = info.getNumDMUIDs();
 
-			ArrayList<DesignUnit> dus = new ArrayList<DesignUnit>();
+			ArrayList<IDesignModule> dms = new ArrayList<IDesignModule>();
 
 			for (int i = 0; i < n; i++) {
 
-				DUUID duuid = info.getDUUID(i);
+				DMUID dmuid = info.getDMUID(i);
 
 				try {
-					DesignUnit du = aDUM.getDU(duuid);
-					if (du != null) {
-						dus.add(du);
+					IDesignModule dm = aDUM.getDM(dmuid);
+					if (dm != null) {
+						dms.add(dm);
 					}
 				} catch (Throwable t) {
 					el.logException(t);
 				}
 			}
 
-			return dus.toArray();
+			return dms.toArray();
 		}
 		return null;
 	}

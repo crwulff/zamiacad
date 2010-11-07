@@ -34,6 +34,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ide.ResourceUtil;
+import org.zamia.ASTNode;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
@@ -46,8 +47,7 @@ import org.zamia.plugin.editors.VHDLScanner;
 import org.zamia.plugin.editors.ZamiaEditor;
 import org.zamia.plugin.editors.ZamiaReconcilingStrategy;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
-
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * 
@@ -199,15 +199,17 @@ public class VHDLCompletionProcessor implements IContentAssistProcessor {
 
 				logger.debug("VHDLCompletionProcessor: Line: " + line + ", col: " + col);
 
-				ASTObject io = SourceLocation2AST.findNearestASTObject(new SourceLocation(sf, line, col), false, zprj);
+				ASTNode node = SourceLocation2AST.findNearestASTNode(new SourceLocation(sf, line, col), false, zprj);
 
-				logger.debug("VHDLCompletionProcessor: nearest io is '%s'", io);
+				logger.debug("VHDLCompletionProcessor: nearest io is '%s'", node);
 
-				if (io != null) {
+				if (node instanceof VHDLNode) {
 
 					HashSetArray<String> identifiers = new HashSetArray<String>();
 
-					io.collectIdentifiers(identifiers, zprj);
+					VHDLNode vn = (VHDLNode) node;
+
+					vn.collectIdentifiers(identifiers, zprj);
 					int n = identifiers.size();
 					logger.debug("VHDLCompletionProcessor: collected %d identifiers", n);
 					for (int i = 0; i < n; i++) {
@@ -314,9 +316,9 @@ public class VHDLCompletionProcessor implements IContentAssistProcessor {
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
 		IContextInformation[] result = new IContextInformation[5];
 		for (int i = 0; i < result.length; i++)
-			result[i] = new ContextInformation(MessageFormat
-					.format("CompletionProcessor.ContextInfo.display.pattern", new Object[] { new Integer(i), new Integer(documentOffset) }), MessageFormat.format(
-					"CompletionProcessor.ContextInfo.value.pattern", new Object[] { new Integer(i), new Integer(documentOffset - 5), new Integer(documentOffset + 5) }));
+			result[i] = new ContextInformation(
+					MessageFormat.format("CompletionProcessor.ContextInfo.display.pattern", new Object[] { new Integer(i), new Integer(documentOffset) }), MessageFormat.format(
+							"CompletionProcessor.ContextInfo.value.pattern", new Object[] { new Integer(i), new Integer(documentOffset - 5), new Integer(documentOffset + 5) }));
 		return result;
 	}
 

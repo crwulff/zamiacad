@@ -19,7 +19,7 @@ import org.zamia.instgraph.IGProcess;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.plugin.views.navigator.IGModuleWrapper.IGMWOp;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 /**
@@ -33,8 +33,8 @@ public class IGModuleWrapperCache {
 
 	private ZamiaProject fZPrj;
 	
-	private HashMap<DUUID, IGModuleWrapper> fBlueDUUIDWrappers = new HashMap<DUUID, IGModuleWrapper>();
-	private HashMap<DUUID, IGModuleWrapper> fRedDUUIDWrappers = new HashMap<DUUID, IGModuleWrapper>();
+	private HashMap<DMUID, IGModuleWrapper> fBlueDUUIDWrappers = new HashMap<DMUID, IGModuleWrapper>();
+	private HashMap<DMUID, IGModuleWrapper> fRedDUUIDWrappers = new HashMap<DMUID, IGModuleWrapper>();
 	private HashMap<ToplevelPath, IGModuleWrapper> fLocalsWrappers = new HashMap<ToplevelPath, IGModuleWrapper>();
 	private HashMap<ToplevelPath, IGModuleWrapper> fGlobalsWrappers = new HashMap<ToplevelPath, IGModuleWrapper>();
 	private HashMap<ToplevelPath, IGModuleWrapper> fInstantiationWrappers = new HashMap<ToplevelPath, IGModuleWrapper>();
@@ -46,7 +46,7 @@ public class IGModuleWrapperCache {
 		fZPrj = aZPrj;
 	}
 
-	public IGModuleWrapper getRedWrapper(Toplevel aTL, DUUID aDUUID) {
+	public IGModuleWrapper getRedWrapper(Toplevel aTL, DMUID aDUUID) {
 
 		IGModuleWrapper wrapper = fRedDUUIDWrappers.get(aDUUID);
 		if (wrapper != null) {
@@ -65,7 +65,7 @@ public class IGModuleWrapperCache {
 		return wrapper;
 	}
 
-	public IGModuleWrapper getBlueWrapper(Toplevel aTL, DUUID aDUUID) {
+	public IGModuleWrapper getBlueWrapper(Toplevel aTL, DMUID aDUUID) {
 
 		IGModuleWrapper wrapper = fBlueDUUIDWrappers.get(aDUUID);
 		if (wrapper != null) {
@@ -164,7 +164,7 @@ public class IGModuleWrapperCache {
 //			return wrapper;
 //		}
 		
-		DUUID duuid = aInst.getChildDUUID();
+		DMUID duuid = aInst.getChildDUUID();
 
 		wrapper = new IGModuleWrapper(IGMWOp.BLUEIG, aInst.getSignature(), duuid, aTP, this);
 		fBlueWrappers.put(aTP, wrapper);

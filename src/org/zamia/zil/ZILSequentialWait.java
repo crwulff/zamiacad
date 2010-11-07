@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILJumpEventStmt;
 import org.zamia.zil.interpreter.ZILJumpNCStmt;
@@ -37,7 +37,7 @@ public class ZILSequentialWait extends ZILSequentialStatement {
 	private ZILOperation fConditionClause;
 	private ArrayList<ZILSignal> fSensitivityList;
 
-	public ZILSequentialWait(ZILOperation aTimeoutClause, ZILOperation aConditionClause, ArrayList<ZILSignal> aSensitivityList, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSequentialWait(ZILOperation aTimeoutClause, ZILOperation aConditionClause, ArrayList<ZILSignal> aSensitivityList, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aContainer, aSrc);
 		fTimeoutClause = aTimeoutClause;
 		fConditionClause = aConditionClause;

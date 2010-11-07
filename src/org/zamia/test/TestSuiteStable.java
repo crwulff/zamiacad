@@ -8,6 +8,9 @@
  */
 package org.zamia.test;
 
+import org.zamia.verilog.VerilogParserIntegrationTest;
+import org.zamia.verilog.VerilogParserTest;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -32,6 +35,8 @@ public class TestSuiteStable {
 		suite.addTestSuite(ParserTest.class);
 		suite.addTestSuite(ZDBTest.class);
 		suite.addTestSuite(VCDTest.class);
+		suite.addTestSuite(VerilogParserTest.class);
+		suite.addTestSuite(VerilogParserIntegrationTest.class);
 		//$JUnit-END$
 		return suite;
 	}

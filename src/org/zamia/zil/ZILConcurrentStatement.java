@@ -9,7 +9,7 @@
 package org.zamia.zil;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.synthesis.Bindings;
 
 
@@ -21,7 +21,7 @@ import org.zamia.zil.synthesis.Bindings;
 
 public abstract class ZILConcurrentStatement extends ZILContainer {
 
-	public ZILConcurrentStatement(String aId, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILConcurrentStatement(String aId, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aId, ZILTypeVoid.getInstance(), aContainer, aSrc);
 	}
 

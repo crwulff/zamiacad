@@ -11,7 +11,7 @@ package org.zamia.zil;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.Suffix;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
@@ -29,7 +29,7 @@ public class ZILOperationSuffix extends ZILOperation {
 
 	private Suffix fSuffix;
 
-	public ZILOperationSuffix(ZILOperation aObject, Suffix aSuffix, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILOperationSuffix(ZILOperation aObject, Suffix aSuffix, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aType, aContainer, aSrc);
 		fSuffix = aSuffix;
 		fObject = aObject;

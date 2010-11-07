@@ -41,7 +41,7 @@ public class FileDeclaration extends BlockDeclarativeItem {
 
 	private FileOpenInformation foi;
 
-	public FileDeclaration(String id_, TypeDefinition td_, FileOpenInformation foi_, ASTObject parent_, long location_) {
+	public FileDeclaration(String id_, TypeDefinition td_, FileOpenInformation foi_, VHDLNode parent_, long location_) {
 		super(id_, parent_, location_);
 		td = td_;
 		foi = foi_;
@@ -57,7 +57,7 @@ public class FileDeclaration extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		// TODO Auto-generated method stub
 		return null;
 	}

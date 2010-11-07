@@ -19,9 +19,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.zamia.BuildPath;
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ERManager;
 import org.zamia.ExceptionLogger;
+import org.zamia.IDesignModule;
 import org.zamia.IZamiaMonitor;
 import org.zamia.SourceLocation;
 import org.zamia.Toplevel;
@@ -36,11 +37,8 @@ import org.zamia.util.HashSetArray;
 import org.zamia.util.Pair;
 import org.zamia.util.PathName;
 import org.zamia.util.ZStack;
-import org.zamia.vhdl.ast.Architecture;
-import org.zamia.vhdl.ast.DUUID;
-import org.zamia.vhdl.ast.DUUID.LUType;
-import org.zamia.vhdl.ast.DesignUnit;
-import org.zamia.vhdl.ast.VHDLPackage;
+import org.zamia.vhdl.ast.DMUID;
+import org.zamia.vhdl.ast.DMUID.LUType;
 import org.zamia.zdb.ZDB;
 import org.zamia.zdb.ZDBListIndex;
 import org.zamia.zdb.ZDBMapIndex;
@@ -58,8 +56,6 @@ public final class IGManager {
 
 	protected final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private static final String TCL_BUILD_ELABORATE_CMD = "zamiaBuildElaborate";
-
 	private static final int NUM_THREADS = 1; // set to 1 to disable multithreading code
 
 	private static final boolean ENABLE_MULTITHREADING = NUM_THREADS > 1;
@@ -76,7 +72,7 @@ public final class IGManager {
 
 	private final ZDB fZDB;
 
-	private final DUManager fDUM;
+	private final DMManager fDUM;
 
 	private final ERManager fERM;
 
@@ -133,7 +129,7 @@ public final class IGManager {
 
 		public final ToplevelPath fPath;
 
-		public final DUUID fDUUID;
+		public final DMUID fDUUID;
 
 		public final String fSignature;
 
@@ -141,11 +137,11 @@ public final class IGManager {
 
 		public final ArrayList<Pair<String, IGStaticValue>> fActualGenerics;
 
-		public final DUUID fParentDUUID;
+		public final DMUID fParentDUUID;
 
 		private IGManager fIGM;
 
-		public BuildNodeJob(IGManager aIGM, ToplevelPath aPath, DUUID aParentDUUID, DUUID aDUUID, String aSignature, ArrayList<Pair<String, IGStaticValue>> aActualGenerics,
+		public BuildNodeJob(IGManager aIGM, ToplevelPath aPath, DMUID aParentDUUID, DMUID aDUUID, String aSignature, ArrayList<Pair<String, IGStaticValue>> aActualGenerics,
 				SourceLocation aLocation) {
 			fIGM = aIGM;
 			fPath = aPath;
@@ -292,12 +288,10 @@ public final class IGManager {
 						logger.error("IGManager: Internal error: module %s on todo list was already done!", fSignature);
 					} else {
 
-						DesignUnit du = fDUM.getDU(fDUUID);
-						if (du instanceof Architecture) {
+						IDesignModule dm = fDUM.getDM(fDUUID);
+						if (dm != null) {
 
-							Architecture arch = (Architecture) du;
-
-							arch.computeStatementsIG(fIGM, module);
+							dm.computeStatementsIG(fIGM, module);
 
 						} else {
 							fERM.addError(new ZamiaException(ExCat.INTERMEDIATE, true, "IGManager: failed to find " + fDUUID, fLocation));
@@ -407,7 +401,7 @@ public final class IGManager {
 
 		fMonitor = aMonitor;
 
-		DUUID duuid = fDUM.getArchDUUID(aTL);
+		DMUID duuid = fDUM.getArchDUUID(aTL);
 
 		if (duuid == null) {
 			logger.error("IGManager: Failed to find toplevel %s.", aTL);
@@ -448,7 +442,7 @@ public final class IGManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public IGModule getOrCreateIGModule(ToplevelPath aPath, DUUID aParentDUUID, DUUID aDUUID, String aSignature, ArrayList<Pair<String, IGStaticValue>> aActualGenerics,
+	public IGModule getOrCreateIGModule(ToplevelPath aPath, DMUID aParentDUUID, DMUID aDUUID, String aSignature, ArrayList<Pair<String, IGStaticValue>> aActualGenerics,
 			boolean aElaborateStatements, SourceLocation aLocation) {
 
 		if (ENABLE_MULTITHREADING) {
@@ -476,24 +470,22 @@ public final class IGManager {
 		} else {
 
 			try {
-				DesignUnit du = fDUM.getDU(aDUUID);
-				if (du instanceof Architecture) {
-
-					Architecture arch = (Architecture) du;
+				IDesignModule dm = fDUM.getDM(aDUUID);
+				if (dm != null) {
 
 					if (ENABLE_MULTITHREADING) {
 						fModulesBeingCreated.add(aSignature);
 						fLock.unlock();
 					}
 
-					module = new IGModule(aPath, aDUUID, arch.getLocation(), fZDB);
+					module = new IGModule(aPath, aDUUID, dm.getLocation(), fZDB);
 
 					int n = aActualGenerics != null ? aActualGenerics.size() : 0;
 					for (int i = 0; i < n; i++) {
 						module.addActualGeneric(aActualGenerics.get(i).getSecond());
 					}
 
-					arch.computeEntityIG(this, module);
+					dm.computeIG(this, module);
 
 					if (ENABLE_MULTITHREADING) {
 						fLock.lock();
@@ -555,14 +547,14 @@ public final class IGManager {
 
 			mid = fZDB.getIdx(INSTANTIATORS_IDX, uid);
 			if (mid != 0) {
-				HashSetArray<DUUID> instantiators = (HashSetArray<DUUID>) fZDB.load(mid);
+				HashSetArray<DMUID> instantiators = (HashSetArray<DMUID>) fZDB.load(mid);
 
 				if (!instantiators.contains(aParentDUUID)) {
 					instantiators.add(aParentDUUID);
 					fZDB.update(mid, instantiators);
 				}
 			} else {
-				HashSetArray<DUUID> instantiators = new HashSetArray<DUUID>();
+				HashSetArray<DMUID> instantiators = new HashSetArray<DMUID>();
 
 				instantiators.add(aParentDUUID);
 				mid = fZDB.store(instantiators);
@@ -595,7 +587,7 @@ public final class IGManager {
 
 	public IGModule findModule(Toplevel aTL) {
 
-		DUUID duuid = fDUM.getArchDUUID(aTL);
+		DMUID duuid = fDUM.getArchDUUID(aTL);
 
 		if (duuid == null)
 			return null;
@@ -643,14 +635,14 @@ public final class IGManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	public HashSetArray<DUUID> findInstantiators(String aUID) {
+	public HashSetArray<DMUID> findInstantiators(String aUID) {
 
 		long mid = fZDB.getIdx(INSTANTIATORS_IDX, aUID);
 		if (mid == 0) {
 			return null;
 		}
 
-		return (HashSetArray<DUUID>) fZDB.load(mid);
+		return (HashSetArray<DMUID>) fZDB.load(mid);
 	}
 
 	/**
@@ -660,7 +652,7 @@ public final class IGManager {
 	 * @return number of rebuilt nodes
 	 */
 	@SuppressWarnings("unchecked")
-	public int rebuildNodes(HashSetArray<DUUID> aDUUIDs, IZamiaMonitor aMonitor) {
+	public int rebuildNodes(HashSetArray<DMUID> aDUUIDs, IZamiaMonitor aMonitor) {
 
 		fMonitor = aMonitor;
 		ZamiaProfiler.getInstance().startTimer("IG");
@@ -674,9 +666,9 @@ public final class IGManager {
 		int n = aDUUIDs.size();
 		for (int i = 0; i < n; i++) {
 
-			DUUID duuid = aDUUIDs.get(i);
+			DMUID duuid = aDUUIDs.get(i);
 
-			DUUID archDUUID = fDUM.getArchDUUID(duuid);
+			DMUID archDUUID = fDUM.getArchDUUID(duuid);
 
 			if (archDUUID == null) {
 				logger.info("IGManager: rebuildNodes(): Warning: couldn't find architecture DUUID for %s", duuid);
@@ -703,12 +695,12 @@ public final class IGManager {
 
 			long dbid = fZDB.getIdx(INSTANTIATORS_IDX, uid);
 			if (dbid != 0) {
-				HashSetArray<DUUID> instantiators = (HashSetArray<DUUID>) fZDB.load(dbid);
+				HashSetArray<DMUID> instantiators = (HashSetArray<DMUID>) fZDB.load(dbid);
 
 				int m = instantiators.size();
 				for (int j = 0; j < m; j++) {
 
-					DUUID instantiator = instantiators.get(j);
+					DMUID instantiator = instantiators.get(j);
 					String uidI = instantiator.getUID();
 
 					HashSetArray<String> signaturesI = (HashSetArray<String>) fZDB.getIdxObj(SIGNATURES_IDX, uidI);
@@ -741,7 +733,7 @@ public final class IGManager {
 
 			IGModule module = (IGModule) fZDB.load(dbid);
 
-			DUUID duuid = module.getDUUID();
+			DMUID duuid = module.getDUUID();
 
 			// remove list from instantiators list of all instantiated modules
 			removeFromInstantiators(duuid, module.getStructure());
@@ -785,7 +777,7 @@ public final class IGManager {
 
 			Toplevel toplevel = bp.getToplevel(i);
 
-			DUUID duuid = fDUM.getArchDUUID(toplevel);
+			DMUID duuid = fDUM.getArchDUUID(toplevel);
 
 			if (duuid == null) {
 				logger.error("IGManager: Failed to find toplevel %s.", toplevel);
@@ -824,7 +816,7 @@ public final class IGManager {
 	}
 
 	@SuppressWarnings("unchecked")
-	private void removeFromInstantiators(DUUID aDUUID, IGStructure aStructure) {
+	private void removeFromInstantiators(DMUID aDUUID, IGStructure aStructure) {
 
 		int n = aStructure.getNumStatements();
 		for (int i = 0; i < n; i++) {
@@ -835,13 +827,13 @@ public final class IGManager {
 
 				IGInstantiation inst = (IGInstantiation) stmt;
 
-				DUUID duuid = inst.getChildDUUID();
+				DMUID duuid = inst.getChildDUUID();
 
 				String uid = duuid.getUID();
 
 				long mid = fZDB.getIdx(INSTANTIATORS_IDX, uid);
 				if (mid != 0) {
-					HashSetArray<DUUID> instantiators = (HashSetArray<DUUID>) fZDB.load(mid);
+					HashSetArray<DMUID> instantiators = (HashSetArray<DMUID>) fZDB.load(mid);
 
 					instantiators.remove(aDUUID);
 					fZDB.update(mid, instantiators);
@@ -871,7 +863,7 @@ public final class IGManager {
 		}
 	}
 
-	public int countNodes(DUUID aDUUID, int aMaxDepth) throws ZamiaException {
+	public int countNodes(DMUID aDUUID, int aMaxDepth) throws ZamiaException {
 
 		logger.info("IGManager: Counting nodes in %s", aDUUID);
 
@@ -888,7 +880,7 @@ public final class IGManager {
 		return counter.getNumNodes();
 	}
 
-	public int countNodes(DUUID aDUUID) throws ZamiaException {
+	public int countNodes(DMUID aDUUID) throws ZamiaException {
 		return countNodes(aDUUID, Integer.MAX_VALUE);
 	}
 
@@ -898,7 +890,7 @@ public final class IGManager {
 			fLock.lock();
 		}
 
-		DUUID duuid = new DUUID(LUType.Package, aLibId, aPkgId, null);
+		DMUID duuid = new DMUID(LUType.Package, aLibId, aPkgId, null);
 
 		String uid = duuid.getUID();
 
@@ -911,19 +903,17 @@ public final class IGManager {
 
 		if (pkg == null) {
 
-			DesignUnit du = null;
+			IDesignModule dm = null;
 			try {
-				du = fDUM.getDU(duuid);
+				dm = fDUM.getDM(duuid);
 			} catch (ZamiaException e) {
 				el.logException(e);
 			}
-			if (du instanceof VHDLPackage) {
+			if (dm != null) {
 
 				logger.info("IGManager: building IGPackage for %s", duuid);
 
-				VHDLPackage vpkg = (VHDLPackage) du;
-
-				SourceLocation location = vpkg.getLocation();
+				SourceLocation location = dm.getLocation();
 
 				pkg = new IGPackage(duuid, location, fZDB);
 
@@ -931,7 +921,7 @@ public final class IGManager {
 				id = pkg.store();
 				fZDB.putIdx(IGManager.PACKAGE_IDX, duuid.getUID(), id);
 
-				vpkg.computeIG(this, pkg);
+				dm.computeIG(this, pkg);
 			}
 		}
 

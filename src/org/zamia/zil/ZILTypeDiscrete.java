@@ -9,7 +9,7 @@
 package org.zamia.zil;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -21,7 +21,7 @@ import org.zamia.vhdl.ast.ASTObject;
 @SuppressWarnings("serial")
 public abstract class ZILTypeDiscrete extends ZILTypeScalar {
 
-	public ZILTypeDiscrete(ZILRange aRange, ZILType aBaseType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject src_) {
+	public ZILTypeDiscrete(ZILRange aRange, ZILType aBaseType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode src_) {
 		super(aRange, aBaseType, aDeclaration, aContainer, src_);
 	}
 
@@ -41,6 +41,6 @@ public abstract class ZILTypeDiscrete extends ZILTypeScalar {
 	 * @throws ZamiaException
 	 */
 
-	public abstract int getOrd(ZILValue v_, ASTObject src_) throws ZamiaException;
+	public abstract int getOrd(ZILValue v_, VHDLNode src_) throws ZamiaException;
 
 }

@@ -11,7 +11,7 @@ package org.zamia.rtl;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILValue;
 
 
@@ -26,7 +26,7 @@ public class RTLLiteral extends RTLModule {
 	private ZILValue v;
 	private RTLPort z;
 	
-	public RTLLiteral(ZILValue v_, RTLGraph parent_, String instanceName_, ASTObject src_) {
+	public RTLLiteral(ZILValue v_, RTLGraph parent_, String instanceName_, VHDLNode src_) {
 		super(parent_, instanceName_, src_);
 		v = v_;
 

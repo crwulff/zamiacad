@@ -8,7 +8,7 @@
  */
 package org.zamia.zil;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * 
@@ -19,7 +19,7 @@ public class ZILSharedVariable extends ZILObject {
 
 	private ZILValue fValue;
 	
-	public ZILSharedVariable (String aId, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSharedVariable (String aId, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super (aId, aType, aContainer, aSrc);
 	}
 	

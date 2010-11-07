@@ -11,7 +11,7 @@ package org.zamia.zil.interpreter;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.PortVarWriter;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILValue;
 
 
@@ -24,7 +24,7 @@ import org.zamia.zil.ZILValue;
 @SuppressWarnings("serial")
 public class ZILPopStmt extends ZILStmt {
 
-	public ZILPopStmt(ASTObject src_) {
+	public ZILPopStmt(VHDLNode src_) {
 		super(src_);
 	}
 

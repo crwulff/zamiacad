@@ -1,5 +1,5 @@
 /* 
- * Copyright 2007-2009 by the authors indicated in the @author tags. 
+ * Copyright 2007-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -13,8 +13,6 @@ import junit.framework.TestCase;
 
 import org.apache.log4j.Level;
 import org.zamia.ZamiaLogger;
-import org.zamia.ZamiaProject.VHDLLanguageSupport;
-
 
 /**
  * @author Guenter Bartsch
@@ -27,26 +25,14 @@ public class DG2ETest extends TestCase {
 
 	private Builder fBuilder;
 
-	public void setupTest(VHDLLanguageSupport aLanguageSupport) {
+	public void setupTest() {
 		ZamiaLogger.setup(Level.DEBUG);
-		fBuilder = new Builder(out, aLanguageSupport);
+		fBuilder = new Builder(out);
 	}
 
-	public void testVHDL2008Parser() throws Exception {
+	public void testVHDLParser() throws Exception {
 
-		setupTest(VHDLLanguageSupport.VHDL2008);
-
-		fBuilder.clean();
-		int n;
-		if ((n = fBuilder.compileDir("test/dg2e", "WORK")) > 0) {
-			System.out.println("Total: " + n + " errors.");
-			fail("Errors detected.");
-		}
-	}
-
-	public void testVHDL2002Parser() throws Exception {
-
-		setupTest(VHDLLanguageSupport.VHDL2002);
+		setupTest();
 
 		fBuilder.clean();
 		int n;

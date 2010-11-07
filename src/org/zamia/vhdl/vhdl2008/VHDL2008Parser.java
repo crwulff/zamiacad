@@ -41,9 +41,9 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
         private String lib;
         public final static ZamiaLogger logger = ZamiaLogger.getInstance();
         private ZamiaProject zprj;
-    private DUManager dum;
+    private DMManager dum;
     private ERManager erm;
-    private HashSetArray<DUUID> dus;
+    private HashSetArray<DMUID> dus;
         private BackupCharStream stream;
         private int priority;
         private boolean fUseFSCache;
@@ -66,10 +66,10 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
         return getLocation (t);
     }
 
-        public HashSetArray<DUUID> parse(Reader aReader, String aLibId, SourceFile aSF, int aPriority, boolean aUseFSCache, boolean aBottomUp, ZamiaProject aZPrj) throws IOException {
+        public HashSetArray<DMUID> parse(Reader aReader, String aLibId, SourceFile aSF, int aPriority, boolean aUseFSCache, boolean aBottomUp, ZamiaProject aZPrj) throws IOException {
                         logger.debug("VHDL2008Parser: parsing %s, target lib : %s", aSF, aLibId);
 
-                dus = new HashSetArray<DUUID>();
+                dus = new HashSetArray<DMUID>();
 
                         zprj = aZPrj;
                         dum = zprj.getDUM();
@@ -159,8 +159,11 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
       }
       du = design_unit(standardMode);
         if (du!=null) {
+
+          du.visit(new SourceLocationGenerator(sf));
+
           dum.addDesignUnit(du, sf, lib, priority, fUseFSCache);
-          dus.add(du.getDUUID());
+          dus.add(du.getDMUID());
         }
     }
     jj_consume_token(0);
@@ -3158,7 +3161,7 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
     jj_consume_token(EQ);
     pl = physical_literal();
     jj_consume_token(SEMICOLON);
-          td_.addUnit (id.getImage(), pl);
+          td_.addUnit (id.getImage(), pl, id.getLineCol());
   }
 
   final public TypeDefinitionEnum enumeration_type_definition() throws ParseException, ZamiaException {
@@ -8952,17 +8955,6 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
     finally { jj_save(139, xla); }
   }
 
-  private boolean jj_3_12() {
-    if (jj_3R_71()) return true;
-    return false;
-  }
-
-  private boolean jj_3R_349() {
-    if (jj_scan_token(COMMA)) return true;
-    if (jj_3R_348()) return true;
-    return false;
-  }
-
   private boolean jj_3R_389() {
     if (jj_3R_130()) return true;
     return false;
@@ -14229,6 +14221,17 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
     jj_scanpos = xsp;
     if (jj_3R_244()) return true;
     }
+    return false;
+  }
+
+  private boolean jj_3_12() {
+    if (jj_3R_71()) return true;
+    return false;
+  }
+
+  private boolean jj_3R_349() {
+    if (jj_scan_token(COMMA)) return true;
+    if (jj_3R_348()) return true;
     return false;
   }
 

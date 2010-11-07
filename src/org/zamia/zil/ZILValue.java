@@ -22,7 +22,7 @@ import org.zamia.rtl.RTLPort;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.OperationCompare.CompareOp;
 import org.zamia.vhdl.ast.OperationLogic.LogicOp;
 import org.zamia.vhdl.ast.OperationMath.MathOp;
@@ -84,25 +84,25 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		return fPtr;
 	}
 
-	protected ZILValue(String aId, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	protected ZILValue(String aId, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aType, aContainer, aSrc);
 		fId = aId;
 	}
 	
-	public ZILValue(BigInteger aNum, ZILTypeInteger aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(BigInteger aNum, ZILTypeInteger aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 		fNum = aNum;
 	}
 
-	public ZILValue(int aNum, ZILTypeInteger aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(int aNum, ZILTypeInteger aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		this(new BigInteger("" + aNum), aType, aContainer, aSrc);
 	}
 
-	public ZILValue(long aNum, ZILTypeInteger aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(long aNum, ZILTypeInteger aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		this(new BigInteger("" + aNum), aType, aContainer, aSrc);
 	}
 
-	public ZILValue(char aChar, ZILTypeEnum aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(char aChar, ZILTypeEnum aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 		fEnumLiteral = aType.findEnumLiteral(aChar);
 		if (fEnumLiteral == null) {
@@ -110,33 +110,33 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		}
 	}
 
-	public ZILValue(BigDecimal aBigDecimal, ZILTypeReal aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(BigDecimal aBigDecimal, ZILTypeReal aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 		fReal = aBigDecimal;
 	}
 
-	public ZILValue(double aDouble, ZILTypeReal aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(double aDouble, ZILTypeReal aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 		fReal = new BigDecimal(aDouble);
 	}
 
-	public ZILValue(BigDecimal aBigDecimal, ZILTypePhysical aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(BigDecimal aBigDecimal, ZILTypePhysical aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 		fReal = aBigDecimal;
 	}
 
-	public ZILValue(String aId, BigDecimal aBigDecimal, ZILTypePhysical aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(String aId, BigDecimal aBigDecimal, ZILTypePhysical aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 		fReal = aBigDecimal;
 		fId = aId;
 	}
 
-	public ZILValue(double aDouble, ZILTypePhysical aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(double aDouble, ZILTypePhysical aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 		fReal = new BigDecimal(aDouble);
 	}
 
-	public ZILValue(ZILTypeArray aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(ZILTypeArray aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 
 		ZILTypeDiscrete indexType = aType.getIndexType();
@@ -156,12 +156,12 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		}
 	}
 
-	public ZILValue(ZILTypeRecord aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(ZILTypeRecord aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 		fRecordValues = new HashMapArray<ZILRecordField, ZILValue>();
 	}
 
-	public ZILValue(String v_, ZILTypeEnum aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(String v_, ZILTypeEnum aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 		fEnumLiteral = aType.findEnumLiteral(v_);
 		if (fEnumLiteral == null) {
@@ -169,7 +169,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		}
 	}
 
-	public ZILValue(String aString, ZILTypeArray aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(String aString, ZILTypeArray aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 
 		ZILType et = aType.getElementType();
@@ -189,14 +189,14 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		}
 	}
 
-	public ZILValue(int aLeft, int aRight, boolean aAscending, ZILTypeInteger aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILValue(int aLeft, int aRight, boolean aAscending, ZILTypeInteger aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		super(aType, aContainer, aSrc);
 		fLeft = aLeft;
 		fRight = aRight;
 		fAscending = aAscending;
 	}
 
-	public ZILValue(ZILEnumLiteral aLiteral, ZILTypeEnum aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILValue(ZILEnumLiteral aLiteral, ZILTypeEnum aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aType, aContainer, aSrc);
 		if (aLiteral == null) {
 			throw new RuntimeException("Internal error.");
@@ -204,7 +204,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		fEnumLiteral = aLiteral;
 	}
 
-	public ZILValue(ZILTypeAccess aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILValue(ZILTypeAccess aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aType, aContainer, aSrc);
 		fPtr = null;
 	}
@@ -242,7 +242,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		} else if (fType instanceof ZILTypeReal) {
 			return new ZILValue(getReal(null), (ZILTypeReal) fType, getContainer(), getSrc());
 		} else if (fType instanceof ZILTypeInteger) {
-			return new ZILValue(getInt((ASTObject) null), (ZILTypeInteger) fType, getContainer(), getSrc());
+			return new ZILValue(getInt((VHDLNode) null), (ZILTypeInteger) fType, getContainer(), getSrc());
 		} else if (fType instanceof ZILTypePhysical) {
 			return new ZILValue(getReal(null), (ZILTypePhysical) fType, getContainer(), getSrc());
 		}
@@ -260,7 +260,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 	// fArrayValue.add(aType);
 	// }
 
-	public int getInt(ASTObject aSrc) throws ZamiaException {
+	public int getInt(VHDLNode aSrc) throws ZamiaException {
 		if (fType instanceof ZILTypeEnum) {
 			return fEnumLiteral.getOrd();
 		}
@@ -270,7 +270,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		return fNum.intValue();
 	}
 
-	public long getLong(ASTObject aSrc) throws ZamiaException {
+	public long getLong(VHDLNode aSrc) throws ZamiaException {
 
 		if (fType instanceof ZILTypeEnum) {
 			return fEnumLiteral.getOrd();
@@ -287,13 +287,13 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		return fNum.longValue();
 	}
 
-	public BigInteger getNum(ASTObject aSrc) throws ZamiaException {
+	public BigInteger getNum(VHDLNode aSrc) throws ZamiaException {
 		if (!(fType instanceof ZILTypeInteger))
 			throw new ZamiaException("Internal error: this is not an integer type: " + fType, aSrc);
 		return fNum;
 	}
 
-	public BigDecimal getReal(ASTObject aSrc) throws ZamiaException {
+	public BigDecimal getReal(VHDLNode aSrc) throws ZamiaException {
 
 		if (fType instanceof ZILTypeInteger)
 			return new BigDecimal(fNum.doubleValue());
@@ -650,7 +650,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		return fRecordValues.get(aField);
 	}
 
-	public static ZILValue getBit(char aBit, ASTObject aSrc) {
+	public static ZILValue getBit(char aBit, VHDLNode aSrc) {
 		try {
 			return new ZILValue(aBit, ZILType.bit, null, aSrc);
 		} catch (ZamiaException e) {
@@ -659,7 +659,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		return null;
 	}
 
-	public static ZILValue computeCompare(ZILValue aValueA, ZILValue aValueB, CompareOp aOp, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public static ZILValue computeCompare(ZILValue aValueA, ZILValue aValueB, CompareOp aOp, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 
 		ZILType t = aValueA.getType();
 
@@ -775,7 +775,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		return l;
 	}
 
-	public static ZILValue computeMath(ZILValue va, ZILValue vb, MathOp op, ASTObject aSrc) throws ZamiaException {
+	public static ZILValue computeMath(ZILValue va, ZILValue vb, MathOp op, VHDLNode aSrc) throws ZamiaException {
 
 		ZILType t = va.getType();
 		ZILValue resValue = null;
@@ -928,7 +928,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		return resValue;
 	}
 
-	public static ZILValue computeLogic(ZILValue aValueA, ZILValue aValueB, LogicOp aOp, ASTObject aSrc) throws ZamiaException {
+	public static ZILValue computeLogic(ZILValue aValueA, ZILValue aValueB, LogicOp aOp, VHDLNode aSrc) throws ZamiaException {
 
 		ZILType t = aValueA.getType();
 
@@ -1050,7 +1050,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 
 	}
 
-	public static ZILValue generateUValue(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public static ZILValue generateUValue(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		if (aType.isBit()) {
 
 			ZILTypeEnum et = (ZILTypeEnum) aType;
@@ -1117,7 +1117,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 			throw new ZamiaException("Internal error: Don't know how to generate constant value for " + aType, aSrc);
 	}
 
-	public static ZILValue generateValue(char aBit, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public static ZILValue generateValue(char aBit, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 
 		if (aType.isBit()) {
 			return getBit(aBit, aSrc);
@@ -1172,7 +1172,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 	}
 
 	// used by the simulator
-	public static ZILValue generateZ(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public static ZILValue generateZ(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 
 		if (aType.isBit()) {
 			
@@ -1678,7 +1678,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		throw new RuntimeException ("Sorry, not implemented yet.");
 	}
 
-	public ZILValue getNext(ASTObject aSrc) throws ZamiaException {
+	public ZILValue getNext(VHDLNode aSrc) throws ZamiaException {
 		
 		if (fEnumLiteral != null) {
 			
@@ -1701,7 +1701,7 @@ public class ZILValue extends ZILOperation implements ZILIReferable, Serializabl
 		throw new ZamiaException ("This is not a discrete type: "+this, aSrc);
 	}
 
-	public ZILValue getPrev(ASTObject aSrc) throws ZamiaException {
+	public ZILValue getPrev(VHDLNode aSrc) throws ZamiaException {
 		
 		if (fEnumLiteral != null) {
 			

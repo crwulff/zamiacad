@@ -13,14 +13,13 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.zamia.ASTNode;
 import org.zamia.analysis.SourceLocation2AST;
 import org.zamia.analysis.ast.ASTDeclarationSearch;
 import org.zamia.plugin.ZamiaPlugin;
-import org.zamia.vhdl.ast.ASTObject;
 import org.zamia.vhdl.ast.DeclarativeItem;
 import org.zamia.vhdl.ast.InterfaceDeclaration;
 import org.zamia.vhdl.ast.SignalDeclaration;
-
 
 /**
  * 
@@ -53,24 +52,24 @@ public class ShowReferencesAction extends StaticAnalysisAction {
 				return;
 			}
 
-			ASTObject nearest = SourceLocation2AST.findNearestASTObject(fLocation, true, fZPrj);
+			ASTNode nearest = SourceLocation2AST.findNearestASTNode(fLocation, true, fZPrj);
 			if (nearest == null) {
 				showError("Couldn't map caret position to syntax tree.");
 				return;
 			}
-			
+
 			DeclarativeItem decl = ASTDeclarationSearch.search(nearest, fZPrj);
-			if (decl==null) {
-				showError("Couldn't find declaration of\n"+nearest);
+			if (decl == null) {
+				showError("Couldn't find declaration of\n" + nearest);
 				return;
 			}
-			
+
 			if (fdlg == null) {
 				fdlg = new ShowReferencesDialog(window.getShell());
 			}
-			
-			fdlg.setSearchJobText("Search for "+decl+"\nLocation: "+fLocation+"\nPath: "+fPath);
-			
+
+			fdlg.setSearchJobText("Search for " + decl + "\nLocation: " + fLocation + "\nPath: " + fPath);
+
 			if (decl instanceof SignalDeclaration || decl instanceof InterfaceDeclaration) {
 				fdlg.setPath(fPath);
 			} else {
@@ -78,7 +77,8 @@ public class ShowReferencesAction extends StaticAnalysisAction {
 			}
 
 			if (fdlg.open() == Window.OK) {
-				NewSearchUI.runQueryInBackground(new ReferencesSearchQuery(this, fdlg.isSearchUp(), fdlg.isSearchDown(), false, fdlg.isUsePath(), fdlg.isWritersOnly(), fdlg.isReadersOnly()));
+				NewSearchUI.runQueryInBackground(new ReferencesSearchQuery(this, fdlg.isSearchUp(), fdlg.isSearchDown(), false, fdlg.isUsePath(), fdlg.isWritersOnly(), fdlg
+						.isReadersOnly()));
 			}
 
 		} catch (Exception e) {

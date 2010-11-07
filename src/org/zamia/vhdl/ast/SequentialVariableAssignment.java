@@ -41,7 +41,7 @@ public class SequentialVariableAssignment extends SequentialStatement {
 
 	private Operation value;
 
-	public SequentialVariableAssignment(Target target_, Operation value_, ASTObject parent_, long location_) {
+	public SequentialVariableAssignment(Target target_, Operation value_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		target = target_;
 		target.setParent(this);
@@ -67,7 +67,7 @@ public class SequentialVariableAssignment extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return target;

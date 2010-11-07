@@ -43,7 +43,7 @@ public class OperationLogic extends Operation {
 
 	private Operation fA, fB;
 
-	public OperationLogic(LogicOp aOp, Operation aA, Operation aB, ASTObject aParent, long aLocation) {
+	public OperationLogic(LogicOp aOp, Operation aA, Operation aB, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fOp = aOp;
 
@@ -73,7 +73,7 @@ public class OperationLogic extends Operation {
 	@Override
 	public void dump(PrintStream out, int i) {
 		printSpaces(out, i);
-		out.print("OperationLogic, cnt=" + cnt + " op = " + getLogicOpId());
+		out.print("OperationLogic, cnt=" + getCnt() + " op = " + getLogicOpId());
 		fA.dump(out, i + 2);
 		if (fB != null)
 			fB.dump(out, i + 2);
@@ -117,7 +117,7 @@ public class OperationLogic extends Operation {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fA;

@@ -14,7 +14,7 @@ import org.zamia.rtl.RTLModule;
 import org.zamia.rtl.RTLPort;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
 
@@ -29,7 +29,7 @@ public class ZILInterfaceSignal extends ZILSignal implements ZILInterface {
 
 	private PortDir fDir;
 
-	public ZILInterfaceSignal(String aId, ZILType aType, PortDir aDir, ZILValue aValue, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILInterfaceSignal(String aId, ZILType aType, PortDir aDir, ZILValue aValue, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aId, aType, aContainer, aSrc);
 		fDir = aDir;
 		

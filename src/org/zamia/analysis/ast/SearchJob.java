@@ -9,7 +9,7 @@
 package org.zamia.analysis.ast;
 
 import org.zamia.analysis.ReferenceSearchResult;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 /**
@@ -22,13 +22,13 @@ public class SearchJob {
 
 	public String fID;
 
-	public DUUID fDUUID;
+	public DMUID fDUUID;
 
 	public ReferenceSearchResult parent;
 
 	int fDepth;
 
-	public SearchJob(String aID, DUUID aDUUID, int aDepth, ReferenceSearchResult aParent) {
+	public SearchJob(String aID, DMUID aDUUID, int aDepth, ReferenceSearchResult aParent) {
 		fID = aID;
 		fDUUID = aDUUID;
 		parent = aParent;

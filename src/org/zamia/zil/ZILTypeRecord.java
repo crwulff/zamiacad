@@ -11,7 +11,7 @@ package org.zamia.zil;
 
 import org.zamia.ZamiaException;
 import org.zamia.util.HashMapArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.Range;
 
 
@@ -25,7 +25,7 @@ public class ZILTypeRecord extends ZILType {
 
 	private HashMapArray<String, ZILRecordField> fields;
 
-	public ZILTypeRecord(ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTypeRecord(ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aDeclaration, aContainer, aSrc);
 
 		fields = new HashMapArray<String, ZILRecordField>();
@@ -35,7 +35,7 @@ public class ZILTypeRecord extends ZILType {
 		fields.put(aId, new ZILRecordField(aId, aType));
 	}
 
-	public ZILRecordField findRecordField(String aId, ASTObject aSrc) {
+	public ZILRecordField findRecordField(String aId, VHDLNode aSrc) {
 		ZILRecordField rf = fields.get(aId);
 		return rf;
 	}
@@ -82,7 +82,7 @@ public class ZILTypeRecord extends ZILType {
 	}
 
 	@Override
-	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		throw new ZamiaException("Cannot create subtypes from record type.", aSrc);
 	}
 
@@ -129,7 +129,7 @@ public class ZILTypeRecord extends ZILType {
 	}
 
 	@Override
-	public ZILType convertType(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType convertType(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		if (aType == this)
 			return this;
 		throw new ZamiaException("Type conversion for record types is not allowed.", aSrc);

@@ -10,7 +10,7 @@ package org.zamia;
 
 import java.io.Serializable;
 
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 /**
@@ -26,19 +26,19 @@ public class Toplevel implements Serializable {
 
 	public final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private DUUID fDUUID;
+	private DMUID fDUUID;
 
 	private SourceLocation fLocation;
 
 	public Toplevel() {
 	}
 
-	public Toplevel(DUUID aDUUID, SourceLocation aLocation) {
+	public Toplevel(DMUID aDUUID, SourceLocation aLocation) {
 		fDUUID = aDUUID;
 		fLocation = aLocation;
 	}
 
-	public DUUID getDUUID() {
+	public DMUID getDUUID() {
 		return fDUUID;
 	}
 

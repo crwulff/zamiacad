@@ -15,8 +15,8 @@ import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLComponent;
 import org.zamia.rtl.RTLGraph;
 import org.zamia.util.ZHash;
-import org.zamia.vhdl.ast.ASTObject;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.VHDLNode;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zil.synthesis.Binding;
 import org.zamia.zil.synthesis.Bindings;
 
@@ -37,13 +37,13 @@ public class ZILInstantiation extends ZILConcurrentStatement {
 		}
 	}
 	
-	private DUUID fDUUID; // the architecture we're referencing
+	private DMUID fDUUID; // the architecture we're referencing
 	private ArrayList <ActualGeneric> fActualGenerics;
 	private String fSignature;
 	private ArrayList<ZILTargetOperationDestination> fPortMap;
 	private ArrayList<ZILInterfaceSignal> fPorts;
 
-	public ZILInstantiation(DUUID aDUUID, String aId, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILInstantiation(DMUID aDUUID, String aId, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aId, aContainer, aSrc);
 		
 		fDUUID = aDUUID;
@@ -51,7 +51,7 @@ public class ZILInstantiation extends ZILConcurrentStatement {
 		fActualGenerics = new ArrayList<ActualGeneric>();
 	}
 
-	public DUUID getDUUID() {
+	public DMUID getDUUID() {
 		return fDUUID;
 	}
 	

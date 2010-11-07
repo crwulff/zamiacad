@@ -30,7 +30,7 @@ public class SequentialWhile extends SequentialLoop {
 
 	private Operation fCond;
 
-	public SequentialWhile(Operation aCond, String aLabel, ASTObject aParent, long aLocation) {
+	public SequentialWhile(Operation aCond, String aLabel, VHDLNode aParent, long aLocation) {
 		super(aLabel, aParent, aLocation);
 
 		fCond = aCond;

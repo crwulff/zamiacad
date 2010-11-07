@@ -14,7 +14,7 @@ import java.util.HashMap;
 import org.zamia.ZamiaException;
 import org.zamia.fsm.FSM;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -30,7 +30,7 @@ public class RTLFSM extends RTLModule {
 	private HashMap<RTLSignal, RTLPort> signalMap;
 
 	public RTLFSM(FSM fsm_, RTLGraph parent_, String instanceName_,
-			ASTObject src_) throws ZamiaException {
+			VHDLNode src_) throws ZamiaException {
 		super(parent_, instanceName_, src_);
 
 		signalMap = new HashMap<RTLSignal, RTLPort>();
@@ -73,7 +73,7 @@ public class RTLFSM extends RTLModule {
 	private RTLPort getSignalPort(RTLSignal s_, PortDir dir_)
 			throws ZamiaException {
 
-		ASTObject src = getSource();
+		VHDLNode src = getSource();
 
 		RTLPort port = signalMap.get(s_);
 		if (port == null) {

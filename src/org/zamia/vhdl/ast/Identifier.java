@@ -27,7 +27,7 @@ import org.zamia.instgraph.IGElaborationEnv;
  * 
  */
 @SuppressWarnings("serial")
-public class Identifier extends ASTObject {
+public class Identifier extends VHDLNode {
 
 	private String fImage;
 
@@ -74,7 +74,7 @@ public class Identifier extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return null;
 	}
 

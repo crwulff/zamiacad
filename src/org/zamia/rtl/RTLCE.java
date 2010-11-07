@@ -10,7 +10,7 @@ package org.zamia.rtl;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 
 
@@ -27,7 +27,7 @@ public class RTLCE extends RTLModule {
 	private ZILType type;
 
 	public RTLCE(ZILType t_, RTLGraph parent_, String instanceName_,
-			ASTObject src_) {
+			VHDLNode src_) {
 		super(parent_, instanceName_, src_);
 
 		type = t_;

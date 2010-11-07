@@ -15,7 +15,7 @@ import org.zamia.ZamiaProject;
 import org.zamia.rtl.Optimizer;
 import org.zamia.rtl.RTLGraph;
 import org.zamia.util.HashMapArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.synthesis.Binding;
 import org.zamia.zil.synthesis.Bindings;
 
@@ -34,19 +34,19 @@ public class ZILModule extends ZILDesignUnit {
 
 	private ArrayList<ZILConcurrentStatement> fStatements;
 
-	public ZILModule(String aId, ASTObject aSrc) {
+	public ZILModule(String aId, VHDLNode aSrc) {
 		super(aId, aSrc);
 		fGenerics = new HashMapArray<String, ZILInterfaceValue>();
 		fInterfaces = new HashMapArray<String, ZILInterfaceSignal>();
 		fStatements = new ArrayList<ZILConcurrentStatement>();
 	}
 
-	public void addGeneric(ZILInterfaceValue aInterface, ASTObject aSrc) throws ZamiaException {
+	public void addGeneric(ZILInterfaceValue aInterface, VHDLNode aSrc) throws ZamiaException {
 		fGenerics.put(aInterface.getId(), aInterface);
 		add(aInterface, aSrc);
 	}
 
-	public void addPort(ZILInterfaceSignal aInterface, ASTObject aSrc) throws ZamiaException {
+	public void addPort(ZILInterfaceSignal aInterface, VHDLNode aSrc) throws ZamiaException {
 		fInterfaces.put(aInterface.getId(), aInterface);
 		add(aInterface, aSrc);
 	}

@@ -43,7 +43,7 @@ public class OperationShift extends Operation {
 
 	private Operation fA, fB;
 
-	public OperationShift(ShiftOp aOp, Operation aA, Operation aB, ASTObject aParent, long aLocation) {
+	public OperationShift(ShiftOp aOp, Operation aA, Operation aB, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fOp = aOp;
 		setOperand(aA, aB);
@@ -74,7 +74,7 @@ public class OperationShift extends Operation {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fA;
@@ -95,7 +95,7 @@ public class OperationShift extends Operation {
 	@Override
 	public void dump(PrintStream out, int i) {
 		printSpaces(out, i);
-		out.print("OperationShift, cnt=" + cnt + " op = " + getShiftOpId());
+		out.print("OperationShift, cnt=" + getCnt() + " op = " + getShiftOpId());
 		fA.dump(out, i + 2);
 		if (fB != null)
 			fB.dump(out, i + 2);

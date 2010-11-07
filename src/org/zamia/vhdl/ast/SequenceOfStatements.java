@@ -35,7 +35,7 @@ public class SequenceOfStatements extends SequentialStatement {
 
 	private ArrayList<SequentialStatement> statements; // of SequentialStatement
 	
-	public SequenceOfStatements (ASTObject parent_, long location_) {
+	public SequenceOfStatements (VHDLNode parent_, long location_) {
 		super (parent_, location_);
 		statements = new ArrayList<SequentialStatement>();
 	}
@@ -68,7 +68,7 @@ public class SequenceOfStatements extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return statements.get(idx_);
 	}
 

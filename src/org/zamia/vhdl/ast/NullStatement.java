@@ -31,7 +31,7 @@ import org.zamia.instgraph.IGSequenceOfStatements;
 @SuppressWarnings("serial")
 public class NullStatement extends SequentialStatement {
 
-	public NullStatement(ASTObject parent_, long location_) {
+	public NullStatement(VHDLNode parent_, long location_) {
 		super(parent_, location_);
 	}
 
@@ -42,7 +42,7 @@ public class NullStatement extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return null;
 	}
 

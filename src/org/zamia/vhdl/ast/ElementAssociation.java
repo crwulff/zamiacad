@@ -28,18 +28,18 @@ import org.zamia.instgraph.IGElaborationEnv;
  */
 
 @SuppressWarnings("serial")
-public class ElementAssociation extends ASTObject {
+public class ElementAssociation extends VHDLNode {
 
 	private ArrayList<Range> choices;
 	private Operation expression;
 
-	public ElementAssociation(ASTObject parent_, long location_) {
+	public ElementAssociation(VHDLNode parent_, long location_) {
 		this(null, parent_, location_);
 	}
-	public ElementAssociation(Operation expr_, ASTObject parent_, long location_) {
+	public ElementAssociation(Operation expr_, VHDLNode parent_, long location_) {
 		this(null, expr_, parent_, location_);
 	}
-	public ElementAssociation(ArrayList<Range> choices_, Operation expr_, ASTObject parent_, long location_) {
+	public ElementAssociation(ArrayList<Range> choices_, Operation expr_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		setExpression(expr_);
 		setChoices(choices_);
@@ -93,7 +93,7 @@ public class ElementAssociation extends ASTObject {
 		return choices.size()+1;
 	}
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (idx_ == 0)
 			return expression;
 		idx_--;

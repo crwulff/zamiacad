@@ -38,7 +38,7 @@ public class SequentialWait extends SequentialStatement {
 
 	private Operation timeoutClause, conditionClause;
 
-	public SequentialWait(String label_, ASTObject parent_, long location_) {
+	public SequentialWait(String label_, VHDLNode parent_, long location_) {
 		super(label_, parent_, location_);
 	}
 
@@ -73,7 +73,7 @@ public class SequentialWait extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return conditionClause;

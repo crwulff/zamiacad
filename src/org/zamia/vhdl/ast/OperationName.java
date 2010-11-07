@@ -35,7 +35,7 @@ public class OperationName extends Operation {
 
 	private Name fName;
 
-	public OperationName(Name aName, ASTObject aParent, long aLocation) {
+	public OperationName(Name aName, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 
 		fName = aName;
@@ -73,7 +73,7 @@ public class OperationName extends Operation {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fName;
 	}
 

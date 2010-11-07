@@ -32,7 +32,7 @@ public class TypeDefinitionRecord extends TypeDefinition {
 
 	private ArrayList<RecordElementDeclaration> elements; // of ElementDeclaration
 
-	public TypeDefinitionRecord(ASTObject parent_, long location_) {
+	public TypeDefinitionRecord(VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		elements = new ArrayList<RecordElementDeclaration>();
 	}
@@ -48,7 +48,7 @@ public class TypeDefinitionRecord extends TypeDefinition {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return elements.get(idx_);
 	}
 

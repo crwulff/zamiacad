@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -60,7 +60,7 @@ public abstract class ZILType extends ZILObject implements Serializable {
 	private static int counter = 0;
 	protected int cnt = 0;
 
-	public ZILType(ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILType(ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(null, aContainer, aSrc);
 		fType = this; // FIXME: void?
 		fDeclaration = aDeclaration;
@@ -105,7 +105,7 @@ public abstract class ZILType extends ZILObject implements Serializable {
 		return true;
 	}
 
-	public abstract ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException;
+	public abstract ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException;
 
 	private ZILType enableType = null;
 
@@ -119,10 +119,10 @@ public abstract class ZILType extends ZILObject implements Serializable {
 
 	protected abstract ZILType computeEnableType();
 
-	public abstract ZILType convertType(ZILType aExpT, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException;
+	public abstract ZILType convertType(ZILType aExpT, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException;
 
 	// may be overwritten, e.g. in ZILTypeEnum
-	public ZILType qualifyType(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType qualifyType(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		return convertType(aType, aContainer, aSrc);
 	}
 

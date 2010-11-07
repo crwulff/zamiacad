@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tag. 
+ * Copyright 2009,2010 by the authors indicated in the @author tag. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -19,9 +19,7 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
-import org.zamia.ZamiaProject.VHDLLanguageSupport;
-import org.zamia.vhdl.ast.DUUID;
-
+import org.zamia.vhdl.ast.DMUID;
 
 /**
  * @author Guenter Bartsch
@@ -170,7 +168,7 @@ public class IGTest extends TestCase {
 
 	private ZamiaProject fZPrj;
 
-	public void setupTest(String aBasePath, String aBuildPath, VHDLLanguageSupport aVHDLLanguageSupport) throws Exception {
+	public void setupTest(String aBasePath, String aBuildPath) throws Exception {
 		ZamiaLogger.setup(Level.DEBUG);
 
 		File f = new File(aBuildPath);
@@ -179,11 +177,11 @@ public class IGTest extends TestCase {
 
 		SourceFile sf = new SourceFile(f);
 
-		fZPrj = new ZamiaProject("IG Test Tmp Project", aBasePath, sf, null, aVHDLLanguageSupport);
+		fZPrj = new ZamiaProject("IG Test Tmp Project", aBasePath, sf, null);
 		fZPrj.clean();
 	}
 
-	private DUUID getUID(ZamiaProject aZPrj) {
+	private DMUID getUID(ZamiaProject aZPrj) {
 		BuildPath bp = aZPrj.getBuildPath();
 
 		Toplevel tl = bp.getToplevel(0);
@@ -191,14 +189,14 @@ public class IGTest extends TestCase {
 		return aZPrj.getDUM().getArchDUUID(tl.getDUUID());
 	}
 
-	private void runTest(String aTestDir, int aNumNodes, VHDLLanguageSupport aVHDLLanguageSupport) throws Exception {
-		setupTest(aTestDir, aTestDir + "/BuildPath.txt", aVHDLLanguageSupport);
+	private void runTest(String aTestDir, int aNumNodes) throws Exception {
+		setupTest(aTestDir, aTestDir + "/BuildPath.txt");
 
 		ZamiaProjectBuilder builder = fZPrj.getBuilder();
 
 		builder.build(true, true, null);
 
-		DUUID duuid = getUID(fZPrj);
+		DMUID duuid = getUID(fZPrj);
 
 		int n = fZPrj.getERM().getNumErrors();
 		logger.error("IGTest: Build finished. Found %d errors.", n);
@@ -215,10 +213,6 @@ public class IGTest extends TestCase {
 		assertEquals(aNumNodes, n);
 	}
 
-	private void runTest(String aTestDir, int aNumNodes) throws Exception {
-		runTest(aTestDir, aNumNodes, VHDLLanguageSupport.VHDL2008);
-	}
-
 	@Override
 	protected void tearDown() {
 		if (fZPrj != null) {
@@ -226,7 +220,7 @@ public class IGTest extends TestCase {
 			fZPrj = null;
 		}
 	}
-	
+
 	// disabled for now (supposed to generate errors)
 	//	public void testInst() throws Exception {
 	//
@@ -238,15 +232,25 @@ public class IGTest extends TestCase {
 	//		runTest("test/semantic/instTest", 2);
 	//	}
 
+	// FIXME: disabled for now (PSL support is incomplete)
+	//	public void testPSL6() throws Exception {
+	//
+	//		if (!enablePSL6Test) {
+	//			fail("Test disabled");
+	//			return;
+	//		}
+	//
+	//		runTest("test/semantic/psl6Test", 1);
+	//	}
 
-	public void testPSL6() throws Exception {
+	public void testManik() throws Exception {
 
-		if (!enablePSL6Test) {
+		if (!enableManikTest) {
 			fail("Test disabled");
 			return;
 		}
 
-		runTest("test/semantic/psl6Test", 1);
+		runTest("examples/manik", 3257);
 	}
 
 	public void testLiteral5() throws Exception {
@@ -257,16 +261,6 @@ public class IGTest extends TestCase {
 		}
 
 		runTest("test/semantic/literal5Test", 1);
-	}
-
-	public void testManik() throws Exception {
-
-		if (!enableManikTest) {
-			fail("Test disabled");
-			return;
-		}
-
-		runTest("examples/manik", 3257);
 	}
 
 	public void testResolver() throws Exception {
@@ -736,7 +730,7 @@ public class IGTest extends TestCase {
 			return;
 		}
 
-		runTest("examples/oggonachip", 358, VHDLLanguageSupport.VHDL2002);
+		runTest("examples/oggonachip", 358);
 	}
 
 	public void testType() throws Exception {
@@ -776,7 +770,7 @@ public class IGTest extends TestCase {
 			return;
 		}
 
-		runTest("examples/jop", 288, VHDLLanguageSupport.VHDL2002);
+		runTest("examples/jop", 288);
 	}
 
 	public void testDLX() throws Exception {
@@ -963,8 +957,8 @@ public class IGTest extends TestCase {
 		IGTest igt = new IGTest();
 
 		try {
-			//igt.testManik();
-			igt.testLeonExtern();
+			igt.testManik();
+			//igt.testLeonExtern();
 			//igt.testPlasma();
 			//igt.testJOP();
 			//igt.testCounterG();

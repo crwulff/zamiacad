@@ -8,7 +8,7 @@
  */
 package org.zamia.zil;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -20,7 +20,7 @@ public class ZILAlias extends ZILObject {
 
 	private ZILIObject fObj;
 
-	public ZILAlias(String aId, ZILIObject aObj, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILAlias(String aId, ZILIObject aObj, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super (aType, aContainer, aSrc);
 		fId = aId;
 	}

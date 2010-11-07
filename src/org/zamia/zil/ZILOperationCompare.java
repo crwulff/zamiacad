@@ -12,7 +12,7 @@ import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLGraph;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.OperationCompare.CompareOp;
 import org.zamia.zil.interpreter.ZILCompareStmt;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
@@ -33,7 +33,7 @@ public class ZILOperationCompare extends ZILOperation {
 
 	private ZILOperation fB;
 
-	public ZILOperationCompare(CompareOp aOp, ZILOperation aA, ZILOperation aB, ZILType type, ZILIContainer container, ASTObject src) {
+	public ZILOperationCompare(CompareOp aOp, ZILOperation aA, ZILOperation aB, ZILType type, ZILIContainer container, VHDLNode src) {
 		super(type, container, src);
 
 		fOp = aOp;

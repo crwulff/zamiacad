@@ -32,7 +32,7 @@ import org.zamia.instgraph.IGElaborationEnv;
 @SuppressWarnings("serial")
 public class GroupTemplateDeclaration extends BlockDeclarativeItem {
 
-	public GroupTemplateDeclaration(String id_, ASTObject parent_, long location_) {
+	public GroupTemplateDeclaration(String id_, VHDLNode parent_, long location_) {
 		super(id_, parent_, location_);
 	}
 
@@ -42,7 +42,7 @@ public class GroupTemplateDeclaration extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return null;
 	}
 

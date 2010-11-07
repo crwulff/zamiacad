@@ -16,7 +16,7 @@ import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLSignalAE;
 import org.zamia.rtl.RTLTargetEMux;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILPushRefStmt;
 import org.zamia.zil.synthesis.Bindings;
@@ -41,11 +41,11 @@ public class ZILVariable extends ZILOperation implements ZILIReferable {
 
 	private boolean fIgnoreOldValue = false;
 
-	public ZILVariable(String aId, ZILType aType, ZILValue aInitialValue, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILVariable(String aId, ZILType aType, ZILValue aInitialValue, ZILIContainer aContainer, VHDLNode aSrc) {
 		this(aId, aType, aInitialValue, 0, aContainer, aSrc);
 	}
 
-	public ZILVariable(String aId, ZILType aType, ZILValue aInitialValue, int aUID, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILVariable(String aId, ZILType aType, ZILValue aInitialValue, int aUID, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aType, aContainer, aSrc);
 		fId = aId;
 		fUID = aUID > 0 ? aUID : fCounter++;

@@ -12,7 +12,7 @@ import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLGraph;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILPushStmt;
 import org.zamia.zil.synthesis.Bindings;
@@ -28,7 +28,7 @@ public class ZILOperationReadSignal extends ZILOperation {
 
 	private ZILSignal fSignal;
 
-	public ZILOperationReadSignal(ZILSignal aSignal, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILOperationReadSignal(ZILSignal aSignal, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aSignal.getType(), aContainer, aSrc);
 		fSignal = aSignal;
 	}

@@ -9,7 +9,7 @@
 package org.zamia.instgraph;
 
 import org.zamia.SourceLocation;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zdb.ZDB;
 
 
@@ -22,14 +22,14 @@ import org.zamia.zdb.ZDB;
 @SuppressWarnings("serial")
 public class IGDUUID extends IGContainerItem {
 
-	private final DUUID fDUUID;
+	private final DMUID fDUUID;
 	
-	public IGDUUID(DUUID aDUUID, SourceLocation aSrc, ZDB aZDB) {
+	public IGDUUID(DMUID aDUUID, SourceLocation aSrc, ZDB aZDB) {
 		super (aDUUID.getUID(), aSrc, aZDB);
 		fDUUID = aDUUID;
 	}
 	
-	public DUUID getDUUID() {
+	public DMUID getDUUID() {
 		return fDUUID;
 	}
 	

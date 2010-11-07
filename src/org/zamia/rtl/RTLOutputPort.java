@@ -10,7 +10,7 @@
 package org.zamia.rtl;
 
 import org.zamia.rtl.RTLPort.PortDir;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * @author guenter bartsch
@@ -19,7 +19,7 @@ import org.zamia.vhdl.ast.ASTObject;
 @SuppressWarnings("serial")
 public class RTLOutputPort extends RTLPortModule {
 
-	public RTLOutputPort(RTLGraph parent_, RTLPort p, ASTObject src_) {
+	public RTLOutputPort(RTLGraph parent_, RTLPort p, VHDLNode src_) {
 		super(parent_, p, src_);
 
 		if (p.getDirection() != PortDir.OUT) {

@@ -11,7 +11,7 @@ package org.zamia.vhdl.ast;
 
 import java.util.ArrayList;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
@@ -49,7 +49,7 @@ public class NameExtensionSuffix extends NameExtension {
 
 	private Suffix suffix;
 
-	public NameExtensionSuffix(Suffix suffix_, ASTObject parent_, long location_) {
+	public NameExtensionSuffix(Suffix suffix_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		suffix = suffix_;
 	}
@@ -68,7 +68,7 @@ public class NameExtensionSuffix extends NameExtension {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return null;
 	}
 
@@ -86,7 +86,7 @@ public class NameExtensionSuffix extends NameExtension {
 
 			ZamiaProject zprj = aEE.getZamiaProject();
 			IGManager igm = zprj.getIGM();
-			DUManager dum = zprj.getDUM();
+			DMManager dum = zprj.getDUM();
 
 			IGPackage igp = igm.findPackage(libImport.getRealId(), suffix.getId(), getLocation());
 			if (igp != null) {
@@ -96,7 +96,7 @@ public class NameExtensionSuffix extends NameExtension {
 
 			Entity e = dum.findEntity(libImport.getRealId(), suffix.getId());
 			if (e != null) {
-				aResult.add(new IGDUUID(e.getDUUID(), getLocation(), aEE.getZDB()));
+				aResult.add(new IGDUUID(e.getDMUID(), getLocation(), aEE.getZDB()));
 				return;
 			}
 
@@ -122,7 +122,7 @@ public class NameExtensionSuffix extends NameExtension {
 		if (aItem instanceof IGDUUID) {
 
 			IGDUUID igduuid = (IGDUUID) aItem;
-			DUUID duuid = igduuid.getDUUID();
+			DMUID duuid = igduuid.getDUUID();
 
 			//			if (duuid.getType() != LUType.Package) {
 			//				aReport.append("Package expected here.", getLocation());
@@ -149,12 +149,12 @@ public class NameExtensionSuffix extends NameExtension {
 
 				// maybe this is an entity ?
 
-				DUManager dum = zprj.getDUM();
+				DMManager dum = zprj.getDUM();
 
 				Architecture arch = dum.getArchitecture(duuid.getLibId(), duuid.getId(), duuid.getArchId());
 
 				if (arch != null) {
-					String signature = IGInstantiation.computeSignature(arch.getDUUID(), null);
+					String signature = IGInstantiation.computeSignature(arch.getDMUID(), null);
 
 					IGModule module = igm.findModule(signature);
 

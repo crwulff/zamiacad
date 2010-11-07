@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILIReferable;
 
 
@@ -24,7 +24,7 @@ public class ZILNewObjectStmt extends ZILStmt {
 
 	private ZILIReferable fObject;
 
-	public ZILNewObjectStmt(ZILIReferable aObject, ASTObject aSrc) {
+	public ZILNewObjectStmt(ZILIReferable aObject, VHDLNode aSrc) {
 		super(aSrc);
 		fObject = aObject;
 	}

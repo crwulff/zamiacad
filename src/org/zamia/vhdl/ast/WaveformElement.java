@@ -31,11 +31,11 @@ import org.zamia.instgraph.IGType;
  * 
  */
 @SuppressWarnings("serial")
-public class WaveformElement extends ASTObject {
+public class WaveformElement extends VHDLNode {
 
 	private Operation fValue, fAfter;
 
-	public WaveformElement(Operation aValue, Operation aAfter, ASTObject aParent, long aLocation) {
+	public WaveformElement(Operation aValue, Operation aAfter, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fValue = aValue;
 		fAfter = aAfter;
@@ -59,7 +59,7 @@ public class WaveformElement extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fValue;

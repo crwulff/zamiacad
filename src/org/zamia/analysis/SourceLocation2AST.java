@@ -10,20 +10,17 @@
 package org.zamia.analysis;
 
 import java.io.IOException;
-import java.util.HashSet;
 
-import org.zamia.DUManager;
-import org.zamia.SFDUInfo;
+import org.zamia.ASTNode;
+import org.zamia.DMManager;
+import org.zamia.IDesignModule;
+import org.zamia.SFDMInfo;
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
-import org.zamia.util.ZStack;
-import org.zamia.vhdl.ast.ASTObject;
-import org.zamia.vhdl.ast.DUUID;
-import org.zamia.vhdl.ast.DesignUnit;
-
+import org.zamia.vhdl.ast.DMUID;
 
 /**
  * 
@@ -38,102 +35,45 @@ public class SourceLocation2AST {
 	private SourceLocation2AST() {
 	}
 
-	public static ASTObject findNearestASTObject(SourceLocation aLocation, boolean aCheckLine, ZamiaProject aZPrj) throws IOException, ZamiaException {
-		DUManager dum = aZPrj.getDUM();
+	public static ASTNode findNearestASTNode(SourceLocation aLocation, boolean aCheckLine, ZamiaProject aZPrj) throws IOException, ZamiaException {
+		DMManager dum = aZPrj.getDUM();
 		SourceFile sf = aLocation.fSF;
 
-		SFDUInfo info = dum.compileFile(sf, null);
+		SFDMInfo info = dum.compileFile(sf, null);
 		if (info == null) {
 			return null;
 		}
-		
-		ASTObject nearest = null;
-		int n = info.getNumDUUIDs();
-		for (int i = n - 1; i >= 0; i--) {
-			DUUID duuid = info.getDUUID(i);
 
-			DesignUnit du = dum.getDU(duuid);
-			
-			if (du == null) {
+		ASTNode nearest = null;
+		int n = info.getNumDMUIDs();
+		for (int i = n - 1; i >= 0; i--) {
+			DMUID dmuid = info.getDMUID(i);
+
+			IDesignModule dm = dum.getDM(dmuid);
+
+			if (dm == null) {
 				continue;
 			}
 
-			ASTObject io = searchClosestASTObject(0, 0, aLocation.fLine, aLocation.fCol, du);
-			if (io != null) {
-				SourceLocation loc = io.getLocation();
-				if (!aCheckLine || loc.fLine == aLocation.fLine) {
-					nearest = io;
-					break;
+			if (dm instanceof ASTNode) {
+
+				ASTNode node = (ASTNode) dm;
+
+				SearchClosestASTNode visitor = new SearchClosestASTNode(aLocation.fLine, aLocation.fCol);
+
+				node.visit(visitor);
+
+				ASTNode closestNode = visitor.getClosestNode();
+				if (closestNode != null) {
+					SourceLocation loc = closestNode.getLocation();
+					if (!aCheckLine || loc.fLine == aLocation.fLine) {
+						nearest = closestNode;
+						break;
+					}
 				}
 			}
 		}
 		return nearest;
-	}
-
-	private static ASTObject searchClosestASTObject(int aLine, int aCol, int aGoalLine, int aGoalCol, ASTObject aParent) {
-
-		if (aParent == null)
-			return null;
-
-		int line = aLine;
-		int col = aCol;
-
-		ZStack<ASTObject> s = new ZStack<ASTObject>();
-		s.push(aParent);
-
-		HashSet<ASTObject> done = new HashSet<ASTObject>();
-
-		ASTObject closest = null;
-
-		while (!s.isEmpty()) {
-
-			ASTObject o = s.pop();
-
-			// logger.debug
-			// ("searchClosestIO: o=%s, closest=%s, line=%d, goalLine=%d", o,
-			// closest, line, goalLine_);
-
-			if (o == null)
-				continue;
-
-			if (done.contains(o))
-				continue;
-
-			done.add(o);
-
-			SourceLocation l = o.getLocation();
-			if (l == null)
-				continue;
-
-			if (isCloser(l.fLine, l.fCol, line, col, aGoalLine, aGoalCol)) {
-				closest = o;
-				line = l.fLine;
-				col = l.fCol;
-			}
-
-			int n = o.getNumChildren();
-			for (int i = n - 1; i >= 0; i--) {
-				ASTObject o2 = o.getChild(i);
-				s.push(o2);
-			}
-		}
-
-		return closest;
-	}
-
-	private static boolean isCloser(int aY, int aX, int aOY, int aOX, int aMaxY, int aMaxX) {
-		if (aY > aMaxY)
-			return false;
-		if ((aY == aMaxY) && (aX > aMaxX))
-			return false;
-
-		if (aY < aOY)
-			return false;
-		if (aY > aOY)
-			return true;
-		if (aX < aOX)
-			return false;
-		return true;
 	}
 
 }

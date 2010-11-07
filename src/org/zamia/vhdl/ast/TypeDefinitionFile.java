@@ -33,7 +33,7 @@ public class TypeDefinitionFile extends TypeDefinition {
 
 	private Name fTypeMark;
 
-	public TypeDefinitionFile(Name aTypeMark, ASTObject aParent, long aLocation) {
+	public TypeDefinitionFile(Name aTypeMark, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		setTypeMark(aTypeMark);
 	}
@@ -49,7 +49,7 @@ public class TypeDefinitionFile extends TypeDefinition {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fTypeMark;
 	}
 

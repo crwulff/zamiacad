@@ -58,14 +58,14 @@ public class GenerateStatement extends ConcurrentStatement {
 
 	private String fLoopVarId;
 
-	public GenerateStatement(String aLoopVarId, Range aRange, String aLabel, ASTObject aParent, long aLocation) {
+	public GenerateStatement(String aLoopVarId, Range aRange, String aLabel, VHDLNode aParent, long aLocation) {
 		super(aLabel, aParent, aLocation);
 		fLoopVarId = aLoopVarId;
 		fRange = aRange;
 		fRange.setParent(this);
 	}
 
-	public GenerateStatement(Operation aCond, String aLabel, ASTObject aParent, long aLocation) {
+	public GenerateStatement(Operation aCond, String aLabel, VHDLNode aParent, long aLocation) {
 		super(aLabel, aParent, aLocation);
 		fCond = aCond;
 		fCond.setParent(this);
@@ -97,7 +97,7 @@ public class GenerateStatement extends ConcurrentStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		int n = fCSS.size();
 		if (aIdx < n) {
 			return fCSS.get(aIdx);
@@ -203,7 +203,7 @@ public class GenerateStatement extends ConcurrentStatement {
 		}
 	}
 
-	private void computeStatementsIG(DUUID aDUUID, String aLabel, IGStructure aStructure, IGElaborationEnv aCache) {
+	private void computeStatementsIG(DMUID aDUUID, String aLabel, IGStructure aStructure, IGElaborationEnv aCache) {
 		int n = fCSS.size();
 		for (int i = 0; i < n; i++) {
 			ConcurrentStatement stmt = fCSS.get(i);
@@ -219,7 +219,7 @@ public class GenerateStatement extends ConcurrentStatement {
 	}
 
 	@Override
-	public void computeIG(DUUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
+	public void computeIG(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
 
 		IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
 

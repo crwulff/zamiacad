@@ -51,7 +51,7 @@ public class InterfaceDeclaration extends DeclarativeItem {
 
 	private PortDir dir;
 
-	public InterfaceDeclaration(String id_, TypeDefinition type_, PortDir dir_, Operation value_, InterfaceKind kind_, ASTObject parent_, long location_) {
+	public InterfaceDeclaration(String id_, TypeDefinition type_, PortDir dir_, Operation value_, InterfaceKind kind_, VHDLNode parent_, long location_) {
 		super(id_, parent_, location_);
 		setType(type_);
 		setValue(value_);
@@ -101,7 +101,7 @@ public class InterfaceDeclaration extends DeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return type;

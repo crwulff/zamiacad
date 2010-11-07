@@ -10,7 +10,7 @@
 package org.zamia.zil;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.Range;
 
 
@@ -25,7 +25,7 @@ public class ZILTypeFile extends ZILType {
 
 	private ZILType fElementType;
 
-	public ZILTypeFile(ZILType aElementType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTypeFile(ZILType aElementType, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aDeclaration, aContainer, aSrc);
 		fElementType = aElementType;
 	}
@@ -48,7 +48,7 @@ public class ZILTypeFile extends ZILType {
 	}
 
 	@Override
-	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType createSubtype(ZILRange aRange, ZILTypeDeclaration aDeclaration, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		throw new ZamiaException("Cannot create subtypes from file type.", aSrc);
 	}
 
@@ -58,7 +58,7 @@ public class ZILTypeFile extends ZILType {
 	}
 
 	@Override
-	public ZILType convertType(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) throws ZamiaException {
+	public ZILType convertType(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) throws ZamiaException {
 		if (aType == this)
 			return this;
 		throw new ZamiaException("Type conversion for file types is not allowed.");

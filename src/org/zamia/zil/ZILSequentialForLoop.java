@@ -7,10 +7,10 @@
  */
 package org.zamia.zil;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ZamiaException;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILLabel;
 import org.zamia.zil.synthesis.VariableRemapping;
@@ -30,7 +30,7 @@ public class ZILSequentialForLoop extends ZILSequentialStatement implements ZILI
 
 	private ZILVariable fVar;
 
-	public ZILSequentialForLoop(ZILVariable aVar, ZILRange aRange, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSequentialForLoop(ZILVariable aVar, ZILRange aRange, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aContainer, aSrc);
 		fVar = aVar;
 		fRange = aRange;
@@ -239,7 +239,7 @@ public class ZILSequentialForLoop extends ZILSequentialStatement implements ZILI
 		}
 	}
 
-	public void add(ZILIObject aObject, ASTObject aSrc) {
+	public void add(ZILIObject aObject, VHDLNode aSrc) {
 		throw new RuntimeException("Internal error.");
 	}
 
@@ -259,7 +259,7 @@ public class ZILSequentialForLoop extends ZILSequentialStatement implements ZILI
 		fStmtSequence.computeReadSignals(aReadSignals);
 	}
 
-	public void addEntityImporter(String libId, DUManager adu) {
+	public void addEntityImporter(String libId, DMManager adu) {
 		throw new RuntimeException ("For loops do not support entity imports.");
 	}
 }

@@ -24,18 +24,18 @@ import org.zamia.instgraph.IGElaborationEnv;
 
 
 @SuppressWarnings("serial")
-public class GroupConstituent extends ASTObject {
+public class GroupConstituent extends VHDLNode {
 
-	public GroupConstituent(Name name, ASTObject parent_, long location_) {
+	public GroupConstituent(Name name, VHDLNode parent_, long location_) {
 		super (parent_, location_);
 	}
 
-	public GroupConstituent(String image, ASTObject parent_, long location_) {
+	public GroupConstituent(String image, VHDLNode parent_, long location_) {
 		super (parent_, location_);
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		// TODO Auto-generated method stub
 		return null;
 	}

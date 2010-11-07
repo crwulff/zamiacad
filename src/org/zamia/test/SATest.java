@@ -10,8 +10,12 @@ package org.zamia.test;
 import java.io.File;
 import java.io.IOException;
 
-import org.zamia.DUManager;
+import junit.framework.TestCase;
+
+import org.zamia.ASTNode;
+import org.zamia.DMManager;
 import org.zamia.ERManager;
+import org.zamia.IDesignModule;
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
 import org.zamia.ToplevelPath;
@@ -33,15 +37,12 @@ import org.zamia.instgraph.IGOperationObject;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.Pair;
 import org.zamia.util.ZStack;
-import org.zamia.vhdl.ast.ASTObject;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
+import org.zamia.vhdl.ast.DMUID.LUType;
 import org.zamia.vhdl.ast.DeclarativeItem;
 import org.zamia.vhdl.ast.DesignUnit;
 import org.zamia.vhdl.ast.Name;
-import org.zamia.vhdl.ast.DUUID.LUType;
-
-import junit.framework.TestCase;
-
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * 
@@ -82,7 +83,7 @@ public class SATest extends TestCase {
 
 		SourceLocation location = new SourceLocation(aSF, aLine, aCol);
 
-		ASTObject nearest = SourceLocation2AST.findNearestASTObject(location, true, fZPrj);
+		ASTNode nearest = SourceLocation2AST.findNearestASTNode(location, true, fZPrj);
 
 		assertNotNull("Failed to find nearest AST Object", nearest);
 
@@ -155,7 +156,7 @@ public class SATest extends TestCase {
 		result.dump(0, System.out);
 		assertEquals(27, result.countRefs());
 
-		DUUID duuid = new DUUID(LUType.Architecture, "WORK", "COUNTER_TB", "RTL");
+		DMUID duuid = new DMUID(LUType.Architecture, "WORK", "COUNTER_TB", "RTL");
 		stressTestIGReferenceSearch(duuid, "COUNTER_TB:");
 	}
 
@@ -163,9 +164,9 @@ public class SATest extends TestCase {
 		setupTest("test/leonExtern", "test/leonExtern/BuildPath.txt");
 
 		String homePath = System.getProperty("user.home");
-		
-		File f = new File(homePath + File.separator+"projects/workspace/zamia/examples/leonSOC/lib/gaisler/greth/grethm.vhd").getCanonicalFile();
-		
+
+		File f = new File(homePath + File.separator + "projects/workspace/zamia/examples/leonSOC/lib/gaisler/greth/grethm.vhd").getCanonicalFile();
+
 		SourceFile sf = new SourceFile(f);
 
 		ReferenceSearchResult result = runIGReferenceSearch(sf, "WORK.LEON3MP(RTL):ETH0.E1.M100", 84, 22, true, true);
@@ -211,7 +212,7 @@ public class SATest extends TestCase {
 	private SourceLocation runASTDeclarationSearch(SourceFile aSF, int aLine, int aCol) throws Exception {
 		SourceLocation location = new SourceLocation(aSF, aLine, aCol);
 
-		ASTObject nearest = SourceLocation2AST.findNearestASTObject(location, true, fZPrj);
+		ASTNode nearest = SourceLocation2AST.findNearestASTNode(location, true, fZPrj);
 
 		assertNotNull("Failed to find nearest AST Object", nearest);
 
@@ -227,13 +228,17 @@ public class SATest extends TestCase {
 	private HashSetArray<String> runASTCompletion(SourceFile aSF, int aLine, int aCol) throws Exception {
 		SourceLocation location = new SourceLocation(aSF, aLine, aCol);
 
-		ASTObject nearest = SourceLocation2AST.findNearestASTObject(location, true, fZPrj);
+		ASTNode nearest = SourceLocation2AST.findNearestASTNode(location, true, fZPrj);
 
-		assertNotNull("Failed to find nearest AST Object", nearest);
+		assertNotNull("Failed to find nearest AST Node", nearest);
 
 		HashSetArray<String> identifiers = new HashSetArray<String>();
 
-		nearest.collectIdentifiers(identifiers, fZPrj);
+		// FIXME: implement in language-agnostic way, e.g. using an AST visitor
+		if (nearest instanceof VHDLNode) {
+			VHDLNode node = (VHDLNode) nearest;
+			node.collectIdentifiers(identifiers, fZPrj);
+		}
 
 		return identifiers;
 	}
@@ -338,7 +343,7 @@ public class SATest extends TestCase {
 		result.dump(0, System.out);
 		assertEquals(2, result.countRefs());
 
-		DUUID duuid = new DUUID(LUType.Architecture, "WORK", "COUNTER_TB", "RTL");
+		DMUID duuid = new DMUID(LUType.Architecture, "WORK", "COUNTER_TB", "RTL");
 		stressTestASTReferenceSearch(duuid);
 	}
 
@@ -357,7 +362,7 @@ public class SATest extends TestCase {
 		result.dump(0, System.out);
 		assertEquals(82, result.countRefs());
 
-		DUUID duuid = new DUUID(LUType.Architecture, "WORK", "MLITE_CPU", "LOGIC");
+		DMUID duuid = new DMUID(LUType.Architecture, "WORK", "MLITE_CPU", "LOGIC");
 		stressTestASTReferenceSearch(duuid);
 	}
 
@@ -423,18 +428,18 @@ public class SATest extends TestCase {
 		return null;
 	}
 
-	private void stressTestIGReferenceSearch(DUUID aDUUID, String aPath) throws Exception {
+	private void stressTestIGReferenceSearch(DMUID aDUUID, String aPath) throws Exception {
 		// do a real stress test - global search on all names
 
-		DUManager dum = fZPrj.getDUM();
+		DMManager dum = fZPrj.getDUM();
 
-		DesignUnit du = dum.getDU(aDUUID);
+		IDesignModule du = dum.getDM(aDUUID);
 
-		ZStack<ASTObject> stack = new ZStack<ASTObject>();
+		ZStack<VHDLNode> stack = new ZStack<VHDLNode>();
 
-		stack.push(du);
+		stack.push((VHDLNode) du);
 		while (!stack.isEmpty()) {
-			ASTObject obj = stack.pop();
+			VHDLNode obj = stack.pop();
 
 			if (obj == null) {
 				continue;
@@ -456,7 +461,7 @@ public class SATest extends TestCase {
 
 			int n = obj.getNumChildren();
 			for (int i = 0; i < n; i++) {
-				ASTObject child = obj.getChild(i);
+				VHDLNode child = obj.getChild(i);
 
 				stack.push(child);
 			}
@@ -464,18 +469,18 @@ public class SATest extends TestCase {
 
 	}
 
-	private void stressTestASTReferenceSearch(DUUID aDUUID) throws Exception {
+	private void stressTestASTReferenceSearch(DMUID aDUUID) throws Exception {
 		// do a real stress test - global search on all names
 
-		DUManager dum = fZPrj.getDUM();
+		DMManager dum = fZPrj.getDUM();
 
-		DesignUnit du = dum.getDU(aDUUID);
+		DesignUnit du = (DesignUnit) dum.getDM(aDUUID);
 
-		ZStack<ASTObject> stack = new ZStack<ASTObject>();
+		ZStack<VHDLNode> stack = new ZStack<VHDLNode>();
 
 		stack.push(du);
 		while (!stack.isEmpty()) {
-			ASTObject obj = stack.pop();
+			VHDLNode obj = stack.pop();
 
 			if (obj == null) {
 				continue;
@@ -497,7 +502,7 @@ public class SATest extends TestCase {
 
 			int n = obj.getNumChildren();
 			for (int i = 0; i < n; i++) {
-				ASTObject child = obj.getChild(i);
+				VHDLNode child = obj.getChild(i);
 
 				stack.push(child);
 			}
@@ -522,7 +527,7 @@ public class SATest extends TestCase {
 		SourceFile sf = new SourceFile(new File("examples/leonSOC/lib/gaisler/greth/grethm.vhd"));
 
 		long startTime = System.currentTimeMillis();
-		
+
 		for (int i = 0; i < BENCHMARK_ITERATIONS; i++) {
 			ReferenceSearchResult result = runIGReferenceSearch(sf, "WORK.LEON3MP(RTL):ETH0.E1.M100", 84, 22, true, true);
 			assertNotNull(result);
@@ -541,9 +546,9 @@ public class SATest extends TestCase {
 		}
 
 		long stopTime = System.currentTimeMillis();
-		
+
 		double t = ((double) stopTime - startTime) / 1000.0;
-		
+
 		logger.info("\n\ntotal benchmark time: %5.2fs", t);
 	}
 

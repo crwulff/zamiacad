@@ -21,7 +21,7 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.plugin.ZamiaPlugin;
 import org.zamia.plugin.ZamiaProjectMap;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -91,9 +91,9 @@ public class ZamiaOutlinePage extends ContentOutlinePage {
 						}
 
 						Object o = s.toArray()[n - 1];
-						if (o instanceof ASTObject) {
+						if (o instanceof VHDLNode) {
 
-							ASTObject ast = (ASTObject) o;
+							VHDLNode ast = (VHDLNode) o;
 
 							ZamiaReconcilingStrategy strategy = fEditor.getReconcilingStrategy();
 

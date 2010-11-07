@@ -31,9 +31,9 @@ import org.zamia.instgraph.IGType;
  */
 
 @SuppressWarnings("serial")
-public abstract class Operation extends ASTObject {
+public abstract class Operation extends VHDLNode {
 
-	public Operation(ASTObject aParent, long aLocation) {
+	public Operation(VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 	}
 

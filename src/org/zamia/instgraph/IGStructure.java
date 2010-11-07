@@ -11,19 +11,18 @@ package org.zamia.instgraph;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.zamia.ASTNode;
 import org.zamia.ERManager;
 import org.zamia.SourceLocation;
 import org.zamia.ToplevelPath;
-import org.zamia.ZamiaProject;
 import org.zamia.ZamiaException.ExCat;
+import org.zamia.ZamiaProject;
 import org.zamia.analysis.SourceLocation2AST;
 import org.zamia.instgraph.interpreter.IGInterpreterContext;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
 import org.zamia.vhdl.ast.InstantiatedUnit;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * 
@@ -111,7 +110,7 @@ public class IGStructure extends IGConcurrentStatement {
 	public int getNumMappings() {
 		return fMappings.size();
 	}
-	
+
 	public IGMapping getMapping(int aIdx) {
 		return fMappings.get(aIdx);
 	}
@@ -125,7 +124,7 @@ public class IGStructure extends IGConcurrentStatement {
 		}
 
 		IGContainer container = getContainer();
-		
+
 		if (container == null) {
 			return null;
 		}
@@ -177,7 +176,7 @@ public class IGStructure extends IGConcurrentStatement {
 	public void updateInstantiations(HashSetArray<String> aDeleteNodes, IGElaborationEnv aEE) {
 
 		IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
-		
+
 		IGInterpreterContext context = getInterpreterContext();
 		if (context != null) {
 			env.pushContext(context);
@@ -185,7 +184,7 @@ public class IGStructure extends IGConcurrentStatement {
 
 		ZamiaProject zprj = getZPrj();
 		ERManager erm = zprj.getERM();
-		
+
 		int n = getNumStatements();
 		for (int i = 0; i < n; i++) {
 
@@ -205,7 +204,7 @@ public class IGStructure extends IGConcurrentStatement {
 					logger.info("IGStructure: Updating instantiation %s at %s", inst, location);
 
 					try {
-						ASTObject asto = SourceLocation2AST.findNearestASTObject(location, true, zprj);
+						ASTNode asto = SourceLocation2AST.findNearestASTNode(location, true, zprj);
 
 						while (asto != null) {
 							if (asto instanceof InstantiatedUnit) {
@@ -219,7 +218,7 @@ public class IGStructure extends IGConcurrentStatement {
 							InstantiatedUnit iu = (InstantiatedUnit) asto;
 
 							erm.removeErrors(iu, ExCat.INTERMEDIATE);
-							
+
 							inst = iu.computeIGInstantiation(inst.getDUUID(), getContainer(), this, aEE);
 
 							if (inst != null) {
@@ -241,7 +240,7 @@ public class IGStructure extends IGConcurrentStatement {
 		if (context != null) {
 			env.exitContext();
 		}
-		
+
 		storeOrUpdate();
 	}
 

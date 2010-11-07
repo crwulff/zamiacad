@@ -27,7 +27,7 @@ import org.zamia.vhdl.ast.OperationMath.MathOp;
  */
 
 @SuppressWarnings("serial")
-public class MultiplyingOperator extends ASTObject {
+public class MultiplyingOperator extends VHDLNode {
 
 	private MathOp op;
 	
@@ -46,7 +46,7 @@ public class MultiplyingOperator extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx_) {
+	public VHDLNode getChild(int aIdx_) {
 		return null;
 	}
 

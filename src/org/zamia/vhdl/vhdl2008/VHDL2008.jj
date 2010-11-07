@@ -55,9 +55,9 @@ public class VHDL2008Parser implements IHDLParser {
 	private String lib;
 	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 	private ZamiaProject zprj;
-    private DUManager dum;
+    private DMManager dum;
     private ERManager erm;
-    private HashSetArray<DUUID> dus;
+    private HashSetArray<DMUID> dus;
 	private BackupCharStream stream;
 	private int priority;
 	private boolean fUseFSCache;
@@ -80,10 +80,10 @@ public class VHDL2008Parser implements IHDLParser {
     	return getLocation (t);
     }
     
-	public HashSetArray<DUUID> parse(Reader aReader, String aLibId, SourceFile aSF, int aPriority, boolean aUseFSCache, boolean aBottomUp, ZamiaProject aZPrj) throws IOException {
+	public HashSetArray<DMUID> parse(Reader aReader, String aLibId, SourceFile aSF, int aPriority, boolean aUseFSCache, boolean aBottomUp, ZamiaProject aZPrj) throws IOException {
 			logger.debug("VHDL2008Parser: parsing %s, target lib : %s", aSF, aLibId);
     
-    		dus = new HashSetArray<DUUID>();
+    		dus = new HashSetArray<DMUID>();
 
 			zprj = aZPrj;
 			dum = zprj.getDUM();    
@@ -571,8 +571,11 @@ void design_file() throws ZamiaException :
     ( du = design_unit(standardMode) 
       { 
       	if (du!=null) {
+
+          du.visit(new SourceLocationGenerator(sf));
+      	  
       	  dum.addDesignUnit(du, sf, lib, priority, fUseFSCache);
-      	  dus.add(du.getDUUID()); 
+      	  dus.add(du.getDMUID()); 
       	}
       } 
     )* <EOF>
@@ -2347,7 +2350,7 @@ void secondary_unit_declaration(TypeDefinitionPhysical td_) throws ZamiaExceptio
 }
 {
 	id = identifier() <EQ> pl=physical_literal() <SEMICOLON>
-	{ td_.addUnit (id.getImage(), pl); }
+	{ td_.addUnit (id.getImage(), pl, id.getLineCol()); }
 }
 
 

@@ -38,7 +38,7 @@ public class AttributeDeclaration extends BlockDeclarativeItem {
 	
 	private Name typeMark;
 	
-	public AttributeDeclaration (String id_, Name typeMark_, ASTObject parent_, long location_) {
+	public AttributeDeclaration (String id_, Name typeMark_, VHDLNode parent_, long location_) {
 		super (id_, parent_, location_);
 		typeMark = typeMark_;
 		typeMark.setParent(this);
@@ -54,7 +54,7 @@ public class AttributeDeclaration extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return typeMark;
 	}
 	

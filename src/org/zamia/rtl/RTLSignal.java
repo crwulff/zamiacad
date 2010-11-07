@@ -15,7 +15,7 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.rtl.RTLPort.PortDir;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 import org.zamia.zil.ZILValue;
 
@@ -42,7 +42,7 @@ public class RTLSignal implements Serializable {
 
 	private ZILType type;
 
-	private ASTObject src; // intermediate layer object this signal was generated from
+	private VHDLNode src; // intermediate layer object this signal was generated from
 
 	protected RTLGraph rtlg;
 
@@ -61,7 +61,7 @@ public class RTLSignal implements Serializable {
 																 * if this is
 																 * not a port
 																 * signal
-																 */, ZILType type_, ASTObject src_) {
+																 */, ZILType type_, VHDLNode src_) {
 
 		ids = new String[1];
 		numIds = 1;
@@ -144,7 +144,7 @@ public class RTLSignal implements Serializable {
 		return replacedBy.getCurrent();
 	}
 
-	public ASTObject getSource() {
+	public VHDLNode getSource() {
 		return src;
 	}
 
@@ -302,7 +302,7 @@ public class RTLSignal implements Serializable {
 		return null;
 	}
 
-	public void setSource(ASTObject src2) {
+	public void setSource(VHDLNode src2) {
 		src = src2;
 	}
 

@@ -40,7 +40,7 @@ public class SequentialExit extends SequentialStatement {
 
 	private Operation fCond;
 
-	public SequentialExit(String aExitLabel, Operation aCond, String aLabel, ASTObject aParent, long aLocation) {
+	public SequentialExit(String aExitLabel, Operation aCond, String aLabel, VHDLNode aParent, long aLocation) {
 		super(aLabel, aParent, aLocation);
 		fCond = aCond;
 		if (fCond != null) {
@@ -55,7 +55,7 @@ public class SequentialExit extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fCond;
 	}
 

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -9,7 +9,7 @@
 package org.zamia.instgraph;
 
 import org.zamia.SourceLocation;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zdb.ZDB;
 
 
@@ -22,14 +22,14 @@ import org.zamia.zdb.ZDB;
 @SuppressWarnings("serial")
 public abstract class IGDesignUnit extends IGItem {
 
-	private DUUID fDUUID;
+	private DMUID fDUUID;
 
-	public IGDesignUnit(DUUID aDUUID, SourceLocation aLocation, ZDB aZDB) {
+	public IGDesignUnit(DMUID aDUUID, SourceLocation aLocation, ZDB aZDB) {
 		super(aLocation, aZDB);
 		fDUUID = aDUUID;
 	}
 
-	public DUUID getDUUID() {
+	public DMUID getDUUID() {
 		return fDUUID;
 	}
 	

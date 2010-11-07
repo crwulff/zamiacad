@@ -10,7 +10,7 @@ package org.zamia.zil;
 
 import org.zamia.ZamiaException;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILJumpNCStmt;
 import org.zamia.zil.interpreter.ZILJumpStmt;
@@ -34,7 +34,7 @@ public class ZILSequentialIf extends ZILSequentialStatement {
 
 	private ZILSequenceOfStatements fElseStmt;
 
-	public ZILSequentialIf(ZILOperation aCond, ZILSequenceOfStatements aThenStmt, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILSequentialIf(ZILOperation aCond, ZILSequenceOfStatements aThenStmt, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aContainer, aSrc);
 		fCond = aCond;
 		fThenStmt = aThenStmt;

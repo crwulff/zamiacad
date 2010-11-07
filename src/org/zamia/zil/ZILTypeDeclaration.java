@@ -8,7 +8,7 @@
  */
 package org.zamia.zil;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * 
@@ -17,7 +17,7 @@ import org.zamia.vhdl.ast.ASTObject;
  */
 public class ZILTypeDeclaration extends ZILObject {
 
-	public ZILTypeDeclaration(String aId, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILTypeDeclaration(String aId, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super (aId, aType, aContainer, aSrc);
 	}
 	
@@ -39,7 +39,7 @@ public class ZILTypeDeclaration extends ZILObject {
 
 	private static int cnt = 0;
 	
-	public static ZILTypeDeclaration generateAnonymousDeclaration(ASTObject aSrc) {
+	public static ZILTypeDeclaration generateAnonymousDeclaration(VHDLNode aSrc) {
 		int myCnt = cnt++;
 		return new ZILTypeDeclaration("#anonymous type "+myCnt+"#", null, null, aSrc);
 	}

@@ -16,7 +16,7 @@ import org.zamia.rtl.RTLPort;
 import org.zamia.rtl.RTLRegister;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLSignalAE;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.RTLCache;
 import org.zamia.zil.ZILClock;
 import org.zamia.zil.ZILIReferable;
@@ -127,7 +127,7 @@ public class Binding {
 			return;
 		}
 
-		ASTObject src = targetSignal.getSource();
+		VHDLNode src = targetSignal.getSource();
 
 		RTLRegister reg = new RTLRegister(rtlg, t, targetSignal.getId(), src);
 		rtlg.add(reg);
@@ -159,24 +159,24 @@ public class Binding {
 	}
 
 	public void dump(PrintStream out_, int offset_) {
-		ASTObject.printSpaces(out_, offset_);
+		VHDLNode.printSpaces(out_, offset_);
 		out_.println("Binding dump for referable:" + fReferable);
-		ASTObject.printSpaces(out_, offset_);
+		VHDLNode.printSpaces(out_, offset_);
 		out_.println("ASyncValue: ");
 		if (fASyncValue != null) {
 			fASyncValue.dump(offset_ + 2);
 			//FIXME			IntermediateObject.dump(out_, aSyncValue, offset_ + 2, new HashSet<Object>());
 		} else {
-			ASTObject.printSpaces(out_, offset_);
+			VHDLNode.printSpaces(out_, offset_);
 			out_.println("  null");
 		}
-		ASTObject.printSpaces(out_, offset_);
+		VHDLNode.printSpaces(out_, offset_);
 		out_.println("syncValue: ");
 		if (fSyncValue != null) {
 			fSyncValue.dump(offset_ + 2);
 			// FIXME			IntermediateObject.dump(out_, syncValue, offset_ + 2, new HashSet<Object>());
 		} else {
-			ASTObject.printSpaces(out_, offset_);
+			VHDLNode.printSpaces(out_, offset_);
 			out_.println("  null");
 		}
 	}

@@ -15,7 +15,7 @@ import java.io.Serializable;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort.PortDir;
 import org.zamia.util.HashMapArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILType;
 
 
@@ -42,7 +42,7 @@ public class RTLArrayCSel extends RTLModule {
 		}
 	}
 
-	public RTLArrayCSel (ZILType inType_, ZILType indexType_, ZILType resType_, RTLGraph parent_, String instanceName_, ASTObject src_) {
+	public RTLArrayCSel (ZILType inType_, ZILType indexType_, ZILType resType_, RTLGraph parent_, String instanceName_, VHDLNode src_) {
 		super(parent_, instanceName_, src_);
 
 		inType = inType_;
@@ -177,7 +177,7 @@ public class RTLArrayCSel extends RTLModule {
 		return outputs.size();
 	}
 
-	public RTLPort addOutput(int idx_, ASTObject src_) throws ZamiaException {
+	public RTLPort addOutput(int idx_, VHDLNode src_) throws ZamiaException {
 		
 		OutputConn conn = outputs.get(new Integer(idx_));
 		if (conn == null) {
@@ -189,7 +189,7 @@ public class RTLArrayCSel extends RTLModule {
 		return conn.port;
 	}
 	
-	public void connectOutput(int idx_, RTLSignal s_, ASTObject src_) throws ZamiaException {
+	public void connectOutput(int idx_, RTLSignal s_, VHDLNode src_) throws ZamiaException {
 		RTLPort port = addOutput(idx_, src_);
 		
 		RTLSignal s = port.getSignal();

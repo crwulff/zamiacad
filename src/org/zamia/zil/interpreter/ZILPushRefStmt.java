@@ -12,7 +12,7 @@ import org.zamia.rtl.RTLPort;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.sim.PortVarWriter;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILRecordField;
 import org.zamia.zil.ZILValue;
 import org.zamia.zil.ZILVariable;
@@ -57,7 +57,7 @@ public class ZILPushRefStmt extends ZILStmt {
 	 * @param aHaveReject
 	 * @param aSrc
 	 */
-	public ZILPushRefStmt(RTLSignal aSignal, boolean aInertial, boolean aHaveDelay, boolean aHaveReject, ASTObject aSrc) {
+	public ZILPushRefStmt(RTLSignal aSignal, boolean aInertial, boolean aHaveDelay, boolean aHaveReject, VHDLNode aSrc) {
 		super(aSrc);
 
 		fPushOp = PushOp.SIGNAL;
@@ -68,7 +68,7 @@ public class ZILPushRefStmt extends ZILStmt {
 		fHaveReject = aHaveReject;
 	}
 
-	public ZILPushRefStmt(ZILVariable aVariable, ASTObject aSrc) {
+	public ZILPushRefStmt(ZILVariable aVariable, VHDLNode aSrc) {
 		super(aSrc);
 
 		fPushOp = PushOp.VAR;
@@ -76,7 +76,7 @@ public class ZILPushRefStmt extends ZILStmt {
 		fVariable = aVariable;
 	}
 
-	public ZILPushRefStmt(ZILValue aValue, ASTObject aSrc) {
+	public ZILPushRefStmt(ZILValue aValue, VHDLNode aSrc) {
 		super(aSrc);
 		fPushOp = PushOp.VALUE;
 
@@ -90,7 +90,7 @@ public class ZILPushRefStmt extends ZILStmt {
 	 * @param aSrc
 	 */
 
-	public ZILPushRefStmt(ZILRecordField aRF, ASTObject aSrc) {
+	public ZILPushRefStmt(ZILRecordField aRF, VHDLNode aSrc) {
 		super(aSrc);
 
 		fPushOp = PushOp.RECORD;
@@ -103,7 +103,7 @@ public class ZILPushRefStmt extends ZILStmt {
 	 * 
 	 * @param aSrc
 	 */
-	public ZILPushRefStmt(boolean aHaveRange, ASTObject aSrc) {
+	public ZILPushRefStmt(boolean aHaveRange, VHDLNode aSrc) {
 		super(aSrc);
 
 		fPushOp = aHaveRange ? PushOp.ARRAYRANGE : PushOp.ARRAYINDEX;

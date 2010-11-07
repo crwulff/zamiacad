@@ -39,7 +39,7 @@ public class TypeDefinitionSubType extends TypeDefinition {
 
 	private Name resF;
 
-	public TypeDefinitionSubType(Name typeMark_, ASTObject parent_, long location_) {
+	public TypeDefinitionSubType(Name typeMark_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		setTypeMark(typeMark_);
 	}
@@ -90,7 +90,7 @@ public class TypeDefinitionSubType extends TypeDefinition {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (idx_ == 0)
 			return typeMark;
 		idx_--;

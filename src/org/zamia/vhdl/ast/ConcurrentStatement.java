@@ -23,21 +23,21 @@ import org.zamia.instgraph.IGStructure;
  */
 
 @SuppressWarnings("serial")
-public abstract class ConcurrentStatement extends ASTObject {
+public abstract class ConcurrentStatement extends VHDLNode {
 
 	protected boolean fPostponed = false; 
 	protected String fLabel;
 
-	public ConcurrentStatement(ASTObject aParent, long aLocation) {
+	public ConcurrentStatement(VHDLNode aParent, long aLocation) {
 		super (aParent, aLocation);
 	}
 	
-	public ConcurrentStatement(String aLabel, ASTObject aParent, long aLocation) {
+	public ConcurrentStatement(String aLabel, VHDLNode aParent, long aLocation) {
 		super (aParent, aLocation);
 		fLabel = aLabel;
 	}
 	
-	public abstract void computeIG(DUUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException;
+	public abstract void computeIG(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException;
 
 	public void setPostponed(boolean aPostponed) {
 		fPostponed = aPostponed;

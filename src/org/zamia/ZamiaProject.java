@@ -1,5 +1,5 @@
 /* 
- * Copyright 2005-2009 by the authors indicated in the @author tags. 
+ * Copyright 2005-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -15,8 +15,8 @@ import java.util.HashMap;
 import org.zamia.instgraph.IGManager;
 import org.zamia.util.ZHash;
 import org.zamia.util.ZamiaTmpDir;
+import org.zamia.verilog.VerilogParser;
 import org.zamia.vhdl.VHDLIndexer;
-import org.zamia.vhdl.vhdl2002.VHDL2002Parser;
 import org.zamia.vhdl.vhdl2008.VHDL2008Parser;
 import org.zamia.zdb.ZDB;
 import org.zamia.zdb.ZDBException;
@@ -40,10 +40,6 @@ public class ZamiaProject {
 
 	//	private static final String TCL_CLEAN_CMD = "zamiaBuildClean";
 
-	public enum VHDLLanguageSupport {
-		VHDL2002, VHDL2008
-	};
-
 	private String fId;
 
 	private String fBasePath;
@@ -54,15 +50,13 @@ public class ZamiaProject {
 
 	private BuildPath fBuildPath;
 
-	private VHDLLanguageSupport fVHDLLanguageSupport;
-
-	private IHDLParser fVHDLParser;
+	private IHDLParser fVHDLParser, fVerilogParser;
 
 	private VHDLIndexer fVHDLIndexer;
 
 	private ZamiaProjectBuilder fBuilder;
 
-	private DUManager fDUM;
+	private DMManager fDUM;
 
 	private IGManager fIGM;
 
@@ -73,12 +67,10 @@ public class ZamiaProject {
 
 	private static final String BUILDPATH_OBJ_NAME = "ZPRJ_BuildPath";
 
-	public ZamiaProject(String aId, String aBasePath, SourceFile aBuildPath, String aDataPath, VHDLLanguageSupport aVHDLLanguageSupport) throws IOException, ZamiaException,
-			ZDBException {
+	public ZamiaProject(String aId, String aBasePath, SourceFile aBuildPath, String aDataPath) throws IOException, ZamiaException, ZDBException {
 		fId = aId;
 		fBasePath = aBasePath;
 		fDataPath = aDataPath != null ? aDataPath : ZamiaTmpDir.getTmpDir().getAbsolutePath();
-		fVHDLLanguageSupport = aVHDLLanguageSupport;
 
 		registerProject(this);
 
@@ -92,15 +84,9 @@ public class ZamiaProject {
 
 		fERM = new ERManager(this);
 
-		switch (fVHDLLanguageSupport) {
-		case VHDL2002:
-			fVHDLParser = new VHDL2002Parser();
-			break;
-		default:
-			fVHDLParser = new VHDL2008Parser();
-		}
-
+		fVHDLParser = new VHDL2008Parser();
 		fVHDLIndexer = new VHDLIndexer();
+		fVerilogParser = new VerilogParser();
 
 		fBuildPath = (BuildPath) fZDB.getNamedObject(BUILDPATH_OBJ_NAME);
 		if (fBuildPath == null) {
@@ -116,7 +102,7 @@ public class ZamiaProject {
 			}
 		}
 
-		fDUM = new DUManager(this);
+		fDUM = new DMManager(this);
 
 		fBuilder = new ZamiaProjectBuilder(this);
 
@@ -144,7 +130,7 @@ public class ZamiaProject {
 	}
 
 	public ZamiaProject(String aId, String aBasePath, SourceFile aBuildPath) throws IOException, ZamiaException, ZDBException {
-		this(aId, aBasePath, aBuildPath, null, VHDLLanguageSupport.VHDL2008);
+		this(aId, aBasePath, aBuildPath, null);
 	}
 
 	public ZamiaProject() throws IOException, ZamiaException, ZDBException {
@@ -189,7 +175,7 @@ public class ZamiaProject {
 		fBuilder.zdbChanged();
 	}
 
-	public DUManager getDUM() {
+	public DMManager getDUM() {
 		return fDUM;
 	}
 
@@ -223,6 +209,10 @@ public class ZamiaProject {
 
 	public IHDLParser getVHDLParser() {
 		return fVHDLParser;
+	}
+
+	public IHDLParser getVerilogParser() {
+		return fVerilogParser;
 	}
 
 	@Override

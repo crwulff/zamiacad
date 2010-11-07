@@ -86,7 +86,7 @@ import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLPort.PortDir;
 import org.zamia.rtl.sim.ISimulator;
 import org.zamia.util.SimpleRegexp;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreter;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 
@@ -1865,7 +1865,7 @@ public class RTLView extends ViewPart implements ZoomObserver, PaintListener {
 			RTLSignal s = c.getSignalHit(this, mx, my);
 
 			if (s != null) {
-				ASTObject io = s.getSource();
+				VHDLNode io = s.getSource();
 				if (io != null) {
 					showSource(io);
 				}
@@ -1974,7 +1974,7 @@ public class RTLView extends ViewPart implements ZoomObserver, PaintListener {
 
 					// show source
 
-					ASTObject io = module.getSource();
+					VHDLNode io = module.getSource();
 					if (io != null) {
 						showSource(io);
 					}
@@ -2220,7 +2220,7 @@ public class RTLView extends ViewPart implements ZoomObserver, PaintListener {
 		ZamiaPlugin.showSource(page, prj_, location_, 0);
 	}
 
-	public void showSource(ASTObject io_) {
+	public void showSource(VHDLNode io_) {
 
 		ZamiaProject s = io_.getZPrj();
 		IProject prj = ZamiaProjectMap.getProject(s);
@@ -2258,7 +2258,7 @@ public class RTLView extends ViewPart implements ZoomObserver, PaintListener {
 	}
 
 	private void doShowSource() {
-		ASTObject io = null;
+		VHDLNode io = null;
 		if (selectedRTLModule != null) {
 			io = selectedRTLModule.getSource();
 		}

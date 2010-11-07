@@ -10,7 +10,7 @@ package org.zamia.zil;
 
 import org.zamia.ZamiaException;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.Range;
 import org.zamia.vhdl.ast.SequenceOfStatements;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
@@ -31,7 +31,7 @@ public class ZILRange extends ZILObject {
 	private ZILOperation fAscending;
 	private boolean fBAscending;
 
-	public ZILRange(ZILOperation aLeft, ZILOperation aRight, ZILOperation aAscending, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILRange(ZILOperation aLeft, ZILOperation aRight, ZILOperation aAscending, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(ZILTypeVoid.getInstance(), aContainer, aSrc);
 		
 		fLeft = aLeft;
@@ -39,11 +39,11 @@ public class ZILRange extends ZILObject {
 		fAscending = aAscending;
 	}
 	
-	public ZILRange(ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILRange(ZILIContainer aContainer, VHDLNode aSrc) {
 		super(ZILTypeVoid.getInstance(), aContainer, aSrc);
 	}
 
-	public ZILRange(ZILOperation aLeft, ZILOperation aRight, boolean aAscending, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILRange(ZILOperation aLeft, ZILOperation aRight, boolean aAscending, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(ZILTypeVoid.getInstance(), aContainer, aSrc);
 		
 		fLeft = aLeft;
@@ -51,7 +51,7 @@ public class ZILRange extends ZILObject {
 		fBAscending = aAscending;
 	}
 
-	public ZILRange(long aLeft, long aRight, boolean aAscending, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILRange(long aLeft, long aRight, boolean aAscending, ZILIContainer aContainer, VHDLNode aSrc) {
 		this (aContainer, aSrc);
 
 		try {
@@ -191,7 +191,7 @@ public class ZILRange extends ZILObject {
 		return v.isLogicOne();
 	}
 
-	public long computeCardinality(ASTObject aSrc) throws ZamiaException {
+	public long computeCardinality(VHDLNode aSrc) throws ZamiaException {
 		
 		if (!isConstant()) {
 			throw new ZamiaException ("Constant range expected here", aSrc);

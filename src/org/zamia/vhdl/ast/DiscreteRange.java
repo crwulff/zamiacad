@@ -31,13 +31,13 @@ import org.zamia.instgraph.IGType;
  */
 
 @SuppressWarnings("serial")
-public class DiscreteRange extends ASTObject {
+public class DiscreteRange extends VHDLNode {
 
 	private Range range;
 
 	private TypeDefinitionSubType td;
 
-	public DiscreteRange(Range range_, ASTObject parent_, long location_) {
+	public DiscreteRange(Range range_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		setRange(range_);
 	}
@@ -47,7 +47,7 @@ public class DiscreteRange extends ASTObject {
 		range.setParent(this);
 	}
 
-	public DiscreteRange(TypeDefinitionSubType td_, ASTObject parent_, long location_) {
+	public DiscreteRange(TypeDefinitionSubType td_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		setTypeDefinition(td_);
 	}
@@ -63,7 +63,7 @@ public class DiscreteRange extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return range;

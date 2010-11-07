@@ -23,7 +23,7 @@ import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.IGSubProgram.IGBuiltin;
 import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 
 
 /**

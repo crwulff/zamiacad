@@ -39,7 +39,7 @@ public class SequentialIf extends SequentialStatement {
 
 	private SequenceOfStatements fThenStmt, fElseStmt;
 
-	public SequentialIf(Operation aCond, SequenceOfStatements aThenStmt, String aLabel, ASTObject aParent, long aLocation) {
+	public SequentialIf(Operation aCond, SequenceOfStatements aThenStmt, String aLabel, VHDLNode aParent, long aLocation) {
 		super(aLabel, aParent, aLocation);
 		setCond(aCond);
 		fThenStmt = aThenStmt;
@@ -75,7 +75,7 @@ public class SequentialIf extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fCond;

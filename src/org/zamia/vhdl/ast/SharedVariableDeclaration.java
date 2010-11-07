@@ -42,7 +42,7 @@ public class SharedVariableDeclaration extends BlockDeclarativeItem{
 	private TypeDefinition td;
 	private Operation initialValue;
 	
-	public SharedVariableDeclaration (String id_, TypeDefinition td_, Operation initialValue_, ASTObject parent_, long location_) {
+	public SharedVariableDeclaration (String id_, TypeDefinition td_, Operation initialValue_, VHDLNode parent_, long location_) {
 		super (id_, parent_, location_);
 		setType(td_);
 		initialValue = initialValue_;
@@ -75,7 +75,7 @@ public class SharedVariableDeclaration extends BlockDeclarativeItem{
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return initialValue;

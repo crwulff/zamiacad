@@ -9,7 +9,7 @@
 package org.zamia.zil;
 
 import org.zamia.util.HashMapArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -22,7 +22,7 @@ public class ZILInterfaceList extends ZILObject {
 
 	private HashMapArray<String,ZILInterface> fInterfaces;
 	
-	public ZILInterfaceList(ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILInterfaceList(ZILIContainer aContainer, VHDLNode aSrc) {
 		super (ZILTypeVoid.getInstance(), aContainer, aSrc);
 		fInterfaces = new HashMapArray<String, ZILInterface>();
 	}

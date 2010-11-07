@@ -40,7 +40,7 @@ public class SequentialNextStatement extends SequentialStatement {
 
 	private String fNextLabel;
 
-	public SequentialNextStatement(String aNextLabel, Operation aExp, String aLabel, ASTObject aParent, long aLocation) {
+	public SequentialNextStatement(String aNextLabel, Operation aExp, String aLabel, VHDLNode aParent, long aLocation) {
 		super(aLabel, aParent, aLocation);
 		fNextLabel = aNextLabel;
 		fExp = aExp;
@@ -54,7 +54,7 @@ public class SequentialNextStatement extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fExp;
 	}
 

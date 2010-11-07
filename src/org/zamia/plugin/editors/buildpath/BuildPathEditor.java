@@ -28,7 +28,7 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaLogger;
 import org.zamia.plugin.editors.ColorManager;
 import org.zamia.plugin.editors.ZamiaPairMatcher;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -112,8 +112,8 @@ public class BuildPathEditor extends TextEditor {
 		ISelection selection = aEvent.getSelection();
 		selectedObject = ((IStructuredSelection) selection).getFirstElement();
 
-		if (selectedObject instanceof ASTObject) {
-			ASTObject io = (ASTObject) selectedObject;
+		if (selectedObject instanceof VHDLNode) {
+			VHDLNode io = (VHDLNode) selectedObject;
 
 			SourceLocation location = io.getLocation();
 			if (location != null) {

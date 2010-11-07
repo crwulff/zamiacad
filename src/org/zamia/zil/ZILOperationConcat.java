@@ -11,7 +11,7 @@ package org.zamia.zil;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
 import org.zamia.zil.synthesis.VariableRemapping;
@@ -27,7 +27,7 @@ public class ZILOperationConcat extends ZILOperation {
 
 	private ZILOperation fA, fB;
 
-	public ZILOperationConcat(ZILOperation aA, ZILOperation aB, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILOperationConcat(ZILOperation aA, ZILOperation aB, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aType, aContainer, aSrc);
 		fA = aA;
 		fB = aB;

@@ -32,7 +32,7 @@ public class TypeDefinitionEnum extends TypeDefinition {
 
 	private ArrayList<OperationLiteral> fEnumLiterals; // of OperationLiteral
 
-	public TypeDefinitionEnum(ASTObject aParent, long aLocation) {
+	public TypeDefinitionEnum(VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fEnumLiterals = new ArrayList<OperationLiteral>();
 	}
@@ -50,7 +50,7 @@ public class TypeDefinitionEnum extends TypeDefinition {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return fEnumLiterals.get(aIdx);
 	}
 

@@ -26,12 +26,12 @@ import org.zamia.rtl.RTLPort.PortDir;
  *
  */
 @SuppressWarnings("serial")
-public class FileOpenInformation extends ASTObject {
+public class FileOpenInformation extends VHDLNode {
 
 	private Operation stringExpr; // other people would probably call this "fileName"...
 	private PortDir m;
 
-	public FileOpenInformation (Operation exp_, PortDir m_, Operation stringExpr_, ASTObject parent_, long location_) {
+	public FileOpenInformation (Operation exp_, PortDir m_, Operation stringExpr_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		stringExpr = stringExpr_;
 		stringExpr.setParent(this);
@@ -47,7 +47,7 @@ public class FileOpenInformation extends ASTObject {
 	}
 	
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		// TODO Auto-generated method stub
 		return null;
 	}

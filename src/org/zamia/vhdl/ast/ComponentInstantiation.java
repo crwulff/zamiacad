@@ -11,7 +11,7 @@ package org.zamia.vhdl.ast;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
@@ -36,12 +36,12 @@ public class ComponentInstantiation extends InstantiatedUnit {
 
 	public final static boolean dump = false;
 
-	public ComponentInstantiation(String aLabel, Name aName, ASTObject aParent, long aLocation) {
+	public ComponentInstantiation(String aLabel, Name aName, VHDLNode aParent, long aLocation) {
 		super(aLabel, aName, aParent, aLocation);
 	}
 
 	@Override
-	public IGInstantiation computeIGInstantiation(DUUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) {
+	public IGInstantiation computeIGInstantiation(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) {
 
 		try {
 
@@ -103,10 +103,10 @@ public class ComponentInstantiation extends InstantiatedUnit {
 
 			IGDUUID zduuid = boundName.computeIGAsDesignUnit(aContainer, aEE, ASTErrorMode.EXCEPTION, null);
 
-			DUUID duuid = null;
+			DMUID duuid = null;
 
 			Architecture arch = null;
-			DUManager duManager = aEE.getZamiaProject().getDUM();
+			DMManager duManager = aEE.getZamiaProject().getDUM();
 
 			if (zduuid != null) {
 				duuid = zduuid.getDUUID();
@@ -167,7 +167,7 @@ public class ComponentInstantiation extends InstantiatedUnit {
 	public void findReferences(String aId, ObjectCat aCat, RefType aRefType, int aDepth, ZamiaProject aZPrj, IGContainer aContainer, IGElaborationEnv aCache, ReferenceSearchResult aResult,
 			ArrayList<SearchJob> aTODO) throws ZamiaException {
 
-		DUUID duuid = getChildDUUID(aContainer, aCache);
+		DMUID duuid = getChildDUUID(aContainer, aCache);
 
 		if (duuid == null) {
 			logger.error("ComponentInstantiation: findReferences: %s: component not found", this);
@@ -175,7 +175,7 @@ public class ComponentInstantiation extends InstantiatedUnit {
 		}
 
 		Architecture arch = null;
-		DUManager duManager = aCache.getZamiaProject().getDUM();
+		DMManager duManager = aCache.getZamiaProject().getDUM();
 
 		arch = duManager.getArchitecture(duuid.getLibId(), duuid.getId(), duuid.getArchId());
 

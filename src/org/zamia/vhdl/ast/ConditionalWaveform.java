@@ -28,20 +28,20 @@ import org.zamia.instgraph.IGElaborationEnv;
  */
 
 @SuppressWarnings("serial")
-public class ConditionalWaveform extends ASTObject {
+public class ConditionalWaveform extends VHDLNode {
 
 	private Waveform waveform;
 
 	private Operation cond;
 
-	public ConditionalWaveform(Waveform waveform_, Operation cond_, ASTObject parent_, long location_) {
+	public ConditionalWaveform(Waveform waveform_, Operation cond_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		waveform = waveform_;
 		waveform.setParent(this);
 		setCond(cond_);
 	}
 
-	public ConditionalWaveform(Waveform waveform_, ASTObject parent_, long location_) {
+	public ConditionalWaveform(Waveform waveform_, VHDLNode parent_, long location_) {
 		this(waveform_, null, parent_, location_);
 	}
 
@@ -74,7 +74,7 @@ public class ConditionalWaveform extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		switch (idx_) {
 		case 0:
 			return cond;

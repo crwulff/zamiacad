@@ -12,7 +12,7 @@ import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -27,7 +27,7 @@ public class ZILJumpEventStmt extends ZILJumpStmt {
 	private RTLSignal fSignal;
 	private RTLPort fPort;
 
-	public ZILJumpEventStmt(RTLSignal aSignal, ZILLabel aLabel, ASTObject aSrc) {
+	public ZILJumpEventStmt(RTLSignal aSignal, ZILLabel aLabel, VHDLNode aSrc) {
 		super(aLabel, aSrc);
 		fSignal = aSignal;
 	}

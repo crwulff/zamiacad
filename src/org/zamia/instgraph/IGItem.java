@@ -19,8 +19,8 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
-import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
+import org.zamia.vhdl.ast.VHDLNode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 import org.zamia.zdb.ZDBIIDSaver;
 
@@ -219,7 +219,7 @@ public abstract class IGItem implements Serializable, ZDBIIDSaver {
 		reportError(aMsg, computeSourceLocation(), aErrorMode, aReport);
 	}
 
-	protected void reportError(String aMsg, ASTObject aObj, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
+	protected void reportError(String aMsg, VHDLNode aObj, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 		reportError(aMsg, aObj.getLocation(), aErrorMode, aReport);
 	}
 

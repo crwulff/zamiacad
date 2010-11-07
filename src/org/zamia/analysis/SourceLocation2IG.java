@@ -10,6 +10,7 @@ package org.zamia.analysis;
 import java.io.IOException;
 import java.util.HashSet;
 
+import org.zamia.ASTNode;
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
 import org.zamia.ToplevelPath;
@@ -25,10 +26,8 @@ import org.zamia.instgraph.IGProcess;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.util.Pair;
 import org.zamia.util.ZStack;
-import org.zamia.vhdl.ast.ASTObject;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.vhdl.ast.DesignUnit;
-
 
 /**
  * 
@@ -94,30 +93,30 @@ public class SourceLocation2IG {
 		 * we need to find a parent in ig/zil world that matches the current source location
 		 */
 
-		ASTObject asto = SourceLocation2AST.findNearestASTObject(aLocation, true, aZPrj);
+		ASTNode node = SourceLocation2AST.findNearestASTNode(aLocation, true, aZPrj);
 
-		if (asto == null) {
+		if (node == null) {
 			error("findNearestItem(): Couldn't find any AST object corresponding to the current cursor position.", aLocation);
 			return null;
 		}
 
-		logger.debug("IGItemSearch: findNearestItem(): found AST object: %s", asto);
+		logger.debug("IGItemSearch: findNearestItem(): found AST object: %s", node);
 
 		// figure out entity duuid
-		while (!(asto instanceof DesignUnit)) {
+		while (!(node instanceof DesignUnit)) {
 
-			logger.debug("IGItemSearch: looking for DesignUnit AST node, asto=%s", asto);
+			logger.debug("IGItemSearch: looking for DesignUnit AST node, asto=%s", node);
 
-			asto = asto.getParent();
-			if (asto == null) {
+			node = node.getParent();
+			if (node == null) {
 				error("findNearestItem(): Couldn't find any AST design unit corresponding to the current cursor position.", aLocation);
 				return null;
 			}
 		}
 
-		logger.debug("IGItemSearch: findNearestItem(): finished search for AST design unit, asto=%s", asto);
+		logger.debug("IGItemSearch: findNearestItem(): finished search for AST design unit, asto=%s", node);
 
-		DUUID duuid = ((DesignUnit) asto).getDUUID().getEntityDUUID();
+		DMUID duuid = ((DesignUnit) node).getDMUID().getEntityDUUID();
 
 		logger.debug("IGItemSearch: findNearestItem(): found entity DUUID: %s", duuid);
 
@@ -172,7 +171,7 @@ public class SourceLocation2IG {
 		// does it match the duuid we found via AST ?
 
 		IGModule module = (IGModule) moduleItem;
-		DUUID igDUUID = module.getDUUID().getEntityDUUID();
+		DMUID igDUUID = module.getDUUID().getEntityDUUID();
 		if (!igDUUID.equals(duuid)) {
 			error("IGItemSearch: findNearestItem(): Found a module, but DUUID doesn't match. Was looking for " + duuid + ", found " + igDUUID, aLocation);
 			return null;

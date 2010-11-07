@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaLogger;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -27,7 +27,7 @@ public abstract class ZILObject implements ZILIObject {
 	
 	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
-	protected ASTObject fSrc;
+	protected VHDLNode fSrc;
 
 	protected ZILIContainer fContainer;
 
@@ -37,20 +37,20 @@ public abstract class ZILObject implements ZILIObject {
 
 	protected String fId;
 	
-	public ZILObject(ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILObject(ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		fSrc = aSrc;
 		fContainer = aContainer;
 		fType = aType;
 	}
 
-	public ZILObject(String aId, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILObject(String aId, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		fSrc = aSrc;
 		fContainer = aContainer;
 		fType = aType;
 		fId = aId;
 	}
 
-	public ASTObject getSrc() {
+	public VHDLNode getSrc() {
 		return fSrc;
 	}
 

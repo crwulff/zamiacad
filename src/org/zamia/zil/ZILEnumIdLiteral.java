@@ -9,7 +9,7 @@
 package org.zamia.zil;
 
 import org.zamia.ZamiaException;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 
@@ -23,7 +23,7 @@ import org.zamia.vhdl.ast.ASTObject;
 @SuppressWarnings("serial")
 public class ZILEnumIdLiteral extends ZILEnumLiteral {
 
-	public ZILEnumIdLiteral(String aId, int aOrd, ZILType aType, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILEnumIdLiteral(String aId, int aOrd, ZILType aType, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aOrd, aType, aContainer, aSrc);
 		fId = aId;
 	}

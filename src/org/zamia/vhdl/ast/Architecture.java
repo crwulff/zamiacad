@@ -11,7 +11,8 @@ package org.zamia.vhdl.ast;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
+import org.zamia.IASTNodeVisitor;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
@@ -22,6 +23,7 @@ import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGContainerItem;
+import org.zamia.instgraph.IGDesignUnit;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGInstantiation;
 import org.zamia.instgraph.IGLibraryImport;
@@ -32,7 +34,7 @@ import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID.LUType;
 import org.zamia.zdb.ZDB;
 
 
@@ -130,7 +132,7 @@ public class Architecture extends SecondaryUnit {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 
 		if (aIdx == 0)
 			return getContext();
@@ -160,7 +162,7 @@ public class Architecture extends SecondaryUnit {
 
 			IGManager igm = aZPrj.getIGM();
 
-			DUUID duuid = getDUUID();
+			DMUID duuid = getDMUID();
 
 			String signature = IGInstantiation.computeSignature(duuid, null);
 
@@ -211,7 +213,7 @@ public class Architecture extends SecondaryUnit {
 
 		IGManager igm = aZPrj.getIGM();
 
-		DUUID duuid = getDUUID();
+		DMUID duuid = getDMUID();
 
 		String signature = IGInstantiation.computeSignature(duuid, null);
 
@@ -256,7 +258,7 @@ public class Architecture extends SecondaryUnit {
 		try {
 			IGManager igm = aZPrj.getIGM();
 
-			DUUID duuid = getDUUID();
+			DMUID duuid = getDMUID();
 
 			String signature = IGInstantiation.computeSignature(duuid, null);
 
@@ -285,8 +287,8 @@ public class Architecture extends SecondaryUnit {
 	}
 
 	@Override
-	public DUUID getDUUID(String aLibId) throws ZamiaException {
-		return new DUUID(LUType.Architecture, aLibId, fEntityName.getId(), getId());
+	public DMUID getDMUID(String aLibId) throws ZamiaException {
+		return new DMUID(LUType.Architecture, aLibId, fEntityName.getId(), getId());
 	}
 
 	public Entity findEntity(IGContainer aContainer, IGElaborationEnv aCache) throws ZamiaException {
@@ -294,20 +296,28 @@ public class Architecture extends SecondaryUnit {
 
 		IGLibraryImport li = aContainer.resolveLibrary("WORK");
 
-		DUManager dum = aCache.getZamiaProject().getDUM();
+		DMManager dum = aCache.getZamiaProject().getDUM();
 
 		Entity entity = dum.findEntity(li.getRealId(), fEntityName.getId());
 
 		return entity;
 	}
 
-	public void computeEntityIG(IGManager aIGM, IGModule aModule) {
+	@Override
+	public void computeIG(IGManager aIGM, IGDesignUnit aModule) {
 
+		if (!(aModule instanceof IGModule)) {
+			reportError("Architecture: Internal error: computeIG() expects an IGModule. Got instead: "+aModule);
+			return;
+		}
+		
+		final IGModule module = (IGModule) aModule;
+		
 		/*
 		 * basic infrastructure for architecture elaboration
 		 */
 
-		IGStructure structure = aModule.getStructure();
+		IGStructure structure = module.getStructure();
 
 		IGContainer container = structure.getContainer();
 
@@ -355,12 +365,13 @@ public class Architecture extends SecondaryUnit {
 		 * entity ig
 		 */
 
-		entity.computeEntityIG(aModule, container, cache);
+		entity.computeEntityIG(module, container, cache);
 
 		container.storeOrUpdate();
 		aModule.storeOrUpdate();
 	}
 
+	@Override
 	public void computeStatementsIG(IGManager aIGM, IGModule aModule) {
 
 		ZamiaProject zprj = aIGM.getProject();
@@ -436,4 +447,5 @@ public class Architecture extends SecondaryUnit {
 		printIndented("END ARCHITECTURE " + getId() + " ;", aIndent, aOut);
 		aOut.println();
 	}
+
 }

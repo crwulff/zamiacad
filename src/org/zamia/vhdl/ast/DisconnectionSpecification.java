@@ -1,5 +1,5 @@
 /*
- * Copyright 2007-2009 by the authors indicated in the @author tags.
+ * Copyright 2007-2010 by the authors indicated in the @author tags.
  * All rights reserved.
  *
  * See the LICENSE file for details.
@@ -32,9 +32,8 @@ import org.zamia.instgraph.IGElaborationEnv;
 @SuppressWarnings("serial")
 public class DisconnectionSpecification extends BlockDeclarativeItem {
 
-	public DisconnectionSpecification(GuardedSignalSpecification gss_, Operation expr_, ASTObject parent_, long location_) {
+	public DisconnectionSpecification(GuardedSignalSpecification gss_, Operation expr_, VHDLNode parent_, long location_) {
 		super(null, parent_, location_);
-		location = location_;
 	}
 
 	@Override
@@ -43,7 +42,7 @@ public class DisconnectionSpecification extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return null;
 	}
 

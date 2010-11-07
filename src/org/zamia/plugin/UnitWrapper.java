@@ -10,7 +10,7 @@ package org.zamia.plugin;
 
 import org.eclipse.core.resources.IProject;
 import org.zamia.ZamiaProject;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 /**
@@ -21,11 +21,11 @@ import org.zamia.vhdl.ast.DUUID;
 
 public class UnitWrapper {
 
-	private DUUID fDUUID;
+	private DMUID fDUUID;
 	private ZamiaProject fZPrj;
 	private IProject fPrj;
 
-	public UnitWrapper(DUUID aDUUID, ZamiaProject aZPrj, IProject aPrj) {
+	public UnitWrapper(DMUID aDUUID, ZamiaProject aZPrj, IProject aPrj) {
 		fDUUID = aDUUID;
 		fZPrj = aZPrj;
 		fPrj = aPrj;
@@ -36,7 +36,7 @@ public class UnitWrapper {
 		return fDUUID.toString();
 	}
 
-	public DUUID getDUUID() {
+	public DMUID getDUUID() {
 		return fDUUID;
 	}
 

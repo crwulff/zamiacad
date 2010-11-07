@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLGraph;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreter;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.interpreter.ZILJumpStmt;
@@ -33,7 +33,7 @@ public class ZILProcess extends ZILConcurrentStatement {
 
 	private boolean fPostponed; // FIXME: implement semantics
 
-	public ZILProcess(boolean aPostponed, String aId, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILProcess(boolean aPostponed, String aId, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aId, aContainer, aSrc);
 	}
 

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2008-2009 by the authors indicated in the @author tags. 
+ * Copyright 2008-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -13,8 +13,6 @@ import junit.framework.TestCase;
 
 import org.apache.log4j.Level;
 import org.zamia.ZamiaLogger;
-import org.zamia.ZamiaProject.VHDLLanguageSupport;
-
 
 /**
  * @author Guenter Bartsch
@@ -29,7 +27,7 @@ public class ParserTest extends TestCase {
 
 	public void setupTest() {
 		ZamiaLogger.setup(Level.DEBUG);
-		fBuilder = new Builder(out, VHDLLanguageSupport.VHDL2002);
+		fBuilder = new Builder(out);
 	}
 
 	public void testWhenConcatenation() throws Exception {
@@ -103,7 +101,7 @@ public class ParserTest extends TestCase {
 			fail("Errors detected.");
 		}
 	}
-	
+
 	@Override
 	protected void tearDown() {
 		fBuilder.shutdown();

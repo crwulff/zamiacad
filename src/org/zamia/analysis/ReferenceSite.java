@@ -10,14 +10,14 @@ package org.zamia.analysis;
 
 import java.io.PrintStream;
 
+import org.zamia.ASTNode;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
 import org.zamia.ToplevelPath;
 import org.zamia.instgraph.IGObject;
-import org.zamia.vhdl.ast.ASTObject;
 import org.zamia.vhdl.ast.ConcurrentStatement;
 import org.zamia.vhdl.ast.DeclarativeItem;
-
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * 
@@ -37,7 +37,7 @@ public class ReferenceSite extends ReferenceSearchResult {
 
 	private final long fDBID;
 
-	public ReferenceSite(ASTObject aIO, RefType aRefType) {
+	public ReferenceSite(VHDLNode aIO, RefType aRefType) {
 		super("", aIO.getLocation(), 0);
 
 		fRefType = aRefType;
@@ -68,7 +68,7 @@ public class ReferenceSite extends ReferenceSearchResult {
 			break;
 		}
 
-		ASTObject io = aIO;
+		ASTNode io = aIO;
 		while (io != null && !(io instanceof ConcurrentStatement)) {
 			io = io.getParent();
 		}
@@ -100,9 +100,9 @@ public class ReferenceSite extends ReferenceSearchResult {
 	}
 
 	public void dump(int aIndent, PrintStream aOut) {
-		ASTObject.printlnIndented("ReferenceSite: " + toString(), aIndent, aOut);
+		VHDLNode.printlnIndented("ReferenceSite: " + toString(), aIndent, aOut);
 	}
-	
+
 	@Override
 	public int countRefs() {
 		return 1;
@@ -111,5 +111,5 @@ public class ReferenceSite extends ReferenceSearchResult {
 	public long getDBID() {
 		return fDBID;
 	}
-	
+
 }

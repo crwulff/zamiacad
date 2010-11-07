@@ -51,13 +51,13 @@ import org.zamia.zdb.ZDB;
  * 
  */
 @SuppressWarnings("serial")
-public class Name extends ASTObject {
+public class Name extends VHDLNode {
 
 	private String fId;
 
 	private ArrayList<NameExtension> fExtensions;
 
-	public Name(String id_, ASTObject parent_, long location_) {
+	public Name(String id_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		fId = id_;
 	}
@@ -84,14 +84,14 @@ public class Name extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		if (fExtensions == null)
 			return null;
 		return fExtensions.get(idx_);
 	}
 
 	public Name cloneName() {
-		Name nn = new Name(fId, null, location);
+		Name nn = new Name(fId, null, getLineCol());
 
 		int n = getNumExtensions();
 		for (int i = 0; i < n; i++) {

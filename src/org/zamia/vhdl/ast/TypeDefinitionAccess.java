@@ -31,7 +31,7 @@ public class TypeDefinitionAccess extends TypeDefinition {
 
 	private TypeDefinition td;
 
-	public TypeDefinitionAccess(TypeDefinition td_, ASTObject parent_, long location_) {
+	public TypeDefinitionAccess(TypeDefinition td_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		setTypeDefinition(td_);
 	}
@@ -47,7 +47,7 @@ public class TypeDefinitionAccess extends TypeDefinition {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return td;
 	}
 

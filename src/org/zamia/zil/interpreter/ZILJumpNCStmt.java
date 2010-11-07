@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 
 /**
@@ -22,7 +22,7 @@ import org.zamia.vhdl.ast.ASTObject;
 @SuppressWarnings("serial")
 public class ZILJumpNCStmt extends ZILJumpStmt {
 
-	public ZILJumpNCStmt(ZILLabel label_, ASTObject src_) {
+	public ZILJumpNCStmt(ZILLabel label_, VHDLNode src_) {
 		super(label_, src_);
 	}
 

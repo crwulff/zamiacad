@@ -39,7 +39,7 @@ public class TypeDeclaration extends BlockDeclarativeItem {
 
 	private TypeDefinition t;
 
-	public TypeDeclaration(String id_, TypeDefinition t_, ASTObject parent_, long location_) {
+	public TypeDeclaration(String id_, TypeDefinition t_, VHDLNode parent_, long location_) {
 		super(id_, parent_, location_);
 		t = t_;
 		t.setParent(this);
@@ -63,7 +63,7 @@ public class TypeDeclaration extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return t;
 	}
 

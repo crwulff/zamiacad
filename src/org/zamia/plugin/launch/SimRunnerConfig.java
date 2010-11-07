@@ -24,8 +24,8 @@ import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.plugin.ZamiaPlugin;
-import org.zamia.vhdl.ast.DUUID;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID;
+import org.zamia.vhdl.ast.DMUID.LUType;
 
 
 /**
@@ -66,7 +66,7 @@ public class SimRunnerConfig {
 
 	private String fFilename;
 
-	private DUUID fToplevel;
+	private DMUID fToplevel;
 
 	private int fSimulator;
 
@@ -119,19 +119,19 @@ public class SimRunnerConfig {
 		return traces;
 	}
 
-	private DUUID getToplevel(ILaunchConfiguration aConfiguration) throws CoreException {
+	private DMUID getToplevel(ILaunchConfiguration aConfiguration) throws CoreException {
 		String str = aConfiguration.getAttribute(ATTR_TOPLEVEL, "MYENTITY");
 
 		try {
-			return DUUID.parse(str);
+			return DMUID.parse(str);
 		} catch (ZamiaException e) {
 			el.logException(e);
 		}
 
-		return new DUUID(LUType.Entity, "WORK", "MYENTITY", null);
+		return new DMUID(LUType.Entity, "WORK", "MYENTITY", null);
 	}
 
-	public DUUID getToplevel() {
+	public DMUID getToplevel() {
 		return fToplevel;
 	}
 

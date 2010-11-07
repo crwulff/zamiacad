@@ -48,7 +48,7 @@ public class SelectedSignalAssignment extends ConcurrentSignalAssignment {
 
 	private Operation fWithExpr;
 
-	public SelectedSignalAssignment(Operation aWithExpr, Target aTarget, ASTObject aParent, long aLocation) {
+	public SelectedSignalAssignment(Operation aWithExpr, Target aTarget, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
 		fSWS = new ArrayList<SelectedWaveform>();
 		fTarget = aTarget;
@@ -77,7 +77,7 @@ public class SelectedSignalAssignment extends ConcurrentSignalAssignment {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fWithExpr;
@@ -144,7 +144,7 @@ public class SelectedSignalAssignment extends ConcurrentSignalAssignment {
 		return buf.toString();
 	}
 
-	public void computeIG(DUUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
+	public void computeIG(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
 		/*
 		 * let's simply turn this into a small process
 		 */

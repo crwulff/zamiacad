@@ -12,7 +12,7 @@ import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLPort.PortDir;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
 import org.zamia.zil.synthesis.VariableRemapping;
@@ -28,7 +28,7 @@ public class ZILOperationAccessParameter extends ZILOperation {
 	private ZILInterfaceVariable fParameter;
 	private PortDir fDir;
 
-	public ZILOperationAccessParameter(ZILInterfaceVariable aParameter, PortDir aDir, ZILIContainer aContainer, ASTObject aSrc) {
+	public ZILOperationAccessParameter(ZILInterfaceVariable aParameter, PortDir aDir, ZILIContainer aContainer, VHDLNode aSrc) {
 		super(aParameter.getType(), aContainer, aSrc);
 		fParameter = aParameter;
 		fDir = aDir;

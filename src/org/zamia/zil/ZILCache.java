@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import org.zamia.ZamiaProject;
 import org.zamia.rtl.RTLGraph;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.InterfaceDeclaration;
 import org.zamia.vhdl.ast.Name;
 import org.zamia.vhdl.ast.Operation;
@@ -32,8 +32,8 @@ public class ZILCache {
 	
 	private ZamiaProject fZPrj;
 	private HashMap<Operation,ZILValue> fConstantOperations;
-	private HashMap<ASTObject, ZILType> fTypeCache;
-	private HashMap<ASTObject, Object> fTransients;
+	private HashMap<VHDLNode, ZILType> fTypeCache;
+	private HashMap<VHDLNode, Object> fTransients;
 	private HashMap<Operation,ZILOperation> fOperationCache;
 	private HashMap<Name,ZILIObject> fNameCache;
 	private HashMap<InterfaceDeclaration,ZILInterface> fInterfaceCache;
@@ -41,8 +41,8 @@ public class ZILCache {
 	public ZILCache (ZamiaProject aZPrj) {
 		fZPrj = aZPrj;
 		fConstantOperations = new HashMap<Operation, ZILValue>();
-		fTypeCache = new HashMap<ASTObject, ZILType>();
-		fTransients = new HashMap<ASTObject, Object>();
+		fTypeCache = new HashMap<VHDLNode, ZILType>();
+		fTransients = new HashMap<VHDLNode, Object>();
 		fOperationCache = new HashMap<Operation, ZILOperation>();
 		fNameCache = new HashMap<Name, ZILIObject>();
 		fInterfaceCache = new HashMap<InterfaceDeclaration, ZILInterface>();
@@ -67,19 +67,19 @@ public class ZILCache {
 		return fConstantOperations.get(op_);
 	}
 
-	public ZILType getType(ASTObject op_) {
+	public ZILType getType(VHDLNode op_) {
 		return fTypeCache.get(op_);
 	}
 	
-	public void setType(ASTObject c_, ZILType t_) {
+	public void setType(VHDLNode c_, ZILType t_) {
 		fTypeCache.put(c_, t_);
 	}
 
-	public Object getTransients(ASTObject aIO) {
+	public Object getTransients(VHDLNode aIO) {
 		return fTransients.get(aIO);
 	}
 
-	public void setTransients(ASTObject aIO, Object aTransients) {
+	public void setTransients(VHDLNode aIO, Object aTransients) {
 		fTransients.put(aIO, aTransients);
 	}
 

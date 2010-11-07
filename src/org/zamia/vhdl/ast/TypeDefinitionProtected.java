@@ -21,7 +21,7 @@ import org.zamia.instgraph.IGType;
 @SuppressWarnings("serial")
 public class TypeDefinitionProtected extends TypeDefinition {
 
-	public TypeDefinitionProtected(ASTObject parent_, long location_) {
+	public TypeDefinitionProtected(VHDLNode parent_, long location_) {
 		super(parent_, location_);
 	}
 
@@ -31,7 +31,7 @@ public class TypeDefinitionProtected extends TypeDefinition {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return null;
 	}
 

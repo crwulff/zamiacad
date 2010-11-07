@@ -30,7 +30,7 @@ public class TypeDefinitionRange extends TypeDefinition {
 
 	private Range range; /* constrained array / range */
 
-	public TypeDefinitionRange(Range range_, ASTObject parent_, long location_) {
+	public TypeDefinitionRange(Range range_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		setRange(range_);
 	}
@@ -50,7 +50,7 @@ public class TypeDefinitionRange extends TypeDefinition {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return range;
 	}
 

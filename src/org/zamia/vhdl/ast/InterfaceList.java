@@ -29,11 +29,11 @@ import org.zamia.util.HashMapArray;
  */
 
 @SuppressWarnings("serial")
-public class InterfaceList extends ASTObject {
+public class InterfaceList extends VHDLNode {
 
 	private HashMapArray<String, InterfaceDeclaration> interfaces;
 
-	public InterfaceList(ASTObject parent_, long location_) {
+	public InterfaceList(VHDLNode parent_, long location_) {
 		super(parent_, location_);
 
 		interfaces = new HashMapArray<String, InterfaceDeclaration>(1);
@@ -49,7 +49,7 @@ public class InterfaceList extends ASTObject {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return interfaces.get(idx_);
 	}
 

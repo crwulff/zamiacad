@@ -1,5 +1,5 @@
 /* 
- * Copyright 2007-2009 by the authors indicated in the @author tags. 
+ * Copyright 2007-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -13,7 +13,7 @@ import java.math.BigInteger;
 import junit.framework.TestCase;
 
 import org.apache.log4j.Level;
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ERManager;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
@@ -23,11 +23,10 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
-import org.zamia.ZamiaProject.VHDLLanguageSupport;
 import org.zamia.instgraph.sim.vcd.VCDImport;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 
 /**
@@ -43,7 +42,7 @@ public class AnnotationsTest extends TestCase {
 
 	private ERManager fERM;
 
-	private DUManager fDUM;
+	private DMManager fDUM;
 
 	private VCDImport fImport;
 
@@ -56,7 +55,7 @@ public class AnnotationsTest extends TestCase {
 
 		SourceFile sf = new SourceFile(f);
 
-		fZPrj = new ZamiaProject("IG Test Tmp Project", aTestDir, sf, null, VHDLLanguageSupport.VHDL2008);
+		fZPrj = new ZamiaProject("IG Test Tmp Project", aTestDir, sf, null);
 		fZPrj.clean();
 		fERM = fZPrj.getERM();
 		fDUM = fZPrj.getDUM();
@@ -65,7 +64,7 @@ public class AnnotationsTest extends TestCase {
 
 		builder.build(true, true, null);
 
-		DUUID duuid = DUUID.parse(aToplevel);
+		DMUID duuid = DMUID.parse(aToplevel);
 
 		duuid = fDUM.getArchDUUID(duuid);
 

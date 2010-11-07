@@ -21,9 +21,10 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
-import org.zamia.DUManager;
-import org.zamia.DesignUnitStub;
+import org.zamia.DMManager;
+import org.zamia.DesignModuleStub;
 import org.zamia.ExceptionLogger;
+import org.zamia.IDesignModule;
 import org.zamia.SourceLocation;
 import org.zamia.ToplevelPath;
 import org.zamia.ZamiaException;
@@ -33,9 +34,7 @@ import org.zamia.instgraph.IGInstantiation;
 import org.zamia.instgraph.IGManager;
 import org.zamia.instgraph.IGModule;
 import org.zamia.plugin.editors.ZamiaEditor;
-import org.zamia.vhdl.ast.DUUID;
-import org.zamia.vhdl.ast.DesignUnit;
-
+import org.zamia.vhdl.ast.DMUID;
 
 /**
  * 
@@ -81,11 +80,11 @@ public class OpenUnitAction implements IWorkbenchWindowActionDelegate {
 				continue;
 			}
 
-			DUManager dum = zprj.getDUM();
+			DMManager dum = zprj.getDUM();
 
 			int m = dum.getNumStubs();
 			for (int j = 0; j < m; j++) {
-				DesignUnitStub stub = dum.getStub(j);
+				DesignModuleStub stub = dum.getStub(j);
 
 				//				System.out.println("Stub in prj: " + stub);
 
@@ -103,15 +102,15 @@ public class OpenUnitAction implements IWorkbenchWindowActionDelegate {
 
 			IProject prj = stub.getPrj();
 			ZamiaProject zprj = stub.getZPrj();
-			DUUID duuid = stub.getDUUID();
+			DMUID dmuid = stub.getDUUID();
 
-			DUManager dum = zprj.getDUM();
+			DMManager dmm = zprj.getDUM();
 
-			DesignUnit du;
+			IDesignModule dm;
 			try {
-				du = dum.getDU(duuid);
-				if (du == null) {
-					logger.error("OpenUnitAction: failed to load DU %s", duuid);
+				dm = dmm.getDM(dmuid);
+				if (dm == null) {
+					logger.error("OpenUnitAction: failed to load DM %s", dmuid);
 					return;
 				}
 
@@ -125,7 +124,7 @@ public class OpenUnitAction implements IWorkbenchWindowActionDelegate {
 				 *  
 				 */
 
-				SourceLocation location = du.getLocation();
+				SourceLocation location = dm.getLocation();
 				String filename = location != null ? location.fSF.getAbsolutePath() : null;
 				ToplevelPath path = null;
 
@@ -139,7 +138,7 @@ public class OpenUnitAction implements IWorkbenchWindowActionDelegate {
 				if (path == null) {
 					IGManager igm = zprj.getIGM();
 
-					DUUID archDUUID = dum.getArchDUUID(duuid);
+					DMUID archDUUID = dmm.getArchDUUID(dmuid);
 
 					if (archDUUID != null) {
 
@@ -152,7 +151,7 @@ public class OpenUnitAction implements IWorkbenchWindowActionDelegate {
 					}
 				}
 
-				IEditorPart editor = ZamiaPlugin.showSource(page, prj, du.getLocation(), 0);
+				IEditorPart editor = ZamiaPlugin.showSource(page, prj, dm.getLocation(), 0);
 				if (path != null && editor instanceof ZamiaEditor) {
 					ZamiaEditor ze = (ZamiaEditor) editor;
 					ze.setPath(path);

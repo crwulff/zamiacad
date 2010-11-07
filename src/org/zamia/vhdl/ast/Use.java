@@ -11,7 +11,7 @@ package org.zamia.vhdl.ast;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ERManager;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
@@ -27,7 +27,7 @@ import org.zamia.instgraph.IGLibraryImport;
 import org.zamia.instgraph.IGManager;
 import org.zamia.instgraph.IGPackage;
 import org.zamia.instgraph.IGPackageImport;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID.LUType;
 
 
 /**
@@ -39,7 +39,7 @@ import org.zamia.vhdl.ast.DUUID.LUType;
 public class Use extends BlockDeclarativeItem {
 	private String fLibId, fPackageId, fItemId;
 
-	public Use(Name aName, ASTObject aParent, long aLocation) throws ZamiaException {
+	public Use(Name aName, VHDLNode aParent, long aLocation) throws ZamiaException {
 		super(null, aParent, aLocation);
 
 		aName.setParent(this);
@@ -90,7 +90,7 @@ public class Use extends BlockDeclarativeItem {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		return null;
 	}
 
@@ -123,7 +123,7 @@ public class Use extends BlockDeclarativeItem {
 	public IGContainerItem computeIG(ArrayList<IGContainerItem> aSpecItems, IGContainer aContainer, IGElaborationEnv aCache) throws ZamiaException {
 		ZamiaProject zprj = aCache.getZamiaProject();
 		ERManager erm = zprj.getERM();
-		DUManager dum = zprj.getDUM();
+		DMManager dum = zprj.getDUM();
 		IGManager igm = zprj.getIGM();
 
 		Library l = null;
@@ -207,7 +207,7 @@ public class Use extends BlockDeclarativeItem {
 
 			} else {
 				try {
-					aContainer.add(new IGDUUID(e.getDUUID(), getLocation(), aCache.getZDB()));
+					aContainer.add(new IGDUUID(e.getDMUID(), getLocation(), aCache.getZDB()));
 				} catch (ZamiaException e1) {
 					reportError(e1);
 				}
@@ -219,7 +219,7 @@ public class Use extends BlockDeclarativeItem {
 			int m = l.getNumDUs();
 			for (int j = 0; j < m; j++) {
 
-				DUUID duuid = l.getDU(j);
+				DMUID duuid = l.getDU(j);
 
 				if (duuid.getType() == LUType.Architecture) {
 					continue;

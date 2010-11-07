@@ -15,7 +15,7 @@ import javax.swing.event.EventListenerList;
 import org.zamia.ZamiaException.ExCat;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.ZStack;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zdb.ZDB;
 
 
@@ -325,7 +325,7 @@ public class ERManager {
 	 */
 
 	@SuppressWarnings("unchecked")
-	public synchronized void removeErrors(ASTObject aAO, ExCat aCat) {
+	public synchronized void removeErrors(VHDLNode aAO, ExCat aCat) {
 
 		SourceLocation location = aAO.getLocation();
 		if (location == null) {
@@ -341,12 +341,12 @@ public class ERManager {
 		if (dbidErr != 0) {
 			errs = (HashSetArray<Long>) fZDB.load(dbidErr);
 
-			ZStack<ASTObject> stack = new ZStack<ASTObject>();
+			ZStack<VHDLNode> stack = new ZStack<VHDLNode>();
 			stack.push(aAO);
-			HashSet<ASTObject> done = new HashSet<ASTObject>();
+			HashSet<VHDLNode> done = new HashSet<VHDLNode>();
 			while (!stack.isEmpty()) {
 
-				ASTObject ao = stack.pop();
+				VHDLNode ao = stack.pop();
 
 				if (done.contains(ao)) {
 					continue;
@@ -357,7 +357,7 @@ public class ERManager {
 
 				int n = ao.getNumChildren();
 				for (int i = 0; i < n; i++) {
-					ASTObject child = ao.getChild(i);
+					VHDLNode child = ao.getChild(i);
 
 					if (child != null) {
 						stack.push(child);

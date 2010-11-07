@@ -39,9 +39,8 @@ public class OperationConcat extends Operation {
 
 	private Operation fA, fB;
 
-	public OperationConcat(Operation aA, Operation aB, ASTObject aParent, long aLocation) {
+	public OperationConcat(Operation aA, Operation aB, VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
-		location = aLocation;
 
 		if (aB == null) {
 			System.out.println("Error: OperationConcat with b==null");
@@ -65,7 +64,7 @@ public class OperationConcat extends Operation {
 	@Override
 	public void dump(PrintStream aOut, int aIndent) {
 		printSpaces(aOut, aIndent);
-		aOut.print("OperationConcat, cnt=" + cnt);
+		aOut.print("OperationConcat, cnt=" + getCnt());
 		fA.dump(aOut, aIndent + 2);
 		if (fB != null)
 			fB.dump(aOut, aIndent + 2);
@@ -89,7 +88,7 @@ public class OperationConcat extends Operation {
 	}
 
 	@Override
-	public ASTObject getChild(int aIdx) {
+	public VHDLNode getChild(int aIdx) {
 		switch (aIdx) {
 		case 0:
 			return fA;

@@ -8,7 +8,7 @@
  */
 package org.zamia.zil;
 
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 
 /**
  * @author guenter bartsch
@@ -17,7 +17,7 @@ public abstract class ZILDesignUnit extends ZILContainer {
 
 //	private ZILResolver fResolver;
 	
-	public ZILDesignUnit(String aId, ASTObject aSrc) {
+	public ZILDesignUnit(String aId, VHDLNode aSrc) {
 		super(aId, null, null, aSrc);
 	}
 	

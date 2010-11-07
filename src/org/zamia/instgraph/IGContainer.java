@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.zamia.DUManager;
+import org.zamia.DMManager;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
@@ -24,9 +24,9 @@ import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGSubProgram.IGBuiltin;
 import org.zamia.instgraph.IGType.TypeCat;
 import org.zamia.vhdl.ast.ConfigurationSpecification;
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.vhdl.ast.TypeDefinition;
-import org.zamia.vhdl.ast.DUUID.LUType;
+import org.zamia.vhdl.ast.DMUID.LUType;
 import org.zamia.zdb.ZDB;
 
 
@@ -204,14 +204,14 @@ public class IGContainer extends IGItem {
 		 */
 
 		ZamiaProject zprj = (ZamiaProject) getZDB().getOwner();
-		DUManager dum = zprj.getDUM();
+		DMManager dum = zprj.getDUM();
 		IGManager igm = zprj.getIGM();
 
 		for (IGLibraryImport li : fImportedLibs) {
 
-			DUUID duuid = new DUUID(LUType.Entity, li.getRealId(), aId, null);
+			DMUID duuid = new DMUID(LUType.Entity, li.getRealId(), aId, null);
 
-			if (dum.hasDU(duuid)) {
+			if (dum.hasDM(duuid)) {
 				res = addResult(res, new IGDUUID(duuid, null, getZDB()));
 			}
 			
@@ -266,7 +266,7 @@ public class IGContainer extends IGItem {
 					//res = pkg.getContainer().resolve(aId, res);
 
 				} else {
-					DUUID duuid = new DUUID(LUType.Package, pi.getLibId(), pi.getId(), null);
+					DMUID duuid = new DMUID(LUType.Package, pi.getLibId(), pi.getId(), null);
 					res = addResult(res, new IGDUUID(duuid, null, getZDB()));
 				}
 			}

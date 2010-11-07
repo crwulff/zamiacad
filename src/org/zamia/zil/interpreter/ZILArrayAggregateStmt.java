@@ -10,7 +10,7 @@ package org.zamia.zil.interpreter;
 
 import org.zamia.ZamiaException;
 import org.zamia.rtl.sim.Simulator;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.ZILTypeArray;
 import org.zamia.zil.ZILValue;
 
@@ -26,7 +26,7 @@ public class ZILArrayAggregateStmt extends ZILStmt {
 	private ZILTypeArray fArrayType;
 	private int fNumEntries;
 
-	public ZILArrayAggregateStmt(ZILTypeArray aArrayType, int aNumEntries, ASTObject aSrc) {
+	public ZILArrayAggregateStmt(ZILTypeArray aArrayType, int aNumEntries, VHDLNode aSrc) {
 		super(aSrc);
 		fArrayType = aArrayType;
 		fNumEntries = aNumEntries;

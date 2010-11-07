@@ -11,7 +11,7 @@ package org.zamia.zil;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.ASTObject;
+import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.zil.interpreter.ZILInterpreterCode;
 import org.zamia.zil.synthesis.Bindings;
 import org.zamia.zil.synthesis.VariableRemapping;
@@ -25,7 +25,7 @@ import org.zamia.zil.synthesis.VariableRemapping;
  */
 public class ZILOperationAllocate extends ZILOperation {
 
-	public ZILOperationAllocate(ZILType type, ZILIContainer container, ASTObject src) {
+	public ZILOperationAllocate(ZILType type, ZILIContainer container, VHDLNode src) {
 		super(type, container, src);
 		// TODO Auto-generated constructor stub
 	}

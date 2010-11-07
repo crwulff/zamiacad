@@ -36,7 +36,7 @@ public class SequentialProcedureCall extends SequentialStatement {
 
 	private Name name;
 
-	public SequentialProcedureCall(Name name_, ASTObject parent_, long location_) {
+	public SequentialProcedureCall(Name name_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		name = name_;
 		name.setParent(this);
@@ -48,7 +48,7 @@ public class SequentialProcedureCall extends SequentialStatement {
 	}
 
 	@Override
-	public ASTObject getChild(int idx_) {
+	public VHDLNode getChild(int idx_) {
 		return name;
 	}
 

@@ -7,7 +7,7 @@
  */
 package org.zamia.analysis.ast;
 
-import org.zamia.vhdl.ast.DUUID;
+import org.zamia.vhdl.ast.DMUID;
 
 /**
  * 
@@ -19,9 +19,9 @@ public class IdDUUIDTuple {
 
 	public String fId;
 
-	public DUUID fDUUID;
+	public DMUID fDUUID;
 
-	public IdDUUIDTuple(String aId, DUUID aDUUID) {
+	public IdDUUIDTuple(String aId, DMUID aDUUID) {
 		fId = aId;
 		fDUUID = aDUUID;
 	}
@@ -40,8 +40,8 @@ public class IdDUUIDTuple {
 
 		IdDUUIDTuple triple2 = (IdDUUIDTuple) aObject;
 
-		DUUID duuid1 = fDUUID;
-		DUUID duuid2 = triple2.fDUUID;
+		DMUID duuid1 = fDUUID;
+		DMUID duuid2 = triple2.fDUUID;
 
 		return duuid1.equals(duuid2) && fId.equals(triple2.fId);
 	}
