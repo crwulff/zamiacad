@@ -233,11 +233,14 @@ public class SequentialProcess extends ConcurrentStatement {
 			n = zs.getNumStatements();
 
 			IGSequentialStatement lastStmt = n > 0 ? zs.getStatement(n - 1) : null;
+			IGSequentialStatement firstStmt = n > 0 ? zs.getStatement(0) : null;
 
-			if (lastStmt == null || (!(lastStmt instanceof IGSequentialWait))) {
+			if (lastStmt == null || (!(lastStmt instanceof IGSequentialWait) && !(firstStmt instanceof IGSequentialWait))) {
 				proc.appendFinalWait(null);
 			}
 		}
+
+		proc.appendRestart(); // for the case when proc.appendFinalWait() doesn't get called
 
 		aStructure.addStatement(proc);
 	}

@@ -21,6 +21,8 @@ import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGContainerItem;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGOperation;
+import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGObject.OIDir;
@@ -121,7 +123,8 @@ public class FileDeclaration extends BlockDeclarativeItem {
 			throw new ZamiaException("File type expected here.", getLocation());
 		}
 
-		IGObject fo = new IGObject(mode, null, IGObjectCat.FILE, t, getId(), getLocation(), aCache.getZDB());
+		IGOperation filePathOp = foi.getStringExpr().computeIGOperation(aContainer.findStringType(), aContainer, aCache, new IGOperationCache(), ASTErrorMode.EXCEPTION, null);
+		IGObject fo = new IGObject(mode, filePathOp, IGObjectCat.FILE, t, getId(), getLocation(), aCache.getZDB());
 		aContainer.add(fo);
 
 		return fo;

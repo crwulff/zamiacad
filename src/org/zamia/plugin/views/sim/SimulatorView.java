@@ -16,7 +16,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -103,6 +106,7 @@ import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.sim.IGISimCursor;
 import org.zamia.instgraph.sim.IGISimObserver;
 import org.zamia.instgraph.sim.IGISimulator;
+import org.zamia.instgraph.sim.ref.IGSimRef;
 import org.zamia.instgraph.sim.vcd.VCDImport;
 import org.zamia.plugin.ZamiaPlugin;
 import org.zamia.plugin.ZamiaProjectMap;
@@ -134,6 +138,8 @@ public class SimulatorView extends ViewPart implements IGISimObserver {
 
 	private IGISimulator fSimulator;
 
+	private ValueForcer fValueForcer;
+	
 	private TraceDialog fTraceDialog;
 
 	private ToolItem fTraceTI, fUnTraceTI, fNewLineTI, fRunTI, fRestartTI, fJobTI, fPrevTransTI, fNextTransTI, fGotoCycleTI;
@@ -416,6 +422,7 @@ public class SimulatorView extends ViewPart implements IGISimObserver {
 		fRestartTI.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				try {
+					getValueForcer().reset();
 					fSimulator.reset();
 				} catch (ZamiaException e2) {
 					MessageBox box = new MessageBox(fControl.getShell(), SWT.ICON_ERROR);
@@ -1291,7 +1298,114 @@ public class SimulatorView extends ViewPart implements IGISimObserver {
 				Toolkit.getDefaultToolkit().getSystemClipboard().setContents(ss, null);
 			}
 		});
+		item = new MenuItem(fPopupMenu, SWT.SEPARATOR);
+		item = new MenuItem(fPopupMenu, SWT.PUSH);
+		item.setText("Force value");
+		item.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				doForceValue();
+			}
+		});
 
+		MenuItem unforceItem = new MenuItem(fPopupMenu, SWT.CASCADE);
+		unforceItem.setText("Unforce");
+
+		Menu unforceMenu = new Menu(fPopupMenu);
+		unforceItem.setMenu(unforceMenu);
+
+		item = new MenuItem(unforceMenu, SWT.PUSH);
+		item.setText("Selected Signals");
+		item.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				doUnforceFromCursor(BigInteger.ZERO);
+			}
+		});
+		item = new MenuItem(unforceMenu, SWT.PUSH);
+		item.setText("Selected Signals from Cursor");
+		item.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				doUnforceFromCursor(fCursorTime);
+			}
+		});
+		item = new MenuItem(unforceMenu, SWT.SEPARATOR);
+		item = new MenuItem(unforceMenu, SWT.PUSH);
+		item.setText("All");
+		item.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				doUnforceAllFromCursor(BigInteger.ZERO);
+			}
+		});
+		item = new MenuItem(unforceMenu, SWT.PUSH);
+		item.setText("All from Cursor");
+		item.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event e) {
+				doUnforceAllFromCursor(fCursorTime);
+			}
+		});
+
+	}
+
+	private void doUnforceAllFromCursor(BigInteger aFromTime) {
+		if (!(fSimulator instanceof IGSimRef)) {
+			ZamiaPlugin.showError(getSite().getShell(), "Unsupported Simulator", "New values can be unforced in Built-In simulator only", "Unforcing all forced values in a read-only simulator");
+			return;
+		}
+
+		ValueForcer valueForcer = getValueForcer();
+
+		valueForcer.unforceAllFromCursor(aFromTime);
+	}
+
+	private void doUnforceFromCursor(BigInteger aFromTime) {
+		if (!(fSimulator instanceof IGSimRef)) {
+			ZamiaPlugin.showError(getSite().getShell(), "Unsupported Simulator", "New values can be unforced in Built-In simulator only", "Unforcing forced values for selected signals in a read-only simulator");
+			return;
+		}
+
+		TreeItem[] items = fTree.getSelection();
+
+		if (items.length == 0)
+			return;
+
+		PathName[] signalPaths = new PathName[items.length];
+		for (int i = 0; i < items.length; i++) {
+			TreeItem item = items[i];
+			TraceLineSignal tl = (TraceLineSignal) item.getData();
+			signalPaths[i] = tl.getSignalPath();
+		}
+
+		ValueForcer valueForcer = getValueForcer();
+
+		valueForcer.unforceFromCursor(aFromTime, signalPaths);
+
+	}
+
+	private void doForceValue() {
+
+		if (!(fSimulator instanceof IGSimRef)) {
+			ZamiaPlugin.showError(getSite().getShell(), "Unsupported Simulator", "New values can be forced in Built-In simulator only", "Forcing value in a read-only simulator");
+			return;
+		}
+
+		TreeItem[] items = fTree.getSelection();
+
+		if (items.length == 0)
+			return;
+
+		TraceLineSignal tl = (TraceLineSignal) items[0].getData();
+
+		PathName signalPath = tl.getSignalPath();
+
+		ValueForcer valueForcer = getValueForcer();
+
+		valueForcer.force(signalPath);
+	}
+
+	private ValueForcer getValueForcer() {
+		if (fValueForcer == null) {
+			fValueForcer = new ValueForcer();
+		}
+		return fValueForcer;
 	}
 
 	class SimRunJob extends Job {
@@ -1352,9 +1466,33 @@ public class SimulatorView extends ViewPart implements IGISimObserver {
 
 				if (sim == SimRunnerConfig.SIM_BUILTIN) {
 
-					// FIXME
+					// Built-In simulator
 
-					throw new RuntimeException("Sorry, broken.");
+					IGSimRef refSim = new IGSimRef();
+					fSimulator = refSim;
+
+					String filename = fConfig.getFilename();
+					try {
+
+						getValueForcer().reset();
+
+						File f = new File(filename);
+
+						fSimulator.open(tlp, f, new PathName(fConfig.getPrefix()), zprj);
+
+						display.syncExec(new Runnable() {
+							public void run() {
+								String filename = fConfig.getFilename();
+								File f = new File(filename);
+								fInfoLabel.setText(f.getName());
+							}
+						});
+
+					} catch (Exception e) {
+						el.logException(e);
+						ZamiaPlugin.showError(getSite().getShell(), "Failed to load Built-In simulator", "Failed to load Built-In simulator", e.toString());
+						fSimulator = null;
+					}
 
 					// // built-in simulator
 					//
@@ -2603,6 +2741,7 @@ public class SimulatorView extends ViewPart implements IGISimObserver {
 				}
 			}
 		} catch (Throwable t) {
+			logger.error(t.getMessage());
 		}
 		return type;
 	}
@@ -2797,6 +2936,238 @@ public class SimulatorView extends ViewPart implements IGISimObserver {
 		return fMinusIcon;
 	}
 
+	public class ValueForcer {
+		private ForcingsTimeline fForcingsTimeline = new ForcingsTimeline();
+
+		public void force(PathName aSignalPath) {
+
+			IGTypeStatic type = getSignalType(aSignalPath);
+
+			boolean isFutureSimul = fCursorTime.compareTo(fSimulator.getEndTime()) == 0;
+
+			/* input value */
+			StringBuilder msg = new StringBuilder("Please specify the new value to be forced on signal ").append(aSignalPath);
+			msg.append("\n\nChange will take place on:  ");
+			if (isFutureSimul) {
+				msg.append("  future simulation");
+			} else {
+				msg.append(fCursorTime.longValue()/fFSPerUnit).append(" ns");
+			}
+			String valueStr = ZamiaPlugin.inputDialog(getSite().getShell(), "Enter New Value", msg.toString(), "");
+			if (valueStr == null) {
+				return;
+			}
+			IGStaticValue value = parseValue(valueStr.toUpperCase(), type, aSignalPath);
+			if (value == null) {
+				return;
+			}
+
+			/* save forcing (enables resimulation of multiple forcings) */
+			saveForcing(fCursorTime, aSignalPath, value);
+
+			/* force */
+			if (isFutureSimul) {
+				/* for future forcing no resimulation needed */
+				doForce(aSignalPath, value);
+
+			} else {
+				/* resimulate with forced values */
+				doResimulate();
+			}
+		}
+
+		private void doResimulate() {
+			try {
+				BigInteger endTime = fSimulator.getEndTime();
+				BigInteger prevForceTime = BigInteger.ZERO;
+
+				/* RESET */
+				fSimulator.reset();
+
+				/* RUN */
+				fForcingsTimeline.restart();
+				while (fForcingsTimeline.gotoNextForcings()) {
+					BigInteger forceTime = fForcingsTimeline.getTime();
+
+					/* RUN */
+					BigInteger timeToRun = forceTime.subtract(prevForceTime);
+					fSimulator.run(timeToRun);
+					prevForceTime = forceTime;
+					/* FORCE */
+					ForcingsTimeline.Forcings forcings = fForcingsTimeline.getForcings();
+					forcings.restart();
+					while (forcings.gotoNext()) {
+						boolean hasAssigned = doForce(forcings.getSignal(), forcings.getValue());
+						if (!hasAssigned) {
+							unforceFromCursor(BigInteger.ZERO, forcings.getSignal());
+							return;
+						}
+					}
+				}
+
+				/* RUN */
+				fSimulator.run(endTime.subtract(prevForceTime));
+
+			} catch (ZamiaException ex) {
+				MessageBox box = new MessageBox(fControl.getShell(), SWT.ICON_ERROR);
+				box.setText("Simulator Error");
+				box.setMessage("Simulator exception caught:\n" + ex);
+				box.open();
+			}
+		}
+
+		private void saveForcing(BigInteger aTime, PathName aSignalPath, IGStaticValue aValue) {
+			fForcingsTimeline.saveForcing(aTime, aSignalPath, aValue);
+		}
+
+		private IGStaticValue parseValue(String aValueStr, IGTypeStatic aType, PathName aSignalPath) {
+			try {
+				return ((IGSimRef) fSimulator).parseValue(aValueStr, aType,aSignalPath);
+			} catch (ZamiaException e) {
+				el.logException(e);
+				ZamiaPlugin.showError(getSite().getShell(), "Exception caught", "Exception caught - see log for details.", e.toString());
+			}
+			return null;
+		}
+
+		private boolean doForce(PathName aSignalPath, IGStaticValue aValue) {
+			try {
+				fSimulator.assign(aSignalPath, aValue);
+			} catch (ZamiaException e1) {
+				el.logException(e1);
+				ZamiaPlugin.showError(getSite().getShell(), "Exception caught", "Exception caught - see log for details.", e1.toString());
+				return false;
+			}
+			return true;
+		}
+
+		public void unforceFromCursor(BigInteger aFromTime, PathName... aSignalPaths) {
+			/* clear history of forcings for specified signals */
+			fForcingsTimeline.unforceFromCursor(aFromTime, aSignalPaths);
+			/* resimulate */
+			doResimulate();
+		}
+
+		public void unforceAllFromCursor(BigInteger aFromTime) {
+			/* clear history of forcings */
+			if (aFromTime.equals(BigInteger.ZERO)) {
+				reset(); // speed-up
+			} else {
+				fForcingsTimeline.unforceAllFromCursor(aFromTime);
+			}
+			/* resimulate */
+			doResimulate();
+		}
+
+		public void reset() {
+			fForcingsTimeline = new ForcingsTimeline();
+		}
+
+		private class ForcingsTimeline {
+
+			private TreeMap<BigInteger, Forcings> fForcings = new TreeMap<BigInteger, Forcings>();
+			/* Used for iteration only */
+			private Iterator<Map.Entry<BigInteger,Forcings>> fIterator;
+			/* Used for iteration only */
+			private BigInteger fCurForceTime;
+			/* Used for iteration only */
+			private Forcings fCurForcings;
+
+			public boolean gotoNextForcings() {
+				if (fIterator.hasNext()) {
+					Map.Entry<BigInteger, Forcings> entry = fIterator.next();
+					fCurForceTime = entry.getKey();
+					fCurForcings = entry.getValue();
+					return true;
+				}
+				return false;
+			}
+
+			public void restart() {
+				fIterator = fForcings.entrySet().iterator();
+				fCurForceTime = null;
+				fCurForcings = null;
+			}
+
+			public BigInteger getTime() {
+				return fCurForceTime;
+			}
+
+			public Forcings getForcings() {
+				return fCurForcings;
+			}
+
+			public void saveForcing(BigInteger aTime, PathName aSignalPath, IGStaticValue aValue) {
+				Forcings forcings = fForcings.get(aTime);
+				if (forcings == null) {
+					forcings = new Forcings();
+					fForcings.put(aTime, forcings);
+				}
+
+				forcings.saveForcing(aSignalPath, aValue);
+			}
+
+			public void unforceFromCursor(BigInteger aFromTime, PathName... aSignalPaths) {
+
+				BigInteger from = aFromTime;
+				BigInteger to = fForcings.lastKey();
+
+				for (Forcings forcing : fForcings.subMap(from, true, to, true).values()) {
+					forcing.unforce(aSignalPaths);
+				}
+
+			}
+
+			public void unforceAllFromCursor(BigInteger aFromTime) {
+				for (BigInteger time : fForcings.keySet()) {
+					if (time.compareTo(aFromTime) >= 0) {
+						fForcings.remove(time);
+					}
+				}
+			}
+
+			public class Forcings {
+				private Map<PathName, IGStaticValue> fForcings = new HashMap<PathName, IGStaticValue>();
+				private Iterator<Map.Entry<PathName,IGStaticValue>> fIterator;
+				private PathName fSignal;
+				private IGStaticValue fValue;
+
+				public boolean gotoNext() {
+					if (fIterator.hasNext()) {
+						Map.Entry<PathName, IGStaticValue> entry = fIterator.next();
+						fSignal = entry.getKey();
+						fValue = entry.getValue();
+						return true;
+					}
+					return false;
+				}
+
+				public void restart() {
+					fIterator = fForcings.entrySet().iterator();
+					fSignal = null;
+					fValue = null;
+				}
+
+				public PathName getSignal() {
+					return fSignal;
+				}
+
+				public IGStaticValue getValue() {
+					return fValue;
+				}
+
+				public void saveForcing(PathName aSignalPath, IGStaticValue aValue) {
+					fForcings.put(aSignalPath, aValue);
+				}
+
+				public void unforce(PathName... aSignalPaths) {
+					for (PathName signalPath : aSignalPaths) {
+						fForcings.remove(signalPath);
+					}
+				}
+			}
+		}
+	}
 	private void doFindReferences(boolean aWritersOnly) {
 		try {
 			TreeItem[] items = fTree.getSelection();

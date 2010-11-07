@@ -14,6 +14,7 @@ import org.zamia.ZamiaException;
 import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
+import java.math.BigInteger;
 
 /**
  * 
@@ -29,7 +30,16 @@ public class IGJumpTimeoutStmt extends IGJumpStmt {
 
 	@Override
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
-		throw new ZamiaException ("Sorry, not implemented yet.");
+		IGStackFrame stackFrame = aRuntime.pop();
+		BigInteger timeout = stackFrame.getLiteral().getNum();
+
+		BigInteger simTime = aRuntime.getCurrentTime(computeSourceLocation());
+
+		if (timeout.compareTo(simTime) == 0) {
+			aRuntime.setPC(fAdr);
+		}
+
+		return ReturnStatus.CONTINUE;
 	}
 
 	@Override

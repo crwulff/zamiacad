@@ -13,6 +13,9 @@ import java.math.BigInteger;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGStaticValue;
+import org.zamia.instgraph.IGStaticValueBuilder;
+import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
@@ -33,11 +36,20 @@ public class IGScheduleTimedWakeupStmt extends IGStmt {
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
 		IGStackFrame sf = aRuntime.pop();
+		IGStaticValue staticValue = sf.getLiteral();
 
-		BigInteger t = sf.getLiteral().getNum();
+		BigInteger t = staticValue.getNum();
+		BigInteger currentTime = aRuntime.getCurrentTime(computeSourceLocation());
 
-		aRuntime.scheduleWakeup(t, computeSourceLocation());
+		BigInteger wakeupTime = currentTime.add(t);
 
+		aRuntime.scheduleWakeup(wakeupTime, computeSourceLocation());
+
+		// Push the same wakeupTime to check for timeout in IGJumpTimeoutStmt
+		IGTypeStatic staticType = staticValue.getType().computeStaticType(aRuntime, aErrorMode, aReport);
+		IGStaticValueBuilder builder = new IGStaticValueBuilder(staticType, null, null);
+		IGStaticValue staticWakeupTime = builder.setNum(wakeupTime).buildConstant();
+		aRuntime.push(staticWakeupTime);
 		return ReturnStatus.CONTINUE;
 	}
 

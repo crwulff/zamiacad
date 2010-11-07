@@ -8,14 +8,26 @@
  */
 package org.zamia.instgraph.interpreter;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.ZamiaLogger;
+import org.zamia.ZamiaProject;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGOperationLiteral;
+import org.zamia.instgraph.IGRange;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGSubProgram;
@@ -34,6 +46,10 @@ import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
  */
 
 public class IGBuiltinOperations {
+	private static HashMap<File, LineNumberReader> readerByFile =  new HashMap<File, LineNumberReader>();
+	private static HashMap<ZamiaProject, LinkedList<LineNumberReader>> readersByProject = new HashMap<ZamiaProject, LinkedList<LineNumberReader>>();
+ 
+	private final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
 	public static ReturnStatus execBuiltin(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
 			throws ZamiaException {
@@ -89,6 +105,14 @@ public class IGBuiltinOperations {
 		case BIT_NOT:
 			return execBitNot(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
+		case BIT_AND:
+		case BIT_NAND:
+		case BIT_NOR:
+		case BIT_OR:
+		case BIT_XNOR:
+		case BIT_XOR:
+			return execBitBinary(aSub, aRuntime, aLocation, aErrorMode, aReport);
+
 		case ARRAY_NOT:
 			return execArrayNot(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
@@ -109,6 +133,21 @@ public class IGBuiltinOperations {
 		case ARRAY_CONCATEA:
 		case ARRAY_CONCATEE:
 			return execArrayConcat(aSub, aRuntime, aLocation, aErrorMode, aReport);
+
+		case READ:
+			return execRead(aSub, aRuntime, aLocation, aErrorMode, aReport);
+
+		case WRITE:
+			return execWrite(aSub, aRuntime, aLocation, aErrorMode, aReport);
+
+		case READLINE:
+			return execReadline(aSub, aRuntime, aLocation, aErrorMode, aReport);
+
+		case WRITELINE:
+			return execWriteline(aSub, aRuntime, aLocation, aErrorMode, aReport);
+
+		case ENDFILE:
+			return execEndfile(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
 		default:
 			throw new ZamiaException("Sorry, unimplemented builtin: " + builtin, aLocation);
@@ -331,7 +370,7 @@ public class IGBuiltinOperations {
 		if (rt == null) {
 			return ReturnStatus.ERROR;
 		}
-		IGStaticValue resValue = res ? rt.getEnumLiteral(1, aLocation, ASTErrorMode.EXCEPTION, null) : rt.getEnumLiteral(0, aLocation, ASTErrorMode.EXCEPTION, null);
+		IGStaticValue resValue = rt.getEnumLiteral(res ? 1 : 0, aLocation, ASTErrorMode.EXCEPTION, null);
 
 		aRuntime.push(resValue);
 
@@ -353,7 +392,7 @@ public class IGBuiltinOperations {
 		if (rt == null) {
 			return ReturnStatus.ERROR;
 		}
-		IGStaticValue resValue = res ? rt.getEnumLiteral(1, aLocation, ASTErrorMode.EXCEPTION, null) : rt.getEnumLiteral(0, aLocation, ASTErrorMode.EXCEPTION, null);
+		IGStaticValue resValue = rt.getEnumLiteral(res ? 1 : 0, aLocation, ASTErrorMode.EXCEPTION, null);
 
 		aRuntime.push(resValue);
 		return ReturnStatus.CONTINUE;
@@ -406,7 +445,7 @@ public class IGBuiltinOperations {
 		if (rt == null) {
 			return ReturnStatus.ERROR;
 		}
-		IGStaticValue resValue = res ? rt.getEnumLiteral(1, aLocation, ASTErrorMode.EXCEPTION, null) : rt.getEnumLiteral(0, aLocation, ASTErrorMode.EXCEPTION, null);
+		IGStaticValue resValue = rt.getEnumLiteral(res ? 1 : 0, aLocation, ASTErrorMode.EXCEPTION, null);
 
 		aRuntime.push(resValue);
 
@@ -428,10 +467,38 @@ public class IGBuiltinOperations {
 		if (rt == null) {
 			return ReturnStatus.ERROR;
 		}
-		IGStaticValue resValue = res ? rt.getEnumLiteral(1, aLocation, ASTErrorMode.EXCEPTION, null) : rt.getEnumLiteral(0, aLocation, ASTErrorMode.EXCEPTION, null);
+		IGStaticValue resValue = rt.getEnumLiteral(res ? 1 : 0, aLocation, ASTErrorMode.EXCEPTION, null);
 
 		aRuntime.push(resValue);
 		return ReturnStatus.CONTINUE;
+	}
+
+	private static ReturnStatus execBitBinary(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
+			throws ZamiaException {
+
+		IGBuiltin originalBuiltin = aSub.getBuiltin();
+		IGBuiltin boolBuiltin;
+		switch (originalBuiltin) {
+			case BIT_AND:
+				boolBuiltin = IGBuiltin.BOOL_AND; break;
+			case BIT_NAND:
+				boolBuiltin = IGBuiltin.BOOL_NAND; break;
+			case BIT_NOR:
+				boolBuiltin = IGBuiltin.BOOL_NOR; break;
+			case BIT_OR:
+				boolBuiltin = IGBuiltin.BOOL_OR; break;
+			case BIT_XNOR:
+				boolBuiltin = IGBuiltin.BOOL_XNOR; break;
+			case BIT_XOR:
+				boolBuiltin = IGBuiltin.BOOL_XOR; break;
+			default:
+				throw new ZamiaException("Sorry, unimplemented builtin: " + originalBuiltin, aLocation);
+		}
+		aSub.setBuiltin(boolBuiltin);
+		ReturnStatus returnStatus = execBoolBinary(aSub, aRuntime, aLocation, aErrorMode, aReport);
+		aSub.setBuiltin(originalBuiltin);
+
+		return returnStatus;
 	}
 
 	private static ReturnStatus execArrayNot(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
@@ -457,7 +524,7 @@ public class IGBuiltinOperations {
 			IGStaticValue v = value.getValue(i + offset, aLocation);
 			boolean b = v.getOrd() == 1;
 
-			v = !b ? et.getEnumLiteral(1, aLocation, ASTErrorMode.EXCEPTION, null) : et.getEnumLiteral(0, aLocation, ASTErrorMode.EXCEPTION, null);
+			v = et.getEnumLiteral(!b ? 1 : 0, aLocation, ASTErrorMode.EXCEPTION, null);
 
 			builder.set(i + offset, v, aLocation);
 		}
@@ -523,7 +590,7 @@ public class IGBuiltinOperations {
 		if (rt == null) {
 			return ReturnStatus.ERROR;
 		}
-		IGStaticValue resValue = bRes ? rt.getEnumLiteral(1, aLocation, ASTErrorMode.EXCEPTION, null) : rt.getEnumLiteral(0, aLocation, ASTErrorMode.EXCEPTION, null);
+		IGStaticValue resValue = rt.getEnumLiteral(bRes ? 1 : 0, aLocation, ASTErrorMode.EXCEPTION, null);
 
 		aRuntime.push(resValue);
 		return ReturnStatus.CONTINUE;
@@ -609,7 +676,7 @@ public class IGBuiltinOperations {
 					throw new ZamiaException("Internal interpreter error: execArrayBinary() called on non-implemented op " + aSub.getBuiltin(), aLocation);
 				}
 
-				IGStaticValue resValue = res ? et.getEnumLiteral(1, aLocation, ASTErrorMode.EXCEPTION, null) : et.getEnumLiteral(0, aLocation, ASTErrorMode.EXCEPTION, null);
+				IGStaticValue resValue = et.getEnumLiteral(res ? 1 : 0, aLocation, ASTErrorMode.EXCEPTION, null);
 
 				builder.set(i + offsetR, resValue, aLocation);
 			}
@@ -705,7 +772,7 @@ public class IGBuiltinOperations {
 
 			IGType boolT = container.findBoolType();
 
-			IGStaticValue ascending = a ? boolT.getEnumLiteral(1, aLocation, ASTErrorMode.EXCEPTION, null) : boolT.getEnumLiteral(0, aLocation, ASTErrorMode.EXCEPTION, null);
+			IGStaticValue ascending = boolT.getEnumLiteral(a ? 1 : 0, aLocation, ASTErrorMode.EXCEPTION, null);
 
 			IGTypeStatic rType = idxType.getStaticRange().getStaticType();
 			IGStaticValue range = new IGStaticValueBuilder(rType, null, aLocation).setLeft(left).setRight(right).setAscending(ascending).buildConstant();
@@ -743,6 +810,178 @@ public class IGBuiltinOperations {
 
 		aRuntime.push(b.buildConstant());
 		return ReturnStatus.CONTINUE;
+	}
+
+	private static ReturnStatus execRead(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
+			throws ZamiaException {
+
+		IGContainer container = aSub.getContainer();
+		IGObject intfL = container.resolveObject("L");
+		IGStaticValue valueF = aRuntime.getObjectValue(intfL);
+
+		IGObject intfV = container.resolveObject("VALUE");
+		IGObject intfG = container.resolveObject("GOOD");
+
+		aRuntime.setObjectValue(intfV, valueF, aLocation);
+		aRuntime.setObjectValue(intfG, valueF == null ? container.findFalseValue() : container.findTrueValue(), aLocation);
+
+		return ReturnStatus.CONTINUE;
+	}
+
+	private static ReturnStatus execWrite(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
+			throws ZamiaException {
+		//todo: also process JUSTIFIED and FIELD
+		IGContainer container = aSub.getContainer();
+		IGObject intfL = container.resolveObject("L");
+
+		IGObject intfV = container.resolveObject("VALUE");
+		IGStaticValue valueV = aRuntime.getObjectValue(intfV);
+		//todo: aRuntime.getObjectValue(intfL) and append to this value before setting object value to intfL.
+		aRuntime.setObjectValue(intfL, valueV, aLocation);
+
+		return ReturnStatus.CONTINUE;
+	}
+
+	private static ReturnStatus execReadline(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
+			throws ZamiaException {
+
+		IGContainer container = aSub.getContainer();
+		IGObject intfF = container.resolveObject("F");
+		IGStaticValue valueF = aRuntime.getObjectValue(intfF);
+
+		IGObject intfL = container.resolveObject("L");
+
+		String filePath = valueF.getId();
+		ZamiaProject zprj = aSub.getZPrj();
+		File file = new File(zprj.getBasePath() + File.separator + filePath);
+
+		String line = null;
+		LineNumberReader reader = null;
+		try {
+
+			reader = getReader(file, zprj);
+
+			line = reader.readLine();
+
+			logger.debug("Line # %d read from %s", reader.getLineNumber(), file.getAbsolutePath());
+
+		} catch (FileNotFoundException e) {
+			throw new ZamiaException("File " + file.getAbsolutePath() + " not found while executing " + aSub, aLocation);
+		} catch (IOException e) {
+			throw new ZamiaException("Error while reading file " + file.getAbsolutePath() + ":\n" + e.getMessage(), aLocation);
+		} finally {
+			if (line == null) { // close reader only when tried to read after EOF was reached and ...
+				close(reader);
+			}
+		}
+
+		if (line == null) { // ... and throw exception
+			throw new ZamiaException("IGBuiltinOperations: execReadline(): trying to read " + file.getName() + " file after EOF was reached", aLocation);
+		}
+
+		IGType stringType = container.findStringType();
+
+		IGTypeStatic intTypeS = container.findUniversalIntType().computeStaticType(aRuntime, ASTErrorMode.EXCEPTION, aReport);
+		IGStaticValue left = new IGStaticValueBuilder(intTypeS, null, null).setNum(0).buildConstant();
+		IGStaticValue right = new IGStaticValueBuilder(intTypeS, null, null).setNum(line.length() - 1).buildConstant();
+		IGStaticValue ascending = container.findTrueValue();
+
+		IGRange range = new IGRange(left, right, ascending, aLocation, aSub.getZDB());
+		stringType = stringType.createSubtype(range, aRuntime, aLocation);
+
+		IGOperationLiteral lineOL = new IGOperationLiteral(line, stringType, aLocation);
+		IGStaticValue ret = lineOL.computeStaticValue(aRuntime, aErrorMode, aReport);
+
+		aRuntime.setObjectValue(intfL, ret, aLocation);
+
+		return ReturnStatus.CONTINUE;
+	}
+
+	private static ReturnStatus execWriteline(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
+			throws ZamiaException {
+
+		IGContainer container = aSub.getContainer();
+		IGObject intfF = container.resolveObject("F");
+
+		IGObject intfL = container.resolveObject("L");
+		IGStaticValue valueL = aRuntime.getObjectValue(intfL);
+
+		aRuntime.setObjectValue(intfF, valueL, aLocation);
+
+		return ReturnStatus.CONTINUE;
+	}
+
+	private static ReturnStatus execEndfile(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
+			throws ZamiaException {
+
+		IGContainer container = aSub.getContainer();
+		IGObject intfF = container.resolveObject("F");
+		IGStaticValue valueF = aRuntime.getObjectValue(intfF);
+
+		String filePath = valueF.getId();
+		ZamiaProject zprj = aSub.getZPrj();
+		File file = new File(zprj.getBasePath() + File.separator + filePath);
+
+		boolean ready;
+		try {
+
+			BufferedReader reader = getReader(file, zprj);
+
+			ready = reader.ready();
+
+		} catch (FileNotFoundException e) {
+			throw new ZamiaException("File " + file.getAbsolutePath() + " not found while executing " + aSub, aLocation);
+		} catch (IOException e) {
+			throw new ZamiaException("Error while checking file " + file.getAbsolutePath() + " for readiness:\n" + e.getMessage(), aLocation);
+		}
+
+		IGStaticValue ret = ready ? container.findFalseValue() : container.findTrueValue();
+
+		aRuntime.push(ret);
+
+		return ReturnStatus.CONTINUE;
+	}
+
+	private static LineNumberReader getReader(File file, ZamiaProject zprj) throws FileNotFoundException {
+
+		LineNumberReader reader = readerByFile.get(file);
+
+		if (reader != null) {
+			return reader;
+		}
+
+		reader = new LineNumberReader(new BufferedReader(new FileReader(file)));
+
+		readerByFile.put(file, reader);
+		getReadersFrom(zprj).add(reader);
+
+		return reader;
+	}
+
+	private static LinkedList<LineNumberReader> getReadersFrom(ZamiaProject zprj) {
+		LinkedList<LineNumberReader> readers = readersByProject.get(zprj);
+		if (readers == null) {
+			readers = new LinkedList<LineNumberReader>();
+			readersByProject.put(zprj, readers);
+		}
+		return readers;
+	}
+
+	public static void remove(ZamiaProject aZprj) {
+		//FOXME: todo: when deleting project from Navigator, call this method to release the potentially occupied resources
+		LinkedList<LineNumberReader> readers = getReadersFrom(aZprj);
+		for (LineNumberReader reader : readers) {
+			close(reader);
+		}
+		readersByProject.remove(aZprj);
+	}
+
+	private static void close(LineNumberReader reader) {
+		try {
+			if (reader != null) {
+				reader.close();
+			}
+		} catch (IOException e) {}
 	}
 
 }
