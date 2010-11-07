@@ -62,4 +62,8 @@ public class FileOpenInformation extends ASTObject {
 	public void findReferences(String id_, ObjectCat category_, RefType refType_, int depth_, ZamiaProject zprj_, IGContainer aContainer, IGElaborationEnv aCache, ReferenceSearchResult result_, ArrayList<SearchJob> aTODO) throws ZamiaException {
 	}
 
+	@Override
+	public String toString() {
+		return m + " " + stringExpr;
+	}
 }

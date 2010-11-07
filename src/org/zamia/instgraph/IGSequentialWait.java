@@ -20,7 +20,7 @@ import org.zamia.instgraph.interpreter.IGJumpEventStmt;
 import org.zamia.instgraph.interpreter.IGJumpStmt;
 import org.zamia.instgraph.interpreter.IGJumpTimeoutStmt;
 import org.zamia.instgraph.interpreter.IGLabel;
-import org.zamia.instgraph.interpreter.IGPushStmt;
+import org.zamia.instgraph.interpreter.IGPushRefStmt;
 import org.zamia.instgraph.interpreter.IGScheduleEventWakeupStmt;
 import org.zamia.instgraph.interpreter.IGScheduleTimedWakeupStmt;
 import org.zamia.instgraph.interpreter.IGWaitStmt;
@@ -103,7 +103,7 @@ public class IGSequentialWait extends IGSequentialStatement {
 
 		if (fConditionClause != null) {
 
-			fConditionClause.computeAccessedItems(false, null, null, 0, accessedItems);
+			fConditionClause.computeAccessedItems(false, null, AccessType.Read, 0, accessedItems);
 
 			int n = accessedItems.size();
 			for (int i = 0; i < n; i++) {
@@ -115,7 +115,7 @@ public class IGSequentialWait extends IGSequentialStatement {
 
 					IGObject obj = (IGObject) item;
 
-					aCode.add(new IGPushStmt(obj, computeSourceLocation(), getZDB()));
+					aCode.add(new IGPushRefStmt(obj, computeSourceLocation(), getZDB()));
 					aCode.add(new IGScheduleEventWakeupStmt(computeSourceLocation(), getZDB()));
 				}
 			}
@@ -139,7 +139,7 @@ public class IGSequentialWait extends IGSequentialStatement {
 			for (int i = 0; i < n; i++) {
 
 				IGOperation zs = getSensitivityListOp(i);
-				zs.generateCode(true, aCode);
+				zs.generateCodeRef(true, false, aCode);
 
 				aCode.add(new IGJumpEventStmt(waitDoneLabel, computeSourceLocation(), getZDB()));
 			}

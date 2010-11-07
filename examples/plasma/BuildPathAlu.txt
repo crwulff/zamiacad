@@ -1,0 +1,14 @@
+#
+# ZamiaCAD build configuration file
+#
+# Format:
+#
+# 
+# ( 'extern'|'local' ) library_name path_prefix
+#
+# environment variables are available bourne shell style ($var), local
+# variables can be assigned using '='
+
+# local sources
+
+toplevel ALU_TEST

@@ -22,6 +22,7 @@ import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
+import org.zamia.instgraph.sim.ref.IGSignalChange;
 import org.zamia.util.ZStack;
 import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
 import org.zamia.zdb.ZDB;
@@ -327,6 +328,10 @@ public class IGInterpreterRuntimeEnv {
 		return fZPrj.getZDB();
 	}
 
+	public ZamiaProject getZPrj() {
+		return fZPrj;
+	}
+
 	private IGInterpreterContext getCurrentContext() {
 		int n = fContexts.size();
 		if (n == 0) {
@@ -399,6 +404,18 @@ public class IGInterpreterRuntimeEnv {
 
 	public void cancelAllWakeups(SourceLocation aLocation) throws ZamiaException {
 		throw new ZamiaException("Error: this environment doesn't support wakeup requests.", aLocation);
+	}
+
+	public IGSignalChange getSignalActivity(IGObject aSignal, SourceLocation aLocation) throws ZamiaException {
+		throw new ZamiaException("Error: this environment doesn't support signals.", aLocation);
+	}
+
+	public boolean isChanged(IGObject aSignal, SourceLocation aLocation) throws ZamiaException {
+		throw new ZamiaException("Error: this environment doesn't support signals.", aLocation);
+	}
+
+	public BigInteger getCurrentTime(SourceLocation aLocation) throws ZamiaException {
+		throw new ZamiaException("Error: this environment doesn't support simulation time retrieval.", aLocation);
 	}
 
 }

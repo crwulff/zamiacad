@@ -11,6 +11,7 @@ package org.zamia.instgraph.interpreter;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGObject;
 import org.zamia.vhdl.ast.ASTObject.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
@@ -30,7 +31,15 @@ public class IGJumpEventStmt extends IGJumpStmt {
 
 	@Override
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
-		throw new ZamiaException ("Sorry, not implemented yet.");
+
+		IGStackFrame stackFrame = aRuntime.pop();
+		IGObjectWriter ow = stackFrame.getObjectWriter();
+		IGObject signal = ow.getObject();
+
+		if (aRuntime.isChanged(signal, computeSourceLocation())) {
+			aRuntime.setPC(fAdr);
+		}
+		return ReturnStatus.CONTINUE;
 	}
 
 	@Override

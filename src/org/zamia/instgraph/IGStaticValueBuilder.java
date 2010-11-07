@@ -228,7 +228,7 @@ public class IGStaticValueBuilder {
 		IGStaticValueBuilder b = new IGStaticValueBuilder(aType, null, aSrc);
 		
 		for (int i = aMin; i<= aMax; i++) {
-			b.set(i, get(i, aSrc), aSrc);
+			b.set(i, getBuilder(i, aSrc), aSrc);
 		}
 		return b;
 	}
@@ -362,17 +362,34 @@ public class IGStaticValueBuilder {
 				fArrayOffset = (int) indexType.getStaticLow(fSrc).getOrd();
 
 				if (card > 0) {
-					fArrayValues = new ArrayList<BuilderEntry>(card);
+					if (fArrayValues == null) {
+						fArrayValues = new ArrayList<BuilderEntry>(card);
 
-					for (int i = 0; i < card; i++) {
-						fArrayValues.add(new BuilderEntry(aConstant.getValue(i + fArrayOffset, fSrc)));
+						for (int i = 0; i < card; i++) {
+							fArrayValues.add(new BuilderEntry(aConstant.getValue(i + fArrayOffset, fSrc)));
+						}
+
+					} else {
+
+						for (int i = 0; i < card; i++) {
+							IGStaticValue aValue = aConstant.getValue(i + fArrayOffset, fSrc);
+
+							BuilderEntry builderEntry = fArrayValues.get(i);
+							if (builderEntry != null) {
+								IGStaticValueBuilder builder = builderEntry.getConstantBuilder();
+								builder.setConstant(aValue);
+							} else {
+								fArrayValues.set(i, new BuilderEntry(aValue));
+							}
+
+						}
 					}
 				}
 			}
 			break;
 
 		case RECORD:
-
+			//FIXME: todo: potential bug (see case ARRAY). shouldn't create a new SVBuilder, but utilize the existent one.
 			int n = fType.getNumRecordFields(fSrc);
 			fRecordValues = new HashMap<String, IGStaticValueBuilder>(n);
 			for (int i = 0; i < n; i++) {

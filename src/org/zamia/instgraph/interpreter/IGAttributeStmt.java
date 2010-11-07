@@ -11,6 +11,9 @@ package org.zamia.instgraph.interpreter;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGItem;
+import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGOperationObject;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGType;
@@ -34,11 +37,18 @@ public class IGAttributeStmt extends IGStmt {
 
 	private long fResTypeDBID;
 
+	private long fObjectItemDBID;
+	
 	public IGAttributeStmt(IGType aResType, AttrOp aAttrOp, boolean aHaveArgument, SourceLocation aLocation, ZDB aZDB) {
 		super(aLocation, aZDB);
 		fHaveArgument = aHaveArgument;
 		fOp = aAttrOp;
 		fResTypeDBID = save(aResType);
+	}
+
+	public IGAttributeStmt(IGItem aItem, IGType aResType, AttrOp aAttrOp, boolean aHaveArgument, SourceLocation aLocation, ZDB aZDB) {
+		this(aResType, aAttrOp, aHaveArgument, aLocation, aZDB);
+		fObjectItemDBID = save(aItem);
 	}
 
 	private IGType getResType() {
@@ -261,6 +271,28 @@ public class IGAttributeStmt extends IGStmt {
 				b.setLeft(resValue.getRight());
 				
 				resValue = b.buildConstant();
+				
+				break;
+			case EVENT:
+				// get signal from objectItem
+				IGObject signal;
+				IGItem objectItem = (IGItem) getZDB().load(fObjectItemDBID);
+				if (objectItem instanceof IGOperationObject) {
+					signal = ((IGOperationObject) objectItem).getObject();
+				} else if (objectItem instanceof IGObject) {
+					signal = (IGObject) objectItem;
+				} else
+					throw new ZamiaException(getClass().getSimpleName() + ": cannot extract signal (" + IGObject.class.getSimpleName() + ") from " + objectItem);
+
+				// check signal event
+				boolean isChanged = aRuntime.isChanged(signal, computeSourceLocation());
+
+				IGType rt = getResType().computeStaticType(aRuntime, aErrorMode, aReport);
+				if (rt == null) {
+					return ReturnStatus.ERROR;
+				}
+
+				resValue = rt.getEnumLiteral(isChanged ? 1 : 0, computeSourceLocation(), ASTErrorMode.EXCEPTION, null);
 				
 				break;
 			default:
