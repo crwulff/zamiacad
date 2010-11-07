@@ -248,7 +248,7 @@ public class IGTest extends TestCase {
 	//		runTest("test/semantic/psl6Test", 1);
 	//	}
 
-	public void testPG99() throws Exception {
+	public void testPG99Z48() throws Exception {
 
 		if (!enablePG99Test) {
 			fail("Test disabled");
@@ -256,6 +256,16 @@ public class IGTest extends TestCase {
 		}
 
 		runTest("examples/pg99", "BuildPath_z48_tb.txt", 11);
+	}
+
+	public void testPG99() throws Exception {
+
+		if (!enablePG99Test) {
+			fail("Test disabled");
+			return;
+		}
+
+		runTest("examples/pg99", 1866);
 	}
 
 	public void testJOP() throws Exception {
