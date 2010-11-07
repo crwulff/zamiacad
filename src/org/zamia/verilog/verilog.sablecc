@@ -1266,8 +1266,8 @@ Productions
   ;
 
   simple_path_declaration = 
-    {parallel_path} t_lparen [l1]: list_of_path_descriptors polarity_operator? t_eg [l2]: list_of_path_descriptors t_rparen |
-    {full_path} t_lparen [l1]: list_of_path_descriptors polarity_operator? t_sg [l2]: list_of_path_descriptors t_rparen 
+    {parallel_path} t_lparen [l1]: list_of_path_descriptors polarity_operator? t_eg [l2]: list_of_path_descriptors t_rparen t_equals path_delay_value |
+    {full_path} t_lparen [l1]: list_of_path_descriptors polarity_operator? t_sg [l2]: list_of_path_descriptors t_rparen t_equals path_delay_value  
   ;
 
 

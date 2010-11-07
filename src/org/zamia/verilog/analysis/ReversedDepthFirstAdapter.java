@@ -11114,6 +11114,14 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
     public void caseAParallelPathSimplePathDeclaration(AParallelPathSimplePathDeclaration node)
     {
         inAParallelPathSimplePathDeclaration(node);
+        if(node.getPathDelayValue() != null)
+        {
+            node.getPathDelayValue().apply(this);
+        }
+        if(node.getTEquals() != null)
+        {
+            node.getTEquals().apply(this);
+        }
         if(node.getTRparen() != null)
         {
             node.getTRparen().apply(this);
@@ -11155,6 +11163,14 @@ public class ReversedDepthFirstAdapter extends AnalysisAdapter
     public void caseAFullPathSimplePathDeclaration(AFullPathSimplePathDeclaration node)
     {
         inAFullPathSimplePathDeclaration(node);
+        if(node.getPathDelayValue() != null)
+        {
+            node.getPathDelayValue().apply(this);
+        }
+        if(node.getTEquals() != null)
+        {
+            node.getTEquals().apply(this);
+        }
         if(node.getTRparen() != null)
         {
             node.getTRparen().apply(this);

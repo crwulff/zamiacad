@@ -13,6 +13,8 @@ public final class AFullPathSimplePathDeclaration extends PSimplePathDeclaration
     private TTSg _tSg_;
     private PListOfPathDescriptors _l2_;
     private TTRparen _tRparen_;
+    private TTEquals _tEquals_;
+    private PPathDelayValue _pathDelayValue_;
 
     public AFullPathSimplePathDeclaration()
     {
@@ -25,7 +27,9 @@ public final class AFullPathSimplePathDeclaration extends PSimplePathDeclaration
         @SuppressWarnings("hiding") PPolarityOperator _polarityOperator_,
         @SuppressWarnings("hiding") TTSg _tSg_,
         @SuppressWarnings("hiding") PListOfPathDescriptors _l2_,
-        @SuppressWarnings("hiding") TTRparen _tRparen_)
+        @SuppressWarnings("hiding") TTRparen _tRparen_,
+        @SuppressWarnings("hiding") TTEquals _tEquals_,
+        @SuppressWarnings("hiding") PPathDelayValue _pathDelayValue_)
     {
         // Constructor
         setTLparen(_tLparen_);
@@ -40,6 +44,10 @@ public final class AFullPathSimplePathDeclaration extends PSimplePathDeclaration
 
         setTRparen(_tRparen_);
 
+        setTEquals(_tEquals_);
+
+        setPathDelayValue(_pathDelayValue_);
+
     }
 
     @Override
@@ -51,7 +59,9 @@ public final class AFullPathSimplePathDeclaration extends PSimplePathDeclaration
             cloneNode(this._polarityOperator_),
             cloneNode(this._tSg_),
             cloneNode(this._l2_),
-            cloneNode(this._tRparen_));
+            cloneNode(this._tRparen_),
+            cloneNode(this._tEquals_),
+            cloneNode(this._pathDelayValue_));
     }
 
     public void apply(Switch sw)
@@ -209,6 +219,56 @@ public final class AFullPathSimplePathDeclaration extends PSimplePathDeclaration
         this._tRparen_ = node;
     }
 
+    public TTEquals getTEquals()
+    {
+        return this._tEquals_;
+    }
+
+    public void setTEquals(TTEquals node)
+    {
+        if(this._tEquals_ != null)
+        {
+            this._tEquals_.parent(null);
+        }
+
+        if(node != null)
+        {
+            if(node.parent() != null)
+            {
+                node.parent().removeChild(node);
+            }
+
+            node.parent(this);
+        }
+
+        this._tEquals_ = node;
+    }
+
+    public PPathDelayValue getPathDelayValue()
+    {
+        return this._pathDelayValue_;
+    }
+
+    public void setPathDelayValue(PPathDelayValue node)
+    {
+        if(this._pathDelayValue_ != null)
+        {
+            this._pathDelayValue_.parent(null);
+        }
+
+        if(node != null)
+        {
+            if(node.parent() != null)
+            {
+                node.parent().removeChild(node);
+            }
+
+            node.parent(this);
+        }
+
+        this._pathDelayValue_ = node;
+    }
+
     @Override
     public String toString()
     {
@@ -218,7 +278,9 @@ public final class AFullPathSimplePathDeclaration extends PSimplePathDeclaration
             + toString(this._polarityOperator_)
             + toString(this._tSg_)
             + toString(this._l2_)
-            + toString(this._tRparen_);
+            + toString(this._tRparen_)
+            + toString(this._tEquals_)
+            + toString(this._pathDelayValue_);
     }
 
     @Override
@@ -258,6 +320,18 @@ public final class AFullPathSimplePathDeclaration extends PSimplePathDeclaration
         if(this._tRparen_ == child)
         {
             this._tRparen_ = null;
+            return;
+        }
+
+        if(this._tEquals_ == child)
+        {
+            this._tEquals_ = null;
+            return;
+        }
+
+        if(this._pathDelayValue_ == child)
+        {
+            this._pathDelayValue_ = null;
             return;
         }
 
@@ -301,6 +375,18 @@ public final class AFullPathSimplePathDeclaration extends PSimplePathDeclaration
         if(this._tRparen_ == oldChild)
         {
             setTRparen((TTRparen) newChild);
+            return;
+        }
+
+        if(this._tEquals_ == oldChild)
+        {
+            setTEquals((TTEquals) newChild);
+            return;
+        }
+
+        if(this._pathDelayValue_ == oldChild)
+        {
+            setPathDelayValue((PPathDelayValue) newChild);
             return;
         }
 

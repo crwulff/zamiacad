@@ -11117,6 +11117,14 @@ public class DepthFirstAdapter extends AnalysisAdapter
         {
             node.getTRparen().apply(this);
         }
+        if(node.getTEquals() != null)
+        {
+            node.getTEquals().apply(this);
+        }
+        if(node.getPathDelayValue() != null)
+        {
+            node.getPathDelayValue().apply(this);
+        }
         outAParallelPathSimplePathDeclaration(node);
     }
 
@@ -11157,6 +11165,14 @@ public class DepthFirstAdapter extends AnalysisAdapter
         if(node.getTRparen() != null)
         {
             node.getTRparen().apply(this);
+        }
+        if(node.getTEquals() != null)
+        {
+            node.getTEquals().apply(this);
+        }
+        if(node.getPathDelayValue() != null)
+        {
+            node.getPathDelayValue().apply(this);
         }
         outAFullPathSimplePathDeclaration(node);
     }
