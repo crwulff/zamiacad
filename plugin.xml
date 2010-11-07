@@ -669,13 +669,13 @@
                 <instanceof value="org.eclipse.core.resources.IStorage"/>
                 <instanceof value="org.eclipse.core.resources.IFile"/>
                 <instanceof value="org.eclipse.core.resources.IResource"/>
-                <instanceof value="org.zamia.vhdl.ast.ASTObject"/>
+                <instanceof value="org.zamia.vhdl.ast.VHDLNode"/>
                 <instanceof value="org.eclipse.ui.IWorkingSet"/>
            </or>
          </triggerPoints>
          <possibleChildren>
             <or>
-                <instanceof value="org.zamia.vhdl.ast.ASTObject"/>
+                <instanceof value="org.zamia.vhdl.ast.VHDLNode"/>
                 <instanceof value="org.zamia.plugin.views.navigator.IGModuleWrapper"/>
             </or>
          </possibleChildren>

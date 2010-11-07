@@ -10,8 +10,8 @@
 # variables can be assigned using '='
 
 # local variables
-LEON_SRC="$HOME/projects/workspace/zamia/examples/leonSOC"
-GRLIB_SRC="projects/workspace/zamia/examples/leonSOC/lib/grlib"
+LEON_SRC="$HOME/projects/workspace/zamiacad/examples/leonSOC"
+GRLIB_SRC="projects/workspace/zamiacad/examples/leonSOC/lib/grlib"
 
 # external sources
 #extern readonly GRLIB            "$LEON_SRC/lib/grlib"
