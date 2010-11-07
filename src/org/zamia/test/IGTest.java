@@ -190,8 +190,8 @@ public class IGTest extends TestCase {
 		return aZPrj.getDUM().getArchDUUID(tl.getDUUID());
 	}
 
-	private void runTest(String aTestDir, int aNumNodes, VHDLLanguageSupport aVHDLLanguageSupport) throws Exception {
-		setupTest(aTestDir, aTestDir + "/BuildPath.txt", aVHDLLanguageSupport);
+	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes) throws Exception {
+		setupTest(aTestDir, aTestDir + File.separator + aBuildPathName, VHDLLanguageSupport.VHDL2008);
 
 		ZamiaProjectBuilder builder = fZPrj.getBuilder();
 
@@ -215,7 +215,7 @@ public class IGTest extends TestCase {
 	}
 
 	private void runTest(String aTestDir, int aNumNodes) throws Exception {
-		runTest(aTestDir, aNumNodes, VHDLLanguageSupport.VHDL2008);
+		runTest (aTestDir, "BuildPath.txt", aNumNodes);
 	}
 
 	@Override
@@ -247,6 +247,16 @@ public class IGTest extends TestCase {
 	//
 	//		runTest("test/semantic/psl6Test", 1);
 	//	}
+
+	public void testPG99() throws Exception {
+
+		if (!enablePG99Test) {
+			fail("Test disabled");
+			return;
+		}
+
+		runTest("examples/pg99", "BuildPath_z48_tb.txt", 11);
+	}
 
 	public void testJOP() throws Exception {
 
@@ -712,16 +722,6 @@ public class IGTest extends TestCase {
 		runTest("test/semantic/blockTest", 2);
 	}
 
-	public void testPG99() throws Exception {
-
-		if (!enablePG99Test) {
-			fail("Test disabled");
-			return;
-		}
-
-		runTest("examples/pg99", 1866);
-	}
-
 	public void testMM() throws Exception {
 
 		File f = new File("examples/gooofy/BuildPath.txt");
@@ -745,7 +745,7 @@ public class IGTest extends TestCase {
 			return;
 		}
 
-		runTest("examples/oggonachip", 358, VHDLLanguageSupport.VHDL2002);
+		runTest("examples/oggonachip", 358);
 	}
 
 	public void testType() throws Exception {

@@ -162,9 +162,7 @@ public class SATest extends TestCase {
 	public void testLeonIGReferenceSearch() throws Exception {
 		setupTest("test/leonExtern", "test/leonExtern/BuildPath.txt");
 
-		String homePath = System.getProperty("user.home");
-		
-		File f = new File(homePath + File.separator+"projects/workspace/zamia/examples/leonSOC/lib/gaisler/greth/grethm.vhd").getCanonicalFile();
+		File f = new File("examples/leonSOC/lib/gaisler/greth/grethm.vhd").getCanonicalFile();
 		
 		SourceFile sf = new SourceFile(f);
 
