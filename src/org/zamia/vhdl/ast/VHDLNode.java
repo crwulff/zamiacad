@@ -301,7 +301,7 @@ public abstract class VHDLNode extends ASTNode {
 	public long getLineCol() {
 
 		long location = getStartLine();
-		location |= getStartCol() << 32;
+		location = ((long) getStartCol() << 32) | location;
 
 		return location;
 	}

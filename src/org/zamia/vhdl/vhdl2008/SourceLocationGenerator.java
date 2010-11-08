@@ -12,7 +12,6 @@ import org.zamia.ASTNode;
 import org.zamia.IASTNodeVisitor;
 import org.zamia.SourceFile;
 import org.zamia.vhdl.ast.Identifier;
-import org.zamia.vhdl.ast.InterfaceList;
 
 /**
  * 
