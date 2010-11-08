@@ -8,6 +8,7 @@
  */
 package org.zamia.test;
 
+import org.zamia.instgraph.sim.ref.IGRefSimTest;
 import org.zamia.verilog.VerilogParserIntegrationTest;
 import org.zamia.verilog.VerilogParserTest;
 
@@ -26,6 +27,7 @@ public class TestSuiteStable {
 	public static Test suite() {
 		TestSuite suite = new TestSuite("Test for org.zamia.test");
 		//$JUnit-BEGIN$
+		suite.addTestSuite(IGRefSimTest.class);
 		suite.addTestSuite(FSCacheTest.class);
 		suite.addTestSuite(BuildPathTest.class);
 		suite.addTestSuite(DG2ETest.class);
