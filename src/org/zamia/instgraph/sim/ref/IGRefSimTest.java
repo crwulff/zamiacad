@@ -39,7 +39,11 @@ public class IGRefSimTest extends TestCase {
 
 	public final static boolean enablePLASMAALUTest = true;
 
+	public final static boolean enableZ48Test = true;
+
 	private ZamiaProject fZPrj;
+
+	private final static BigInteger NANO_FACTOR = new BigInteger("1000000");
 
 	public void setupTest(String aBasePath, String aBuildPath) throws Exception {
 		ZamiaLogger.setup(Level.DEBUG);
@@ -62,12 +66,8 @@ public class IGRefSimTest extends TestCase {
 		return aZPrj.getDUM().getArchDUUID(tl.getDUUID());
 	}
 
-	private void runTest(String aTestDir, int aNumNodes, String... aSimRuns) throws Exception {
-		runTest(aTestDir, "/BuildPath.txt", aNumNodes, aSimRuns);
-	}
-
-	private void runTest(String aTestDir, String aBuildPath, int aNumNodes, String... aSimRuns) throws Exception {
-		setupTest(aTestDir, aTestDir + aBuildPath);
+	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes, int aNanos) throws Exception {
+		setupTest(aTestDir, aTestDir + File.separator + aBuildPathName);
 
 		ZamiaProjectBuilder builder = fZPrj.getBuilder();
 
@@ -86,29 +86,25 @@ public class IGRefSimTest extends TestCase {
 		assertEquals(0, n);
 
 		n = fZPrj.getIGM().countNodes(duuid);
-		logger.info("IGTest: elaborated model for %s has %d modules.", duuid, n);
+		logger.info("IGTest: elaborated model for %s has %d unique modules.", duuid, n);
 		assertEquals(aNumNodes, n);
 
-		IGSimRef refsim = new IGSimRef();
+		IGSimRef sim = new IGSimRef();
 
-		ToplevelPath tlp = new ToplevelPath(new Toplevel(duuid, null), new PathName(""));
+		Toplevel tl = new Toplevel(duuid, null);
 
-		refsim.open(tlp, null, null, fZPrj);
+		ToplevelPath tlp = new ToplevelPath(tl, new PathName(""));
 
-		for (String simRun : aSimRuns) {
-			refsim.run(new BigInteger(simRun));
-		}
+		sim.open(tlp, null, null, fZPrj);
+
+		sim.reset();
+
+		sim.run(new BigInteger("" + aNanos).multiply(NANO_FACTOR));
+
 	}
 
-	public void testFCounter() throws Exception {
-
-		if (!enableFCounterTest) {
-			fail("Test disabled");
-			return;
-		}
-
-		runTest("test/refsim/fcounter", 1, "152000000");
-
+	private void runTest(String aTestDir, int aNumNodes, int aNanos) throws Exception {
+		runTest(aTestDir, "BuildPath.txt", aNumNodes, aNanos);
 	}
 
 	public void testCounterG() throws Exception {
@@ -118,18 +114,30 @@ public class IGRefSimTest extends TestCase {
 			return;
 		}
 
-		runTest("test/gcounter", 19, "152000000");
+		runTest("test/gcounter", 19, 152);
 	}
 
-	public void testPartialSignalAssignment() throws Exception {
+	public void testFCounter() throws Exception {
 
-		if (!enablePartialSATest) {
+		if (!enableFCounterTest) {
 			fail("Test disabled");
 			return;
 		}
 
-		runTest("test/refsim/partialSignalAssignmentTest", 1, "5000000");
+		runTest("test/refsim/fcounter", 1, 152);
+
 	}
+
+	// FIXME: disabled for now as sources are missing
+	//	public void testPartialSignalAssignment() throws Exception {
+	//
+	//		if (!enablePartialSATest) {
+	//			fail("Test disabled");
+	//			return;
+	//		}
+	//
+	//		runTest("test/refsim/partialSignalAssignmentTest", 1, 5);
+	//	}
 
 	public void testPlasmaAlu() throws Exception {
 		if (!enablePLASMAALUTest) {
@@ -137,8 +145,18 @@ public class IGRefSimTest extends TestCase {
 			return;
 		}
 
-		runTest("examples/plasma", "/BuildPathAlu.txt", 2, "29750000000"); // 119 * 250 * 1000000
+		runTest("examples/plasma", "/BuildPathAlu.txt", 2, 29750); // 119 * 250 
 
+	}
+
+	public void testZ48() throws Exception {
+
+		if (!enableZ48Test) {
+			fail("Test disabled");
+			return;
+		}
+
+		runTest("examples/pg99", "BuildPath_z48_tb.txt", 11, 10000);
 	}
 
 	public static void main(String args[]) {
