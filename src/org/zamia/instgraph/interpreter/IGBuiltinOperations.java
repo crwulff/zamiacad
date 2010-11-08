@@ -780,35 +780,37 @@ public class IGBuiltinOperations {
 			rt = rt.createSubtype(range, aLocation);
 		}
 
-		IGStaticValueBuilder b = new IGStaticValueBuilder(rt, null, aLocation);
+		IGStaticValueBuilder resBuilder = new IGStaticValueBuilder(rt, null, aLocation);
 
-		int off = b.getArrayOffset();
-
-		if (aSub.getBuiltin() == IGBuiltin.ARRAY_CONCATAA || aSub.getBuiltin() == IGBuiltin.ARRAY_CONCATAE) {
-			int n = (int) tA.getStaticIndexType(aLocation).computeCardinality(aLocation);
-			int offA = valueA.getArrayOffset();
-			for (int i = 0; i < n; i++) {
-				IGStaticValue op = valueA.getValue(i + offA, aLocation);
-				b.set(i + off, op, aLocation);
-			}
-			off += n;
-		} else {
-			b.set(off, valueA, aLocation);
-			off += 1;
-		}
+		int off = resBuilder.getArrayOffset();
 
 		if (aSub.getBuiltin() == IGBuiltin.ARRAY_CONCATAA || aSub.getBuiltin() == IGBuiltin.ARRAY_CONCATEA) {
 			int n = (int) tB.getStaticIndexType(aLocation).computeCardinality(aLocation);
 			int offB = valueB.getArrayOffset();
 			for (int i = 0; i < n; i++) {
 				IGStaticValue op = valueB.getValue(i + offB, aLocation);
-				b.set(i + off, op, aLocation);
+				resBuilder.set(i + off, op, aLocation);
 			}
+			off += n;
 		} else {
-			b.set(off, valueB, aLocation);
+			resBuilder.set(off, valueB, aLocation);
+			off += 1;
 		}
 
-		aRuntime.push(b.buildConstant());
+		if (aSub.getBuiltin() == IGBuiltin.ARRAY_CONCATAA || aSub.getBuiltin() == IGBuiltin.ARRAY_CONCATAE) {
+			int n = (int) tA.getStaticIndexType(aLocation).computeCardinality(aLocation);
+			int offA = valueA.getArrayOffset();
+			for (int i = 0; i < n; i++) {
+				IGStaticValue op = valueA.getValue(i + offA, aLocation);
+				resBuilder.set(i + off, op, aLocation);
+			}
+			off += n;
+		} else {
+			resBuilder.set(off, valueA, aLocation);
+			off += 1;
+		}
+
+		aRuntime.push(resBuilder.buildConstant());
 		return ReturnStatus.CONTINUE;
 	}
 
