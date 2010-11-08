@@ -884,6 +884,14 @@ public class IGType extends IGContainerItem {
 		return fCat == TypeCat.FILE;
 	}
 
+	public boolean isString() {
+
+		if (fCat != TypeCat.ARRAY)
+			return false;
+		
+		return getElementType().isCharEnum();
+	}
+
 	public IGType getElementType(SourceLocation aSrc) throws ZamiaException {
 		if (!isArray() && !isFile()) {
 			throw new ZamiaException("Array type expected here.", aSrc);

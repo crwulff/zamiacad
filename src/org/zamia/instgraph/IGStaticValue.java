@@ -529,18 +529,18 @@ public class IGStaticValue extends IGOperation {
 
 				IGTypeStatic at = getStaticType();
 
-				boolean ascending = isSTAscending(at);
+				// boolean ascending = isSTAscending(at);
 
 				if (fArrayValues != null) {
 					int n = fArrayValues.size();
-					if (at.isLogic()) {
+					if (at.isLogic() || at.isString()) {
 						// buf.append("\"");
-						for (int i = 0; i < n; i++) {
-							buf.append(fArrayValues.get(ascending ? i : n - i - 1).toHRString());
+						for (int i = n-1; i >=0; i--) {
+							buf.append(fArrayValues.get(i).toHRString());
 						}
 						// buf.append("\"");
-
 					} else {
+						
 						buf.append("(");
 						for (int i = 0; i < n; i++) {
 							buf.append(fArrayValues.get(i));

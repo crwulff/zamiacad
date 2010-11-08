@@ -124,7 +124,7 @@ public class IGOperationLiteral extends IGOperation {
 			int n = fStr.length();
 			int offset = builder.getArrayOffset();
 			for (int i = 0; i < n; i++) {
-				char c = fStr.charAt(i);
+				char c = fStr.charAt(n-1-i);
 
 				// IGActualConstantBuilder b = builder.getBuilder(offset+i,
 				// computeSourceLocation());
