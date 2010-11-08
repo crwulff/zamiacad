@@ -418,19 +418,19 @@ public class Parser
 			push(goTo(12), list);
 		    }
 		    break;
-                    case 42: /* reduce AP0PortDeclarationS */
+                    case 42: /* reduce AP0PortDeclarationSingle */
 		    {
 			ArrayList list = new42();
 			push(goTo(13), list);
 		    }
 		    break;
-                    case 43: /* reduce AP1PortDeclarationS */
+                    case 43: /* reduce AP1PortDeclarationSingle */
 		    {
 			ArrayList list = new43();
 			push(goTo(13), list);
 		    }
 		    break;
-                    case 44: /* reduce AP2PortDeclarationS */
+                    case 44: /* reduce AP2PortDeclarationSingle */
 		    {
 			ArrayList list = new44();
 			push(goTo(13), list);
@@ -7110,10 +7110,10 @@ public class Parser
         PPortDeclarationFoo pportdeclarationfooNode1;
         {
             // Block
-        PPortDeclarationS pportdeclarationsNode2;
-        pportdeclarationsNode2 = (PPortDeclarationS)nodeArrayList1.get(0);
+        PPortDeclarationSingle pportdeclarationsingleNode2;
+        pportdeclarationsingleNode2 = (PPortDeclarationSingle)nodeArrayList1.get(0);
 
-        pportdeclarationfooNode1 = new AP0PortDeclarationFoo(pportdeclarationsNode2);
+        pportdeclarationfooNode1 = new AP0PortDeclarationFoo(pportdeclarationsingleNode2);
         }
 	nodeList.add(pportdeclarationfooNode1);
         return nodeList;
@@ -7485,60 +7485,60 @@ public class Parser
 
 
     @SuppressWarnings("unchecked")
-    ArrayList new42() /* reduce AP0PortDeclarationS */
+    ArrayList new42() /* reduce AP0PortDeclarationSingle */
     {
         @SuppressWarnings("hiding") ArrayList nodeList = new ArrayList();
 
         @SuppressWarnings("unused") ArrayList nodeArrayList1 = pop();
-        PPortDeclarationS pportdeclarationsNode1;
+        PPortDeclarationSingle pportdeclarationsingleNode1;
         {
             // Block
         PInoutDeclarationS pinoutdeclarationsNode2;
         pinoutdeclarationsNode2 = (PInoutDeclarationS)nodeArrayList1.get(0);
 
-        pportdeclarationsNode1 = new AP0PortDeclarationS(pinoutdeclarationsNode2);
+        pportdeclarationsingleNode1 = new AP0PortDeclarationSingle(pinoutdeclarationsNode2);
         }
-	nodeList.add(pportdeclarationsNode1);
+	nodeList.add(pportdeclarationsingleNode1);
         return nodeList;
     }
 
 
 
     @SuppressWarnings("unchecked")
-    ArrayList new43() /* reduce AP1PortDeclarationS */
+    ArrayList new43() /* reduce AP1PortDeclarationSingle */
     {
         @SuppressWarnings("hiding") ArrayList nodeList = new ArrayList();
 
         @SuppressWarnings("unused") ArrayList nodeArrayList1 = pop();
-        PPortDeclarationS pportdeclarationsNode1;
+        PPortDeclarationSingle pportdeclarationsingleNode1;
         {
             // Block
         PInputDeclarationS pinputdeclarationsNode2;
         pinputdeclarationsNode2 = (PInputDeclarationS)nodeArrayList1.get(0);
 
-        pportdeclarationsNode1 = new AP1PortDeclarationS(pinputdeclarationsNode2);
+        pportdeclarationsingleNode1 = new AP1PortDeclarationSingle(pinputdeclarationsNode2);
         }
-	nodeList.add(pportdeclarationsNode1);
+	nodeList.add(pportdeclarationsingleNode1);
         return nodeList;
     }
 
 
 
     @SuppressWarnings("unchecked")
-    ArrayList new44() /* reduce AP2PortDeclarationS */
+    ArrayList new44() /* reduce AP2PortDeclarationSingle */
     {
         @SuppressWarnings("hiding") ArrayList nodeList = new ArrayList();
 
         @SuppressWarnings("unused") ArrayList nodeArrayList1 = pop();
-        PPortDeclarationS pportdeclarationsNode1;
+        PPortDeclarationSingle pportdeclarationsingleNode1;
         {
             // Block
         POutputDeclarationS poutputdeclarationsNode2;
         poutputdeclarationsNode2 = (POutputDeclarationS)nodeArrayList1.get(0);
 
-        pportdeclarationsNode1 = new AP2PortDeclarationS(poutputdeclarationsNode2);
+        pportdeclarationsingleNode1 = new AP2PortDeclarationSingle(poutputdeclarationsNode2);
         }
-	nodeList.add(pportdeclarationsNode1);
+	nodeList.add(pportdeclarationsingleNode1);
         return nodeList;
     }
 

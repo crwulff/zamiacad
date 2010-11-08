@@ -35,9 +35,9 @@ public interface Analysis extends Switch
     void caseAPortExpressionRep(APortExpressionRep node);
     void caseAP0PortReference(AP0PortReference node);
     void caseAP1PortReference(AP1PortReference node);
-    void caseAP0PortDeclarationS(AP0PortDeclarationS node);
-    void caseAP1PortDeclarationS(AP1PortDeclarationS node);
-    void caseAP2PortDeclarationS(AP2PortDeclarationS node);
+    void caseAP0PortDeclarationSingle(AP0PortDeclarationSingle node);
+    void caseAP1PortDeclarationSingle(AP1PortDeclarationSingle node);
+    void caseAP2PortDeclarationSingle(AP2PortDeclarationSingle node);
     void caseAP0PortDeclaration(AP0PortDeclaration node);
     void caseAP1PortDeclaration(AP1PortDeclaration node);
     void caseAP2PortDeclaration(AP2PortDeclaration node);

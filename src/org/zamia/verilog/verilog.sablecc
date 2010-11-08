@@ -398,7 +398,7 @@ Productions
   ;
  
   port_declaration_foo = 
-    {p0}  port_declaration_s |
+    {p0}  port_declaration_single |
     {p2}  identifier |
     {p3}  identifier t_lbracket range_expression t_rbracket |
     {p4}  identifier t_equals expression |
@@ -417,7 +417,7 @@ Productions
     {p1} identifier t_lbracket range_expression t_rbracket
   ;
   
-  port_declaration_s =
+  port_declaration_single =
     {p0}  inout_declaration_s |
     {p1}  input_declaration_s |
     {p2}  output_declaration_s

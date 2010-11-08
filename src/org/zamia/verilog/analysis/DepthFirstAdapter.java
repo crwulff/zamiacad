@@ -392,9 +392,9 @@ public class DepthFirstAdapter extends AnalysisAdapter
     public void caseAP0PortDeclarationFoo(AP0PortDeclarationFoo node)
     {
         inAP0PortDeclarationFoo(node);
-        if(node.getPortDeclarationS() != null)
+        if(node.getPortDeclarationSingle() != null)
         {
-            node.getPortDeclarationS().apply(this);
+            node.getPortDeclarationSingle().apply(this);
         }
         outAP0PortDeclarationFoo(node);
     }
@@ -691,67 +691,67 @@ public class DepthFirstAdapter extends AnalysisAdapter
         outAP1PortReference(node);
     }
 
-    public void inAP0PortDeclarationS(AP0PortDeclarationS node)
+    public void inAP0PortDeclarationSingle(AP0PortDeclarationSingle node)
     {
         defaultIn(node);
     }
 
-    public void outAP0PortDeclarationS(AP0PortDeclarationS node)
+    public void outAP0PortDeclarationSingle(AP0PortDeclarationSingle node)
     {
         defaultOut(node);
     }
 
     @Override
-    public void caseAP0PortDeclarationS(AP0PortDeclarationS node)
+    public void caseAP0PortDeclarationSingle(AP0PortDeclarationSingle node)
     {
-        inAP0PortDeclarationS(node);
+        inAP0PortDeclarationSingle(node);
         if(node.getInoutDeclarationS() != null)
         {
             node.getInoutDeclarationS().apply(this);
         }
-        outAP0PortDeclarationS(node);
+        outAP0PortDeclarationSingle(node);
     }
 
-    public void inAP1PortDeclarationS(AP1PortDeclarationS node)
+    public void inAP1PortDeclarationSingle(AP1PortDeclarationSingle node)
     {
         defaultIn(node);
     }
 
-    public void outAP1PortDeclarationS(AP1PortDeclarationS node)
+    public void outAP1PortDeclarationSingle(AP1PortDeclarationSingle node)
     {
         defaultOut(node);
     }
 
     @Override
-    public void caseAP1PortDeclarationS(AP1PortDeclarationS node)
+    public void caseAP1PortDeclarationSingle(AP1PortDeclarationSingle node)
     {
-        inAP1PortDeclarationS(node);
+        inAP1PortDeclarationSingle(node);
         if(node.getInputDeclarationS() != null)
         {
             node.getInputDeclarationS().apply(this);
         }
-        outAP1PortDeclarationS(node);
+        outAP1PortDeclarationSingle(node);
     }
 
-    public void inAP2PortDeclarationS(AP2PortDeclarationS node)
+    public void inAP2PortDeclarationSingle(AP2PortDeclarationSingle node)
     {
         defaultIn(node);
     }
 
-    public void outAP2PortDeclarationS(AP2PortDeclarationS node)
+    public void outAP2PortDeclarationSingle(AP2PortDeclarationSingle node)
     {
         defaultOut(node);
     }
 
     @Override
-    public void caseAP2PortDeclarationS(AP2PortDeclarationS node)
+    public void caseAP2PortDeclarationSingle(AP2PortDeclarationSingle node)
     {
-        inAP2PortDeclarationS(node);
+        inAP2PortDeclarationSingle(node);
         if(node.getOutputDeclarationS() != null)
         {
             node.getOutputDeclarationS().apply(this);
         }
-        outAP2PortDeclarationS(node);
+        outAP2PortDeclarationSingle(node);
     }
 
     public void inAP0PortDeclaration(AP0PortDeclaration node)

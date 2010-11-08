@@ -184,17 +184,17 @@ public class AnalysisAdapter implements Analysis
         defaultCase(node);
     }
 
-    public void caseAP0PortDeclarationS(AP0PortDeclarationS node)
+    public void caseAP0PortDeclarationSingle(AP0PortDeclarationSingle node)
     {
         defaultCase(node);
     }
 
-    public void caseAP1PortDeclarationS(AP1PortDeclarationS node)
+    public void caseAP1PortDeclarationSingle(AP1PortDeclarationSingle node)
     {
         defaultCase(node);
     }
 
-    public void caseAP2PortDeclarationS(AP2PortDeclarationS node)
+    public void caseAP2PortDeclarationSingle(AP2PortDeclarationSingle node)
     {
         defaultCase(node);
     }

@@ -2,7 +2,7 @@
 
 package org.zamia.verilog.node;
 
-public abstract class PPortDeclarationS extends Node
+public abstract class PPortDeclarationSingle extends Node
 {
     // Empty body
 }

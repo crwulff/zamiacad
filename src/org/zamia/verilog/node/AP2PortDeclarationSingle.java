@@ -5,16 +5,16 @@ package org.zamia.verilog.node;
 import org.zamia.verilog.analysis.*;
 
 @SuppressWarnings("nls")
-public final class AP2PortDeclarationS extends PPortDeclarationS
+public final class AP2PortDeclarationSingle extends PPortDeclarationSingle
 {
     private POutputDeclarationS _outputDeclarationS_;
 
-    public AP2PortDeclarationS()
+    public AP2PortDeclarationSingle()
     {
         // Constructor
     }
 
-    public AP2PortDeclarationS(
+    public AP2PortDeclarationSingle(
         @SuppressWarnings("hiding") POutputDeclarationS _outputDeclarationS_)
     {
         // Constructor
@@ -25,13 +25,13 @@ public final class AP2PortDeclarationS extends PPortDeclarationS
     @Override
     public Object clone()
     {
-        return new AP2PortDeclarationS(
+        return new AP2PortDeclarationSingle(
             cloneNode(this._outputDeclarationS_));
     }
 
     public void apply(Switch sw)
     {
-        ((Analysis) sw).caseAP2PortDeclarationS(this);
+        ((Analysis) sw).caseAP2PortDeclarationSingle(this);
     }
 
     public POutputDeclarationS getOutputDeclarationS()

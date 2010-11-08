@@ -7,7 +7,7 @@ import org.zamia.verilog.analysis.*;
 @SuppressWarnings("nls")
 public final class AP0PortDeclarationFoo extends PPortDeclarationFoo
 {
-    private PPortDeclarationS _portDeclarationS_;
+    private PPortDeclarationSingle _portDeclarationSingle_;
 
     public AP0PortDeclarationFoo()
     {
@@ -15,10 +15,10 @@ public final class AP0PortDeclarationFoo extends PPortDeclarationFoo
     }
 
     public AP0PortDeclarationFoo(
-        @SuppressWarnings("hiding") PPortDeclarationS _portDeclarationS_)
+        @SuppressWarnings("hiding") PPortDeclarationSingle _portDeclarationSingle_)
     {
         // Constructor
-        setPortDeclarationS(_portDeclarationS_);
+        setPortDeclarationSingle(_portDeclarationSingle_);
 
     }
 
@@ -26,7 +26,7 @@ public final class AP0PortDeclarationFoo extends PPortDeclarationFoo
     public Object clone()
     {
         return new AP0PortDeclarationFoo(
-            cloneNode(this._portDeclarationS_));
+            cloneNode(this._portDeclarationSingle_));
     }
 
     public void apply(Switch sw)
@@ -34,16 +34,16 @@ public final class AP0PortDeclarationFoo extends PPortDeclarationFoo
         ((Analysis) sw).caseAP0PortDeclarationFoo(this);
     }
 
-    public PPortDeclarationS getPortDeclarationS()
+    public PPortDeclarationSingle getPortDeclarationSingle()
     {
-        return this._portDeclarationS_;
+        return this._portDeclarationSingle_;
     }
 
-    public void setPortDeclarationS(PPortDeclarationS node)
+    public void setPortDeclarationSingle(PPortDeclarationSingle node)
     {
-        if(this._portDeclarationS_ != null)
+        if(this._portDeclarationSingle_ != null)
         {
-            this._portDeclarationS_.parent(null);
+            this._portDeclarationSingle_.parent(null);
         }
 
         if(node != null)
@@ -56,23 +56,23 @@ public final class AP0PortDeclarationFoo extends PPortDeclarationFoo
             node.parent(this);
         }
 
-        this._portDeclarationS_ = node;
+        this._portDeclarationSingle_ = node;
     }
 
     @Override
     public String toString()
     {
         return ""
-            + toString(this._portDeclarationS_);
+            + toString(this._portDeclarationSingle_);
     }
 
     @Override
     void removeChild(@SuppressWarnings("unused") Node child)
     {
         // Remove child
-        if(this._portDeclarationS_ == child)
+        if(this._portDeclarationSingle_ == child)
         {
-            this._portDeclarationS_ = null;
+            this._portDeclarationSingle_ = null;
             return;
         }
 
@@ -83,9 +83,9 @@ public final class AP0PortDeclarationFoo extends PPortDeclarationFoo
     void replaceChild(@SuppressWarnings("unused") Node oldChild, @SuppressWarnings("unused") Node newChild)
     {
         // Replace child
-        if(this._portDeclarationS_ == oldChild)
+        if(this._portDeclarationSingle_ == oldChild)
         {
-            setPortDeclarationS((PPortDeclarationS) newChild);
+            setPortDeclarationSingle((PPortDeclarationSingle) newChild);
             return;
         }
 
