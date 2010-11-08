@@ -47,10 +47,11 @@ Helpers
   octal_value = octal_digit ( '_' | octal_digit )* ;
   hex_value = hex_digit ( '_' | hex_digit )* ;
 
-  zero_or_one = ( '0' | '1' );
-  z_or_x = ( 'x' | 'X' | 'z' | 'Z' );
-
   ws = (sp | ht | ff | line_terminator)*;
+
+  zero_or_one = ( '0' | '1' );
+
+  z_or_x = ( 'x' | 'X' | 'z' | 'Z' );
 
 Tokens
 
@@ -676,7 +677,7 @@ Productions
   // A.2.4 Declaration assignments
   
   /*
-  defparam_assignment ::= hierarchical_parameter_identifier = constant_mintypmax_expression
+  defparam_assignment = hierarchical_parameter_identifier = constant_mintypmax_expression
   */
   
   net_decl_assignment = identifier t_equals expression ;
@@ -696,9 +697,9 @@ Productions
     {p0} k_pathpulses = ( reject_limit_value [ , error_limit_value ] )  |
     {p1} PATHPULSE$specify_input_terminal_descriptor$specify_terminal_descriptor = ( reject_limit_value [ , error_limit_value ] )
   ;
-  error_limit_value ::= limit_value
-  reject_limit_value ::= limit_value
-  limit_value ::= constant_mintypmax_expression
+  error_limit_value = limit_value
+  reject_limit_value = limit_value
+  limit_value = constant_mintypmax_expression
   */
   
   // A.2.5 Declaration ranges
@@ -1242,9 +1243,8 @@ Productions
     {p0} specparam_declaration |
     {p1} pulsestyle_declaration | 
     {p2} showcancelled_declaration  | 
-    {p3} path_declaration /*
-| 
-    {p4} system_timing_check */
+    {p3} path_declaration | 
+    {p4} system_timing_check 
   ;
 
   pulsestyle_declaration =
@@ -1320,6 +1320,139 @@ Productions
     {p1} k_if t_lparen module_path_expression t_rparen edge_sensitive_path_declaration |
     {p2} k_ifnone simple_path_declaration
   ;
+
+  // A.7.5 System timing checks
+
+  // A.7.5.1 System timing check commands
+
+  system_timing_check = 
+   {p0}  setup_timing_check |
+   {p1}  hold_timing_check | 
+   {p2}  setuphold_timing_check |
+/*
+   {p3}  recovery_timing_check |
+   {p4}  removal_timing_check |
+   {p5}  recrem_timing_check |
+   {p6}  skew_timing_check |
+   {p7}  timeskew_timing_check |
+   {p8}  fullskew_timing_check |
+*/
+   {p9}  period_timing_check |
+   {p10} width_timing_check |
+   {p11} nochange_timing_check 
+  ;
+
+  setup_timing_check =
+       {p0} k_ssetup t_lparen [e0]: timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma expression t_rparen t_semicolon |
+       {p1} k_ssetup t_lparen [e0]: timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma expression t_comma identifier? t_rparen t_semicolon
+  ;
+
+  hold_timing_check =
+       {p0} k_shold t_lparen [e0]: timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma expression t_rparen t_semicolon |
+       {p1} k_shold t_lparen [e0]: timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma expression t_comma identifier? t_rparen t_semicolon
+  ;
+
+  setuphold_timing_check =
+    {p0} k_ssetuphold t_lparen timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma [x1]: expression t_comma [x2]: expression t_rparen t_semicolon |
+    {p1} k_ssetuphold t_lparen timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma [x1]: expression t_comma [x2]: expression [c2]: t_comma identifier? t_rparen t_semicolon |
+    {p2} k_ssetuphold t_lparen timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma [x1]: expression t_comma [x2]: expression [c2]: t_comma identifier? [c3]: t_comma [x3]: mintypmax_expression? t_rparen t_semicolon | 
+    {p3} k_ssetuphold t_lparen timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma [x1]: expression t_comma [x2]: expression [c2]: t_comma identifier? [c3]: t_comma [x3]: mintypmax_expression? [c4]: t_comma [x4]: mintypmax_expression? t_rparen t_semicolon | 
+    {p4} k_ssetuphold t_lparen timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma [x1]: expression t_comma [x2]: expression [c2]: t_comma identifier? [c3]: t_comma [x3]: mintypmax_expression? [c4]: t_comma [x4]: mintypmax_expression? [c5]: t_comma delayed_reference? t_rparen t_semicolon | 
+    {p5} k_ssetuphold t_lparen timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma [x1]: expression t_comma [x2]: expression [c2]: t_comma identifier? [c3]: t_comma [x3]: mintypmax_expression? [c4]: t_comma [x4]: mintypmax_expression? [c5]: t_comma delayed_reference? [c6]: t_comma delayed_data? t_rparen t_semicolon
+  ; 
+
+/*
+  $recovery_timing_check =
+       $recovery ( timing_check_event , timing_check_event , expression [ , [ identifier ] ] ) ;
+
+  $removal_timing_check =
+       $removal ( timing_check_event , timing_check_event , expression [ , [ identifier ] ] ) ;
+
+  $recrem_timing_check =
+       $recrem ( timing_check_event , timing_check_event , expression , expression
+                          [ , [ identifier ] [ , [ mintypmax_expression ] [ , [ mintypmax_expression ]
+                          [ , [ delayed_reference ] [ , [ delayed_data ] ] ] ] ] ] ) ;
+
+  $skew_timing_check =
+       $skew ( timing_check_event , timing_check_event , expression [ , [ identifier ] ] ) ;
+
+  $timeskew_timing_check =
+       $timeskew ( timing_check_event , timing_check_event , expression
+                          [ , [ identifier ] [ , [ expression ] [ , [ expression ] ] ] ] ) ;
+
+  $fullskew_timing_check =
+       $fullskew ( timing_check_event , timing_check_event , expression , expression
+                          [ , [ identifier ] [ , [ expression ] [ , [ expression ] ] ] ] ) ;
+*/
+
+  period_timing_check =
+       {p0} k_speriod t_lparen timing_check_event [c0]: t_comma expression t_rparen t_semicolon |
+       {p1} k_speriod t_lparen timing_check_event [c0]: t_comma expression [c1]: t_comma identifier? t_rparen t_semicolon
+ ;
+
+  width_timing_check =
+       {p0} k_swidth t_lparen timing_check_event [c0]: t_comma expression t_rparen t_semicolon |
+       {p1} k_swidth t_lparen timing_check_event [c0]: t_comma [x0]: expression [c1]: t_comma [x1]: expression t_rparen t_semicolon |
+       {p2} k_swidth t_lparen timing_check_event [c0]: t_comma [x0]: expression [c1]: t_comma [x1]: expression [c2]: t_comma identifier t_rparen t_semicolon 
+  ;
+
+  nochange_timing_check =
+       {p0} k_snochange t_lparen [e0]: timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma [x0]: mintypmax_expression [c2]: t_comma [x1]: mintypmax_expression t_rparen t_semicolon |
+       {p1} k_snochange t_lparen [e0]: timing_check_event [c0]: t_comma [e1]: timing_check_event [c1]: t_comma [x0]: mintypmax_expression [c2]: t_comma [x1]: mintypmax_expression [c3]: t_comma identifier? t_rparen t_semicolon
+  ;
+
+  // A.7.5.2 System timing check command arguments
+
+  delayed_data = 
+    {p0} identifier |
+    {p1} identifier t_lbracket mintypmax_expression t_rbracket
+  ;
+
+  delayed_reference = 
+    {p0} identifier |
+    {p1} identifier t_lbracket mintypmax_expression t_rbracket
+  ;
+
+  // A.7.5.3 System timing check event definitions
+
+  timing_check_event =
+        {p0} timing_check_event_control? specify_terminal_descriptor |
+        {p1} timing_check_event_control? specify_terminal_descriptor t_tand timing_check_condition
+  ;
+
+/*
+  controlled_timing_check_event =
+        timing_check_event_control specify_terminal_descriptor [ &&& timing_check_condition ]
+*/
+
+  timing_check_event_control =
+      {p0}  k_posedge |
+      {p1}  k_negedge |
+      {p2}  edge_control_specifier
+  ;
+
+  edge_control_specifier =  k_edge t_lbracket t_edge_descriptor edge_control_specifier_rep* t_rbracket ;
+
+  edge_control_specifier_rep = t_comma t_edge_descriptor;
+
+  timing_check_condition = expression ;
+
+/*
+  timing_check_condition =
+        scalar_timing_check_condition
+      | ( scalar_timing_check_condition )
+
+  scalar_timing_check_condition =
+       expression
+     | ~ expression
+     | expression == scalar_constant
+     | expression === scalar_constant
+     | expression != scalar_constant
+     | expression !== scalar_constant
+
+  scalar_constant =
+       1'b0 | 1'b1 | 1'B0 | 1'B1 | 'b0 | 'b1 | 'B0 | 'B1 | 1 | 0
+*/
 
   // A.8 Expressions
   

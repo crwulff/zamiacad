@@ -2014,6 +2014,11 @@ public class AnalysisAdapter implements Analysis
         defaultCase(node);
     }
 
+    public void caseAP4SpecifyItem(AP4SpecifyItem node)
+    {
+        defaultCase(node);
+    }
+
     public void caseAP0PulsestyleDeclaration(AP0PulsestyleDeclaration node)
     {
         defaultCase(node);
@@ -2150,6 +2155,181 @@ public class AnalysisAdapter implements Analysis
     }
 
     public void caseAP2StateDependentPathDeclaration(AP2StateDependentPathDeclaration node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0SystemTimingCheck(AP0SystemTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1SystemTimingCheck(AP1SystemTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP2SystemTimingCheck(AP2SystemTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP9SystemTimingCheck(AP9SystemTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP10SystemTimingCheck(AP10SystemTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP11SystemTimingCheck(AP11SystemTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0SetupTimingCheck(AP0SetupTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1SetupTimingCheck(AP1SetupTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0HoldTimingCheck(AP0HoldTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1HoldTimingCheck(AP1HoldTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0SetupholdTimingCheck(AP0SetupholdTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1SetupholdTimingCheck(AP1SetupholdTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP2SetupholdTimingCheck(AP2SetupholdTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP3SetupholdTimingCheck(AP3SetupholdTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP4SetupholdTimingCheck(AP4SetupholdTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP5SetupholdTimingCheck(AP5SetupholdTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0PeriodTimingCheck(AP0PeriodTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1PeriodTimingCheck(AP1PeriodTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0WidthTimingCheck(AP0WidthTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1WidthTimingCheck(AP1WidthTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP2WidthTimingCheck(AP2WidthTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0NochangeTimingCheck(AP0NochangeTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1NochangeTimingCheck(AP1NochangeTimingCheck node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0DelayedData(AP0DelayedData node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1DelayedData(AP1DelayedData node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0DelayedReference(AP0DelayedReference node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1DelayedReference(AP1DelayedReference node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0TimingCheckEvent(AP0TimingCheckEvent node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1TimingCheckEvent(AP1TimingCheckEvent node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP0TimingCheckEventControl(AP0TimingCheckEventControl node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP1TimingCheckEventControl(AP1TimingCheckEventControl node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAP2TimingCheckEventControl(AP2TimingCheckEventControl node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAEdgeControlSpecifier(AEdgeControlSpecifier node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseAEdgeControlSpecifierRep(AEdgeControlSpecifierRep node)
+    {
+        defaultCase(node);
+    }
+
+    public void caseATimingCheckCondition(ATimingCheckCondition node)
     {
         defaultCase(node);
     }
