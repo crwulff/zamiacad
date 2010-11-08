@@ -138,9 +138,11 @@ public class IGSimRef implements IGISimulator {
 
 			fSimulationTime = rl.getTime();
 
-			logger.debug("Simulator: *************************************************");
-			logger.debug("Simulator: ** Simulation time is now %5d ns			**", fSimulationTime.divide(MLN_FS));
-			logger.debug("Simulator: *************************************************");
+			int nanos = fSimulationTime.divide(MLN_FS).intValue();
+			
+			logger.debug("IGSimRef: *************************************************");
+			logger.debug("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
+			logger.debug("IGSimRef: *************************************************");
 
 			fSimSchedule.removeFirst();
 

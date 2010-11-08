@@ -45,4 +45,8 @@ public class IGSimContext extends IGInterpreterContext {
 		return getCurrentValue(aDBID);
 	}
 
+	
+	public PathName getPath() {
+		return fPath;
+	}
 }

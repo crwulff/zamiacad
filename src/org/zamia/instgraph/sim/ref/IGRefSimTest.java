@@ -33,7 +33,7 @@ public class IGRefSimTest extends TestCase {
 
 	public final static boolean enableFCounterTest = true;
 
-	public final static boolean enableCOUNTERGTest = true;
+	public final static boolean enableGCOUNTERTest = true;
 
 	public final static boolean enablePartialSATest = true;
 
@@ -107,9 +107,9 @@ public class IGRefSimTest extends TestCase {
 		runTest(aTestDir, "BuildPath.txt", aNumNodes, aNanos);
 	}
 
-	public void testCounterG() throws Exception {
+	public void testGCounter() throws Exception {
 
-		if (!enableCOUNTERGTest) {
+		if (!enableGCOUNTERTest) {
 			fail("Test disabled");
 			return;
 		}
@@ -165,7 +165,7 @@ public class IGRefSimTest extends TestCase {
 		try {
 			//			igt.testFCounter();
 
-			igt.testCounterG();
+			igt.testGCounter();
 			//			igt.testPlasmaAlu();
 			//			igt.testPartialSignalAssignment();
 		} catch (Exception e) {

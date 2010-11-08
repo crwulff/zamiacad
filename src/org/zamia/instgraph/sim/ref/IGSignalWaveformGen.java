@@ -12,7 +12,9 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashSet;
 
+import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaException;
+import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGTypeStatic;
@@ -30,6 +32,10 @@ import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
  */
 
 public class IGSignalWaveformGen {
+
+	protected final static ZamiaLogger logger = ZamiaLogger.getInstance();
+
+	protected final static ExceptionLogger el = ExceptionLogger.getInstance();
 
 	private IGObject fSignal;
 
@@ -63,6 +69,18 @@ public class IGSignalWaveformGen {
 	public void commit() throws ZamiaException {
 		if (fNextValue != null) {
 			fContext.setObjectValue(fIO, fNextValue, null);
+			
+			String signalPath;
+			
+			if (fContext instanceof IGSimContext) {
+				IGSimContext sc = (IGSimContext) fContext;
+				signalPath = sc.getPath().toString() + "." + fSignal.getId();
+			} else {
+				signalPath = fSignal.toString();
+			}
+			
+			logger.debug ("IGSimRef: IGSignalWaveformGen: commit(): setting %s to %s", signalPath, fNextValue);
+			
 			fNextValue = null;
 		}
 	}
