@@ -17,6 +17,7 @@ import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
+import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
 
 
@@ -58,7 +59,7 @@ public class IGInterpreterContext implements Serializable {
 			} else {
 
 				IGTypeStatic oT = aObject.getStaticType();
-				if (!oT.isUnconstrained()) {
+				if (!oT.isUnconstrained() && oT.getCat() != IGType.TypeCat.FILE  && oT.getCat() != IGType.TypeCat.ACCESS) {
 
 					IGTypeStatic oIdxT = oT.getStaticIndexType(null);
 					IGTypeStatic idxT = t.getStaticIndexType(null);

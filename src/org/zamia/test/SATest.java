@@ -1,5 +1,5 @@
 /* 
- * Copyright 2006-2009 by the authors indicated in the @author tags. 
+ * Copyright 2006-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -163,9 +163,7 @@ public class SATest extends TestCase {
 	public void testLeonIGReferenceSearch() throws Exception {
 		setupTest("test/leonExtern", "test/leonExtern/BuildPath.txt");
 
-		String homePath = System.getProperty("user.home");
-
-		File f = new File(homePath + File.separator + "projects/workspace/zamia/examples/leonSOC/lib/gaisler/greth/grethm.vhd").getCanonicalFile();
+		File f = new File("examples/leonSOC/lib/gaisler/greth/grethm.vhd").getCanonicalFile();
 
 		SourceFile sf = new SourceFile(f);
 

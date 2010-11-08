@@ -59,7 +59,7 @@ public class IGOperationAttribute extends IGOperation {
 			aCode.add(new IGPushStmt((IGObject) fItem, computeSourceLocation(), getZDB()));
 		}
 
-		aCode.add(new IGAttributeStmt(getType(), fAttrOp, fOp != null, computeSourceLocation(), getZDB()));
+		aCode.add(new IGAttributeStmt(fItem, getType(), fAttrOp, fOp != null, computeSourceLocation(), getZDB()));
 
 	}
 

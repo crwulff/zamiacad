@@ -189,8 +189,8 @@ public class IGTest extends TestCase {
 		return aZPrj.getDUM().getArchDUUID(tl.getDUUID());
 	}
 
-	private void runTest(String aTestDir, int aNumNodes) throws Exception {
-		setupTest(aTestDir, aTestDir + "/BuildPath.txt");
+	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes) throws Exception {
+		setupTest(aTestDir, aTestDir + File.separator + aBuildPathName);
 
 		ZamiaProjectBuilder builder = fZPrj.getBuilder();
 
@@ -211,6 +211,10 @@ public class IGTest extends TestCase {
 		n = fZPrj.getIGM().countNodes(duuid);
 		logger.info("IGTest: elaborated model for %s has %d unique modules.", duuid, n);
 		assertEquals(aNumNodes, n);
+	}
+
+	private void runTest(String aTestDir, int aNumNodes) throws Exception {
+		runTest(aTestDir, "BuildPath.txt", aNumNodes);
 	}
 
 	@Override
@@ -243,6 +247,45 @@ public class IGTest extends TestCase {
 	//		runTest("test/semantic/psl6Test", 1);
 	//	}
 
+	public void testPG99Z48() throws Exception {
+
+		if (!enablePG99Test) {
+			fail("Test disabled");
+			return;
+		}
+
+		runTest("examples/pg99", "BuildPath_z48_tb.txt", 11);
+	}
+
+	public void testPG99() throws Exception {
+
+		if (!enablePG99Test) {
+			fail("Test disabled");
+			return;
+		}
+
+		runTest("examples/pg99", 1866);
+	}
+
+	public void testJOP() throws Exception {
+
+		if (!enableJOPTest) {
+			fail("Test disabled");
+			return;
+		}
+
+		runTest("examples/jop", 288);
+	}
+
+	public void testBP() throws Exception {
+
+		if (!enableBPTest) {
+			fail("Test disabled");
+			return;
+		}
+		runTest("test/semantic/bpTest", 1913);
+	}
+
 	public void testManik() throws Exception {
 
 		if (!enableManikTest) {
@@ -251,6 +294,16 @@ public class IGTest extends TestCase {
 		}
 
 		runTest("examples/manik", 3257);
+	}
+
+	public void testLeonExtern() throws Exception {
+
+		if (!enableLeonExternTest) {
+			fail("Test disabled");
+			return;
+		}
+
+		runTest("test/leonExtern", 1913);
 	}
 
 	public void testLiteral5() throws Exception {
@@ -311,26 +364,6 @@ public class IGTest extends TestCase {
 		}
 
 		runTest("examples/leonSOC", 1913);
-	}
-
-	public void testLeonExtern() throws Exception {
-
-		if (!enableLeonExternTest) {
-			fail("Test disabled");
-			return;
-		}
-
-		runTest("test/leonExtern", 1913);
-	}
-
-	public void testBP() throws Exception {
-
-		if (!enableBPTest) {
-			fail("Test disabled");
-			return;
-		}
-
-		runTest("test/semantic/bpTest", 1913);
 	}
 
 	public void testConcat6() throws Exception {
@@ -697,16 +730,6 @@ public class IGTest extends TestCase {
 		runTest("test/semantic/blockTest", 2);
 	}
 
-	public void testPG99() throws Exception {
-
-		if (!enablePG99Test) {
-			fail("Test disabled");
-			return;
-		}
-
-		runTest("examples/pg99", 1866);
-	}
-
 	public void testMM() throws Exception {
 
 		File f = new File("examples/gooofy/BuildPath.txt");
@@ -761,16 +784,6 @@ public class IGTest extends TestCase {
 		}
 
 		runTest("examples/itc99", 1);
-	}
-
-	public void testJOP() throws Exception {
-
-		if (!enableJOPTest) {
-			fail("Test disabled");
-			return;
-		}
-
-		runTest("examples/jop", 288);
 	}
 
 	public void testDLX() throws Exception {

@@ -83,6 +83,13 @@ public class IGProcess extends IGConcurrentStatement {
 		}
 
 		fSOS.add(new IGSequentialWait(null, null, sensSignals, null, null, getZDB()));
+
+		appendRestart();
+	}
+
+	public void appendRestart() {
+		// Make process loop (run from WAIT stmt to WAIT stmt)
+		fSOS.add(new IGSequentialRestart(null, null, getZDB()));
 	}
 
 	@Override

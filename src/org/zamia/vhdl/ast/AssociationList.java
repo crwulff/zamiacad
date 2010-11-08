@@ -207,7 +207,7 @@ public class AssociationList extends VHDLNode {
 					}
 				}
 
-				mapping = new IGMapping(new IGOperationObject(interf, null, aActualEE.getZDB()), actualObj, actual.getLocation(), aFormalEE.getZDB());
+				mapping = new IGMapping(new IGOperationObject(interf, interf.computeSourceLocation(), aActualEE.getZDB()), actualObj, actual.getLocation(), aFormalEE.getZDB());
 
 				res.addMapping(mapping, score);
 

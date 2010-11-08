@@ -40,7 +40,7 @@ use ieee.numeric_std.all;
 
 use work.jop_types.all;
 
-entity scio is
+entity scio_test is
 generic (addr_bits : integer);
 
 port (
@@ -56,9 +56,9 @@ port (
 	rdy_cnt		: out unsigned(1 downto 0)
 
 );
-end scio;
+end scio_test;
 
-architecture rtl of scio is
+architecture rtl of scio_test is
 
 	constant SLAVE_CNT : integer := 4;
 	-- SLAVE_CNT <= 2**DECODE_BITS

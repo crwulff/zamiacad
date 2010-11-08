@@ -44,7 +44,7 @@ public class IGScheduleEventWakeupStmt extends IGStmt {
 
 		aRuntime.scheduleWakeup(obj, computeSourceLocation());
 
-		return ReturnStatus.WAIT;
+		return ReturnStatus.CONTINUE;
 	}
 
 	@Override
