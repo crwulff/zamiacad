@@ -53,10 +53,10 @@ public class VerilogParserTest extends TestCase {
 	public void testLeonVerilog() throws ParserException, LexerException, IOException {
 		compile("test/verilog/misc/ahb2wb.v");
 		compile("test/verilog/misc/ata_device_oc.v");
-//		compile("test/verilog/misc/i2c_slave_model.v");
-//		compile("test/verilog/misc/postponer.v");
-//		compile("test/verilog/misc/simple_spi_top.v");
-//		compile("test/verilog/misc/spi_slave_model.v");
+		compile("test/verilog/misc/i2c_slave_model.v");
+		compile("test/verilog/misc/postponer.v");
+		compile("test/verilog/misc/simple_spi_top.v");
+		compile("test/verilog/misc/spi_slave_model.v");
 	}
 
 	public void testDDR2() throws ParserException, LexerException, IOException {
