@@ -24,6 +24,7 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
 import org.zamia.instgraph.IGManager;
+import org.zamia.util.Native;
 import org.zamia.util.ZamiaTmpDir;
 import org.zamia.vhdl.ast.DMUID;
 
@@ -128,7 +129,7 @@ public class FSCacheTest extends TestCase {
 
 		f.setReadable(false);
 
-		checkList(f.getAbsolutePath(), false);
+		checkList(f.getAbsolutePath(), Native.isWindows() ? true : false);
 
 		f.setReadable(true);
 

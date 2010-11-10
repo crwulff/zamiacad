@@ -20,11 +20,6 @@
 	<configuration>
 	  <source>1.6</source>
 	  <target>1.6</target>
-              <excludes>
-                <exclude>**/org.zamia/plugin/**</exclude>
-                <exclude>**/org.zamia/instgraph/sim/aet/**</exclude>
-                <exclude>**/org.zamia/rtl/sim/aet/**</exclude>
-              </excludes>
 	</configuration>
       </plugin>
       <plugin>
@@ -73,20 +68,6 @@
       <artifactId>commons-cli</artifactId>
       <version>1.2</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>jacl</groupId>
-      <artifactId>jacl</artifactId>
-      <version>1.4.1</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/share/jars/jacl.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>tcljava</groupId>
-      <artifactId>tcljava</artifactId>
-      <version>1.4.1</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/share/jars/tcljava.jar</systemPath>
     </dependency>
     <dependency>
         <groupId>jline</groupId>
