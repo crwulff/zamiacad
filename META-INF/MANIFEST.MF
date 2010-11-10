@@ -4,7 +4,7 @@ Bundle-Name: ZamiaCAD
 Bundle-SymbolicName: org.zamia.cad;singleton:=true
 Bundle-Version: 0.9.7.alpha1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
-Bundle-Vendor: JAVAWORLD
+Bundle-Vendor: ZamiaCAD Project
 Bundle-Localization: plugin
 Import-Package: org.osgi.framework;version="1.3.0"
 Export-Package: org.zamia,
