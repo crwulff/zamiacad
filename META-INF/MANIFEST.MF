@@ -30,11 +30,9 @@ Bundle-ClassPath: bin/,
  share/,
  share/jars/commons-cli-1.0.jar,
  share/jars/commons-logging-1.0.4.jar,
- share/jars/jacl.jar,
  share/jars/jakarta-oro-2.0.8.jar,
  share/jars/jline.jar,
  share/jars/junit.jar,
  share/jars/log4j-1.2.14.jar,
- share/jars/log5j-1.2.jar,
- share/jars/tcljava.jar
+ share/jars/log5j-1.2.jar
 
