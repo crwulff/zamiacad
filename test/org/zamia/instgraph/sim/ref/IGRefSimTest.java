@@ -134,4 +134,9 @@ public class IGRefSimTest {
 
 		runTest("examples/pg99", "BuildPath_z48_tb.txt", 11, 10000);
 	}
+	@Test
+	public void testPlasma() throws Exception {
+
+		runTest("examples/plasma", "BuildPathTbench.txt", 19, 0);
+	}
 }

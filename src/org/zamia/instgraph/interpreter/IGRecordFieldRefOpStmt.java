@@ -34,8 +34,19 @@ public class IGRecordFieldRefOpStmt extends IGStmt {
 
 	@Override
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
-		// FIXME
-		throw new ZamiaException("Sorry, not implemented yet.");
+
+		IGStackFrame sf = aRuntime.pop();
+
+		IGObjectWriter writer = sf.getObjectWriter();
+		if (writer == null) {
+			return ReturnStatus.ERROR;
+		}
+
+		writer = new IGObjectWriter(writer, fRF, computeSourceLocation());
+
+		aRuntime.push(writer);
+
+		return ReturnStatus.CONTINUE;
 	}
 
 	@Override
