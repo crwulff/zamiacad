@@ -1,5 +1,8 @@
 #!/bin/sh
 
+rm -rf work
+mkdir work
+
 ghdl -i --work=work --workdir=work alu_tb.vhd
 ghdl -i --work=work --workdir=work alu.vhd
 ghdl -i --work=work --workdir=work bus_mux.vhd
@@ -14,11 +17,13 @@ ghdl -i --work=work --workdir=work mult.vhd
 ghdl -i --work=work --workdir=work pc_next.vhd
 ghdl -i --work=work --workdir=work pipeline.vhd
 ghdl -i --work=work --workdir=work plasma.vhd
-ghdl -i --work=work --workdir=work ram.vhd
 ghdl -i --work=work --workdir=work reg_bank.vhd
 ghdl -i --work=work --workdir=work shifter.vhd
 ghdl -i --work=work --workdir=work uart.vhd
+ghdl -i --work=work --workdir=work tbench.vhd
+ghdl -i --work=work --workdir=work sram2mlite.vhd
+ghdl -i --work=work --workdir=work ram.vhd
 
-ghdl -m --ieee=synopsys -fexplicit --workdir=work -Pwork cpu_tb
-ghdl -e --ieee=synopsys -fexplicit --workdir=work -Pwork cpu_tb
-ghdl -r cpu_tb --vcd=cpu_tb.vcd --stop-time=10000ns
+ghdl -m --ieee=synopsys -fexplicit --workdir=work -Pwork tbench
+ghdl -e --ieee=synopsys -fexplicit --workdir=work -Pwork tbench
+ghdl -r tbench --vcd=tbench.vcd --stop-time=100000ns

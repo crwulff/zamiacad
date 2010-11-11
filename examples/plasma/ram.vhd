@@ -52,20 +52,7 @@ begin
          array(natural range 0 to mem_size/4 - 1) of word;
       variable storage : storage_array;
       variable index : natural := 0;
-      file load_file : text is in "code.txt";
-      variable hex_file_line : line;
    begin
-      --load in the ram executable image
-      if index = 0 then
-         while not endfile(load_file) loop
---The following two lines had to be commented out for synthesis
-            readline(load_file, hex_file_line);
-            hread(hex_file_line, data);
-            storage(index) := data;
-            index := index + 1;
-         end loop;
-      end if;
-
       index := conv_integer(mem_address(ADDRESS_WIDTH-1 downto 2));
       data := storage(index);
 
