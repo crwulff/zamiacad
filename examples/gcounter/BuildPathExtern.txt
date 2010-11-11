@@ -1,0 +1,5 @@
+SRC="examples/gcounter"
+
+extern readonly WORK "$SRC"
+
+toplevel COUNTER_TB

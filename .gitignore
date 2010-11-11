@@ -4,7 +4,7 @@ syntax: glob
 *.du
 du.db
 ZDB
-test/vests
+examples/vests
 examples/hapra
 examples/n68
 examples/gooofy

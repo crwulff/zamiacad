@@ -1,5 +1,0 @@
-SRC="$HOME/projects/workspace/zamia/test/gcounter"
-
-extern readonly WORK "$SRC"
-
-toplevel COUNTER_TB

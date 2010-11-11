@@ -1,0 +1,4 @@
+extern readonly WORK "examples/add4"
+
+toplevel ADD4
+

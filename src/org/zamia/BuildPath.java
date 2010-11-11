@@ -508,7 +508,7 @@ public class BuildPath implements Serializable {
 
 		if (fSym != Symbol.STRING)
 			throw new ZamiaException("pathPrefix expected.", getLocation());
-		String pathPrefix = evalString(fBuf.toString());
+		String pathPrefix = evalString(fBuf.toString()).replace('/', File.separatorChar).replace('\\', File.separatorChar);
 		nextSym();
 
 		if (!pathPrefix.endsWith(File.separator)) {
