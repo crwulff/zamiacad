@@ -148,14 +148,11 @@ public class FSCache {
 			for (int i = 0; i < files.length; i++) {
 
 				BufferedReader in = null;
+				String path = null;
 				try {
 					in = new BufferedReader(new FileReader(files[i]));
 
-					String path = in.readLine();
-
-					if (path == null || path.startsWith(aPathPrefix) || aPathPrefix.startsWith(path)) {
-						files[i].delete();
-					}
+					path = in.readLine();
 
 				} catch (IOException e) {
 					el.logException(e);
@@ -167,6 +164,10 @@ public class FSCache {
 							el.logException(e);
 						}
 					}
+				}
+
+				if (path == null || path.startsWith(aPathPrefix) || aPathPrefix.startsWith(path)) {
+					files[i].delete();
 				}
 			}
 		} finally {
