@@ -139,4 +139,14 @@ public class IGRefSimTest {
 
 		runTest("examples/plasma", "BuildPathTbench.txt", 19, 0);
 	}
+	@Test
+	public void testRisingEdge() throws Exception {
+
+		runTest("examples/gcounter", "BuildPathRisingEdge.txt", 19, 152);
+	}
+	@Test
+	public void testEntityInst() throws Exception {
+
+		runTest("examples/gcounter", "BuildPathEntityInst.txt", 2, 152);
+	}
 }

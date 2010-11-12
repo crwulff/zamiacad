@@ -1,0 +1,2 @@
+toplevel COUNTER_TB_RISING_EDGE
+
