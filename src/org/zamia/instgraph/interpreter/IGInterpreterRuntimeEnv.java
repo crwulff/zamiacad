@@ -1,5 +1,5 @@
 /* 
- * Copyright 2008-2009 by the authors indicated in the @author tags. 
+ * Copyright 2008-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -26,7 +26,6 @@ import org.zamia.instgraph.sim.ref.IGSignalChange;
 import org.zamia.util.ZStack;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * Stack, PC and Variable contexts for executing InterpreterCode
@@ -141,7 +140,7 @@ public class IGInterpreterRuntimeEnv {
 			if (code != null) {
 				code.dumpToLogger(pc);
 			} else {
-				logger.debug ("Interpreter: code == null.");
+				logger.debug("Interpreter: code == null.");
 			}
 
 			if (code == null || pc < 0 || pc >= code.getNumStmts()) {
@@ -241,7 +240,7 @@ public class IGInterpreterRuntimeEnv {
 		IGInterpreterContext context = fContexts.peek();
 
 		IGTypeStatic type = aObj.getType().computeStaticType(this, ASTErrorMode.EXCEPTION, null);
-		
+
 		if (type.isError()) {
 			return;
 		}

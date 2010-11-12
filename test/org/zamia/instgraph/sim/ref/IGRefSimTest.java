@@ -100,6 +100,13 @@ public class IGRefSimTest {
 	}
 
 	@Test
+	public void testHexLiteral() throws Exception {
+
+		runTest("examples/refsim/hexLiteral", 1, 100);
+
+	}
+	
+	@Test
 	public void testGCounter() throws Exception {
 
 		runTest("examples/gcounter", 19, 152);

@@ -17,23 +17,21 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite.RefType;
-import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
+import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationBinary;
+import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGOperationPhi;
 import org.zamia.instgraph.IGRange;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGType;
-import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.zdb.ZDB;
-import org.zamia.zil.ZILValue;
-
 
 /**
  * 
@@ -248,7 +246,31 @@ public class OperationLiteral extends Operation {
 
 			if ((c != '"') && (c != '_')) {
 				int n = c - '0';
-				buf.append(ZILValue.convert(n, bitsPerChar));
+
+				switch (c) {
+				case 'A':
+					n = 10;
+					break;
+				case 'B':
+					n = 11;
+					break;
+				case 'C':
+					n = 12;
+					break;
+				case 'D':
+					n = 13;
+					break;
+				case 'E':
+					n = 14;
+					break;
+				case 'F':
+					n = 15;
+					break;
+				default:
+					n = c - '0';
+				}
+
+				buf.append(IGStaticValue.convert(n, bitsPerChar));
 			}
 		}
 
@@ -350,7 +372,7 @@ public class OperationLiteral extends Operation {
 			}
 
 			IGOperation right;
-			
+
 			if (ascending instanceof IGStaticValue) {
 
 				IGStaticValue sAscending = (IGStaticValue) ascending;
@@ -359,7 +381,7 @@ public class OperationLiteral extends Operation {
 				} else {
 					right = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
 				}
-				
+
 			} else {
 				IGOperation rightAsc = new IGOperationBinary(left, length, BinOp.ADD, it, getLocation(), zdb).optimize(env);
 				IGOperation rightDesc = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
@@ -506,7 +528,7 @@ public class OperationLiteral extends Operation {
 				} else {
 					right = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
 				}
-				
+
 			} else {
 				IGOperation rightAsc = new IGOperationBinary(left, length, BinOp.ADD, it, getLocation(), zdb).optimize(env);
 				IGOperation rightDesc = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
