@@ -312,7 +312,8 @@ begin
 
   process(clk)
   begin
-    if rising_edge(clk) then
+    -- FIXME: original: if rising_edge(clk) then
+    if clk'event and clk='1' then
       r <= rin;
     end if;
   end process;
