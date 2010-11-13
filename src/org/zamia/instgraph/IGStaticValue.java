@@ -1458,20 +1458,6 @@ public class IGStaticValue extends IGOperation {
 		return v;
 	}
 
-	private boolean isSTAscending(IGTypeStatic aType) {
-		if (!aType.isArray()) {
-			return true;
-		}
-		
-		try {
-			return aType.getStaticIndexType(null).isAscending();
-		} catch (ZamiaException e) {
-			el.logException(e);
-		}
-		
-		return true;
-	}
-	
 	public String toHexString() {
 
 		
