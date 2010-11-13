@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -40,5 +40,10 @@ public class IGInterpreterObject {
 
 	public long getDBID() {
 		return fObject.getDBID();
+	}
+	
+	@Override
+	public String toString() {
+		return fObject.toString();
 	}
 }

@@ -62,7 +62,7 @@ public class IGArrayAggregateStmt extends IGOpStmt {
 
 			if (fHaveOthers) {
 
-				logger.error("IGArratAggregateStmt: Internal error, array is unconstrained and others value is given!");
+				logger.error("IGArrayAggregateStmt: Internal error, array is unconstrained and others value is given!");
 
 				offset++;
 			}
