@@ -888,7 +888,7 @@ public class IGStaticValue extends IGOperation {
 					return aResType.getEnumLiteral(1, aSrc, aErrorMode, aReport); // different lengths => true
 				}
 				for (int i = 0; i < c1; i++) {
-					if (aA.getValue(i + aA.getArrayOffset(), aSrc) != aB.getValue(i + aB.getArrayOffset(), aSrc)) {
+					if (!aA.getValue(i + aA.getArrayOffset(), aSrc).equalsValue(aB.getValue(i + aB.getArrayOffset(), aSrc))) {
 						return aResType.getEnumLiteral(1, aSrc, aErrorMode, aReport); // true
 					}
 				}
