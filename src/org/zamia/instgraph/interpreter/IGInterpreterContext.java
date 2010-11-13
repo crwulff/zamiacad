@@ -20,7 +20,6 @@ import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
 
-
 /*
 *
  * 
@@ -38,6 +37,10 @@ public class IGInterpreterContext implements Serializable {
 
 	private HashMap<IGOperationLiteral, IGStaticValue> fCachedLiterals = new HashMap<IGOperationLiteral, IGStaticValue>();
 
+	private static int counter = 0;
+
+	private final int fCnt = counter++;
+
 	public IGInterpreterContext() {
 
 	}
@@ -54,12 +57,10 @@ public class IGInterpreterContext implements Serializable {
 		IGTypeStatic t = value.getStaticType();
 		if (t.isArray()) {
 
-			if (t.isUnconstrained()) {
-				logger.warn("IGInterpreterRuntime: Warning: setting %s to an unconstrained array value: %s", aObject, aValue);
-			} else {
+			if (!t.isUnconstrained()) {
 
 				IGTypeStatic oT = aObject.getStaticType();
-				if (!oT.isUnconstrained() && oT.getCat() != IGType.TypeCat.FILE  && oT.getCat() != IGType.TypeCat.ACCESS) {
+				if (!oT.isUnconstrained() && oT.getCat() != IGType.TypeCat.FILE && oT.getCat() != IGType.TypeCat.ACCESS) {
 
 					IGTypeStatic oIdxT = oT.getStaticIndexType(null);
 					IGTypeStatic idxT = t.getStaticIndexType(null);
@@ -125,4 +126,10 @@ public class IGInterpreterContext implements Serializable {
 			}
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "IGInterpreterContext(cnt=" + fCnt + ")";
+	}
+
 }

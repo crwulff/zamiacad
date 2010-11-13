@@ -91,9 +91,9 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 			}
 			
 			IGObject obj = (IGObject) item;
-			if (obj.getInitialValue() == null) {
-				continue;
-			}
+//			if (obj.getInitialValue() == null) {
+//				continue;
+//			}
 			if (obj.getDirection() == OIDir.NONE) {
 				continue;
 			}
@@ -108,6 +108,27 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 			mapping.generateEntryCode(false, aCode, computeSourceLocation());
 		}
 
+		// create and init local variables
+		
+		n = subContainer.getNumLocalItems();
+		for (int i = 0; i < n; i++) {
+			
+			IGContainerItem item = subContainer.getLocalItem(i);
+			
+			if (!(item instanceof IGObject)) {
+				continue;
+			}
+			
+			IGObject obj = (IGObject) item;
+//			if (obj.getInitialValue() == null) {
+//				continue;
+//			}
+			if (obj.getDirection() != OIDir.NONE) {
+				continue;
+			}
+			aCode.add(new IGNewObjectStmt(obj, computeSourceLocation(), getZDB()));
+		}
+		
 		aCode.add(new IGCallStmt(fSP, computeSourceLocation(), getZDB()));
 
 		n = fMappings.getNumMappings();
