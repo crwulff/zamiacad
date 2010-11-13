@@ -377,7 +377,7 @@ public class FSCacheTest {
 
 		logger.info("Leon IG has %d nodes.", nNodes);
 
-		assertEquals(1913, nNodes);
+		assertEquals(1933, nNodes);
 
 		// now, move the sources
 		File f = new File("examples/leonSOC");
@@ -405,7 +405,7 @@ public class FSCacheTest {
 
 		logger.info("Leon IG has %d nodes.", nNodes);
 
-		assertEquals(1913, nNodes);
+		assertEquals(1933, nNodes);
 
 		f2.renameTo(f);
 

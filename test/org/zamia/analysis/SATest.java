@@ -173,7 +173,7 @@ public class SATest {
 		ReferenceSearchResult result = runIGReferenceSearch(sf, "WORK.LEON3MP(RTL):ETH0.E1.M100", 84, 22, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
-		assertEquals(975, result.countRefs());
+		assertEquals(999, result.countRefs());
 
 		result = runIGReferenceSearch(sf, "WORK.LEON3MP(RTL):ETH0.E1.M100", 84, 17, true, true);
 		assertNotNull(result);
@@ -276,7 +276,7 @@ public class SATest {
 		assertNotNull("Failed to find completion proposals", ids);
 		assertEquals("Wrong number of completion proposals", 27, ids.size());
 
-		ids = runASTCompletion(sf, 315, 5);
+		ids = runASTCompletion(sf, 316, 5);
 		assertNotNull("Failed to find completion proposals", ids);
 		assertEquals("Wrong number of completion proposals", 21, ids.size());
 
@@ -359,10 +359,10 @@ public class SATest {
 
 		SourceFile sf = new SourceFile(new File("examples/plasma/uart.vhd"));
 
-		ReferenceSearchResult result = runASTReferenceSearch(sf, 315, 20, true, true);
+		ReferenceSearchResult result = runASTReferenceSearch(sf, 316, 9, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
-		assertEquals(29, result.countRefs());
+		assertEquals(30, result.countRefs());
 
 		result = runASTReferenceSearch(sf, 228, 13, true, true);
 		assertNotNull(result);

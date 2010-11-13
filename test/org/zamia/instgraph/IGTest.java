@@ -133,7 +133,7 @@ public class IGTest {
 	@Test
 	public void testBP() throws Exception {
 
-		runTest("examples/semantic/bpTest", 1913);
+		runTest("examples/semantic/bpTest", 1933);
 	}
 
 	@Test
@@ -145,7 +145,7 @@ public class IGTest {
 	@Test
 	public void testLeonExtern() throws Exception {
 
-		runTest("examples/leonExtern", 1913);
+		runTest("examples/leonExtern", 1933);
 	}
 
 	@Test
@@ -181,7 +181,7 @@ public class IGTest {
 	@Test
 	public void testLeon() throws Exception {
 
-		runTest("examples/leonSOC", 1913);
+		runTest("examples/leonSOC", 1933);
 	}
 
 	@Test
