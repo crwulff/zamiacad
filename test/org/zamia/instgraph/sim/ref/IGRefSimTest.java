@@ -100,10 +100,13 @@ public class IGRefSimTest {
 	}
 
 	@Test
+	public void testRisingEdge() throws Exception {
+		runTest("examples/refsim/params2", 1, 152);
+	}
+	
+	@Test
 	public void testParams1() throws Exception {
-
 		runTest("examples/refsim/params1", 1, 100);
-
 	}
 	
 	@Test
@@ -159,11 +162,6 @@ public class IGRefSimTest {
 	public void testPlasma() throws Exception {
 
 		runTest("examples/plasma", "BuildPathTbench.txt", 19, 0);
-	}
-	@Test
-	public void testRisingEdge() throws Exception {
-
-		runTest("examples/gcounter", "BuildPathRisingEdge.txt", 19, 152);
 	}
 	@Test
 	public void testEntityInst() throws Exception {
