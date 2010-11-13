@@ -100,6 +100,20 @@ public class IGRefSimTest {
 	}
 
 	@Test
+	public void testParams1() throws Exception {
+
+		runTest("examples/refsim/params1", 1, 100);
+
+	}
+	
+	@Test
+	public void testExpr1() throws Exception {
+
+		runTest("examples/refsim/expr1", 1, 100);
+
+	}
+	
+	@Test
 	public void testHexLiteral() throws Exception {
 
 		runTest("examples/refsim/hexLiteral", 1, 100);
