@@ -265,7 +265,7 @@ public class Block extends ConcurrentStatement {
 
 				IGMapping mapping = mappings.getMapping(i);
 
-				mapping.generateEntryCode(false, ic, getLocation());
+				mapping.generateInstantiationCode(false, ic, getLocation());
 
 				//inst.addGeneric(mapping);
 			}

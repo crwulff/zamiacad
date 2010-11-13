@@ -74,7 +74,7 @@ public class IGOperationPhi extends IGOperation {
 	}
 
 	@Override
-	public void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
+	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
 		throw new ZamiaException("Sorry, not implemented yet.");
 	}
 

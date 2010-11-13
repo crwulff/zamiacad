@@ -128,7 +128,7 @@ public class IGRange extends IGOperation {
 	}
 
 	@Override
-	public void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
+	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
 		// FIXME: implement?
 		throw new ZamiaException("Sorry, not implemented yet.");
 	}

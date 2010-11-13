@@ -99,7 +99,7 @@ public class IGOperationRecordAggregate extends IGOperation {
 	}
 
 	@Override
-	public void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
+	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
 		// FIXME
 		throw new ZamiaException("IGOperationRecordAggregate: generateCodeRef(): Sorry, not implemented yet.", computeSourceLocation());
 	}

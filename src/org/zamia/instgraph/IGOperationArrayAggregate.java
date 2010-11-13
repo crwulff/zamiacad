@@ -126,7 +126,7 @@ public class IGOperationArrayAggregate extends IGOperation {
 	}
 
 	@Override
-	public void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
+	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
 		// FIXME
 		throw new ZamiaException("Sorry, not implemented yet.");
 	}

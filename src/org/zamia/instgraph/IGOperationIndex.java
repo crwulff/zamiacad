@@ -64,11 +64,12 @@ public class IGOperationIndex extends IGOperation {
 	}
 
 	@Override
-	public void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		fOp.generateCodeRef(aFromInside, true, aCode);
+	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
+		IGObject obj = fOp.generateCodeRef(aFromInside, true, aCode);
 		fIdx.generateCode(aFromInside, aCode);
 
 		aCode.add(new IGIndexRefOpStmt(computeSourceLocation(), getZDB()));
+		return obj;
 	}
 
 	@Override

@@ -1259,7 +1259,7 @@ public class IGStaticValue extends IGOperation {
 	}
 
 	@Override
-	public void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
+	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
 		throw new ZamiaException("IGStaticValue: Cannot use static expressions as assignment targets.", computeSourceLocation());
 	}
 

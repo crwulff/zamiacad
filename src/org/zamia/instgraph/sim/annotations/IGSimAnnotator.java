@@ -198,7 +198,7 @@ public class IGSimAnnotator {
 
 				IGMapping mapping = struct.getMapping(j);
 
-				mapping.generateEntryCode(true, ic, mapping.computeSourceLocation());
+				mapping.generateInstantiationCode(true, ic, mapping.computeSourceLocation());
 			}
 
 			try {
@@ -238,7 +238,7 @@ public class IGSimAnnotator {
 
 					try {
 						IGMapping mapping = inst.getMapping(j);
-						mapping.generateEntryCode(true, ic, null);
+						mapping.generateInstantiationCode(true, ic, null);
 					} catch (Throwable t) {
 						el.logException(t);
 					}

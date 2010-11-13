@@ -10,8 +10,10 @@ package org.zamia.instgraph;
 
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
+import org.zamia.instgraph.interpreter.IGMapStmt;
 import org.zamia.instgraph.interpreter.IGPopStmt;
 import org.zamia.zdb.ZDB;
 
@@ -27,6 +29,7 @@ import java.util.Collection;
 public class IGMapping extends IGItem {
 
 	public static final String SYNCHRO_IN_ID = "_synchro_IN";
+
 	public static final String SYNCHRO_OUT_ID = "_synchro_OUT";
 
 	private IGOperation fFormal;
@@ -47,7 +50,10 @@ public class IGMapping extends IGItem {
 		return fActual;
 	}
 
-	public void generateEntryCode(boolean aIgnoreDir, IGInterpreterCode aIc, SourceLocation aSrc) throws ZamiaException {
+	/*
+	 * used for fake processes that handle instantiation mappings in simulator
+	 */
+	public void generateInstantiationCode(boolean aIgnoreDir, IGInterpreterCode aIc, SourceLocation aSrc) throws ZamiaException {
 
 		OIDir dir = fFormal.getDirection();
 
@@ -58,9 +64,28 @@ public class IGMapping extends IGItem {
 		}
 	}
 
-	@Override
-	public String toString() {
-		return "IGMapping(formal=" + fFormal + ", actual=" + fActual + ")";
+	/*
+	 * next two methods generate code which for subprogram entry and exit
+	 */
+
+	public void generateEntryCode(IGInterpreterCode aIc, SourceLocation aSrc) throws ZamiaException {
+
+		OIDir dir = fFormal.getDirection();
+
+		if (dir == OIDir.IN || dir == OIDir.INOUT) {
+			IGObject obj = fFormal.generateCodeRef(false, true, aIc);
+
+			fActual.generateCode(true, aIc);
+			
+			// take special care of signal parameters:
+			if (obj != null && obj.getCat() == IGObjectCat.SIGNAL) {
+				
+				aIc.add(new IGMapStmt(aSrc, getZDB()));
+			} else {
+				aIc.add(new IGPopStmt(false, false, false, aSrc, getZDB()));
+			}
+			
+		}
 	}
 
 	public void generateExitCode(IGInterpreterCode aCode, SourceLocation aSrc) throws ZamiaException {
@@ -72,6 +97,11 @@ public class IGMapping extends IGItem {
 			fFormal.generateCode(false, aCode);
 			aCode.add(new IGPopStmt(false, false, false, aSrc, getZDB()));
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "IGMapping(formal=" + fFormal + ", actual=" + fActual + ")";
 	}
 
 	@Override

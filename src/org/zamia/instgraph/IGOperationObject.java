@@ -45,7 +45,7 @@ public class IGOperationObject extends IGOperation {
 	}
 
 	@Override
-	public void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
+	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
 
 		IGObject obj = getObject();
 
@@ -68,6 +68,8 @@ public class IGOperationObject extends IGOperation {
 		}
 
 		aCode.add(new IGPushRefStmt(getObject(), computeSourceLocation(), getZDB()));
+		
+		return obj;
 	}
 
 	@Override

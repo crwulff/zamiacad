@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2009 by the authors indicated in the @author tags.
+ * Copyright 2005-2010 by the authors indicated in the @author tags.
  * All rights reserved.
  *
  * See the LICENSE file for details.
@@ -14,7 +14,6 @@ import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * 
@@ -58,16 +57,15 @@ public class IGPopStmt extends IGStmt {
 			delay = aRuntime.pop().getValue();
 		}
 
-		IGStaticValue v = aRuntime.pop().getValue();
+		IGStackFrame valueSF = aRuntime.pop();
 
 		IGStackFrame targetSF = aRuntime.pop();
 
-		IGObjectWriter svw = targetSF.getObjectWriter();
+		IGObjectWriter ow = targetSF.getObjectWriter();
 
-		svw.setValue(v);
+		ow.setValue(valueSF.getValue());
+		ow.schedule(fInertial, delay, reject, aRuntime);
 
-		svw.schedule(fInertial, delay, reject, aRuntime);
-		
 		return ReturnStatus.CONTINUE;
 	}
 

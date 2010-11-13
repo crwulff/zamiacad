@@ -287,7 +287,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 
 						IGMapping mapping = mappings.getMapping(i);
 
-						mapping.generateEntryCode(false, ic, mapping.computeSourceLocation());
+						mapping.generateInstantiationCode(false, ic, mapping.computeSourceLocation());
 
 						inst.addGeneric(mapping);
 					}

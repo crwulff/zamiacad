@@ -51,7 +51,7 @@ public abstract class IGOperation extends IGContainerItem {
 
 	public abstract void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException;
 
-	public abstract void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException;
+	public abstract IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException;
 
 	public IGStaticValue computeStaticValue(IGInterpreterRuntimeEnv aEnv, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 		//IGInterpreterCode ic = new IGInterpreterCode("Constant computation for " + this, computeSourceLocation());

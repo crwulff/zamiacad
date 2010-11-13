@@ -105,7 +105,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 		n = fMappings.getNumMappings();
 		for (int i = 0; i < n; i++) {
 			IGMapping mapping = fMappings.getMapping(i);
-			mapping.generateEntryCode(false, aCode, computeSourceLocation());
+			mapping.generateEntryCode(aCode, computeSourceLocation());
 		}
 
 		// create and init local variables
@@ -141,7 +141,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 	}
 
 	@Override
-	public void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
+	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
 		// FIXME
 		throw new ZamiaException("Sorry, not implemented yet.");
 	}

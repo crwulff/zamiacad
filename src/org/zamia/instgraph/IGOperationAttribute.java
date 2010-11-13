@@ -95,7 +95,7 @@ public class IGOperationAttribute extends IGOperation {
 	}
 
 	@Override
-	public void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
+	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
 		throw new ZamiaException("Cannot have attribute expression on the left side of an expression.", computeSourceLocation());
 	}
 

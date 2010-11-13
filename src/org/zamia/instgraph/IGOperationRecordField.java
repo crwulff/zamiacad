@@ -50,9 +50,10 @@ public class IGOperationRecordField extends IGOperation {
 	}
 
 	@Override
-	public void generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		fOp.generateCodeRef(aFromInside, true, aCode);
+	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
+		IGObject obj = fOp.generateCodeRef(aFromInside, true, aCode);
 		aCode.add(new IGRecordFieldRefOpStmt(fRF, computeSourceLocation(), getZDB()));
+		return obj;
 	}
 
 	@Override
