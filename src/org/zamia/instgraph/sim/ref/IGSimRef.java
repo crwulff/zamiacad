@@ -67,6 +67,8 @@ public class IGSimRef implements IGISimulator {
 
 	private static final BigInteger MLN_FS = new BigInteger("1000000");
 
+	private static final int SIM_MAX_ITERATIONS = 1000;
+
 	private ZamiaProject fZPrj;
 
 	private ToplevelPath fTLP;
@@ -125,6 +127,10 @@ public class IGSimRef implements IGISimulator {
 
 	private void simulate(BigInteger aTimeLimit) throws ZamiaException {
 
+		// break endless loops
+		int counter = 0;
+		BigInteger lastSimulationTime = fSimulationTime;
+
 		while (true) {
 			if (fSimSchedule.isEmpty()) {
 				break;
@@ -139,10 +145,22 @@ public class IGSimRef implements IGISimulator {
 			fSimulationTime = rl.getTime();
 
 			int nanos = fSimulationTime.divide(MLN_FS).intValue();
-			
+
 			logger.debug("IGSimRef: *************************************************");
 			logger.debug("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
 			logger.debug("IGSimRef: *************************************************");
+
+			// have we made progress in time?
+			if (lastSimulationTime.compareTo(fSimulationTime) < 0) {
+				lastSimulationTime = fSimulationTime;
+				counter = 0;
+			} else {
+				counter++;
+				if (counter >= SIM_MAX_ITERATIONS) {
+					logger.error("IGRefSim: Error, max iteration limit exceeded at %d ns.", nanos);
+					throw new ZamiaException("Simulator max iteration limit exceeded at " + lastSimulationTime + " fs.");
+				}
+			}
 
 			fSimSchedule.removeFirst();
 
@@ -296,12 +314,12 @@ public class IGSimRef implements IGISimulator {
 	}
 
 	private void initGenerics(IGInstantiation aInst, IGContainer aInstContainer, IGInterpreterRuntimeEnv aRuntime) throws ZamiaException {
-		ArrayList<Pair<String,IGStaticValue>> actualGenerics = aInst.getActualGenerics();
-		
+		ArrayList<Pair<String, IGStaticValue>> actualGenerics = aInst.getActualGenerics();
+
 		for (Pair<String, IGStaticValue> actualGeneric : actualGenerics) {
 
 			ArrayList<IGContainerItem> localItems = aInstContainer.findLocalItems(actualGeneric.getFirst());
-			
+
 			if (localItems.size() > 1) {
 				logger.debug(getClass().getSimpleName() + ": 1 generic item expected for %s, found %s: %s", actualGeneric.getFirst(), localItems.size(), localItems);
 			}
@@ -485,7 +503,12 @@ public class IGSimRef implements IGISimulator {
 
 		BigInteger timeLimit = startTime.add(aTime);
 
-		simulate(timeLimit);
+		try {
+			simulate(timeLimit);
+		} catch (ZamiaException e) {
+			notifyChanges(fSimulationTime);
+			throw e;
+		}
 
 		fSimulationTime = timeLimit;
 
@@ -640,12 +663,11 @@ public class IGSimRef implements IGISimulator {
 					continue;
 				}
 				gen.removeListener(aProcess);
-			}			
+			}
 		}
 	}
 
-	private <H extends Map<Long, ?>, T extends Map<PathName, H>>
-	H resolveSignal(long aDBID, PathName aPath, T aSource) {
+	private <H extends Map<Long, ?>, T extends Map<PathName, H>> H resolveSignal(long aDBID, PathName aPath, T aSource) {
 		ArrayList<H> mapsList = resolve(aDBID, aPath, aSource);
 		return mapsList.size() > 0 ? mapsList.get(0) : null;
 	}
@@ -662,12 +684,11 @@ public class IGSimRef implements IGISimulator {
 	 * @return list of those maps within aPath that contain the specified DBID as a key,
 	 * or a list of all the maps within aPath if 0-DBID is specified
 	 */
-	private  <H extends Map<Long, ?>, T extends Map<PathName, H>>
-	ArrayList<H> resolve (long aDBID, PathName aPath, T aSource) {
+	private <H extends Map<Long, ?>, T extends Map<PathName, H>> ArrayList<H> resolve(long aDBID, PathName aPath, T aSource) {
 
 		PathName path = aPath;
 		ArrayList<H> retList = new ArrayList<H>(aDBID == 0 ? path.getNumSegments() : 1);
-		
+
 		while (true) {
 
 			H map = aSource.get(path);
@@ -708,7 +729,6 @@ public class IGSimRef implements IGISimulator {
 		IGInterpreterRuntimeEnv runtimeEnv = new IGInterpreterRuntimeEnv(new IGInterpreterCode("UserInputParse", null), fZPrj);
 		elabEnv.setInterpreterEnv(runtimeEnv);
 
-
 		ArrayList<IGOperation> igOpList = literal.computeIG(aType, container, elabEnv, null, ASTErrorMode.EXCEPTION, null);
 		if (igOpList == null || igOpList.size() == 0) {
 			return null;
@@ -722,6 +742,7 @@ public class IGSimRef implements IGISimulator {
 
 	private class IGAssignRequest extends IGSimRequest {
 		private final PathName fSignalName;
+
 		private final IGStaticValue fValue;
 
 		public IGAssignRequest(IGSimProcess aProcess, PathName aSignalName, IGStaticValue aValue) {
