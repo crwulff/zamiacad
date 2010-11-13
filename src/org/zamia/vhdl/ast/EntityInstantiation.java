@@ -72,7 +72,7 @@ public class EntityInstantiation extends InstantiatedUnit {
 
 			DMManager duManager = aEE.getZamiaProject().getDUM();
 
-			Architecture arch = duManager.getArchitecture(duuid.getLibId(), duuid.getId(), fArchId);
+			Architecture arch = duManager.getArchitecture(duuid.getLibId(), duuid.getId(), fArchId != null ? fArchId : duuid.getArchId());
 
 			if (arch == null) {
 				reportError("EntityInstantiation: Couldn't find '%s'", fName);

@@ -168,6 +168,6 @@ public class IGRefSimTest {
 	@Test
 	public void testEntityInst() throws Exception {
 
-		runTest("examples/gcounter", "BuildPathEntityInst.txt", 2, 152);
+		runTest("examples/refsim/entityInst", 2, 152);
 	}
 }
