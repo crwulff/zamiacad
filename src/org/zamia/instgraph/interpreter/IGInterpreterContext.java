@@ -1,5 +1,5 @@
 /* 
- * Copyright 2008-2009 by the authors indicated in the @author tags. 
+ * Copyright 2008, 2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -14,10 +14,9 @@ import java.util.HashMap;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
+import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGStaticValue;
-import org.zamia.instgraph.IGStaticValueBuilder;
-import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
 
 /*
@@ -31,7 +30,7 @@ public class IGInterpreterContext implements Serializable {
 
 	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
-	private HashMap<Long, IGStaticValue> fObjects = new HashMap<Long, IGStaticValue>();
+	private HashMap<Long, IGObjectDriver> fDrivers = new HashMap<Long, IGObjectDriver>();
 
 	private HashMap<Long, IGTypeStatic> fCachedTypes = new HashMap<Long, IGTypeStatic>();
 
@@ -45,62 +44,45 @@ public class IGInterpreterContext implements Serializable {
 
 	}
 
+	public IGObjectDriver createObject(IGInterpreterObject aObject, SourceLocation aLocation) throws ZamiaException {
+
+		long dbid = aObject.getDBID();
+
+		String id = aObject.getObject().getId();
+		
+		IGObject obj = aObject.getObject();
+		
+		IGObjectDriver driver = new IGObjectDriver(id, obj.getDirection(), obj.getCat(), null, aObject.getStaticType(), aLocation);
+
+		fDrivers.put(dbid, driver);
+
+		return driver;
+	}
+
+	public IGObjectDriver getObjectDriver(long aDBID) {
+		return fDrivers.get(aDBID);
+	}
+
 	public IGStaticValue getObjectValue(long aDBID) {
-		return fObjects.get(aDBID);
+		IGObjectDriver driver = fDrivers.get(aDBID);
+
+		if (driver == null)
+			return null;
+
+		return driver.getValue();
 	}
 
 	public void setObjectValue(IGInterpreterObject aObject, IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
 
-		IGStaticValue value = aValue;
+		long dbid = aObject.getDBID();
 
-		// so we have to do an index shift?
-		IGTypeStatic t = value.getStaticType();
-		if (t.isArray()) {
+		IGObjectDriver driver = fDrivers.get(dbid);
 
-			if (!t.isUnconstrained()) {
-
-				IGTypeStatic oT = aObject.getStaticType();
-				if (!oT.isUnconstrained() && oT.getCat() != IGType.TypeCat.FILE && oT.getCat() != IGType.TypeCat.ACCESS) {
-
-					IGTypeStatic oIdxT = oT.getStaticIndexType(null);
-					IGTypeStatic idxT = t.getStaticIndexType(null);
-
-					int oC = (int) oIdxT.computeCardinality(null);
-					int c = (int) idxT.computeCardinality(null);
-					if (oC != c) {
-						throw new ZamiaException("Interpreter: error: tried to assign object " + aObject + " from incompatible array value " + aValue + ": " + oT + " vs " + t,
-								aLocation);
-					}
-
-					int l = (int) idxT.getStaticLeft(aLocation).getLong();
-					int r = (int) idxT.getStaticRight(aLocation).getLong();
-					boolean a = idxT.getStaticAscending().isTrue();
-					int off = a ? l : r;
-
-					int oL = (int) oIdxT.getStaticLeft(aLocation).getLong();
-					int oR = (int) oIdxT.getStaticRight(aLocation).getLong();
-					boolean oA = oIdxT.getStaticAscending().isTrue();
-					int oOff = oA ? oL : oR;
-
-					if (l != oL || r != oR || a != oA) {
-						// yes, time to shift the index
-
-						IGStaticValueBuilder builder = new IGStaticValueBuilder(oT, null, aLocation);
-
-						for (int i = 0; i < c; i++) {
-
-							IGStaticValue v = value.getValue(i + off, aLocation);
-
-							builder.set(i + oOff, v, aLocation);
-						}
-
-						value = builder.buildConstant();
-					}
-				}
-			}
+		if (driver == null) {
+			driver = createObject(aObject, aLocation);
 		}
 
-		fObjects.put(aObject.getDBID(), value);
+		driver.setValue(aValue, aLocation);
 	}
 
 	public void putCachedLiteralActualConstant(IGOperationLiteral aLiteral, IGStaticValue aConstant) {
@@ -120,9 +102,9 @@ public class IGInterpreterContext implements Serializable {
 	}
 
 	public void dump() {
-		for (Long dbid : fObjects.keySet()) {
+		for (Long dbid : fDrivers.keySet()) {
 			if (dbid != null) {
-				logger.debug("InterpreterContext: Object %s => %s", dbid, fObjects.get(dbid));
+				logger.debug("InterpreterContext: Object %s => %s", dbid, fDrivers.get(dbid));
 			}
 		}
 	}

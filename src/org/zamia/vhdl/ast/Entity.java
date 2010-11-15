@@ -262,7 +262,7 @@ public class Entity extends PrimaryUnit {
 
 					aContainer.addGeneric(igg);
 
-					env.newObject(igg, interf.getLocation());
+					env.newObject(igg, ASTErrorMode.EXCEPTION, null, interf.getLocation());
 
 					if (i < nActualGenerics) {
 						IGStaticValue actualGeneric = aModule.getActualGeneric(i);
@@ -290,7 +290,7 @@ public class Entity extends PrimaryUnit {
 					aContainer.addInterface((IGObject) igi);
 
 					if (igi instanceof IGObject) {
-						env.newObject((IGObject) igi, interf.getLocation());
+						env.newObject((IGObject) igi, ASTErrorMode.EXCEPTION, null, interf.getLocation());
 					}
 
 				} catch (ZamiaException e) {
@@ -311,7 +311,7 @@ public class Entity extends PrimaryUnit {
 
 				if (item instanceof IGObject) {
 					IGObject obj = (IGObject) item;
-					env.newObject(obj, decl.getLocation());
+					env.newObject(obj, ASTErrorMode.EXCEPTION, null, decl.getLocation());
 				}
 
 			} catch (ZamiaException e) {

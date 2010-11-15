@@ -336,7 +336,7 @@ public class SubProgram extends BlockDeclarativeItem {
 		try {
 			if (code != null) {
 
-				IGSequenceOfStatements zSeq = new IGSequenceOfStatements(null, getLocation(), aEE.getZDB());
+				IGSequenceOfStatements igsos = new IGSequenceOfStatements(null, getLocation(), aEE.getZDB());
 
 				// declarations:
 
@@ -352,8 +352,8 @@ public class SubProgram extends BlockDeclarativeItem {
 					}
 				}
 
-				code.generateIG(zSeq, container, aEE);
-				sub.setCode(zSeq);
+				code.generateIG(igsos, container, aEE);
+				sub.setCode(igsos);
 
 				sub.storeOrUpdate();
 

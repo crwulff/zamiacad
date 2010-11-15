@@ -390,7 +390,7 @@ public class IGSimRef implements IGISimulator {
 
 			IGObject obj = (IGObject) item;
 
-			aEnv.newObject(obj, obj.computeSourceLocation());
+			aEnv.newObject(obj, ASTErrorMode.EXCEPTION, null, obj.computeSourceLocation());
 
 			long dbid = obj.getDBID();
 			PathName signalPath = aPath.clonePathName().append(obj.getId());

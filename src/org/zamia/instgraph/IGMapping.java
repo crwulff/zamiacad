@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -8,17 +8,16 @@
  */
 package org.zamia.instgraph;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
-import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGMapStmt;
 import org.zamia.instgraph.interpreter.IGPopStmt;
 import org.zamia.zdb.ZDB;
-
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * 
@@ -50,53 +49,10 @@ public class IGMapping extends IGItem {
 		return fActual;
 	}
 
-	/*
-	 * used for fake processes that handle instantiation mappings in simulator
-	 */
-	public void generateInstantiationCode(boolean aIgnoreDir, IGInterpreterCode aIc, SourceLocation aSrc) throws ZamiaException {
-
-		OIDir dir = fFormal.getDirection();
-
-		if (aIgnoreDir || dir == OIDir.IN || dir == OIDir.INOUT) {
-			fFormal.generateCodeRef(false, !aIgnoreDir, aIc);
-			fActual.generateCode(true, aIc);
-			aIc.add(new IGPopStmt(false, false, false, aSrc, getZDB()));
-		}
-	}
-
-	/*
-	 * next two methods generate code which for subprogram entry and exit
-	 */
-
-	public void generateEntryCode(IGInterpreterCode aIc, SourceLocation aSrc) throws ZamiaException {
-
-		OIDir dir = fFormal.getDirection();
-
-		if (dir == OIDir.IN || dir == OIDir.INOUT) {
-			IGObject obj = fFormal.generateCodeRef(false, true, aIc);
-
-			fActual.generateCode(true, aIc);
-			
-			// take special care of signal parameters:
-			if (obj != null && obj.getCat() == IGObjectCat.SIGNAL) {
-				
-				aIc.add(new IGMapStmt(aSrc, getZDB()));
-			} else {
-				aIc.add(new IGPopStmt(false, false, false, aSrc, getZDB()));
-			}
-			
-		}
-	}
-
-	public void generateExitCode(IGInterpreterCode aCode, SourceLocation aSrc) throws ZamiaException {
-
-		OIDir dir = fFormal.getDirection();
-
-		if (dir == OIDir.OUT || dir == OIDir.INOUT) {
-			fActual.generateCodeRef(true, true, aCode);
-			fFormal.generateCode(false, aCode);
-			aCode.add(new IGPopStmt(false, false, false, aSrc, getZDB()));
-		}
+	public void generateCode(IGInterpreterCode aCode, SourceLocation aSrc) throws ZamiaException {
+		fFormal.generateCode(false, aCode);
+		fActual.generateCode(true, aCode);
+		aCode.add(new IGMapStmt(aSrc, getZDB()));
 	}
 
 	@Override
@@ -137,7 +93,7 @@ public class IGMapping extends IGItem {
 			code = new IGInterpreterCode(aLabel + SYNCHRO_IN_ID, aSrc);
 			// for signal assignment generate code manually, because IGSequentialAssignment
 			// will generate code that will not allow to write into IN port.
-			fFormal.generateCodeRef(false, true, code);
+			fFormal.generateCode(false, code);
 			fActual.generateCode(false, code);
 			code.add(new IGPopStmt(false, false, false, computeSourceLocation(), getZDB()));
 			// now process automatically

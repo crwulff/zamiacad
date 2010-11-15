@@ -84,12 +84,22 @@ public class IGPushStmt extends IGStmt {
 		IGObject obj = getObject();
 		if (obj != null) {
 
-			IGStaticValue iv = aRuntime.getObjectValue(obj);
-			if (iv == null) {
-				reportError("Object not found: " + obj, computeSourceLocation(), aErrorMode, aReport);
-				return ReturnStatus.ERROR;
+			IGObjectDriver driver = aRuntime.getDriver(obj, aErrorMode, aReport);
+			
+			if (driver == null) {
+				
+				ZamiaException e = new ZamiaException ("IGPushStmt: Failed to find driver for "+obj, computeSourceLocation());
+				if (aErrorMode == ASTErrorMode.RETURN_NULL) {
+					if (aReport != null) {
+						aReport.append(e);
+					}
+					return ReturnStatus.ERROR;
+				} else {
+					throw e;
+				}
 			}
-			aRuntime.push(iv);
+			
+			aRuntime.push(driver);
 
 		} else if (fTypeDBID != 0) {
 			IGTypeStatic type = getType().computeStaticType(aRuntime, aErrorMode, aReport);

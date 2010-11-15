@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -11,17 +11,13 @@ package org.zamia.instgraph.interpreter;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
-import org.zamia.instgraph.IGItem;
-import org.zamia.instgraph.IGObject;
-import org.zamia.instgraph.IGOperationObject;
+import org.zamia.instgraph.IGOperationAttribute.AttrOp;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
-import org.zamia.instgraph.IGOperationAttribute.AttrOp;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * 
@@ -37,18 +33,11 @@ public class IGAttributeStmt extends IGStmt {
 
 	private long fResTypeDBID;
 
-	private long fObjectItemDBID;
-	
 	public IGAttributeStmt(IGType aResType, AttrOp aAttrOp, boolean aHaveArgument, SourceLocation aLocation, ZDB aZDB) {
 		super(aLocation, aZDB);
 		fHaveArgument = aHaveArgument;
 		fOp = aAttrOp;
 		fResTypeDBID = save(aResType);
-	}
-
-	public IGAttributeStmt(IGItem aItem, IGType aResType, AttrOp aAttrOp, boolean aHaveArgument, SourceLocation aLocation, ZDB aZDB) {
-		this(aResType, aAttrOp, aHaveArgument, aLocation, aZDB);
-		fObjectItemDBID = save(aItem);
 	}
 
 	private IGType getResType() {
@@ -152,31 +141,32 @@ public class IGAttributeStmt extends IGStmt {
 					} else {
 						resValue = type.getStaticRange();
 					}
-					
+
 					IGStaticValueBuilder b = new IGStaticValueBuilder(resValue.getStaticType(), null, computeSourceLocation());
 
 					// reverse direction
-					
+
 					IGStaticValue asc = resValue.getAscending();
 					IGTypeStatic ascT = asc.getStaticType();
-					
+
 					boolean ascB = !asc.isTrue();
-					
-					asc = ascB ? ascT.getEnumLiteral(1, computeSourceLocation(), ASTErrorMode.EXCEPTION, null) : ascT.getEnumLiteral(0, computeSourceLocation(), ASTErrorMode.EXCEPTION, null);
+
+					asc = ascB ? ascT.getEnumLiteral(1, computeSourceLocation(), ASTErrorMode.EXCEPTION, null) : ascT.getEnumLiteral(0, computeSourceLocation(),
+							ASTErrorMode.EXCEPTION, null);
 
 					b.setAscending(asc);
-					
+
 					// left becomes right, right becomes left
-					
+
 					b.setRight(resValue.getLeft());
 					b.setLeft(resValue.getRight());
-					
+
 					resValue = b.buildConstant();
-					
+
 					break;
 				case LENGTH:
 					if (!type.isArray()) {
-						throw new ZamiaException ("Attribute "+fOp+" is not defined for non-array types.", computeSourceLocation());
+						throw new ZamiaException("Attribute " + fOp + " is not defined for non-array types.", computeSourceLocation());
 					}
 					IGTypeStatic idxType = type.getStaticIndexType(computeSourceLocation());
 					long card = idxType.computeCardinality(computeSourceLocation());
@@ -188,20 +178,42 @@ public class IGAttributeStmt extends IGStmt {
 			}
 		} else {
 
-			IGStaticValue v = sf.getLiteral();
-			type = v.getStaticType();
+			IGStaticValue v = sf.getValue();
+
+			if (v == null) {
+
+				IGObjectDriver driver = sf.getObjectDriver();
+
+				if (driver != null) {
+
+					type = driver.getCurrentType();
+					
+				} else {
+					if (aErrorMode == ASTErrorMode.RETURN_NULL) {
+						return ReturnStatus.ERROR;
+					} else {
+						throw new ZamiaException("Internal error: value expected for attribute computation.", computeSourceLocation());
+					}
+				}
+
+			} else {
+
+				type = v.getStaticType();
+			}
 
 			switch (fOp) {
 			case LENGTH:
 
 				if (type.isArray()) {
+					if (!checkConstrained(type, aErrorMode, aReport, computeSourceLocation())) {
+						return ReturnStatus.ERROR;
+					}
 					type = type.getStaticIndexType(computeSourceLocation());
 				}
 
 				IGTypeStatic srType = getResType().computeStaticType(aRuntime, aErrorMode, aReport);
-				
-				resValue = new IGStaticValueBuilder(srType, null, computeSourceLocation()).setNum(
-						type.computeCardinality(computeSourceLocation())).buildConstant();
+
+				resValue = new IGStaticValueBuilder(srType, null, computeSourceLocation()).setNum(type.computeCardinality(computeSourceLocation())).buildConstant();
 				break;
 			case LOW:
 				if (type.isArray()) {
@@ -251,49 +263,40 @@ public class IGAttributeStmt extends IGStmt {
 				} else {
 					resValue = type.getStaticRange();
 				}
-				
+
 				IGStaticValueBuilder b = new IGStaticValueBuilder(resValue.getStaticType(), null, computeSourceLocation());
 
 				// reverse direction
-				
+
 				IGStaticValue asc = resValue.getAscending();
 				IGTypeStatic ascT = asc.getStaticType();
-				
+
 				boolean ascB = !asc.isTrue();
-				
-				asc = ascB ? ascT.getEnumLiteral(1, computeSourceLocation(), ASTErrorMode.EXCEPTION, null) : ascT.getEnumLiteral(0, computeSourceLocation(), ASTErrorMode.EXCEPTION, null);
+
+				asc = ascB ? ascT.getEnumLiteral(1, computeSourceLocation(), ASTErrorMode.EXCEPTION, null) : ascT.getEnumLiteral(0, computeSourceLocation(),
+						ASTErrorMode.EXCEPTION, null);
 
 				b.setAscending(asc);
-				
+
 				// left becomes right, right becomes left
-				
+
 				b.setRight(resValue.getLeft());
 				b.setLeft(resValue.getRight());
-				
+
 				resValue = b.buildConstant();
-				
+
 				break;
 			case EVENT:
-				// get signal from objectItem
-				IGObject signal;
-				IGItem objectItem = (IGItem) getZDB().load(fObjectItemDBID);
-				if (objectItem instanceof IGOperationObject) {
-					signal = ((IGOperationObject) objectItem).getObject();
-				} else if (objectItem instanceof IGObject) {
-					signal = (IGObject) objectItem;
-				} else
-					throw new ZamiaException(getClass().getSimpleName() + ": cannot extract signal (" + IGObject.class.getSimpleName() + ") from " + objectItem);
 
-				// check signal event
-				boolean isChanged = aRuntime.isChanged(signal, computeSourceLocation());
+				IGObjectDriver driver = sf.getObjectDriver();
 
 				IGType rt = getResType().computeStaticType(aRuntime, aErrorMode, aReport);
 				if (rt == null) {
 					return ReturnStatus.ERROR;
 				}
 
-				resValue = rt.getEnumLiteral(isChanged ? 1 : 0, computeSourceLocation(), ASTErrorMode.EXCEPTION, null);
-				
+				resValue = rt.getEnumLiteral(driver.isEvent() ? 1 : 0, computeSourceLocation(), ASTErrorMode.EXCEPTION, null);
+
 				break;
 			default:
 				throw new ZamiaException("Internal error: attribute " + fOp + " not implemented for values.", computeSourceLocation());
@@ -304,6 +307,22 @@ public class IGAttributeStmt extends IGStmt {
 		aRuntime.push(resValue);
 
 		return ReturnStatus.CONTINUE;
+	}
+
+	private boolean checkConstrained(IGTypeStatic aType, ASTErrorMode aErrorMode, ErrorReport aReport, SourceLocation aLocation) throws ZamiaException {
+		
+		if (!aType.isUnconstrained())
+			return true;
+		
+		ZamiaException e = new ZamiaException("Unconstrained array detected in attribute computation.", aLocation);
+		if (aErrorMode == ASTErrorMode.EXCEPTION) {
+			throw e;
+		}
+		if (aReport != null) {
+			aReport.append(e);
+		}
+		
+		return false;
 	}
 
 	@Override

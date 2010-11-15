@@ -66,7 +66,7 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 	@Override
 	public void generateCode(IGInterpreterCode aCode) throws ZamiaException {
 
-		fTarget.generateCodeRef(true, true, aCode);
+		fTarget.generateCode(true, aCode);
 		fValue.generateCode(true, aCode);
 
 		if (fDelay != null) {

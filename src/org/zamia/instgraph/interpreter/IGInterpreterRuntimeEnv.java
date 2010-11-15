@@ -40,7 +40,7 @@ public class IGInterpreterRuntimeEnv {
 
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
-	public final static boolean dump = false;
+	public final static boolean dump = true;
 
 	protected ZStack<IGInterpreterContext> fContexts;
 
@@ -236,37 +236,60 @@ public class IGInterpreterRuntimeEnv {
 		fContexts.pop();
 	}
 
-	public void newObject(IGObject aObj, SourceLocation aLocation) throws ZamiaException {
+	public IGObjectDriver newObject(IGObject aObj, ASTErrorMode aErrorMode, ErrorReport aReport, SourceLocation aLocation) throws ZamiaException {
 		IGInterpreterContext context = fContexts.peek();
 
-		IGTypeStatic type = aObj.getType().computeStaticType(this, ASTErrorMode.EXCEPTION, null);
+		IGTypeStatic type = aObj.getType().computeStaticType(this, aErrorMode, aReport);
 
-		if (type.isError()) {
-			return;
+		if (type == null || type.isError()) {
+			return null;
 		}
-
+		
+		IGInterpreterObject intObject = new IGInterpreterObject(aObj, type);
+		
+		IGObjectDriver driver = context.createObject(intObject, aLocation);
+		
 		IGOperation iv = aObj.getInitialValue();
-		IGStaticValue value = null;
 		if (iv != null) {
-			value = iv.computeStaticValue(this, ASTErrorMode.EXCEPTION, null);
-		} else {
-			value = IGStaticValue.generateZ(type, aObj.computeSourceLocation());
+			IGStaticValue value = iv.computeStaticValue(this, aErrorMode, aReport);
+			
+			if (value == null) {
+				ZamiaException e = new ZamiaException("Interpreter: Failed to compute initial value for "+aObj, aLocation);
+				if (aErrorMode == ASTErrorMode.RETURN_NULL) {
+					if (aReport != null) {
+						aReport.append(e);
+					}
+					return null;
+				}
+				throw e;
+			}
+			
+			driver.setValue(value, aLocation);
 		}
 
-		context.setObjectValue(new IGInterpreterObject(aObj, type), value, aLocation);
+		return driver;
 	}
 
-	public IGStaticValue getObjectValue(IGObject aObj) throws ZamiaException {
+	public IGObjectDriver getDriver(IGObject aObj, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 		int n = fContexts.size();
 		long dbid = aObj.getDBID();
 		for (int i = n - 1; i >= 0; i--) {
 			IGInterpreterContext context = fContexts.get(i);
-			IGStaticValue value = context.getObjectValue(dbid);
-			if (value != null)
-				return value;
+			IGObjectDriver driver = context.getObjectDriver(dbid);
+			if (driver != null)
+				return driver;
 		}
-
 		return null;
+	}
+	
+	public IGStaticValue getObjectValue(IGObject aObj) throws ZamiaException {
+		
+		IGObjectDriver driver = getDriver (aObj, ASTErrorMode.EXCEPTION, null);
+		if (driver == null) {
+			return null;
+		}
+		
+		return driver.getValue();
 	}
 
 	public IGInterpreterContext findContext(long aDBID) {
@@ -309,13 +332,6 @@ public class IGInterpreterRuntimeEnv {
 		fStack.push(new IGStackFrame(aValue));
 	}
 
-	public void push(IGObjectWriter aSw) {
-		if (dump) {
-			logger.debug("Interpreter: pushing %s", aSw);
-		}
-		fStack.push(new IGStackFrame(aSw));
-	}
-
 	public void push(IGTypeStatic aType) {
 		if (dump) {
 			logger.debug("Interpreter: pushing %s", aType);
@@ -323,6 +339,13 @@ public class IGInterpreterRuntimeEnv {
 		fStack.push(new IGStackFrame(aType));
 	}
 
+	public void push(IGObjectDriver aDriver) {
+		if (dump) {
+			logger.debug("Interpreter: pushing %s", aDriver);
+		}
+		fStack.push(new IGStackFrame(aDriver));
+	}
+	
 	public ZDB getZDB() {
 		return fZPrj.getZDB();
 	}
@@ -393,7 +416,7 @@ public class IGInterpreterRuntimeEnv {
 		throw new ZamiaException("Error: this environment doesn't support wakeup requests.", aLocation);
 	}
 
-	public void scheduleWakeup(IGObject aSignal, SourceLocation aLocation) throws ZamiaException {
+	public void scheduleWakeup(IGObjectDriver aDriver, SourceLocation aLocation) throws ZamiaException {
 		throw new ZamiaException("Error: this environment doesn't support wakeup requests.", aLocation);
 	}
 
@@ -415,6 +438,10 @@ public class IGInterpreterRuntimeEnv {
 
 	public BigInteger getCurrentTime(SourceLocation aLocation) throws ZamiaException {
 		throw new ZamiaException("Error: this environment doesn't support simulation time retrieval.", aLocation);
+	}
+
+	public void scheduleSignalChange(boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGObjectDriver aIgObjectDriver, SourceLocation aLocation) throws ZamiaException {
+		throw new ZamiaException("Error: this environment doesn't support signals.", aLocation);
 	}
 
 }

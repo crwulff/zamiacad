@@ -25,7 +25,6 @@ import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -51,8 +50,6 @@ public abstract class IGOperation extends IGContainerItem {
 
 	public abstract void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException;
 
-	public abstract IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException;
-
 	public IGStaticValue computeStaticValue(IGInterpreterRuntimeEnv aEnv, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 		//IGInterpreterCode ic = new IGInterpreterCode("Constant computation for " + this, computeSourceLocation());
 		IGInterpreterCode ic = new IGInterpreterCode("Constant computation", computeSourceLocation());
@@ -69,23 +66,29 @@ public abstract class IGOperation extends IGContainerItem {
 		 * value on the stack
 		 */
 
-		ReturnStatus status = aEnv.call(ic, aErrorMode, aReport);
-		if (status == ReturnStatus.ERROR) {
-			return null;
-		}
+		aEnv.enterContext();
 
-		status = aEnv.resume(aErrorMode, aReport);
-		if (status == ReturnStatus.ERROR) {
-			return null;
-		}
+		try {
+			ReturnStatus status = aEnv.call(ic, aErrorMode, aReport);
+			if (status == ReturnStatus.ERROR) {
+				return null;
+			}
 
-		aEnv.rts();
+			status = aEnv.resume(aErrorMode, aReport);
+			if (status == ReturnStatus.ERROR) {
+				return null;
+			}
+
+			aEnv.rts();
+		} finally {
+			aEnv.exitContext();
+		}
 
 		IGStackFrame sf = aEnv.pop();
 		if (sf == null) {
 			return null;
 		}
-		IGStaticValue res = sf.getLiteral();
+		IGStaticValue res = sf.getValue();
 		return res;
 	}
 
@@ -108,7 +111,7 @@ public abstract class IGOperation extends IGContainerItem {
 			fTypeDBID = save(fType);
 			fType = null; // we have to drop the reference so GC will be able to free the memory
 		}
-		out.defaultWriteObject(); 
+		out.defaultWriteObject();
 	}
 
 	public IGType getType() {

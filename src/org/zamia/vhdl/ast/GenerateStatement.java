@@ -190,7 +190,7 @@ public class GenerateStatement extends ConcurrentStatement {
 				if (item != null) {
 					if (item instanceof IGObject) {
 						IGObject obj = (IGObject) item;
-						env.newObject(obj, decl.getLocation());
+						env.newObject(obj, ASTErrorMode.EXCEPTION, null, decl.getLocation());
 					}
 				}
 
@@ -288,7 +288,7 @@ public class GenerateStatement extends ConcurrentStatement {
 					IGStructure structure = new IGStructure(context, path, aContainer.getDBID(), label, getLocation(), aEE.getZDB());
 
 					structure.getContainer().add(loopConst);
-					env.newObject(loopConst, getLocation());
+					env.newObject(loopConst, ASTErrorMode.EXCEPTION, null, getLocation());
 
 					computeDeclarationsIG(structure.getContainer(), aEE);
 
@@ -321,7 +321,7 @@ public class GenerateStatement extends ConcurrentStatement {
 					IGStructure structure = new IGStructure(context, path, aContainer.getDBID(), label, getLocation(), aEE.getZDB());
 
 					structure.getContainer().add(loopConst);
-					env.newObject(loopConst, getLocation());
+					env.newObject(loopConst, ASTErrorMode.EXCEPTION, null, getLocation());
 
 					computeDeclarationsIG(structure.getContainer(), aEE);
 

@@ -16,7 +16,6 @@ import org.zamia.instgraph.interpreter.IGTypeConversionStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -41,12 +40,6 @@ public class IGOperationTypeConversion extends IGOperation {
 	public void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
 		fOp.generateCode(aFromInside, aCode);
 		aCode.add(new IGTypeConversionStmt(getType(), computeSourceLocation(), getZDB()));
-	}
-
-	@Override
-	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		// FIXME
-		throw new ZamiaException("Sorry, not implemented yet.");
 	}
 
 	@Override

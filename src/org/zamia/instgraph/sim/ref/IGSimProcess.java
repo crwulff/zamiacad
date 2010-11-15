@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -22,6 +22,7 @@ import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
+import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.instgraph.interpreter.IGObjectWriter;
 import org.zamia.util.PathName;
 
@@ -49,8 +50,13 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 	}
 
 	@Override
-	public void scheduleWakeup(IGObject aSignal, SourceLocation aLocation) throws ZamiaException {
-		fSim.scheduleWakeup(aSignal, this);
+	public void scheduleWakeup(IGObjectDriver aDriver, SourceLocation aLocation) throws ZamiaException {
+		
+		// FIXME
+		
+		throw new ZamiaException ("Sorry, broken.");
+		
+		//fSim.scheduleWakeup(aSignal, this);
 	}
 
 	public void scheduleSignalChange(boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGObjectWriter aObjectWriter, SourceLocation aLocation) throws ZamiaException {

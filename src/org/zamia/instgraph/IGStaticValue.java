@@ -29,7 +29,6 @@ import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * This represents any constant value in the interpreter or ig
  * 
@@ -110,17 +109,19 @@ public class IGStaticValue extends IGOperation {
 
 		switch (type.getCat()) {
 		case ARRAY:
-			IGTypeStatic indexType = type.getStaticIndexType(computeSourceLocation());
+			SourceLocation location = computeSourceLocation();
+			
+			IGTypeStatic indexType = type.getStaticIndexType(location);
 
 			if (!type.isUnconstrained()) {
-				int card = (int) indexType.computeCardinality(computeSourceLocation());
-				fArrayOffset = (int) indexType.getStaticLow(computeSourceLocation()).getOrd();
+				int card = (int) indexType.computeCardinality(location);
+				fArrayOffset = (int) indexType.getStaticLow(location).getOrd();
 
 				if (card >= 0) {
 					fArrayValues = new ArrayList<IGStaticValue>(card);
 
 					for (int i = 0; i < card; i++) {
-						fArrayValues.add(aBuilder.get(i + fArrayOffset, computeSourceLocation()));
+						fArrayValues.add(aBuilder.get(i + fArrayOffset, location));
 					}
 				}
 
@@ -128,14 +129,15 @@ public class IGStaticValue extends IGOperation {
 			break;
 
 		case RECORD:
+			location = computeSourceLocation();
 			fRecordValues = new HashMapArray<String, IGStaticValue>();
 
 			int n = type.getNumRecordFields(null);
 
 			for (int i = 0; i < n; i++) {
-				IGRecordField rf = type.getRecordField(i, computeSourceLocation());
+				IGRecordField rf = type.getRecordField(i, location);
 				String rfID = rf.getId();
-				fRecordValues.put(rfID, aBuilder.get(rf, computeSourceLocation()));
+				fRecordValues.put(rfID, aBuilder.get(rf, location));
 			}
 
 			break;
@@ -535,12 +537,13 @@ public class IGStaticValue extends IGOperation {
 					int n = fArrayValues.size();
 					if (at.isLogic() || at.isString()) {
 						// buf.append("\"");
-						for (int i = n-1; i >=0; i--) {
-							buf.append(fArrayValues.get(i).toHRString());
+						for (int i = n - 1; i >= 0; i--) {
+							IGStaticValue v = fArrayValues.get(i);
+							buf.append(v != null ? v.toHRString() : "[null]");
 						}
 						// buf.append("\"");
 					} else {
-						
+
 						buf.append("(");
 						for (int i = 0; i < n; i++) {
 							buf.append(fArrayValues.get(i));
@@ -577,14 +580,14 @@ public class IGStaticValue extends IGOperation {
 
 			case ENUM:
 				if (fIsCharLiteral) {
-					return ""+fCharLiteral;
+					return "" + fCharLiteral;
 				}
-				
+
 				String id = getId();
 				if (id != null) {
 					return getId();
 				}
-				
+
 				IGStaticValue literal = type.getEnumLiteral(fEnumOrd, null, ASTErrorMode.EXCEPTION, null);
 				return literal.getId();
 
@@ -1259,11 +1262,6 @@ public class IGStaticValue extends IGOperation {
 	}
 
 	@Override
-	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		throw new ZamiaException("IGStaticValue: Cannot use static expressions as assignment targets.", computeSourceLocation());
-	}
-
-	@Override
 	public OIDir getDirection() throws ZamiaException {
 		return OIDir.NONE;
 	}
@@ -1363,60 +1361,60 @@ public class IGStaticValue extends IGOperation {
 			return false;
 
 		if (t1.isScalar()) {
-			
+
 			if (isCharLiteral() != aV.isCharLiteral()) {
 				return false;
 			}
-			
+
 			if (isCharLiteral()) {
 				return getCharLiteral() == aV.getCharLiteral();
 			}
-			
+
 			return getOrd() == aV.getOrd();
 		}
 
 		if (t1.isArray()) {
-			
+
 			int o1 = getArrayOffset();
 			int o2 = aV.getArrayOffset();
-			
+
 			int n1 = getNumArrayEntries(null);
 			int n2 = aV.getNumArrayEntries(null);
 			if (n1 != n2 || o1 != o2) {
 				return false;
 			}
-			
-			for (int i = 0; i<n1; i++) {
-				IGStaticValue v1 = getValue(i+o1, null);
-				IGStaticValue v2 = aV.getValue(i+o2, null);
+
+			for (int i = 0; i < n1; i++) {
+				IGStaticValue v1 = getValue(i + o1, null);
+				IGStaticValue v2 = aV.getValue(i + o2, null);
 				if (!v1.equalsValue(v2)) {
 					return false;
 				}
 			}
 			return true;
 		}
-		
+
 		if (t1.isRecord()) {
-			
+
 			int n1 = t1.getNumRecordFields(null);
 			int n2 = t2.getNumRecordFields(null);
 
 			if (n1 != n2) {
 				return false;
 			}
-			
-			for (int i = 0; i<n1; i++) {
-				
+
+			for (int i = 0; i < n1; i++) {
+
 				IGRecordField rf1 = t1.getRecordField(i, null);
 				IGRecordField rf2 = t2.getRecordField(i, null);
 
 				String id1 = rf1.getId();
 				String id2 = rf2.getId();
-				
+
 				if (!id1.equals(id2)) {
 					return false;
 				}
-				
+
 				IGStaticValue v1 = getRecordFieldValue(id1, null);
 				IGStaticValue v2 = aV.getRecordFieldValue(id2, null);
 				if (!v1.equalsValue(v2)) {
@@ -1425,7 +1423,7 @@ public class IGStaticValue extends IGOperation {
 			}
 			return true;
 		}
-		
+
 		// FIXME: implement
 		throw new ZamiaException("IGStaticValue: equalsValue(): sorry, not implemented for " + cat1 + " types.");
 	}
@@ -1435,9 +1433,9 @@ public class IGStaticValue extends IGOperation {
 
 		String str = toHRString();
 
-//		IGTypeStatic t = getStaticType();
-//		boolean asc = isSTAscending(t);
-		
+		//		IGTypeStatic t = getStaticType();
+		//		boolean asc = isSTAscending(t);
+
 		int l = str.length();
 		for (int i = 0; i < l; i++) {
 			//char c = str.charAt(asc ? l-i-1 : i);
@@ -1460,7 +1458,6 @@ public class IGStaticValue extends IGOperation {
 
 	public String toHexString() {
 
-		
 		if (!getType().isLogic()) {
 			return toHRString();
 		}

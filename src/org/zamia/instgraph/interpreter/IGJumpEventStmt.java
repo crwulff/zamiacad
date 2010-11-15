@@ -11,10 +11,8 @@ package org.zamia.instgraph.interpreter;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
-import org.zamia.instgraph.IGObject;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * 
@@ -33,10 +31,9 @@ public class IGJumpEventStmt extends IGJumpStmt {
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
 		IGStackFrame stackFrame = aRuntime.pop();
-		IGObjectWriter ow = stackFrame.getObjectWriter();
-		IGObject signal = ow.getObject();
+		IGObjectDriver driver = stackFrame.getObjectDriver();
 
-		if (aRuntime.isChanged(signal, computeSourceLocation())) {
+		if (driver.isEvent()) {
 			aRuntime.setPC(fAdr);
 		}
 		return ReturnStatus.CONTINUE;
@@ -44,7 +41,7 @@ public class IGJumpEventStmt extends IGJumpStmt {
 
 	@Override
 	public String toString() {
-		return "JUMP EVENT "+fAdr;
+		return "JUMP EVENT " + fAdr;
 	}
 
 }

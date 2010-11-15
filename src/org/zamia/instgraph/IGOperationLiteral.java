@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -162,12 +162,6 @@ public class IGOperationLiteral extends IGOperation {
 	@Override
 	public void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
 		aCode.add(new IGPushStmt(this, computeSourceLocation(), getZDB()));
-	}
-
-	@Override
-	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		// FIXME: implement
-		throw new ZamiaException("Sorry, not implemented yet.");
 	}
 
 	@Override

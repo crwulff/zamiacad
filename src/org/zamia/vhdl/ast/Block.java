@@ -228,7 +228,7 @@ public class Block extends ConcurrentStatement {
 
 					blockContainer.addGeneric(igg);
 
-					env.newObject(igg, interf.getLocation());
+					env.newObject(igg, ASTErrorMode.EXCEPTION, null, interf.getLocation());
 
 				} catch (ZamiaException e) {
 					reportError(e);
@@ -257,7 +257,7 @@ public class Block extends ConcurrentStatement {
 			int n = generics.size();
 			for (int i = 0; i < n; i++) {
 				IGObject generic = generics.get(i);
-				env.newObject(generic, generic.computeSourceLocation());
+				env.newObject(generic, ASTErrorMode.EXCEPTION, null, generic.computeSourceLocation());
 			}
 
 			n = mappings.getNumMappings();
@@ -265,7 +265,7 @@ public class Block extends ConcurrentStatement {
 
 				IGMapping mapping = mappings.getMapping(i);
 
-				mapping.generateInstantiationCode(false, ic, getLocation());
+				mapping.generateCode(ic, getLocation());
 
 				//inst.addGeneric(mapping);
 			}
@@ -308,7 +308,7 @@ public class Block extends ConcurrentStatement {
 					blockContainer.addInterface((IGObject) igi);
 
 					if (igi instanceof IGObject) {
-						env.newObject((IGObject) igi, interf.getLocation());
+						env.newObject((IGObject) igi, ASTErrorMode.EXCEPTION, null, interf.getLocation());
 					}
 
 				} catch (ZamiaException e) {
@@ -348,7 +348,7 @@ public class Block extends ConcurrentStatement {
 				if (item != null) {
 					if (item instanceof IGObject) {
 						IGObject obj = (IGObject) item;
-						env.newObject(obj, decl.getLocation());
+						env.newObject(obj, ASTErrorMode.EXCEPTION, null, decl.getLocation());
 					}
 				}
 
@@ -367,7 +367,7 @@ public class Block extends ConcurrentStatement {
 			IGObject guardSignal = new IGObject(OIDir.NONE, null, IGObjectCat.SIGNAL, guardOp.getType(), "GUARD", fGuard.getLocation(), aEE.getZDB());
 
 			blockContainer.add(guardSignal);
-			env.newObject(guardSignal, fGuard.getLocation());
+			env.newObject(guardSignal, ASTErrorMode.EXCEPTION, null, fGuard.getLocation());
 
 			/*
 			 * let's simply turn this into a small process

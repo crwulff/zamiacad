@@ -150,7 +150,7 @@ public class IGSimAnnotator {
 
 				IGObjectCat cat = obj.getCat();
 
-				aEnv.newObject(obj, obj.computeSourceLocation());
+				aEnv.newObject(obj, ASTErrorMode.EXCEPTION, null, obj.computeSourceLocation());
 
 				if (cat == IGObjectCat.SIGNAL && obj.getDirection() == OIDir.NONE) {
 					PathName signalName = aPathPrefix.append(obj.getId());
@@ -198,7 +198,7 @@ public class IGSimAnnotator {
 
 				IGMapping mapping = struct.getMapping(j);
 
-				mapping.generateInstantiationCode(true, ic, mapping.computeSourceLocation());
+				mapping.generateCode(ic, mapping.computeSourceLocation());
 			}
 
 			try {
@@ -238,7 +238,7 @@ public class IGSimAnnotator {
 
 					try {
 						IGMapping mapping = inst.getMapping(j);
-						mapping.generateInstantiationCode(true, ic, null);
+						mapping.generateCode(ic, null);
 					} catch (Throwable t) {
 						el.logException(t);
 					}

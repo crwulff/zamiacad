@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -7,8 +7,6 @@
  * Created by Guenter Bartsch on Sep 3, 2009
  */
 package org.zamia.instgraph.interpreter;
-
-import java.math.BigInteger;
 
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;

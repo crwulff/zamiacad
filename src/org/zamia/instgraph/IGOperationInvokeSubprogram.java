@@ -19,7 +19,6 @@ import org.zamia.instgraph.interpreter.IGNewObjectStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -44,15 +43,15 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 
 	@Override
 	public void computeAccessedItems(boolean aLeftSide, IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
-		
+
 		if (fMappings == null) {
 			return;
 		}
-		
+
 		int n = fMappings.getNumMappings();
-		
-		for (int i = 0; i<n; i++) {
-			
+
+		for (int i = 0; i < n; i++) {
+
 			IGMapping mapping = fMappings.getMapping(i);
 
 			IGOperation formal = mapping.getFormal();
@@ -63,11 +62,11 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 				el.logException(e);
 			}
 			boolean formalIsLeftSide = dir == OIDir.IN;
-			
+
 			mapping.getFormal().computeAccessedItems(formalIsLeftSide, aFilterItem, aFilterType, aDepth, aAccessedItems);
 			mapping.getActual().computeAccessedItems(!formalIsLeftSide, aFilterItem, aFilterType, aDepth, aAccessedItems);
 		}
-		
+
 	}
 
 	@Override
@@ -83,17 +82,14 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 
 		int n = subContainer.getNumLocalItems();
 		for (int i = 0; i < n; i++) {
-			
+
 			IGContainerItem item = subContainer.getLocalItem(i);
-			
+
 			if (!(item instanceof IGObject)) {
 				continue;
 			}
-			
+
 			IGObject obj = (IGObject) item;
-//			if (obj.getInitialValue() == null) {
-//				continue;
-//			}
 			if (obj.getDirection() == OIDir.NONE) {
 				continue;
 			}
@@ -101,49 +97,16 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 		}
 
 		// map interfaces
-		
+
 		n = fMappings.getNumMappings();
 		for (int i = 0; i < n; i++) {
 			IGMapping mapping = fMappings.getMapping(i);
-			mapping.generateEntryCode(aCode, computeSourceLocation());
+			mapping.generateCode(aCode, computeSourceLocation());
 		}
 
-		// create and init local variables
-		
-		n = subContainer.getNumLocalItems();
-		for (int i = 0; i < n; i++) {
-			
-			IGContainerItem item = subContainer.getLocalItem(i);
-			
-			if (!(item instanceof IGObject)) {
-				continue;
-			}
-			
-			IGObject obj = (IGObject) item;
-//			if (obj.getInitialValue() == null) {
-//				continue;
-//			}
-			if (obj.getDirection() != OIDir.NONE) {
-				continue;
-			}
-			aCode.add(new IGNewObjectStmt(obj, computeSourceLocation(), getZDB()));
-		}
-		
 		aCode.add(new IGCallStmt(fSP, computeSourceLocation(), getZDB()));
 
-		n = fMappings.getNumMappings();
-		for (int i = 0; i < n; i++) {
-			IGMapping mapping = fMappings.getMapping(i);
-			mapping.generateExitCode(aCode, computeSourceLocation());
-		}
-
 		aCode.add(new IGExitContextStmt(computeSourceLocation(), getZDB()));
-	}
-
-	@Override
-	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		// FIXME
-		throw new ZamiaException("Sorry, not implemented yet.");
 	}
 
 	@Override
@@ -174,7 +137,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 		}
 
 		buf.append(")");
-		
+
 		return buf.toString();
 	}
 

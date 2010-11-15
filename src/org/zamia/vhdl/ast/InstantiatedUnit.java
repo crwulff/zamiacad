@@ -279,7 +279,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 					n = generics.size();
 					for (int i = 0; i < n; i++) {
 						IGObject generic = generics.get(i);
-						env.newObject(generic, generic.computeSourceLocation());
+						env.newObject(generic, ASTErrorMode.EXCEPTION, null, generic.computeSourceLocation());
 					}
 
 					n = mappings.getNumMappings();
@@ -287,7 +287,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 
 						IGMapping mapping = mappings.getMapping(i);
 
-						mapping.generateInstantiationCode(false, ic, mapping.computeSourceLocation());
+						mapping.generateCode(ic, mapping.computeSourceLocation());
 
 						inst.addGeneric(mapping);
 					}

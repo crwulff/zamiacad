@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -59,7 +59,7 @@ public class IGOperationAttribute extends IGOperation {
 			aCode.add(new IGPushStmt((IGObject) fItem, computeSourceLocation(), getZDB()));
 		}
 
-		aCode.add(new IGAttributeStmt(fItem, getType(), fAttrOp, fOp != null, computeSourceLocation(), getZDB()));
+		aCode.add(new IGAttributeStmt(getType(), fAttrOp, fOp != null, computeSourceLocation(), getZDB()));
 
 	}
 
@@ -92,11 +92,6 @@ public class IGOperationAttribute extends IGOperation {
 	@Override
 	public String toString() {
 		return fItem.toString() + "'" + fAttrOp;
-	}
-
-	@Override
-	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		throw new ZamiaException("Cannot have attribute expression on the left side of an expression.", computeSourceLocation());
 	}
 
 	@Override

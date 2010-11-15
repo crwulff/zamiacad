@@ -17,7 +17,6 @@ import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -45,35 +44,46 @@ public class IGRangeOpStmt extends IGOpStmt {
 		case APPLY:
 
 			IGStackFrame rangeSF = aRuntime.pop();
-			IGStackFrame opSF = aRuntime.pop();
-
-			IGStaticValue v = opSF.getValue();
 			IGStaticValue r = rangeSF.getValue();
+
+			IGStackFrame opSF = aRuntime.pop();
 
 			rT = getType().computeStaticType(aRuntime, aErrorMode, aReport);
 			if (rT == null) {
 				return ReturnStatus.ERROR;
 			}
-			
-			IGStaticValueBuilder builder = new IGStaticValueBuilder(rT, null, computeSourceLocation());
 
-			int offset = builder.getArrayOffset();
+			IGObjectDriver driver = opSF.getObjectDriver();
+			if (driver != null) {
 
-			int left = (int) r.getLeft().getOrd();
-			int right = (int) r.getRight().getOrd();
-			boolean ascending = r.getAscending().isTrue();
+				IGObjectDriver rangeDriver = driver.getRange(r, rT, computeSourceLocation());
 
-			if (ascending) {
-				for (int i = left; i <= right; i++) {
-					builder.set(i - left + offset, v.getValue(i, computeSourceLocation()), computeSourceLocation());
-				}
+				aRuntime.push(rangeDriver);
+
 			} else {
-				for (int i = left; i >= right; i--) {
-					builder.set(i - right + offset, v.getValue(i, computeSourceLocation()), computeSourceLocation());
-				}
-			}
 
-			aRuntime.push(builder.buildConstant());
+				IGStaticValue v = opSF.getValue();
+
+				IGStaticValueBuilder builder = new IGStaticValueBuilder(rT, null, computeSourceLocation());
+
+				int offset = builder.getArrayOffset();
+
+				int left = (int) r.getLeft().getOrd();
+				int right = (int) r.getRight().getOrd();
+				boolean ascending = r.getAscending().isTrue();
+
+				if (ascending) {
+					for (int i = left; i <= right; i++) {
+						builder.set(i - left + offset, v.getValue(i, computeSourceLocation()), computeSourceLocation());
+					}
+				} else {
+					for (int i = left; i >= right; i--) {
+						builder.set(i - right + offset, v.getValue(i, computeSourceLocation()), computeSourceLocation());
+					}
+				}
+
+				aRuntime.push(builder.buildConstant());
+			}
 			break;
 
 		case CREATE:
@@ -88,8 +98,24 @@ public class IGRangeOpStmt extends IGOpStmt {
 			if (rT == null) {
 				return ReturnStatus.ERROR;
 			}
-			
-			builder = new IGStaticValueBuilder(rT, null, computeSourceLocation());
+
+			SourceLocation location = computeSourceLocation();
+
+			IGStaticValueBuilder builder = new IGStaticValueBuilder(rT, null, location);
+
+			IGStaticValue l = leftSF.getValue();
+			r = rightSF.getValue();
+			IGStaticValue a = ascendingSF.getValue();
+
+			if (!checkParam(l, aErrorMode, aReport, location)) {
+				return ReturnStatus.ERROR;
+			}
+			if (!checkParam(a, aErrorMode, aReport, location)) {
+				return ReturnStatus.ERROR;
+			}
+			if (!checkParam(r, aErrorMode, aReport, location)) {
+				return ReturnStatus.ERROR;
+			}
 
 			builder.setLeft(leftSF.getValue());
 			builder.setAscending(ascendingSF.getValue());
@@ -119,6 +145,24 @@ public class IGRangeOpStmt extends IGOpStmt {
 		}
 
 		return ReturnStatus.CONTINUE;
+	}
+
+	private boolean checkParam(IGStaticValue aV, ASTErrorMode aErrorMode, ErrorReport aReport, SourceLocation aLocation) throws ZamiaException {
+
+		if (aV != null)
+			return true;
+
+		ZamiaException e = new ZamiaException("Parameter null", aLocation);
+
+		if (aErrorMode == ASTErrorMode.EXCEPTION) {
+			throw e;
+		}
+
+		if (aReport != null) {
+			aReport.append(e);
+		}
+
+		return false;
 	}
 
 	@Override

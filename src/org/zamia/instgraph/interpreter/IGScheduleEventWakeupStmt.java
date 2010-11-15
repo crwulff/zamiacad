@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -11,11 +11,8 @@ package org.zamia.instgraph.interpreter;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
-import org.zamia.instgraph.IGObject;
-import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * 
@@ -34,15 +31,13 @@ public class IGScheduleEventWakeupStmt extends IGStmt {
 
 		IGStackFrame sf = aRuntime.pop();
 
-		IGObjectWriter ow = sf.getObjectWriter();
+		IGObjectDriver driver = sf.getObjectDriver();
 
-		IGObject obj = ow.getObject();
-
-		if (obj == null || obj.getCat() != IGObjectCat.SIGNAL) {
-			throw new ZamiaException("Internal error: signal expected in sensitivity list, found: " + obj, computeSourceLocation());
+		if (driver == null) {
+			throw new ZamiaException("Internal error: signal expected in sensitivity list, found: " + sf, computeSourceLocation());
 		}
 
-		aRuntime.scheduleWakeup(obj, computeSourceLocation());
+		aRuntime.scheduleWakeup(driver, computeSourceLocation());
 
 		return ReturnStatus.CONTINUE;
 	}

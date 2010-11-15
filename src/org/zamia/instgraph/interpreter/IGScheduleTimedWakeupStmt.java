@@ -36,7 +36,7 @@ public class IGScheduleTimedWakeupStmt extends IGStmt {
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
 		IGStackFrame sf = aRuntime.pop();
-		IGStaticValue staticValue = sf.getLiteral();
+		IGStaticValue staticValue = sf.getValue();
 
 		BigInteger t = staticValue.getNum();
 		BigInteger currentTime = aRuntime.getCurrentTime(computeSourceLocation());

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2008-2009 by the authors indicated in the @author tags. 
+ * Copyright 2008-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -25,12 +25,8 @@ public class IGStackFrame  {
 
 	private IGTypeStatic fType;
 	
-	private IGObjectWriter fWriter;
+	private IGObjectDriver fDriver;
 	
-	public IGStaticValue getLiteral() {
-		return fValue;
-	}
-
 	public IGStackFrame(IGStaticValue aValue) {
 		fValue = aValue;
 	}
@@ -39,8 +35,8 @@ public class IGStackFrame  {
 		fType = aType;
 	}
 
-	public IGStackFrame(IGObjectWriter aWriter) {
-		fWriter = aWriter;
+	public IGStackFrame(IGObjectDriver aDriver) {
+		fDriver = aDriver;
 	}
 
 	public IGStaticValue getValue() throws ZamiaException {
@@ -48,6 +44,10 @@ public class IGStackFrame  {
 		if (fValue != null) {
 			return fValue;
 		}
+		if (fDriver != null) {
+			return fDriver.getValue();
+		}
+		
 		throw new ZamiaException("StackFrame.getValue(): Internal error - empty.");
 	}
 
@@ -74,13 +74,13 @@ public class IGStackFrame  {
 			return "SF Type "+fType;
 		if (fValue != null)
 			return "SF Value "+fValue;
-		if (fWriter != null)
-			return "SF Writer "+fWriter;
+		if (fDriver != null)
+			return "SF "+fDriver;
 		return "SF VOID ?";
 	}
 
-	public IGObjectWriter getObjectWriter() {
-		return fWriter;
+	public IGObjectDriver getObjectDriver() {
+		return fDriver;
 	}
 
 }

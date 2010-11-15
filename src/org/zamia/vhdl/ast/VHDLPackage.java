@@ -141,7 +141,7 @@ public class VHDLPackage extends PrimaryUnit {
 
 				if (item instanceof IGObject) {
 					IGObject obj = (IGObject) item;
-					env.newObject(obj, decl.getLocation());
+					env.newObject(obj, ASTErrorMode.EXCEPTION, null, decl.getLocation());
 				}
 			} catch (ZamiaException e) {
 				reportError(e);

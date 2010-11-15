@@ -15,11 +15,9 @@ import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGRangeOpStmt;
-import org.zamia.instgraph.interpreter.IGRangeRefOpStmt;
 import org.zamia.instgraph.interpreter.IGRangeOpStmt.IGRangeOp;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * 
@@ -44,14 +42,6 @@ public class IGOperationRange extends IGOperation {
 		fOp.generateCode(aFromInside, aCode);
 		fRange.generateCode(aFromInside, aCode);
 		aCode.add(new IGRangeOpStmt(IGRangeOp.APPLY, getType(), computeSourceLocation(), getZDB()));
-	}
-
-	@Override
-	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		IGObject obj = fOp.generateCodeRef(aFromInside, true, aCode);
-		fRange.generateCode(aFromInside, aCode);
-		aCode.add(new IGRangeRefOpStmt(getType(), computeSourceLocation(), getZDB()));
-		return obj;
 	}
 
 	@Override

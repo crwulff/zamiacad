@@ -1,5 +1,5 @@
 /* 
- * Copyright 2008-2009 by the authors indicated in the @author tags. 
+ * Copyright 2008-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -96,12 +96,6 @@ public class IGOperationRecordAggregate extends IGOperation {
 		}
 
 		aCode.add(new IGRecordAggregateStmt(fields, getType(), computeSourceLocation(), getZDB()));
-	}
-
-	@Override
-	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		// FIXME
-		throw new ZamiaException("IGOperationRecordAggregate: generateCodeRef(): Sorry, not implemented yet.", computeSourceLocation());
 	}
 
 	@Override

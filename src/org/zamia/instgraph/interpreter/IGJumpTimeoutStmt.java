@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -31,7 +31,7 @@ public class IGJumpTimeoutStmt extends IGJumpStmt {
 	@Override
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 		IGStackFrame stackFrame = aRuntime.pop();
-		BigInteger timeout = stackFrame.getLiteral().getNum();
+		BigInteger timeout = stackFrame.getValue().getNum();
 
 		BigInteger simTime = aRuntime.getCurrentTime(computeSourceLocation());
 

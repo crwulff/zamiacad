@@ -113,39 +113,45 @@ public class IGTest {
 	//	}
 
 	@Test
-	public void testPG99Z48() throws Exception {
+	public void testAlias1() throws Exception {
 
-		runTest("examples/pg99", "BuildPath_z48_tb.txt", 11);
+		runTest("examples/semantic/alias1Test", 1);
 	}
 
 	@Test
-	public void testPG99() throws Exception {
+	public void testSubProgram7() throws Exception {
 
-		runTest("examples/pg99", 1866);
+		runTest("examples/semantic/subProgramTest7", 1);
 	}
 
 	@Test
-	public void testJOP() throws Exception {
+	public void testSubProgram6() throws Exception {
 
-		runTest("examples/jop", 288);
+		runTest("examples/semantic/subProgramTest6", 1);
 	}
 
 	@Test
-	public void testBP() throws Exception {
+	public void testArray() throws Exception {
 
-		runTest("examples/semantic/bpTest", 1933);
+		runTest("examples/semantic/arrayTest", 1);
 	}
 
 	@Test
-	public void testManik() throws Exception {
+	public void testSubProgram2() throws Exception {
 
-		runTest("examples/manik", 3257);
+		runTest("examples/semantic/subProgramTest2", 1);
 	}
 
 	@Test
-	public void testLeonExtern() throws Exception {
+	public void testConcat7() throws Exception {
 
-		runTest("examples/leonExtern", 1933);
+		runTest("examples/semantic/concat7Test", 1);
+	}
+
+	@Test
+	public void testConcat2() throws Exception {
+
+		runTest("examples/semantic/concat2Test", 1);
 	}
 
 	@Test
@@ -176,12 +182,6 @@ public class IGTest {
 	public void testVarDeclaration() throws Exception {
 
 		runTest("examples/semantic/varDeclarationTest", 1);
-	}
-
-	@Test
-	public void testLeon() throws Exception {
-
-		runTest("examples/leonSOC", 1933);
 	}
 
 	@Test
@@ -346,6 +346,24 @@ public class IGTest {
 		runTest("examples/semantic/aggregate3Test", 2);
 	}
 
+	@Test
+	public void testConcat3() throws Exception {
+
+		runTest("examples/semantic/concat3Test", 1);
+	}
+
+	@Test
+	public void testExpr() throws Exception {
+
+		runTest("examples/semantic/exprTest", 1);
+	}
+
+	@Test
+	public void testAttributes() throws Exception {
+
+		runTest("examples/semantic/attributeTest", 1);
+	}
+
 	// at the moment it is not clear whether this
 	// test is supposed to work or not
 	// ghdl doesn't like this one either:
@@ -366,9 +384,39 @@ public class IGTest {
 	}
 
 	@Test
-	public void testArray() throws Exception {
+	public void testAggregate() throws Exception {
 
-		runTest("examples/semantic/arrayTest", 1);
+		runTest("examples/semantic/aggregateTest", 1);
+	}
+
+	@Test
+	public void testTypeConversion() throws Exception {
+
+		runTest("examples/semantic/typeConversionTest", 1);
+	}
+
+	@Test
+	public void testBlock() throws Exception {
+
+		runTest("examples/semantic/blockTest", 2);
+	}
+
+	@Test
+	public void testPackages() throws Exception {
+
+		runTest("examples/leonpkg", 1);
+	}
+
+	@Test
+	public void testConcat() throws Exception {
+
+		runTest("examples/semantic/concatTest", 2);
+	}
+
+	@Test
+	public void testConstComputation() throws Exception {
+
+		runTest("examples/semantic/constTest", 3);
 	}
 
 	@Test
@@ -393,18 +441,6 @@ public class IGTest {
 	public void testVestsCh04() throws Exception {
 
 		runTest("examples/vests/vhdl-93/ashenden/compliant/ch04", 2);
-	}
-
-	@Test
-	public void testTypeConversion() throws Exception {
-
-		runTest("examples/semantic/typeConversionTest", 1);
-	}
-
-	@Test
-	public void testBlock() throws Exception {
-
-		runTest("examples/semantic/blockTest", 2);
 	}
 
 	@Test
@@ -450,24 +486,6 @@ public class IGTest {
 	}
 
 	@Test
-	public void testConcat3() throws Exception {
-
-		runTest("examples/semantic/concat3Test", 1);
-	}
-
-	@Test
-	public void testExpr() throws Exception {
-
-		runTest("examples/semantic/exprTest", 1);
-	}
-
-	@Test
-	public void testAttributes() throws Exception {
-
-		runTest("examples/semantic/attributeTest", 1);
-	}
-
-	@Test
 	public void testDDS() throws Exception {
 
 		runTest("examples/dds_synthesizer", 2);
@@ -483,36 +501,6 @@ public class IGTest {
 	public void testHapra() throws Exception {
 
 		runTest("examples/hapra", 18);
-	}
-
-	@Test
-	public void testAggregate() throws Exception {
-
-		runTest("examples/semantic/aggregateTest", 1);
-	}
-
-	@Test
-	public void testConcat2() throws Exception {
-
-		runTest("examples/semantic/concat2Test", 1);
-	}
-
-	@Test
-	public void testSubProgram2() throws Exception {
-
-		runTest("examples/semantic/subProgramTest2", 1);
-	}
-
-	@Test
-	public void testConstComputation() throws Exception {
-
-		runTest("examples/semantic/constTest", 3);
-	}
-
-	@Test
-	public void testPackages() throws Exception {
-
-		runTest("examples/leonpkg", 1);
 	}
 
 	@Test
@@ -534,12 +522,6 @@ public class IGTest {
 	}
 
 	@Test
-	public void testConcat() throws Exception {
-
-		runTest("examples/semantic/concatTest", 2);
-	}
-
-	@Test
 	public void testPlasma() throws Exception {
 
 		runTest("examples/plasma", 14);
@@ -550,4 +532,46 @@ public class IGTest {
 
 		runTest("examples/add4", 13);
 	}
+	@Test
+	public void testPG99Z48() throws Exception {
+
+		runTest("examples/pg99", "BuildPath_z48_tb.txt", 11);
+	}
+
+	@Test
+	public void testPG99() throws Exception {
+
+		runTest("examples/pg99", 1866);
+	}
+
+	@Test
+	public void testJOP() throws Exception {
+
+		runTest("examples/jop", 288);
+	}
+
+	@Test
+	public void testBP() throws Exception {
+
+		runTest("examples/semantic/bpTest", 1933);
+	}
+
+	@Test
+	public void testManik() throws Exception {
+
+		runTest("examples/manik", 3257);
+	}
+
+	@Test
+	public void testLeon() throws Exception {
+
+		runTest("examples/leonSOC", 1933);
+	}
+
+	@Test
+	public void testLeonExtern() throws Exception {
+
+		runTest("examples/leonExtern", 1933);
+	}
+	
 }

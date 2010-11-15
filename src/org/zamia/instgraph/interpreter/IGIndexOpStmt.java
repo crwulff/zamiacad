@@ -14,7 +14,6 @@ import org.zamia.instgraph.IGStaticValue;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -35,11 +34,24 @@ public class IGIndexOpStmt extends IGStmt {
 		IGStaticValue opIdx = sfIdx.getValue();
 
 		IGStackFrame sf = aRuntime.pop();
-		IGStaticValue op = sf.getValue();
 
-		IGStaticValue resValue = op.getValue((int) opIdx.getOrd(), computeSourceLocation());
+		int idx = (int) opIdx.getOrd();
 
-		aRuntime.push(resValue);
+		IGObjectDriver driver = sf.getObjectDriver();
+		if (driver != null) {
+
+			driver = driver.getChild(idx, computeSourceLocation());
+
+			aRuntime.push(driver);
+			
+		} else {
+
+			IGStaticValue op = sf.getValue();
+
+			IGStaticValue resValue = op.getValue(idx, computeSourceLocation());
+
+			aRuntime.push(resValue);
+		}
 
 		return ReturnStatus.CONTINUE;
 

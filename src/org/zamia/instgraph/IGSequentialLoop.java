@@ -14,12 +14,14 @@ import org.zamia.instgraph.IGOperationAttribute.AttrOp;
 import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.interpreter.IGAttributeStmt;
 import org.zamia.instgraph.interpreter.IGBinaryOpStmt;
+import org.zamia.instgraph.interpreter.IGEnterNewContextStmt;
+import org.zamia.instgraph.interpreter.IGExitContextStmt;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGJumpNCStmt;
 import org.zamia.instgraph.interpreter.IGJumpStmt;
 import org.zamia.instgraph.interpreter.IGLabel;
+import org.zamia.instgraph.interpreter.IGNewObjectStmt;
 import org.zamia.instgraph.interpreter.IGPopStmt;
-import org.zamia.instgraph.interpreter.IGPushRefStmt;
 import org.zamia.instgraph.interpreter.IGPushStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
@@ -95,6 +97,8 @@ public class IGSequentialLoop extends IGSequentialStatement {
 	@Override
 	public void generateCode(IGInterpreterCode aCode) throws ZamiaException {
 
+		SourceLocation location = computeSourceLocation();
+		
 		IGLabel loopExitLabel = new IGLabel();
 
 		String loopLabel = getId();
@@ -112,14 +116,17 @@ public class IGSequentialLoop extends IGSequentialStatement {
 
 			IGType b = getContainer().findBoolType();
 			IGObject param = getParameter();
-			IGOperation one = param.getType().getOne(computeSourceLocation());
+			IGOperation one = param.getType().getOne(location);
 
 			// init loop var
 
-			aCode.add(new IGPushRefStmt(param, computeSourceLocation(), getZDB()));
+			aCode.add(new IGEnterNewContextStmt(location, getZDB()));
+			aCode.add(new IGNewObjectStmt(param, location, getZDB()));
+			
+			aCode.add(new IGPushStmt(param, location, getZDB()));
 			fRange.generateCode(true, aCode);
-			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.LEFT, false, computeSourceLocation(), getZDB()));
-			aCode.add(new IGPopStmt(false, false, false, computeSourceLocation(), getZDB()));
+			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.LEFT, false, location, getZDB()));
+			aCode.add(new IGPopStmt(false, false, false, location, getZDB()));
 
 			// loop header: check boundaries
 
@@ -127,23 +134,23 @@ public class IGSequentialLoop extends IGSequentialStatement {
 			aCode.defineLabel(loop);
 			IGLabel lhdesc = new IGLabel();
 			fRange.generateCode(true, aCode);
-			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.ASCENDING, false, computeSourceLocation(), getZDB()));
-			aCode.add(new IGJumpNCStmt(lhdesc, computeSourceLocation(), getZDB()));
+			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.ASCENDING, false, location, getZDB()));
+			aCode.add(new IGJumpNCStmt(lhdesc, location, getZDB()));
 
-			aCode.add(new IGPushStmt(getParameter(), computeSourceLocation(), getZDB()));
+			aCode.add(new IGPushStmt(getParameter(), location, getZDB()));
 			fRange.generateCode(true, aCode);
-			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.RIGHT, false, computeSourceLocation(), getZDB()));
-			aCode.add(new IGBinaryOpStmt(BinOp.LESSEQ, b, computeSourceLocation(), getZDB()));
-			aCode.add(new IGJumpNCStmt(loopExitLabel, computeSourceLocation(), getZDB()));
+			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.RIGHT, false, location, getZDB()));
+			aCode.add(new IGBinaryOpStmt(BinOp.LESSEQ, b, location, getZDB()));
+			aCode.add(new IGJumpNCStmt(loopExitLabel, location, getZDB()));
 			IGLabel loopbody = new IGLabel();
-			aCode.add(new IGJumpStmt(loopbody, computeSourceLocation(), getZDB()));
+			aCode.add(new IGJumpStmt(loopbody, location, getZDB()));
 
 			aCode.defineLabel(lhdesc);
-			aCode.add(new IGPushStmt(getParameter(), computeSourceLocation(), getZDB()));
+			aCode.add(new IGPushStmt(getParameter(), location, getZDB()));
 			fRange.generateCode(true, aCode);
-			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.RIGHT, false, computeSourceLocation(), getZDB()));
-			aCode.add(new IGBinaryOpStmt(BinOp.GREATEREQ, b, computeSourceLocation(), getZDB()));
-			aCode.add(new IGJumpNCStmt(loopExitLabel, computeSourceLocation(), getZDB()));
+			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.RIGHT, false, location, getZDB()));
+			aCode.add(new IGBinaryOpStmt(BinOp.GREATEREQ, b, location, getZDB()));
+			aCode.add(new IGJumpNCStmt(loopExitLabel, location, getZDB()));
 
 			// loop body:
 
@@ -154,24 +161,27 @@ public class IGSequentialLoop extends IGSequentialStatement {
 
 			IGLabel lfdesc = new IGLabel();
 			fRange.generateCode(true, aCode);
-			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.ASCENDING, false, computeSourceLocation(), getZDB()));
-			aCode.add(new IGJumpNCStmt(lfdesc, computeSourceLocation(), getZDB()));
+			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.ASCENDING, false, location, getZDB()));
+			aCode.add(new IGJumpNCStmt(lfdesc, location, getZDB()));
 
-			aCode.add(new IGPushRefStmt(getParameter(), computeSourceLocation(), getZDB()));
-			aCode.add(new IGPushStmt(getParameter(), computeSourceLocation(), getZDB()));
+			aCode.add(new IGPushStmt(getParameter(), location, getZDB()));
+			aCode.add(new IGPushStmt(getParameter(), location, getZDB()));
 			one.generateCode(true, aCode);
-			aCode.add(new IGBinaryOpStmt(BinOp.ADD, getParameter().getType(), computeSourceLocation(), getZDB()));
-			aCode.add(new IGPopStmt(false, false, false, computeSourceLocation(), getZDB()));
-			aCode.add(new IGJumpStmt(loop, computeSourceLocation(), getZDB()));
+			aCode.add(new IGBinaryOpStmt(BinOp.ADD, getParameter().getType(), location, getZDB()));
+			aCode.add(new IGPopStmt(false, false, false, location, getZDB()));
+			aCode.add(new IGJumpStmt(loop, location, getZDB()));
 
 			aCode.defineLabel(lfdesc);
 
-			aCode.add(new IGPushRefStmt(getParameter(), computeSourceLocation(), getZDB()));
-			aCode.add(new IGPushStmt(getParameter(), computeSourceLocation(), getZDB()));
+			aCode.add(new IGPushStmt(getParameter(), location, getZDB()));
+			aCode.add(new IGPushStmt(getParameter(), location, getZDB()));
 			one.generateCode(true, aCode);
-			aCode.add(new IGBinaryOpStmt(BinOp.SUB, getParameter().getType(), computeSourceLocation(), getZDB()));
-			aCode.add(new IGPopStmt(false, false, false, computeSourceLocation(), getZDB()));
-			aCode.add(new IGJumpStmt(loop, computeSourceLocation(), getZDB()));
+			aCode.add(new IGBinaryOpStmt(BinOp.SUB, getParameter().getType(), location, getZDB()));
+			aCode.add(new IGPopStmt(false, false, false, location, getZDB()));
+			aCode.add(new IGJumpStmt(loop, location, getZDB()));
+
+			aCode.defineLabel(loopExitLabel);
+			aCode.add(new IGExitContextStmt(location, getZDB()));
 
 			break;
 
@@ -182,7 +192,10 @@ public class IGSequentialLoop extends IGSequentialStatement {
 
 			fBody.generateCode(aCode);
 
-			aCode.add(new IGJumpStmt(loop, computeSourceLocation(), getZDB()));
+			aCode.add(new IGJumpStmt(loop, location, getZDB()));
+			
+			aCode.defineLabel(loopExitLabel);
+
 			break;
 
 		case WHILE:
@@ -191,11 +204,13 @@ public class IGSequentialLoop extends IGSequentialStatement {
 			aCode.defineLabel(loop);
 
 			fCond.generateCode(true, aCode);
-			aCode.add(new IGJumpNCStmt(loopExitLabel, computeSourceLocation(), getZDB()));
+			aCode.add(new IGJumpNCStmt(loopExitLabel, location, getZDB()));
 
 			fBody.generateCode(aCode);
 
-			aCode.add(new IGJumpStmt(loop, computeSourceLocation(), getZDB()));
+			aCode.add(new IGJumpStmt(loop, location, getZDB()));
+
+			aCode.defineLabel(loopExitLabel);
 
 			break;
 
@@ -206,7 +221,6 @@ public class IGSequentialLoop extends IGSequentialStatement {
 
 		aCode.removeLoopExitLabel(loopLabel);
 
-		aCode.defineLabel(loopExitLabel);
 
 	}
 

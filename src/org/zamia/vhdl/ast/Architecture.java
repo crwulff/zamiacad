@@ -401,7 +401,7 @@ public class Architecture extends SecondaryUnit {
 				IGContainerItem item = decl.computeIG(null, container, cache);
 				if (item instanceof IGObject) {
 					IGObject obj = (IGObject) item;
-					env.newObject(obj, decl.getLocation());
+					env.newObject(obj, ASTErrorMode.EXCEPTION, null, decl.getLocation());
 				}
 			} catch (ZamiaException e) {
 				reportError(e);

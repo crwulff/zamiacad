@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -39,15 +39,17 @@ public class IGAliasOpStmt extends IGOpStmt {
 		IGTypeStatic t2 = v2.getStaticType();
 		IGTypeStatic t = getType().computeStaticType(aRuntime, ASTErrorMode.EXCEPTION, null);
 		
-		IGStaticValueBuilder b = new IGStaticValueBuilder(t, null, computeSourceLocation());
-
-		IGTypeStatic idx2 = t2.getStaticIndexType(computeSourceLocation());
+		SourceLocation location = computeSourceLocation();
 		
-		int off2 = (int) idx2.getStaticLow(computeSourceLocation()).getOrd();
-		int card2 = (int) idx2.computeCardinality(computeSourceLocation());
+		IGStaticValueBuilder b = new IGStaticValueBuilder(t, null, location);
+
+		IGTypeStatic idx2 = t2.getStaticIndexType(location);
+		
+		int off2 = (int) idx2.getStaticLow(location).getOrd();
+		int card2 = (int) idx2.computeCardinality(location);
 		int off1 = b.getArrayOffset();
 		for (int i = off2; i<off2+card2; i++) {
-			b.set(i-off2+off1, v2.getValue(i, computeSourceLocation()), computeSourceLocation());
+			b.set(i-off2+off1, v2.getValue(i, location), location);
 		}
 
 		aRuntime.push(b.buildConstant());

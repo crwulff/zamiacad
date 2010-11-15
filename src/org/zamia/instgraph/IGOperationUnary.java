@@ -17,7 +17,6 @@ import org.zamia.instgraph.interpreter.IGUnaryOpStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -67,11 +66,6 @@ public class IGOperationUnary extends IGOperation {
 	@Override
 	public String toString() {
 		return fUnaryOp + " " + fA.toString();
-	}
-
-	@Override
-	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		throw new ZamiaException("Operation not permitted on left hand side");
 	}
 
 	@Override

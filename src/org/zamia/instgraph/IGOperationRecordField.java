@@ -13,10 +13,8 @@ import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGRecordFieldOpStmt;
-import org.zamia.instgraph.interpreter.IGRecordFieldRefOpStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * 
@@ -47,13 +45,6 @@ public class IGOperationRecordField extends IGOperation {
 	public void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
 		fOp.generateCode(aFromInside, aCode);
 		aCode.add(new IGRecordFieldOpStmt(fRF, computeSourceLocation(), getZDB()));
-	}
-
-	@Override
-	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		IGObject obj = fOp.generateCodeRef(aFromInside, true, aCode);
-		aCode.add(new IGRecordFieldRefOpStmt(fRF, computeSourceLocation(), getZDB()));
-		return obj;
 	}
 
 	@Override

@@ -13,7 +13,6 @@ import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.interpreter.IGIndexOpStmt;
-import org.zamia.instgraph.interpreter.IGIndexRefOpStmt;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
@@ -61,15 +60,6 @@ public class IGOperationIndex extends IGOperation {
 			return fOp;
 		}
 		return fOp;
-	}
-
-	@Override
-	public IGObject generateCodeRef(boolean aFromInside, boolean aCheckDirection, IGInterpreterCode aCode) throws ZamiaException {
-		IGObject obj = fOp.generateCodeRef(aFromInside, true, aCode);
-		fIdx.generateCode(aFromInside, aCode);
-
-		aCode.add(new IGIndexRefOpStmt(computeSourceLocation(), getZDB()));
-		return obj;
 	}
 
 	@Override

@@ -61,10 +61,26 @@ public class IGPopStmt extends IGStmt {
 
 		IGStackFrame targetSF = aRuntime.pop();
 
-		IGObjectWriter ow = targetSF.getObjectWriter();
+		IGObjectDriver driver = targetSF.getObjectDriver();
 
-		ow.setValue(valueSF.getValue());
-		ow.schedule(fInertial, delay, reject, aRuntime);
+		if (driver == null) {
+			throw new ZamiaException("IGPopStmt: Invalid target", computeSourceLocation());
+		}
+
+		IGStaticValue v = valueSF.getValue();
+		if (v == null) {
+			ZamiaException e = new ZamiaException("IGMapStmt: actual is unitialized.", computeSourceLocation());
+			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
+				if (aReport != null) {
+					aReport.append(e);
+				}
+				return ReturnStatus.ERROR;
+			} else {
+				throw e;
+			}
+		}
+
+		driver.schedule(fInertial, delay, reject, v, aRuntime, computeSourceLocation());
 
 		return ReturnStatus.CONTINUE;
 	}

@@ -38,7 +38,7 @@ public class IGNewObjectStmt extends IGStmt {
 		
 		IGObject obj = (IGObject) getZDB().load(fObjectDBID);
 		
-		aRuntime.newObject(obj, computeSourceLocation());
+		aRuntime.newObject(obj, ASTErrorMode.EXCEPTION, null, computeSourceLocation());
 		
 		return ReturnStatus.CONTINUE;
 	}
