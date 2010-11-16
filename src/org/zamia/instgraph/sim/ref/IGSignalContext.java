@@ -1,5 +1,6 @@
 package org.zamia.instgraph.sim.ref;
 
+import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.interpreter.IGInterpreterContext;
 
@@ -25,7 +26,7 @@ public class IGSignalContext {
 		return fSignalContext;
 	}
 
-	public IGStaticValue getValue() {
+	public IGStaticValue getValue() throws ZamiaException {
 		return fSignalContext.getObjectValue(fSignalDBID);
 	}
 }

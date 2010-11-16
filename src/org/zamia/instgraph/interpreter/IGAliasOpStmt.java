@@ -42,7 +42,7 @@ public class IGAliasOpStmt extends IGOpStmt {
 		IGObjectDriver driver = sf.getObjectDriver();
 		if (driver != null) {
 			
-			IGObjectDriver aliasDriver = driver.getAlias(t, location);
+			IGObjectDriver aliasDriver = driver.createAliasDriver(t, location);
 
 			if (IGInterpreterRuntimeEnv.dump) {
 				logger.debug ("Interpreter: result of driver alias op: %s", aliasDriver);

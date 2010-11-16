@@ -63,13 +63,13 @@ public class IGInterpreterContext implements Serializable {
 		return fDrivers.get(aDBID);
 	}
 
-	public IGStaticValue getObjectValue(long aDBID) {
+	public IGStaticValue getObjectValue(long aDBID) throws ZamiaException {
 		IGObjectDriver driver = fDrivers.get(aDBID);
 
 		if (driver == null)
 			return null;
 
-		return driver.getValue();
+		return driver.getValue(null);
 	}
 
 	public void setObjectValue(IGInterpreterObject aObject, IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {

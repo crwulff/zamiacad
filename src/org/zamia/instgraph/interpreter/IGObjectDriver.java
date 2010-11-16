@@ -53,9 +53,17 @@ public class IGObjectDriver implements Serializable {
 
 	private final IGObjectCat fCat;
 
+	private OIDir fDir;
+
 	private IGObjectDriver fMappedTo = null;
 
-	private OIDir fDir;
+	private IGTypeStatic fAliasedType = null;
+
+	private IGTypeStatic fRangeType = null;
+
+	private IGStaticValue fRange = null;
+
+	private int fIdxOffset = 0;
 
 	// for logging/debugging purposes only:
 	private final String fId;
@@ -77,7 +85,7 @@ public class IGObjectDriver implements Serializable {
 			fArrayElementDrivers = new ArrayList<IGObjectDriver>();
 
 			adaptArraySize(aLocation);
-			
+
 		} else if (fDeclaredType.isRecord()) {
 
 			int n = fDeclaredType.getNumRecordFields(aLocation);
@@ -98,7 +106,39 @@ public class IGObjectDriver implements Serializable {
 
 	public void setValue(IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
 		if (fMappedTo != null) {
-			fMappedTo.setValue(aValue, aLocation);
+
+			if (fRangeType != null) {
+
+				int rangeL = (int) fRange.getLeft().getOrd();
+				int rangeR = (int) fRange.getRight().getOrd();
+				boolean rangeA = fRange.getAscending().isTrue();
+				int rangeMin = rangeA ? rangeL : rangeR;
+				int rangeMax = rangeA ? rangeR : rangeL;
+
+				IGTypeStatic srcType = aValue.getStaticType();
+
+				IGTypeStatic srcIdxType = srcType.getStaticIndexType(aLocation);
+				int srcL = (int) srcIdxType.getStaticLeft(aLocation).getOrd();
+				int srcR = (int) srcIdxType.getStaticRight(aLocation).getOrd();
+				boolean srcA = srcIdxType.getStaticAscending().isTrue();
+				int srcOff = srcA ? srcL : srcR;
+
+				for (int i = rangeMin; i <= rangeMax; i++) {
+
+					IGStaticValue v = aValue.getValue(i - rangeMin + srcOff, aLocation);
+
+					IGObjectDriver elementDriver = fMappedTo.getArrayElementDriver(i, aLocation);
+
+					elementDriver.setValue(v, aLocation);
+
+				}
+
+			} else {
+				
+				fMappedTo.setValue(aValue, aLocation);
+				
+			}
+			
 			return;
 		}
 
@@ -119,19 +159,59 @@ public class IGObjectDriver implements Serializable {
 			int l = (int) idxT.getStaticLeft(aLocation).getOrd();
 			int r = (int) idxT.getStaticRight(aLocation).getOrd();
 			boolean a = idxT.getStaticAscending().isTrue();
-			int off = a ? l : r;
+			fIdxOffset = a ? l : r;
 
 			IGTypeStatic elementType = fCurrentType.getStaticElementType(aLocation);
 
 			int n = fArrayElementDrivers.size();
 			while (n < card) {
-				int idx = off + n;
+				int idx = fIdxOffset + n;
 
 				fArrayElementDrivers.add(new IGObjectDriver(fId + "(" + idx + ")", fDir, fCat, this, elementType, aLocation));
 				n++;
 			}
 		}
 
+	}
+
+	private IGStaticValue shiftIndex(IGTypeStatic aDestType, IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
+
+		IGStaticValue value = aValue;
+
+		IGTypeStatic srcType = value.getStaticType();
+
+		IGTypeStatic srcIdxType = srcType.getStaticIndexType(null);
+		int srcL = (int) srcIdxType.getStaticLeft(aLocation).getOrd();
+		int srcR = (int) srcIdxType.getStaticRight(aLocation).getOrd();
+		boolean srcA = srcIdxType.getStaticAscending().isTrue();
+		int srcOff = srcA ? srcL : srcR;
+		int srcCard = (int) srcIdxType.computeCardinality(null);
+
+		IGTypeStatic destIdxType = aDestType.getStaticIndexType(null);
+		int destL = (int) destIdxType.getStaticLeft(aLocation).getOrd();
+		int destR = (int) destIdxType.getStaticRight(aLocation).getOrd();
+		boolean destA = destIdxType.getStaticAscending().isTrue();
+		int destOff = destA ? destL : destR;
+		int destCard = (int) destIdxType.computeCardinality(null);
+
+		if (destCard != srcCard) {
+			throw new ZamiaException("Interpreter: error: tried to assign object from incompatible array value " + aValue + ": " + aDestType + " vs " + srcType, aLocation);
+		}
+
+		if (srcL != destL || srcR != destR || srcA != destA) {
+			// yes, time to shift the index
+
+			IGStaticValueBuilder builder = new IGStaticValueBuilder(aDestType, null, aLocation);
+
+			for (int i = 0; i < srcCard; i++) {
+				IGStaticValue v = aValue.getValue(i + srcOff, aLocation);
+				builder.set(i + destOff, v, aLocation);
+			}
+
+			value = builder.buildConstant();
+		}
+
+		return value;
 	}
 
 	protected void setValueInternal(IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
@@ -157,51 +237,20 @@ public class IGObjectDriver implements Serializable {
 
 			fValue = aValue;
 
+			// so we have to do an index shift?
+			if (!fDeclaredType.isUnconstrained() && fDeclaredType.getCat() != IGType.TypeCat.FILE && fDeclaredType.getCat() != IGType.TypeCat.ACCESS) {
+				fValue = shiftIndex(fDeclaredType, fValue, aLocation);
+			}
+
+			// update children
+
+			t = fValue.getStaticType();
 			IGTypeStatic idxT = t.getStaticIndexType(null);
 			int l = (int) idxT.getStaticLeft(aLocation).getOrd();
 			int r = (int) idxT.getStaticRight(aLocation).getOrd();
 			boolean a = idxT.getStaticAscending().isTrue();
 			int off = a ? l : r;
 			int c = (int) idxT.computeCardinality(null);
-
-			// so we have to do an index shift?
-			if (!fDeclaredType.isUnconstrained() && fDeclaredType.getCat() != IGType.TypeCat.FILE && fDeclaredType.getCat() != IGType.TypeCat.ACCESS) {
-
-				IGTypeStatic declaredIdxT = fDeclaredType.getStaticIndexType(null);
-				int declaredIdxLeft = (int) declaredIdxT.getStaticLeft(aLocation).getOrd();
-				int declaredIdxRight = (int) declaredIdxT.getStaticRight(aLocation).getOrd();
-				boolean declaredIdxAscending = declaredIdxT.getStaticAscending().isTrue();
-				int declaredOffset = declaredIdxAscending ? declaredIdxLeft : declaredIdxRight;
-				int oC = (int) declaredIdxT.computeCardinality(null);
-
-				if (oC != c) {
-					throw new ZamiaException("Interpreter: error: tried to assign object from incompatible array value " + aValue + ": " + fDeclaredType + " vs " + t, aLocation);
-				}
-
-				if (l != declaredIdxLeft || r != declaredIdxRight || a != declaredIdxAscending) {
-					// yes, time to shift the index
-
-					IGStaticValueBuilder builder = new IGStaticValueBuilder(fDeclaredType, null, aLocation);
-
-					for (int i = 0; i < c; i++) {
-						IGStaticValue v = aValue.getValue(i + off, aLocation);
-						builder.set(i + declaredOffset, v, aLocation);
-					}
-
-					fValue = builder.buildConstant();
-					
-					t = fValue.getStaticType();
-					idxT = t.getStaticIndexType(null);
-					l = (int) idxT.getStaticLeft(aLocation).getOrd();
-					r = (int) idxT.getStaticRight(aLocation).getOrd();
-					a = idxT.getStaticAscending().isTrue();
-					off = a ? l : r;
-					c = (int) idxT.computeCardinality(null);
-
-				}
-			}
-
-			// update children
 
 			for (int i = 0; i < c; i++) {
 				IGStaticValue v = fValue.getValue(i + off, aLocation);
@@ -226,9 +275,42 @@ public class IGObjectDriver implements Serializable {
 		}
 	}
 
-	public IGStaticValue getValue() {
+	public IGStaticValue getValue(SourceLocation aLocation) throws ZamiaException {
 		if (fMappedTo != null) {
-			return fMappedTo.getValue();
+			IGStaticValue value = fMappedTo.getValue(aLocation);
+
+			if (fAliasedType != null) {
+				value = shiftIndex(fAliasedType, value, aLocation);
+			}
+
+			if (fRangeType != null) {
+
+				int rangeL = (int) fRange.getLeft().getOrd();
+				int rangeR = (int) fRange.getRight().getOrd();
+				boolean rangeA = fRange.getAscending().isTrue();
+				int rangeMin = rangeA ? rangeL : rangeR;
+				int rangeMax = rangeA ? rangeR : rangeL;
+
+				IGTypeStatic destIdxType = fRangeType.getStaticIndexType(aLocation);
+				int destL = (int) destIdxType.getStaticLeft(aLocation).getOrd();
+				int destR = (int) destIdxType.getStaticRight(aLocation).getOrd();
+				boolean destA = destIdxType.getStaticAscending().isTrue();
+				int destOff = destA ? destL : destR;
+
+				IGStaticValueBuilder builder = new IGStaticValueBuilder(fRangeType, null, aLocation);
+
+				for (int i = rangeMin; i <= rangeMax; i++) {
+
+					IGStaticValue v = value.getValue(i, aLocation);
+
+					builder.set(i - rangeMin + destOff, v, aLocation);
+				}
+
+				value = builder.buildConstant();
+
+			}
+
+			return value;
 		}
 		return fValue;
 	}
@@ -258,12 +340,12 @@ public class IGObjectDriver implements Serializable {
 			IGStaticValueBuilder builder = new IGStaticValueBuilder(t, fId, aLocation);
 
 			for (int i = 0; i < c; i++) {
-				IGStaticValue v = fArrayElementDrivers.get(i).getValue();
-				
+				IGStaticValue v = fArrayElementDrivers.get(i).getValue(aLocation);
+
 				builder.set(i + off, v, aLocation);
 			}
-			
-			fValue = builder.buildConstant();;
+
+			fValue = builder.buildConstant();
 
 		} else if (fDeclaredType.isRecord()) {
 
@@ -273,11 +355,11 @@ public class IGObjectDriver implements Serializable {
 
 			for (int i = 0; i < n; i++) {
 
-				IGRecordField rf = fDeclaredType.getRecordField(i, null);
+				IGRecordField rf = fDeclaredType.getRecordField(i, aLocation);
 				String rfid = rf.getId();
 
-				IGStaticValue v = fRecordFieldDrivers.get(rfid).getValue();
-				
+				IGStaticValue v = fRecordFieldDrivers.get(rfid).getValue(aLocation);
+
 				builder.set(rf, v, aLocation);
 			}
 
@@ -329,17 +411,10 @@ public class IGObjectDriver implements Serializable {
 
 	public IGObjectDriver getArrayElementDriver(int aIdx, SourceLocation aLocation) throws ZamiaException {
 		if (fMappedTo != null) {
-			return fMappedTo.getArrayElementDriver(aIdx, aLocation);
+			return fMappedTo.getArrayElementDriver(aIdx - fIdxOffset, aLocation);
 		}
 
-		IGTypeStatic idxT = fCurrentType.getStaticIndexType(aLocation);
-
-		int l = (int) idxT.getStaticLeft(aLocation).getOrd();
-		int r = (int) idxT.getStaticRight(aLocation).getOrd();
-		boolean a = idxT.getStaticAscending().isTrue();
-		int off = a ? l : r;
-
-		return fArrayElementDrivers.get(aIdx - off);
+		return fArrayElementDrivers.get(aIdx - fIdxOffset);
 	}
 
 	public void schedule(boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGStaticValue aValue, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation)
@@ -365,114 +440,70 @@ public class IGObjectDriver implements Serializable {
 	}
 
 	public void map(IGObjectDriver aActual, SourceLocation aLocation) throws ZamiaException {
-
 		fMappedTo = aActual;
-
-		//		switch (fCat) {
-		//		case SIGNAL:
-		//			fMappedTo = aActual;
-		//			break;
-		//
-		//		case CONSTANT:
-		//		case FILE:
-		//		case VARIABLE:
-		//
-		//			switch (aOp) {
-		//			case CALL_ENTRY:
-		//
-		//				if (fDir != OIDir.OUT) {
-		//					setValue(aActual.getValue(), aLocation);
-		//				}
-		//				break;
-		//
-		//			case CALL_EXIT:
-		//
-		//				if (fDir != OIDir.IN) {
-		//					aActual.setValue(getValue(), aLocation);
-		//				}
-		//				break;
-		//
-		//			default:
-		//				throw new ZamiaException("Illegal mapping.", aLocation);
-		//			}
-		//
-		//		}
-
 	}
 
 	public IGTypeStatic getCurrentType() {
 		if (fMappedTo != null) {
+			if (fAliasedType != null)
+				return fAliasedType;
+			if (fRangeType != null)
+				return fRangeType;
 			return fMappedTo.getCurrentType();
 		}
-		return fCurrentType != null ? fCurrentType : fDeclaredType;
+		return fCurrentType;
 	}
 
-	private IGObjectDriver(String aId, OIDir aDir, IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, ArrayList<IGObjectDriver> aChildren, SourceLocation aLocation) throws ZamiaException {
-		fId = aId;
-		fDir = aDir;
-		fCat = aCat;
-		fDeclaredType = aType;
-		fCurrentType = aType;
-		fParent = aParent;
-
-		if (!fDeclaredType.isArray() || fDeclaredType.isUnconstrained()) {
-			throw new ZamiaException ("IGObjectDriver: Internal error.", aLocation);
-		}
-		
-		fArrayElementDrivers = aChildren;
-		updateValue(aLocation);
+	private void setRange(IGObjectDriver aDriver, IGStaticValue aRange, IGTypeStatic aRangeType, int aIdxOffset, SourceLocation aLocation) throws ZamiaException {
+		fMappedTo = aDriver;
+		fRangeType = aRangeType;
+		fRange = aRange;
+		fIdxOffset = aIdxOffset;
 	}
 
-	
-	public IGObjectDriver getRange(IGStaticValue aR, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
-		ArrayList<IGObjectDriver> rangeDrivers = new ArrayList<IGObjectDriver>();
-		
-		int left = (int) aR.getLeft().getOrd();
-		int right = (int) aR.getRight().getOrd();
-		boolean ascending = aR.getAscending().isTrue();
-
-		if (ascending) {
-			for (int i = left; i <= right; i++) {
-				rangeDrivers.add(getArrayElementDriver(i, aLocation));
-			}
-		} else {
-			for (int i = left; i >= right; i--) {
-				rangeDrivers.add(getArrayElementDriver(i, aLocation));
-			}
-		}
-
-		String id = fId+"("+aR+")";
-		
-		return new IGObjectDriver (id, fDir, fCat, fParent, aType, rangeDrivers, aLocation);
-	}
-
-	public IGObjectDriver getAlias(IGTypeStatic aT, SourceLocation aLocation) throws ZamiaException {
-
-		if (!aT.isArray() || aT.isUnconstrained()) {
+	public IGObjectDriver createRangeDriver(IGStaticValue aRange, IGTypeStatic aRangeType, SourceLocation aLocation) throws ZamiaException {
+		if (aRangeType == null || !aRangeType.isArray() || aRangeType.isUnconstrained()) {
 			return this;
 		}
-		
-		ArrayList<IGObjectDriver> rangeDrivers = new ArrayList<IGObjectDriver>();
 
-		IGTypeStatic idxT = aT.getStaticIndexType(aLocation);
+		String id = fId + "(" + aRange + ")";
 
-		int left = (int) idxT.getStaticLeft(aLocation).getOrd();
-		int right = (int) idxT.getStaticRight(aLocation).getOrd();
-		boolean ascending = idxT.getStaticAscending().isTrue();
+		IGObjectDriver rangeDriver = new IGObjectDriver(id, fDir, fCat, null, aRangeType, aLocation);
 
-		if (ascending) {
-			for (int i = left; i <= right; i++) {
-				rangeDrivers.add(getArrayElementDriver(i, aLocation));
-			}
-		} else {
-			for (int i = left; i >= right; i--) {
-				rangeDrivers.add(getArrayElementDriver(i, aLocation));
-			}
+		int rangeOffset = (int) aRangeType.getStaticIndexType(aLocation).getStaticLow(aLocation).getOrd();
+		IGTypeStatic currentType = getCurrentType();
+
+		int currentOffset = (int) currentType.getStaticIndexType(aLocation).getStaticLow(aLocation).getOrd();
+
+		rangeDriver.setRange(this, aRange, aRangeType, rangeOffset - currentOffset, aLocation);
+
+		return rangeDriver;
+	}
+
+	private void setAlias(IGObjectDriver aDriver, IGTypeStatic aAliasedType, int aIdxOffset, SourceLocation aLocation) throws ZamiaException {
+		fMappedTo = aDriver;
+		fAliasedType = aAliasedType;
+		fIdxOffset = aIdxOffset;
+	}
+
+	public IGObjectDriver createAliasDriver(IGTypeStatic aAliasType, SourceLocation aLocation) throws ZamiaException {
+
+		if (aAliasType == null || !aAliasType.isArray() || aAliasType.isUnconstrained()) {
+			return this;
 		}
 
-		String id = "&["+toString()+"]{"+aT+"}";
-		
-		return new IGObjectDriver (id, fDir, fCat, fParent, aT, rangeDrivers, aLocation);
+		String id = "&[" + toString() + "]{" + aAliasType + "}";
+
+		IGObjectDriver aliasedDriver = new IGObjectDriver(id, fDir, fCat, null, aAliasType, aLocation);
+
+		int aliasOffset = (int) aAliasType.getStaticIndexType(aLocation).getStaticLow(aLocation).getOrd();
+		IGTypeStatic currentType = getCurrentType();
+
+		int currentOffset = (int) currentType.getStaticIndexType(aLocation).getStaticLow(aLocation).getOrd();
+
+		aliasedDriver.setAlias(this, aAliasType, aliasOffset - currentOffset, aLocation);
+
+		return aliasedDriver;
 	}
 
 }

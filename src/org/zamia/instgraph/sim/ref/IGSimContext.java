@@ -8,6 +8,7 @@
  */
 package org.zamia.instgraph.sim.ref;
 
+import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.interpreter.IGInterpreterContext;
 import org.zamia.util.PathName;
@@ -29,12 +30,12 @@ public class IGSimContext extends IGInterpreterContext {
 		fPath = aPath;
 	}
 
-	public IGStaticValue getCurrentValue(long aDBID) {
+	public IGStaticValue getCurrentValue(long aDBID) throws ZamiaException {
 		return super.getObjectValue(aDBID);
 	}
 
 	@Override
-	public IGStaticValue getObjectValue(long aDBID) {
+	public IGStaticValue getObjectValue(long aDBID) throws ZamiaException {
 		// For signals -- get delta
 		// For others -- current value
 		IGStaticValue v = fSim.getSignalNextValue(aDBID, fPath);

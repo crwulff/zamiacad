@@ -56,7 +56,7 @@ public class IGRangeOpStmt extends IGOpStmt {
 			IGObjectDriver driver = opSF.getObjectDriver();
 			if (driver != null) {
 
-				IGObjectDriver rangeDriver = driver.getRange(r, rT, computeSourceLocation());
+				IGObjectDriver rangeDriver = driver.createRangeDriver(r, rT, computeSourceLocation());
 
 				aRuntime.push(rangeDriver);
 

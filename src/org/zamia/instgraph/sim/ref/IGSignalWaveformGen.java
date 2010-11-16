@@ -97,7 +97,7 @@ public class IGSignalWaveformGen {
 		return aNewValue != null && !aNewValue.equalsValue(aOldValue);
 	}
 
-	private IGStaticValue getCurrentValue() {
+	private IGStaticValue getCurrentValue() throws ZamiaException {
 		return ((IGSimContext) fContext).getCurrentValue(fSignal.getDBID());
 	}
 

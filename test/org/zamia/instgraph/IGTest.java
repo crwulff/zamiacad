@@ -113,15 +113,21 @@ public class IGTest {
 	//	}
 
 	@Test
-	public void testExpr() throws Exception {
+	public void testAVSAES() throws Exception {
 
-		runTest("examples/semantic/exprTest", 1);
+		runTest("examples/avs_aes", 125);
 	}
 
 	@Test
-	public void testAlias1() throws Exception {
+	public void testAggregate() throws Exception {
 
-		runTest("examples/semantic/alias1Test", 1);
+		runTest("examples/semantic/aggregateTest", 1);
+	}
+
+	@Test
+	public void testSubProgram7() throws Exception {
+
+		runTest("examples/semantic/subProgramTest7", 1);
 	}
 
 	@Test
@@ -131,9 +137,15 @@ public class IGTest {
 	}
 	
 	@Test
-	public void testSubProgram7() throws Exception {
+	public void testExpr() throws Exception {
 
-		runTest("examples/semantic/subProgramTest7", 1);
+		runTest("examples/semantic/exprTest", 1);
+	}
+
+	@Test
+	public void testAlias1() throws Exception {
+
+		runTest("examples/semantic/alias1Test", 1);
 	}
 
 	@Test
@@ -390,12 +402,6 @@ public class IGTest {
 	}
 
 	@Test
-	public void testAggregate() throws Exception {
-
-		runTest("examples/semantic/aggregateTest", 1);
-	}
-
-	@Test
 	public void testTypeConversion() throws Exception {
 
 		runTest("examples/semantic/typeConversionTest", 1);
@@ -471,12 +477,6 @@ public class IGTest {
 	public void testType() throws Exception {
 
 		runTest("examples/semantic/typeTest", 1);
-	}
-
-	@Test
-	public void testAVSAES() throws Exception {
-
-		runTest("examples/avs_aes", 125);
 	}
 
 	@Test

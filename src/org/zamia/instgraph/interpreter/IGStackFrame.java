@@ -45,7 +45,7 @@ public class IGStackFrame  {
 			return fValue;
 		}
 		if (fDriver != null) {
-			return fDriver.getValue();
+			return fDriver.getValue(null);
 		}
 		
 		throw new ZamiaException("StackFrame.getValue(): Internal error - empty.");

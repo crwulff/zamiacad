@@ -289,10 +289,10 @@ public class IGInterpreterRuntimeEnv {
 			return null;
 		}
 		
-		return driver.getValue();
+		return driver.getValue(null);
 	}
 
-	public IGInterpreterContext findContext(long aDBID) {
+	public IGInterpreterContext findContext(long aDBID) throws ZamiaException {
 		int n = fContexts.size();
 
 		// if not found => create in latest context
