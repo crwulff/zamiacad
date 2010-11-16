@@ -113,6 +113,12 @@ public class IGTest {
 	//	}
 
 	@Test
+	public void testGenerics1() throws Exception {
+
+		runTest("examples/semantic/genericsTest1", 2);
+	}
+
+	@Test
 	public void testAVSAES() throws Exception {
 
 		runTest("examples/avs_aes", 125);
