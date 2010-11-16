@@ -119,6 +119,12 @@ public class IGTest {
 	}
 
 	@Test
+	public void testSubProgram8() throws Exception {
+
+		runTest("examples/semantic/subProgramTest8", 46);
+	}
+	
+	@Test
 	public void testSubProgram7() throws Exception {
 
 		runTest("examples/semantic/subProgramTest7", 1);
