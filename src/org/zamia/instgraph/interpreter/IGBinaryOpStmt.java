@@ -15,6 +15,7 @@ import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.IGOperationBinary.BinOp;
+import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
@@ -37,18 +38,34 @@ public class IGBinaryOpStmt extends IGOpStmt {
 	@Override
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
+		SourceLocation location = computeSourceLocation();
+		
 		IGStackFrame sf2 = aRuntime.pop();
 		IGStaticValue op2 = sf2.getValue();
 
+		if (op2 == null) {
+			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
+				return ReturnStatus.ERROR;
+			}
+			throw new ZamiaException ("IGBinaryOpStmt: op2==null", location);
+		}
+
 		IGStackFrame sf1 = aRuntime.pop();
 		IGStaticValue op1 = sf1.getValue();
+
+		if (op1 == null) {
+			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
+				return ReturnStatus.ERROR;
+			}
+			throw new ZamiaException ("IGBinaryOpStmt: op1==null", location);
+		}
 
 		IGTypeStatic rt = getType().computeStaticType(aRuntime, aErrorMode, aReport);
 		if (rt == null) {
 			return ReturnStatus.ERROR;
 		}
 
-		IGStaticValue resValue = IGStaticValue.computeBinary(op1, op2, fOp, rt, computeSourceLocation(), aErrorMode, aReport);
+		IGStaticValue resValue = IGStaticValue.computeBinary(op1, op2, fOp, rt, location, aErrorMode, aReport);
 		if (resValue == null) {
 			return ReturnStatus.ERROR;
 		}
