@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -13,20 +13,21 @@ import java.util.ArrayList;
 /**
  * result of IGContainer:resolve(id)
  * 
- * immutable
- * 
  * @author Guenter Bartsch
  * 
  */
 
 public class IGResolveResult {
 
-	private ArrayList<IGItem> fResults;
+	private final ArrayList<IGItem> fResults;
 
-	private IGResolveResult fParent;
+	private boolean fContainsSubPrograms = false;
 
-	public IGResolveResult(IGResolveResult aParent, ArrayList<IGItem> aResults) {
-		fParent = aParent;
+	public IGResolveResult() {
+		this(new ArrayList<IGItem>());
+	}
+
+	public IGResolveResult(ArrayList<IGItem> aResults) {
 		fResults = aResults;
 	}
 
@@ -38,19 +39,26 @@ public class IGResolveResult {
 		return fResults.get(aIdx);
 	}
 
-	public IGResolveResult getParent() {
-		return fParent;
+	public void addItem(IGItem aItem) {
+		fResults.add(aItem);
+		if (aItem instanceof IGSubProgram)
+			fContainsSubPrograms = true;
+
+	}
+
+	public boolean isContainsSubPrograms() {
+		return fContainsSubPrograms;
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder buf = new StringBuilder("IGResolveResult(nResults=" + fResults.size());
-
-		if (fParent != null) {
-			buf.append(" more results in parent(s)");
-		}
-
 		buf.append(")");
 		return buf.toString();
 	}
+
+	public boolean isEmpty() {
+		return fResults.isEmpty();
+	}
+
 }

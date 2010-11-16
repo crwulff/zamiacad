@@ -21,6 +21,7 @@ import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGItem;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationCache;
+import org.zamia.instgraph.IGResolveResult;
 import org.zamia.instgraph.IGSubProgram;
 import org.zamia.instgraph.IGType;
 
@@ -193,10 +194,10 @@ public class TypeDefinitionSubType extends TypeDefinition {
 
 		if (resF == null && constraints == null) {
 
-			ArrayList<IGItem> items = typeMark.computeIG(null, aContainer, aEE, new IGOperationCache(), ASTErrorMode.EXCEPTION, null);
-			int n = items.size(); // FIXME 
+			IGResolveResult result = typeMark.computeIG(null, aContainer, aEE, new IGOperationCache(), ASTErrorMode.EXCEPTION, null);
+			int n = result.getNumResults(); // FIXME 
 			for (int i = 0; i<n; i++) {
-				return items.get(i);
+				return result.getResult(i);
 			}
 		}
 

@@ -25,10 +25,9 @@ import org.zamia.instgraph.IGSubProgram.IGBuiltin;
 import org.zamia.instgraph.IGType.TypeCat;
 import org.zamia.vhdl.ast.ConfigurationSpecification;
 import org.zamia.vhdl.ast.DMUID;
-import org.zamia.vhdl.ast.TypeDefinition;
 import org.zamia.vhdl.ast.DMUID.LUType;
+import org.zamia.vhdl.ast.TypeDefinition;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * 
@@ -171,36 +170,49 @@ public class IGContainer extends IGItem {
 		storeOrUpdate();
 	}
 
-	private IGResolveResult addResult(IGResolveResult aParent, IGItem aItem) {
-		if (aItem == null) {
-			return aParent;
-		}
-
-		ArrayList<IGItem> l = new ArrayList<IGItem>(1);
-		l.add(aItem);
-
-		return new IGResolveResult(aParent, l);
-	}
-
 	public IGResolveResult resolve(String aId) {
-		return resolve(aId, null);
+		IGResolveResult res = new IGResolveResult();
+		resolveP(aId, res);
+		return res;
 	}
 
-	protected IGResolveResult resolve(String aId, IGResolveResult aParent) {
-
-		IGResolveResult res = aParent;
+	private void resolveP(String aId, IGResolveResult aResult) {
 
 		/*
-		 * first check the parent, if any
+		 * first, local items
+		 */
+
+		IGResolveResult res = aResult;
+
+		ArrayList<Long> itemsL = fLocalItemMap.get(aId);
+		if (itemsL != null) {
+
+			int n = itemsL.size();
+			for (int i = 0; i < n; i++) {
+
+				IGItem item = (IGItem) getZDB().load(itemsL.get(i).longValue());
+				res.addItem(item);
+			}
+
+			if (!res.isEmpty() && !res.isContainsSubPrograms())
+				return;
+		}
+
+		/*
+		 * then check the parent, if any
 		 */
 
 		if (fParentDBID != 0) {
 			IGContainer parent = (IGContainer) getZDB().load(fParentDBID);
-			res = parent.resolve(aId);
+
+			parent.resolveP(aId, res);
+
+			if (!res.isEmpty() && !res.isContainsSubPrograms())
+				return;
 		}
 
 		/*
-		 * now the context
+		 * finally the context
 		 */
 
 		ZamiaProject zprj = (ZamiaProject) getZDB().getOwner();
@@ -212,16 +224,16 @@ public class IGContainer extends IGItem {
 			DMUID duuid = new DMUID(LUType.Entity, li.getRealId(), aId, null);
 
 			if (dum.hasDM(duuid)) {
-				res = addResult(res, new IGDUUID(duuid, null, getZDB()));
+				res.addItem(new IGDUUID(duuid, null, getZDB()));
 			}
-			
+
 			if (li.getId().equals(aId)) {
-				res = addResult(res, li);
+				res.addItem(li);
 			}
 		}
 
 		int n = fImportedPackages.size();
-		for (int i = 0; i < n; i++) {
+		for (int i = n - 1; i >= 0; i--) {
 			IGPackageImport pi = fImportedPackages.get(i);
 
 			String itemId = pi.getItemId();
@@ -240,55 +252,31 @@ public class IGContainer extends IGItem {
 			IGContainer pkgContainer = pkg.getContainer();
 
 			if (itemId != null) {
-				ArrayList<IGContainerItem> itemsL = pkgContainer.findLocalItems(aId);
-				if (itemsL != null) {
-					int m = itemsL.size();
-					ArrayList<IGItem> items = new ArrayList<IGItem>(n);
+				ArrayList<IGContainerItem> itemsC = pkgContainer.findLocalItems(aId);
+				if (itemsC != null) {
+					int m = itemsC.size();
 					for (int j = 0; j < m; j++) {
-						items.add(itemsL.get(j));
+						res.addItem(itemsC.get(j));
 					}
-					res = new IGResolveResult(res, items);
 				}
-				//res = pkg.getContainer().resolve(aId, res);
+
 			} else {
 				if (pi.isAll()) {
 
-					ArrayList<IGContainerItem> itemsL = pkgContainer.findLocalItems(aId);
-					if (itemsL != null) {
-						int m = itemsL.size();
-						ArrayList<IGItem> items = new ArrayList<IGItem>(n);
+					ArrayList<IGContainerItem> itemsC = pkgContainer.findLocalItems(aId);
+					if (itemsC != null) {
+						int m = itemsC.size();
 						for (int j = 0; j < m; j++) {
-							items.add(itemsL.get(j));
+							res.addItem(itemsC.get(j));
 						}
-						res = new IGResolveResult(res, items);
 					}
 
-					//res = pkg.getContainer().resolve(aId, res);
-
 				} else {
-					DMUID duuid = new DMUID(LUType.Package, pi.getLibId(), pi.getId(), null);
-					res = addResult(res, new IGDUUID(duuid, null, getZDB()));
+					DMUID dmuid = new DMUID(LUType.Package, pi.getLibId(), pi.getId(), null);
+					res.addItem(new IGDUUID(dmuid, null, getZDB()));
 				}
 			}
 		}
-
-		/*
-		 * finally, local items
-		 */
-
-		ArrayList<Long> itemsL = fLocalItemMap.get(aId);
-		if (itemsL != null) {
-
-			n = itemsL.size();
-			ArrayList<IGItem> items = new ArrayList<IGItem>(n);
-			for (int i = 0; i < n; i++) {
-				items.add((IGItem) getZDB().load(itemsL.get(i).longValue()));
-			}
-
-			res = new IGResolveResult(res, items);
-		}
-
-		return res;
 	}
 
 	/*
@@ -299,17 +287,12 @@ public class IGContainer extends IGItem {
 
 		IGResolveResult res = resolve(aId);
 
-		while (res != null) {
-
-			int n = res.getNumResults();
-			for (int i = 0; i < n; i++) {
-				IGItem item = res.getResult(i);
-				if (item instanceof IGType) {
-					return (IGType) item;
-				}
+		int n = res.getNumResults();
+		for (int i = 0; i < n; i++) {
+			IGItem item = res.getResult(i);
+			if (item instanceof IGType) {
+				return (IGType) item;
 			}
-
-			res = res.getParent();
 		}
 
 		return null;
@@ -318,17 +301,12 @@ public class IGContainer extends IGItem {
 	public IGLibraryImport resolveLibrary(String aId) {
 		IGResolveResult res = resolve(aId);
 
-		while (res != null) {
-
-			int n = res.getNumResults();
-			for (int i = 0; i < n; i++) {
-				IGItem item = res.getResult(i);
-				if (item instanceof IGLibraryImport) {
-					return (IGLibraryImport) item;
-				}
+		int n = res.getNumResults();
+		for (int i = 0; i < n; i++) {
+			IGItem item = res.getResult(i);
+			if (item instanceof IGLibraryImport) {
+				return (IGLibraryImport) item;
 			}
-
-			res = res.getParent();
 		}
 
 		return null;
@@ -337,17 +315,12 @@ public class IGContainer extends IGItem {
 	public IGObject resolveObject(String aId) {
 		IGResolveResult res = resolve(aId);
 
-		while (res != null) {
-
-			int n = res.getNumResults();
-			for (int i = 0; i < n; i++) {
-				IGItem item = res.getResult(i);
-				if (item instanceof IGObject) {
-					return (IGObject) item;
-				}
+		int n = res.getNumResults();
+		for (int i = 0; i < n; i++) {
+			IGItem item = res.getResult(i);
+			if (item instanceof IGObject) {
+				return (IGObject) item;
 			}
-
-			res = res.getParent();
 		}
 
 		return null;

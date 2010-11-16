@@ -24,9 +24,9 @@ import org.zamia.vhdl.ast.Operation;
 
 public class IGOperationCache {
 
-	private HashMap<Name, ArrayList<IGItem>> fNameCache;
+	private HashMap<Name, IGResolveResult> fNameCache;
 
-	private HashMap<Name, HashMap<IGType, ArrayList<IGItem>>> fNameCacheHinted;
+	private HashMap<Name, HashMap<IGType, IGResolveResult>> fNameCacheHinted;
 
 	private HashMap<Operation, ArrayList<IGOperation>> fOperationCache;
 
@@ -35,31 +35,31 @@ public class IGOperationCache {
 	private HashMap<IGRange, IGOperation> fRangeCache;
 
 	public IGOperationCache() {
-		fNameCache = new HashMap<Name, ArrayList<IGItem>>();
-		fNameCacheHinted = new HashMap<Name, HashMap<IGType, ArrayList<IGItem>>>();
+		fNameCache = new HashMap<Name, IGResolveResult>();
+		fNameCacheHinted = new HashMap<Name, HashMap<IGType, IGResolveResult>>();
 		fOperationCache = new HashMap<Operation, ArrayList<IGOperation>>();
 		fOperationCacheHinted = new HashMap<Operation, HashMap<IGType, ArrayList<IGOperation>>>();
 		fRangeCache = new HashMap<IGRange, IGOperation>();
 	}
 
-	public ArrayList<IGItem> getIGItems(Name aName, IGType aTypeHint) {
+	public IGResolveResult getIGResolveResult(Name aName, IGType aTypeHint) {
 		if (aTypeHint == null) {
 			return fNameCache.get(aName);
 		}
-		HashMap<IGType, ArrayList<IGItem>> hm = fNameCacheHinted.get(aName);
+		HashMap<IGType, IGResolveResult> hm = fNameCacheHinted.get(aName);
 		if (hm == null) {
 			return null;
 		}
 		return hm.get(aTypeHint);
 	}
 
-	public void setIGItems(Name aName, IGType aTypeHint, ArrayList<IGItem> aItems) {
+	public void setIGResolveResult(Name aName, IGType aTypeHint, IGResolveResult aItems) {
 		if (aTypeHint == null) {
 			fNameCache.put(aName, aItems);
 		} else {
-			HashMap<IGType, ArrayList<IGItem>> hm = fNameCacheHinted.get(aName);
+			HashMap<IGType, IGResolveResult> hm = fNameCacheHinted.get(aName);
 			if (hm == null) {
-				hm = new HashMap<IGType, ArrayList<IGItem>>();
+				hm = new HashMap<IGType, IGResolveResult>();
 				fNameCacheHinted.put(aName, hm);
 			}
 			hm.put(aTypeHint, aItems);

@@ -15,8 +15,8 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite.RefType;
-import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
+import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGItem;
@@ -24,9 +24,9 @@ import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationAllocate;
 import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGOperationTypeQualification;
+import org.zamia.instgraph.IGResolveResult;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGType.TypeCat;
-
 
 /**
  * 
@@ -67,37 +67,38 @@ public class OperationAllocator extends Operation {
 	}
 
 	@Override
-	protected ArrayList<IGOperation> computeIGP(IGType aTypeHint, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
+	protected ArrayList<IGOperation> computeIGP(IGType aTypeHint, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, ASTErrorMode aErrorMode,
+			ErrorReport aReport) throws ZamiaException {
 
 		ArrayList<IGOperation> res = new ArrayList<IGOperation>();
 
 		Name name = fTD.getName();
-		ArrayList<IGItem> items = name.computeIG(aTypeHint, aContainer, aEE, aCache, aErrorMode, aReport);
-		if (items == null) {
+		IGResolveResult result = name.computeIG(aTypeHint, aContainer, aEE, aCache, aErrorMode, aReport);
+		if (result.isEmpty()) {
 			return res;
 		}
 
-		int n = items.size();
+		int n = result.getNumResults();
 		for (int i = 0; i < n; i++) {
-			IGItem item = items.get(i);
+			IGItem item = result.getResult(i);
 			if (item instanceof IGOperationTypeQualification) {
 
 				IGOperationTypeQualification qual = (IGOperationTypeQualification) item;
 
 				IGType t = qual.getType();
 				IGType accessT = null;
-				
+
 				if (aTypeHint != null && aTypeHint.isAccess()) {
 					IGType et = aTypeHint.getElementType();
 					if (t.isAssignmentCompatible(et, getLocation())) {
 						accessT = aTypeHint;
 					}
 				}
-				
+
 				if (accessT == null) {
 					accessT = new IGType(TypeCat.ACCESS, null, null, null, t, null, false, getLocation(), aEE.getZDB());
 				}
-				
+
 				IGOperation expr = qual.getOperation();
 
 				res.add(new IGOperationAllocate(expr, accessT, getLocation(), aEE.getZDB()));

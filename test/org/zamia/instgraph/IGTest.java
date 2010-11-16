@@ -113,6 +113,12 @@ public class IGTest {
 	//	}
 
 	@Test
+	public void testExpr() throws Exception {
+
+		runTest("examples/semantic/exprTest", 1);
+	}
+
+	@Test
 	public void testAlias1() throws Exception {
 
 		runTest("examples/semantic/alias1Test", 1);
@@ -356,12 +362,6 @@ public class IGTest {
 	public void testConcat3() throws Exception {
 
 		runTest("examples/semantic/concat3Test", 1);
-	}
-
-	@Test
-	public void testExpr() throws Exception {
-
-		runTest("examples/semantic/exprTest", 1);
 	}
 
 	@Test

@@ -35,7 +35,6 @@ import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.ast.DMUID.LUType;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * A VHDL Entity.
  * 
@@ -153,27 +152,23 @@ public class Entity extends PrimaryUnit {
 
 			IGResolveResult rres = container.resolve(aId);
 
-			while (rres != null) {
+			int n = rres.getNumResults();
+			for (int i = 0; i < n; i++) {
+				IGItem item = rres.getResult(i);
+				if (item instanceof IGLibraryImport) {
+					IGLibraryImport ip = (IGLibraryImport) item;
 
-				int n = rres.getNumResults();
-				for (int i = 0; i < n; i++) {
-					IGItem item = rres.getResult(i);
-					if (item instanceof IGLibraryImport) {
-						IGLibraryImport ip = (IGLibraryImport) item;
+					String libId = ip.getRealId();
 
-						String libId = ip.getRealId();
-
-						return dum.getLibrary(libId);
-					}
-					// FIXME
-					//					if (item != null) {
-					//						ASTObject src = item.getSrc();
-					//						if (src instanceof DeclarativeItem) {
-					//							return (DeclarativeItem) src;
-					//						}
-					//					}
+					return dum.getLibrary(libId);
 				}
-				rres = rres.getParent();
+				// FIXME
+				//					if (item != null) {
+				//						ASTObject src = item.getSrc();
+				//						if (src instanceof DeclarativeItem) {
+				//							return (DeclarativeItem) src;
+				//						}
+				//					}
 			}
 
 		} catch (ZamiaException e) {
@@ -196,8 +191,8 @@ public class Entity extends PrimaryUnit {
 	}
 
 	@Override
-	public void findReferences(String aId, ObjectCat aCat, RefType aRefType, int aDepth, ZamiaProject aZPrj, IGContainer aContainer, IGElaborationEnv aCache, ReferenceSearchResult aResult,
-			ArrayList<SearchJob> aTODO) throws ZamiaException {
+	public void findReferences(String aId, ObjectCat aCat, RefType aRefType, int aDepth, ZamiaProject aZPrj, IGContainer aContainer, IGElaborationEnv aCache,
+			ReferenceSearchResult aResult, ArrayList<SearchJob> aTODO) throws ZamiaException {
 		// FIXME: type search
 
 		int n = getNumDeclarations();

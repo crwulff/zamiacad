@@ -18,8 +18,8 @@ import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite;
 import org.zamia.analysis.ReferenceSite.RefType;
-import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
+import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGDUUID;
 import org.zamia.instgraph.IGElaborationEnv;
@@ -28,6 +28,7 @@ import org.zamia.instgraph.IGMappings;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationBinary;
+import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGOperationInvokeSubprogram;
 import org.zamia.instgraph.IGOperationLiteral;
@@ -38,10 +39,8 @@ import org.zamia.instgraph.IGResolveResult;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGSubProgram;
 import org.zamia.instgraph.IGType;
-import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.zdb.ZDB;
-
 
 /**
  * Represents names (including extensions such as indices, ranges, suffixes...)
@@ -138,69 +137,64 @@ public class Name extends VHDLNode {
 	 * 
 	 ************************************************************/
 
-	public final ArrayList<IGItem> computeIG(IGType aTypeHint, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, ASTErrorMode aErrorMode, ErrorReport aReport)
+	public final IGResolveResult computeIG(IGType aTypeHint, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, ASTErrorMode aErrorMode, ErrorReport aReport)
 			throws ZamiaException {
 		if (aCache == null) {
 			return computeIGP(aTypeHint, aContainer, aEE, null, aErrorMode, aReport);
 		}
 
-		ArrayList<IGItem> items = aCache.getIGItems(this, aTypeHint);
-		if (items != null)
-			return items;
+		IGResolveResult result = aCache.getIGResolveResult(this, aTypeHint);
+		if (result != null)
+			return result;
 
-		items = computeIGP(aTypeHint, aContainer, aEE, aCache, aErrorMode, aReport);
-		if (items == null)
+		result = computeIGP(aTypeHint, aContainer, aEE, aCache, aErrorMode, aReport);
+		if (result == null)
 			return null;
-		aCache.setIGItems(this, aTypeHint, items);
-		return items;
+		aCache.setIGResolveResult(this, aTypeHint, result);
+		return result;
 	}
 
 	private IGResolveResult createOperations(IGResolveResult aRR, ZDB aZDB) {
 
-		IGResolveResult parent = aRR.getParent();
-		if (parent != null) {
-			parent = createOperations(parent, aZDB);
-		}
+		IGResolveResult res = new IGResolveResult();
 
 		int n = aRR.getNumResults();
-		ArrayList<IGItem> res = new ArrayList<IGItem>(n);
 		for (int i = 0; i < n; i++) {
 			IGItem item = aRR.getResult(i);
 
 			if (item instanceof IGObject) {
 				item = new IGOperationObject((IGObject) item, getLocation(), aZDB);
 			}
-			res.add(item);
+
+			res.addItem(item);
 		}
 
-		return new IGResolveResult(parent, res);
+		return res;
 	}
 
-	private ArrayList<IGItem> computeIGP(IGType aTypeHint, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, ASTErrorMode aErrorMode, ErrorReport aReport)
+	private IGResolveResult computeIGP(IGType aTypeHint, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, ASTErrorMode aErrorMode, ErrorReport aReport)
 			throws ZamiaException {
-
-		ArrayList<IGItem> res = new ArrayList<IGItem>();
 
 		String id = getId();
 
 		/*
-		 * Step 1/3 : resolve id, create hierarchical list of all potential matches
+		 * Step 1/2 : resolve id, create hierarchical list of all potential matches
 		 */
 
 		IGResolveResult rr = aContainer.resolve(id);
-		if (rr == null) {
-			
+		if (rr.getNumResults() == 0) {
+
 			// is this actually a string literal?
-			
+
 			if (id.charAt(0) == '"' && getNumExtensions() == 0 && aTypeHint != null && aTypeHint.isArray()) {
 
 				IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
 				ZDB zdb = aEE.getZDB();
-				
+
 				IGType it = aTypeHint.getIndexType();
 
 				int l = id.length();
-				
+
 				String image = id.substring(1, l - 1);
 
 				IGOperation ascending = it.getAscending(aContainer, getLocation());
@@ -218,7 +212,7 @@ public class Name extends VHDLNode {
 					} else {
 						right = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
 					}
-					
+
 				} else {
 					IGOperation rightAsc = new IGOperationBinary(left, length, BinOp.ADD, it, getLocation(), zdb).optimize(env);
 					IGOperation rightDesc = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
@@ -230,43 +224,26 @@ public class Name extends VHDLNode {
 
 				IGType type = aTypeHint.createSubtype(range, aEE.getInterpreterEnv(), getLocation());
 
-				res.add(new IGOperationLiteral(image, type, getLocation()));
+				rr.addItem(new IGOperationLiteral(image, type, getLocation()));
 
-				return res;
+				return rr;
 			}
 
 			reportError("Couldn't resolve " + getId(), this, aErrorMode, aReport);
-			return res;
+			return rr;
 		}
 
 		rr = createOperations(rr, aEE.getZDB());
 
 		/*
-		 * Step 2/3 : filter/modify the match tree through the extensions
+		 * Step 2/2 : filter/modify the match tree through the extensions
 		 */
 
 		ErrorReport report = aReport != null ? aReport : new ErrorReport();
 
 		rr = applyExtensions(rr, aContainer, aEE, aCache, report);
 
-		/*
-		 * Step 3/3 : create linear list
-		 */
-
-		while (rr != null) {
-			int n = rr.getNumResults();
-			for (int i = n - 1; i >= 0; i--) {
-
-				IGItem match = rr.getResult(i);
-				if (match == null) {
-					continue;
-				}
-				res.add(match);
-			}
-			rr = rr.getParent();
-		}
-
-		return res;
+		return rr;
 	}
 
 	private IGResolveResult applyExtensions(IGResolveResult aRR, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, ErrorReport aReport) throws ZamiaException {
@@ -276,11 +253,6 @@ public class Name extends VHDLNode {
 			return aRR;
 		}
 
-		IGResolveResult parent = aRR.getParent();
-		if (parent != null) {
-			parent = applyExtensions(parent, aContainer, aEE, aCache, aReport);
-		}
-
 		int m = aRR.getNumResults();
 		ArrayList<IGItem> items = new ArrayList<IGItem>(m);
 		for (int j = 0; j < m; j++) {
@@ -288,7 +260,7 @@ public class Name extends VHDLNode {
 		}
 
 		SourceLocation prevLocation = getLocation();
-		
+
 		for (int iExt = 0; iExt < nExt; iExt++) {
 
 			NameExtension ext = getExtension(iExt);
@@ -303,19 +275,19 @@ public class Name extends VHDLNode {
 			items = newItems;
 		}
 
-		return new IGResolveResult(parent, items);
+		return new IGResolveResult(items);
 	}
 
 	// convenience
 
 	public IGType computeIGAsType(IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
-		ArrayList<IGItem> items = computeIG(null, aContainer, aEE, aCache, aErrorMode, aReport);
+		IGResolveResult result = computeIG(null, aContainer, aEE, aCache, aErrorMode, aReport);
 
-		int n = items.size();
+		int n = result.getNumResults();
 		for (int i = 0; i < n; i++) {
 
-			IGItem item = items.get(i);
+			IGItem item = result.getResult(i);
 
 			if (item instanceof IGType) {
 				return (IGType) item;
@@ -329,7 +301,7 @@ public class Name extends VHDLNode {
 	public IGOperation computeIGAsOperation(IGType aTypeHint, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, ASTErrorMode aErrorMode, ErrorReport aReport)
 			throws ZamiaException {
 
-		ArrayList<IGItem> items = computeIG(aTypeHint, aContainer, aEE, aCache, aErrorMode, aReport);
+		IGResolveResult result = computeIG(aTypeHint, aContainer, aEE, aCache, aErrorMode, aReport);
 
 		ErrorReport report = aReport;
 		if (aReport == null) {
@@ -338,9 +310,9 @@ public class Name extends VHDLNode {
 
 		IGOperation fallbackOp = null;
 
-		int n = items.size();
+		int n = result.getNumResults();
 		for (int i = 0; i < n; i++) {
-			IGItem item = items.get(i);
+			IGItem item = result.getResult(i);
 
 			if (item instanceof IGOperation) {
 				IGOperation op = (IGOperation) item;
@@ -358,6 +330,7 @@ public class Name extends VHDLNode {
 					return op;
 				}
 				fallbackOp = op;
+				;
 
 			} else if (item instanceof IGSubProgram) {
 
@@ -400,12 +373,12 @@ public class Name extends VHDLNode {
 			report = new ErrorReport();
 		}
 
-		ArrayList<IGItem> items = computeIG(null, aContainer, aEE, new IGOperationCache(), aErrorMode, report);
+		IGResolveResult result = computeIG(null, aContainer, aEE, new IGOperationCache(), aErrorMode, report);
 
-		int n = items.size();
+		int n = result.getNumResults();
 		for (int i = 0; i < n; i++) {
 
-			IGItem item = items.get(i);
+			IGItem item = result.getResult(i);
 
 			if (item instanceof IGDUUID) {
 				return (IGDUUID) item;
@@ -423,12 +396,12 @@ public class Name extends VHDLNode {
 			report = new ErrorReport();
 		}
 
-		ArrayList<IGItem> items = computeIG(null, aContainer, aEE, new IGOperationCache(), aErrorMode, report);
+		IGResolveResult result = computeIG(null, aContainer, aEE, new IGOperationCache(), aErrorMode, report);
 
-		int n = items.size();
+		int n = result.getNumResults();
 		for (int i = 0; i < n; i++) {
 
-			IGItem item = items.get(i);
+			IGItem item = result.getResult(i);
 
 			if (item instanceof IGSubProgram) {
 
@@ -460,12 +433,12 @@ public class Name extends VHDLNode {
 			report = new ErrorReport();
 		}
 
-		ArrayList<IGItem> items = computeIG(null, aContainer, aEE, new IGOperationCache(), aErrorMode, report);
+		IGResolveResult result = computeIG(null, aContainer, aEE, new IGOperationCache(), aErrorMode, report);
 
-		int n = items.size();
+		int n = result.getNumResults();
 		for (int i = 0; i < n; i++) {
 
-			IGItem item = items.get(i);
+			IGItem item = result.getResult(i);
 
 			if (item instanceof IGSubProgram) {
 

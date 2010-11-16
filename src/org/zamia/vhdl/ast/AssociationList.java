@@ -28,6 +28,7 @@ import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGOperationObject;
+import org.zamia.instgraph.IGResolveResult;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGObject.OIDir;
 
@@ -248,8 +249,8 @@ public class AssociationList extends VHDLNode {
 			ErrorReport report = new ErrorReport();
 			Name formalName = formal.getName();
 
-			ArrayList<IGItem> formalItems = formalName.computeIG(null, aFormalScope, aFormalEE, aFormalCache, ASTErrorMode.RETURN_NULL, report);
-			if (formalItems == null) {
+			IGResolveResult formalItems = formalName.computeIG(null, aFormalScope, aFormalEE, aFormalCache, ASTErrorMode.RETURN_NULL, report);
+			if (formalItems == null || formalItems.isEmpty()) {
 				aReport.append(report);
 				aReport.append("Failed to compute object for interface name " + formalName, formal.getLocation());
 				res.setFailed(true);
@@ -258,10 +259,10 @@ public class AssociationList extends VHDLNode {
 			}
 
 			boolean foundMatch = false;
-			int nFormalItems = formalItems.size();
+			int nFormalItems = formalItems.getNumResults();
 			
 			for (int iFormalItem = 0; iFormalItem < nFormalItems; iFormalItem++) {
-				IGItem formalItem = formalItems.get(iFormalItem);
+				IGItem formalItem = formalItems.getResult(iFormalItem);
 				if (!(formalItem instanceof IGOperation)) {
 					continue;
 				}

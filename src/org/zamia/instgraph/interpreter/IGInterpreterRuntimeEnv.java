@@ -40,7 +40,7 @@ public class IGInterpreterRuntimeEnv {
 
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
-	public final static boolean dump = true;
+	public final static boolean dump = false;
 
 	protected ZStack<IGInterpreterContext> fContexts;
 

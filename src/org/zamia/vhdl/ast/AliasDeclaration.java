@@ -16,8 +16,8 @@ import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite;
 import org.zamia.analysis.ReferenceSite.RefType;
-import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
+import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGContainerItem;
 import org.zamia.instgraph.IGElaborationEnv;
@@ -25,8 +25,8 @@ import org.zamia.instgraph.IGItem;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationAlias;
 import org.zamia.instgraph.IGOperationCache;
+import org.zamia.instgraph.IGResolveResult;
 import org.zamia.instgraph.IGType;
-
 
 /**
  * 
@@ -103,11 +103,11 @@ public class AliasDeclaration extends BlockDeclarativeItem {
 	@Override
 	public IGContainerItem computeIG(ArrayList<IGContainerItem> aSpecItems, IGContainer aContainer, IGElaborationEnv aEE) throws ZamiaException {
 
-		ArrayList<IGItem> items = name.computeIG(null, aContainer, aEE, new IGOperationCache(), ASTErrorMode.EXCEPTION, null);
+		IGResolveResult result = name.computeIG(null, aContainer, aEE, new IGOperationCache(), ASTErrorMode.EXCEPTION, null);
 
-		int n = items.size();
+		int n = result.getNumResults();
 		for (int i = 0; i < n; i++) {
-			IGItem item = items.get(i);
+			IGItem item = result.getResult(i);
 			if (item instanceof IGOperation) {
 
 				IGOperation op = (IGOperation) item;

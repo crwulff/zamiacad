@@ -23,7 +23,6 @@ import org.zamia.instgraph.IGResolveResult;
 import org.zamia.instgraph.IGSubProgram;
 import org.zamia.instgraph.IGType;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -148,60 +147,52 @@ public abstract class Operation extends VHDLNode {
 
 		IGResolveResult rr = aContainer.resolve(aOpId);
 		IGOperationInvokeSubprogram inv = null;
-		while (rr != null) {
+		int n = rr.getNumResults();
+		for (int i = 0; i < n; i++) {
 
-			int n = rr.getNumResults();
-			for (int i = 0; i < n; i++) {
+			IGItem item = rr.getResult(i);
+			if (!(item instanceof IGSubProgram)) {
+				continue;
+			}
 
-				IGItem item = rr.getResult(i);
-				if (!(item instanceof IGSubProgram)) {
-					continue;
-				}
+			IGSubProgram sp = (IGSubProgram) item;
 
-				IGSubProgram sp = (IGSubProgram) item;
+			IGType rt = sp.getReturnType();
+			if (rt == null) {
+				//report.append("SubProgram is a procedure, not a function.", getLocation());
+				continue;
+			}
+			if (aTypeHint != null && !rt.isAssignmentCompatible(aTypeHint, getLocation())) {
+				//if (QUICK_ERROR_REPORTING) {
+				//	report.append("Wrong return type", getLocation());
+				//} else {
+				//	report.append("Wrong return type: " + sp + " from " + sp.computeSourceLocation() + "\n  expected=" + aTypeHint + "\n  actual=" + rt, getLocation());
+				//}
+				continue;
+			}
 
-				IGType rt = sp.getReturnType();
-				if (rt == null) {
-					//report.append("SubProgram is a procedure, not a function.", getLocation());
-					continue;
-				}
-				if (aTypeHint != null && !rt.isAssignmentCompatible(aTypeHint, getLocation())) {
-					//if (QUICK_ERROR_REPORTING) {
-					//	report.append("Wrong return type", getLocation());
-					//} else {
-					//	report.append("Wrong return type: " + sp + " from " + sp.computeSourceLocation() + "\n  expected=" + aTypeHint + "\n  actual=" + rt, getLocation());
-					//}
-					continue;
-				}
-
-				IGOperationInvokeSubprogram invocation = sp.generateInvocation(al, aContainer, aEE, aCache, getLocation(), report);
-				if (invocation != null) {
-					if (inv != null) {
-						int s1 = inv.getScore();
-						int s2 = invocation.getScore();
-						//						if (s1 == s2) {
-						//							reportError("Operator " + opId + " is ambigous here:\n" + sp + " from " + sp.computeSourceLocation() + " matches as well as\n" + inv.getSub()
-						//									+ " from " + inv.getSub().computeSourceLocation(), this, aErrorMode, report);
-						//							return null;
-						//						} else 
-						if (s2 > s1) {
-							inv = invocation;
-						}
-					} else {
+			IGOperationInvokeSubprogram invocation = sp.generateInvocation(al, aContainer, aEE, aCache, getLocation(), report);
+			if (invocation != null) {
+				if (inv != null) {
+					int s1 = inv.getScore();
+					int s2 = invocation.getScore();
+					//						if (s1 == s2) {
+					//							reportError("Operator " + opId + " is ambigous here:\n" + sp + " from " + sp.computeSourceLocation() + " matches as well as\n" + inv.getSub()
+					//									+ " from " + inv.getSub().computeSourceLocation(), this, aErrorMode, report);
+					//							return null;
+					//						} else 
+					if (s2 > s1) {
 						inv = invocation;
 					}
+				} else {
+					inv = invocation;
 				}
 			}
-
-			if (inv != null) {
-				break;
-			}
-			rr = rr.getParent();
 		}
 
 		if (inv == null) {
 
-			int n = report.getNumEntries();
+			n = report.getNumEntries();
 			if (n > 0) {
 				String msg = report.toString();
 				reportError(msg, this, aErrorMode, report);

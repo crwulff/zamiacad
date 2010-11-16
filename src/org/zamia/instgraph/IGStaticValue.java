@@ -24,6 +24,7 @@ import org.zamia.instgraph.IGType.TypeCat;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGPushStmt;
+import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
@@ -716,6 +717,7 @@ public class IGStaticValue extends IGOperation {
 
 	public static IGStaticValue computeBinary(IGStaticValue aA, IGStaticValue aB, BinOp aOp, IGTypeStatic aResType, SourceLocation aSrc, ASTErrorMode aErrorMode,
 			ErrorReport aReport) throws ZamiaException {
+		
 		IGTypeStatic tA = aA.getStaticType();
 		IGTypeStatic tB = aB.getStaticType();
 
