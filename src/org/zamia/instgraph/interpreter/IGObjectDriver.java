@@ -99,6 +99,7 @@ public class IGObjectDriver implements Serializable {
 	public void setValue(IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
 		if (fMappedTo != null) {
 			fMappedTo.setValue(aValue, aLocation);
+			return;
 		}
 
 		setValueInternal(aValue, aLocation);
@@ -326,9 +327,9 @@ public class IGObjectDriver implements Serializable {
 		return false;
 	}
 
-	public IGObjectDriver getChild(int aIdx, SourceLocation aLocation) throws ZamiaException {
+	public IGObjectDriver getArrayElementDriver(int aIdx, SourceLocation aLocation) throws ZamiaException {
 		if (fMappedTo != null) {
-			return fMappedTo.getChild(aIdx, aLocation);
+			return fMappedTo.getArrayElementDriver(aIdx, aLocation);
 		}
 
 		IGTypeStatic idxT = fCurrentType.getStaticIndexType(aLocation);
@@ -432,17 +433,46 @@ public class IGObjectDriver implements Serializable {
 
 		if (ascending) {
 			for (int i = left; i <= right; i++) {
-				rangeDrivers.add(getChild(i, aLocation));
+				rangeDrivers.add(getArrayElementDriver(i, aLocation));
 			}
 		} else {
 			for (int i = left; i >= right; i--) {
-				rangeDrivers.add(getChild(i, aLocation));
+				rangeDrivers.add(getArrayElementDriver(i, aLocation));
 			}
 		}
 
 		String id = fId+"("+aR+")";
 		
 		return new IGObjectDriver (id, fDir, fCat, fParent, aType, rangeDrivers, aLocation);
+	}
+
+	public IGObjectDriver getAlias(IGTypeStatic aT, SourceLocation aLocation) throws ZamiaException {
+
+		if (!aT.isArray() || aT.isUnconstrained()) {
+			return this;
+		}
+		
+		ArrayList<IGObjectDriver> rangeDrivers = new ArrayList<IGObjectDriver>();
+
+		IGTypeStatic idxT = aT.getStaticIndexType(aLocation);
+
+		int left = (int) idxT.getStaticLeft(aLocation).getOrd();
+		int right = (int) idxT.getStaticRight(aLocation).getOrd();
+		boolean ascending = idxT.getStaticAscending().isTrue();
+
+		if (ascending) {
+			for (int i = left; i <= right; i++) {
+				rangeDrivers.add(getArrayElementDriver(i, aLocation));
+			}
+		} else {
+			for (int i = left; i >= right; i--) {
+				rangeDrivers.add(getArrayElementDriver(i, aLocation));
+			}
+		}
+
+		String id = "&["+toString()+"]{"+aT+"}";
+		
+		return new IGObjectDriver (id, fDir, fCat, fParent, aT, rangeDrivers, aLocation);
 	}
 
 }

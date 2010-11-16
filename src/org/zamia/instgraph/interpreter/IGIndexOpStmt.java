@@ -40,8 +40,12 @@ public class IGIndexOpStmt extends IGStmt {
 		IGObjectDriver driver = sf.getObjectDriver();
 		if (driver != null) {
 
-			driver = driver.getChild(idx, computeSourceLocation());
+			driver = driver.getArrayElementDriver(idx, computeSourceLocation());
 
+			if (IGInterpreterRuntimeEnv.dump) {
+				logger.debug ("Interpreter: result of driver idx op: %s", driver);
+			}
+			
 			aRuntime.push(driver);
 			
 		} else {
