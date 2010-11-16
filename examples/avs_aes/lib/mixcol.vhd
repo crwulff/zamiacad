@@ -1,8 +1,10 @@
 --------------------------------------------------------------------------------
--- This file is part of the project  MYPROJECTNAME
--- see: MYPROJECTURL
+-- This file is part of the project  avs_aes
+-- see: http://opencores.org/project,avs_aes
 --
--- description: Mux2, 2-Port-N-Bit Bit Mulitplexer
+-- description:
+-- This is only the entity to the architectures fwd and INV of mixcolumn as
+-- they have the same interface
 --
 -------------------------------------------------------------------------------
 --
@@ -41,45 +43,18 @@
 -- $Revision$			
 -------------------------------------------------------------------------------
 
+library IEEE;
+use IEEE.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-library ieee;
-use ieee.std_logic_1164.all;
 
-entity mux2 is
-	generic (
-		IOwidth : POSITIVE := 32			-- width of I/O ports
-		);
+library avs_aes_lib;
+use avs_aes_lib.avs_aes_pkg.all;
+
+entity Mixcol is
 	port (
-		inport_a : in  STD_LOGIC_VECTOR (IOwidth-1 downto 0);  -- port 1
-		inport_b : in  STD_LOGIC_VECTOR (IOwidth-1 downto 0);  -- port 2
-		selector : in  STD_LOGIC;		-- switch to select ports
-		outport	 : out STD_LOGIC_VECTOR (IOwidth-1 downto 0)   -- output
+		col_in	: in  DWORD;			-- one column of the state
+		col_out : out DWORD			-- output column
 		); 
-end mux2;
+end entity Mixcol;
 
-
-architecture arch1 of mux2 is
-
-begin  -- arch1
-
-	-- purpose: switch the ports
-	-- type	  : combinational
-	-- inputs : selector,inport_a,inport_b
-	-- outputs: outport
-	muxing : process (inport_a, inport_b, selector)
-	begin  -- PROCESS selector
-		-- default behaviour to avoid latch
-		outport <= inport_a;
-		case selector is
-			when '0' =>
-				outport <= inport_a;
-			when '1' =>
-				outport <= inport_b;
-			when others =>
-				--pragma synthesis_off
-				report "!! selector in arch1 of mux2 has strange value !!" severity warning;
-				--pragma synthesis_on
-		end case;
-	end process muxing;
-
-end arch1;

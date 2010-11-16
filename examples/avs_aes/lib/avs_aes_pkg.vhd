@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
--- This file is part of the project  MYPROJECTNAME
--- see: MYPROJECTURL
+-- This file is part of the project  avs_aes
+-- see: http://opencores.org/project,avs_aes
 --
 -- description:
 -- Central file for definition of types and global functions for handling of
@@ -46,7 +46,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-package aes_ecb_pkg is
+package avs_aes_pkg is
 	-- tiny 4 bit value
 	constant NIBBLE_WIDTH : NATURAL := 4;
 	subtype NIBBLE_RANGE is NATURAL range NIBBLE_WIDTH-1 downto 0;
@@ -188,7 +188,7 @@ package aes_ecb_pkg is
 
 	
 ---------------------------------------------------------------------------
--- Components relevant for AES_ECB
+-- Components relevant for AVS_AES
 ---------------------------------------------------------------------------
 	component AddRoundKey
 		port (
@@ -351,9 +351,9 @@ package aes_ecb_pkg is
 	-- modulo additon DWORD+DWORD=DWORD
 	function "+" (left, right : in DWORD) return DWORD;
 
-end package aes_ecb_pkg;
+end package avs_aes_pkg;
 
-package body aes_ecb_pkg is
+package body avs_aes_pkg is
 
 	---------------------------------------------------------------------------
 	-- function to calculate number of rounds based on keylength, returns
@@ -383,4 +383,4 @@ package body aes_ecb_pkg is
 		return STD_LOGIC_VECTOR(result);
 	end function;
 
-end package body aes_ecb_pkg;
+end package body avs_aes_pkg;

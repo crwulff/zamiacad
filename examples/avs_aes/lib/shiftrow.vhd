@@ -1,6 +1,6 @@
 --------------------------------------------------------------------------------
--- This file is part of the project  MYPROJECTNAME
--- see: MYPROJECTURL
+-- This file is part of the project  avs_aes
+-- see: http://opencores.org/project,avs_aes
 --
 -- description: (THIS IS ONLY THE ENTITY FOR THE SHIFTROW COMPONENTS) 
 -- Shift Row rotates the Rows of the AES Block
@@ -48,8 +48,8 @@ library IEEE;
 use IEEE.numeric_std.all;
 use IEEE.std_logic_1164.all;
 
-library aes_ecb_lib;
-use aes_ecb_lib.aes_ecb_pkg.all;
+library avs_aes_lib;
+use avs_aes_lib.avs_aes_pkg.all;
 
 entity Shiftrow is
 	port (

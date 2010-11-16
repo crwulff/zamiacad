@@ -1,18 +1,16 @@
--------------------------------------------------------------------------------
--- This file is part of the project  MYPROJECTNAME
--- see:  MYPROJECTURL
+--------------------------------------------------------------------------------
+-- This file is part of the project  avs_aes
+-- see: http://opencores.org/project,avs_aes
 --
--- description:
--- AddRoundKey module for AES algorithm, basically a simple XOR for states and
--- keyblocks.... just a simple XOR wrapped into a component for nicer usage.
---
+-- description: Mux2, 2-Port-N-Bit Bit Mulitplexer
 --
 -------------------------------------------------------------------------------
+--
 -- Author(s):
 --	   Thomas Ruschival -- ruschi@opencores.org (www.ruschival.de)
 --
 --------------------------------------------------------------------------------
--- Copyright (c) 2009, Thomas Ruschival
+-- Copyright (c) 2009, Authors and opencores.org
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without modification,
@@ -22,7 +20,7 @@
 --    * Redistributions in binary form must reproduce the above copyright notice,
 --    this list of conditions and the following disclaimer in the documentation
 --    and/or other materials provided with the distribution.
---    * Neither the name of the  nor the names of its contributors
+--    * Neither the name of the organization nor the names of its contributors
 --    may be used to endorse or promote products derived from this software without
 --    specific prior written permission.
 -- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -43,33 +41,45 @@
 -- $Revision$			
 -------------------------------------------------------------------------------
 
-library IEEE;
-use IEEE.std_logic_1164.all;
-use ieee.numeric_std.all;
 
-library aes_ecb_lib;
-use aes_ecb_lib.aes_ecb_pkg.all;
+library ieee;
+use ieee.std_logic_1164.all;
 
-entity AddRoundKey is
+entity mux2 is
+	generic (
+		IOwidth : POSITIVE := 32			-- width of I/O ports
+		);
 	port (
-		roundkey	: in  KEYBLOCK;		-- Roundkey
-		cypherblock : in  STATE;		-- State for this round
-		result		: out STATE);		-- result
-end entity AddRoundKey;
+		inport_a : in  STD_LOGIC_VECTOR (IOwidth-1 downto 0);  -- port 1
+		inport_b : in  STD_LOGIC_VECTOR (IOwidth-1 downto 0);  -- port 2
+		selector : in  STD_LOGIC;		-- switch to select ports
+		outport	 : out STD_LOGIC_VECTOR (IOwidth-1 downto 0)   -- output
+		); 
+end mux2;
 
-architecture arch1 of AddRoundKey is
 
-begin  -- architecture arch1
+architecture arch1 of mux2 is
 
-	-- purpose: Adding (Xor) roundkey words with Keywords
+begin  -- arch1
+
+	-- purpose: switch the ports
 	-- type	  : combinational
-	-- inputs : cypherblock, roundkey
-	-- outputs: result
-	Xoring : process (cypherblock, roundkey) is
-	begin  -- process Xoring
-		for cnt in cypherblock'range loop
-			result(cnt) <= cypherblock(cnt) xor roundkey(cnt);
-		end loop;  -- cnt
-	end process Xoring;
+	-- inputs : selector,inport_a,inport_b
+	-- outputs: outport
+	muxing : process (inport_a, inport_b, selector)
+	begin  -- PROCESS selector
+		-- default behaviour to avoid latch
+		outport <= inport_a;
+		case selector is
+			when '0' =>
+				outport <= inport_a;
+			when '1' =>
+				outport <= inport_b;
+			when others =>
+				--pragma synthesis_off
+				report "!! selector in arch1 of mux2 has strange value !!" severity warning;
+				--pragma synthesis_on
+		end case;
+	end process muxing;
 
-end architecture arch1;
+end arch1;

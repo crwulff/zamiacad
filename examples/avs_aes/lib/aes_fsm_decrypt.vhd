@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
--- This file is part of the project  MYPROJECTNAME
--- see: MYPROJECTURL
+-- This file is part of the project  avs_aes
+-- see: http://opencores.org/project,avs_aes
 --
 -- description:
 -- Statemachine controlling the decryption datapath within aes_core.vhd does no
@@ -46,8 +46,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library aes_ecb_lib;
-use aes_ecb_lib.aes_ecb_pkg.all;
+library avs_aes_lib;
+use avs_aes_lib.avs_aes_pkg.all;
 
 entity aes_fsm_decrypt is
 	generic (

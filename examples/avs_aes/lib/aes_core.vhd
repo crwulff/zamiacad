@@ -1,6 +1,6 @@
 -------------------------------------------------------------------------------
--- This file is part of the project	 MYPROJECTNAME
--- see: MYPROJECTURL
+-- This file is part of the project	 avs_aes
+-- see: http://opencores.org/project,avs_aes
 --
 -- description:
 -- Complete structural description of the AES core. No processes or protocol
@@ -46,8 +46,8 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-library aes_ecb_lib;
-use aes_ecb_lib.aes_ecb_pkg.all;
+library avs_aes_lib;
+use avs_aes_lib.avs_aes_pkg.all;
 
 entity AES_CORE is
 	generic (
@@ -227,7 +227,7 @@ begin  -- architecture arch1
 	---------------------------------------------------------------------------
 	-- Shiftrow step (encryption datapath)
 	---------------------------------------------------------------------------
-	shiftrow_enc : entity aes_ecb_lib.Shiftrow(fwd)
+	shiftrow_enc : entity avs_aes_lib.Shiftrow(fwd)
 		port map (
 			state_in  => sbox_out_enc,
 			state_out => shiftrow_out_enc
@@ -237,7 +237,7 @@ begin  -- architecture arch1
 	-- mix column step
 	---------------------------------------------------------------------------
 	MixColArray_enc : for i in 0 to 3 generate
-		mix_column_enc : entity aes_ecb_lib.Mixcol(fwd)
+		mix_column_enc : entity avs_aes_lib.Mixcol(fwd)
 			port map (
 				col_in	=> shiftrow_out_enc(i),
 				col_out => mixcol_out_enc(i));					 
@@ -317,7 +317,7 @@ begin  -- architecture arch1
 		-- Inverse mixcolumn 
 		---------------------------------------------------------------------------
 		InverseMixCol : for i in 0 to 3 generate
-			mix_column_dec : entity aes_ecb_lib.Mixcol(inv)
+			mix_column_dec : entity avs_aes_lib.Mixcol(inv)
 				port map (
 					col_in	=> addkey_out_dec(i),
 					col_out => mixcol_out_dec(i));
@@ -339,7 +339,7 @@ begin  -- architecture arch1
 					outport	 => shiftrow_in_dec(i));
 		end generate SRinputMux;
 
-		Shiftrow_dec : entity aes_ecb_lib.Shiftrow(inv)
+		Shiftrow_dec : entity avs_aes_lib.Shiftrow(inv)
 			port map (
 				state_in  => shiftrow_in_dec,
 				state_out => shiftrow_out_dec

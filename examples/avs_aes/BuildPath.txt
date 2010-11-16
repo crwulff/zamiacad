@@ -1,4 +1,4 @@
-local AES_ECB_LIB "aes_ecb"
+local AVS_AES_LIB "lib"
 
-toplevel AES_ECB_LIB.AVS_AES_TB
+toplevel AVS_AES_TB
 

@@ -1,13 +1,10 @@
-------------------------------------------------------------------------------
--- This file is part of the project	 MYPROJECTNAME
--- see: MYPROJECTURL
+--------------------------------------------------------------------------------
+-- This file is part of the project	 avs_aes
+-- see: http://opencores.org/project,avs_aes
 --
--- description: 
--- Sbox implements a lookup ROM for nonlinear substitution of a Bytearray.
--- This is only the entity for either arch1 (which is pure VHDL) or M4K which
--- is an Altera M4K-Blockram implementation.
+-- description: Register - nothing special
 --
--------------------------------------------------------------------------------!
+-------------------------------------------------------------------------------
 --
 -- Author(s):
 --	   Thomas Ruschival -- ruschi@opencores.org (www.ruschival.de)
@@ -43,27 +40,41 @@
 -- $Date$
 -- $Revision$			
 -------------------------------------------------------------------------------
+
 library ieee;
 use ieee.std_logic_1164.all;
 
--------------------------------------------------------------------------------
--- The interface is 2x8Bit because Altera megafunction is supposed to be at max
--- 8Bit dual port ROM (and I relied on a altera quartus generated component
--- before) see architecture m4k
--------------------------------------------------------------------------------
-entity sbox is
+entity memory_word is
 	generic (
-		INVERSE : BOOLEAN := false		-- is this the inverse or the forward
-										-- lookup table.
-										-- TRUE -> inverse sbox
-										-- FALSE -> forward sbox
-		); 
-	port(
-		clk		  : in	STD_LOGIC;		-- system clock
-		address_a : in	STD_LOGIC_VECTOR (7 downto 0);	-- 1st byte
-		address_b : in	STD_LOGIC_VECTOR (7 downto 0);	-- 2nd byte
-		q_a		  : out STD_LOGIC_VECTOR (7 downto 0);	-- substituted 1st byte
-		q_b		  : out STD_LOGIC_VECTOR (7 downto 0)	-- substituted 2nd byte
-		);
-end sbox;
+		IOwidth : POSITIVE := 1);		-- width in bits
+	port (
+		data_in	 : in  STD_LOGIC_VECTOR(IOwidth-1 downto 0);
+		data_out : out STD_LOGIC_VECTOR(IOwidth-1 downto 0);
+		res_n	 : in  STD_LOGIC;		-- system reset active low
+		ena		 : in  STD_LOGIC;		-- enable write
+		clk		 : in  STD_LOGIC);		-- system clock
+end entity memory_word;
 
+architecture arch1 of memory_word is
+	signal data : STD_LOGIC_VECTOR(IOwidth-1 downto 0);	 -- storage
+begin  -- architecture arch1
+
+	-- purpose: write data to register at clock edge if enabled
+	-- type	  : sequential
+	-- inputs : clk, res_n, data_in,ena
+	write_mem : process (clk, res_n) is
+	begin  -- process write_mem
+		if res_n = '0' then
+			data <= (others => '0');
+		elsif rising_edge(clk) then
+			if ena = '1' then
+				data <= data_in;
+			end if;
+		end if;
+	end process write_mem;
+
+	-- data can always be read
+	data_out <= data;
+	
+	
+end architecture arch1;
