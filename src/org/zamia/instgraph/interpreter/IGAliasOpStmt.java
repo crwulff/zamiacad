@@ -18,7 +18,6 @@ import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -33,32 +32,61 @@ public class IGAliasOpStmt extends IGOpStmt {
 
 	@Override
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
-		
-		IGStaticValue v2 = aRuntime.pop().getValue();
-		
-		IGTypeStatic t2 = v2.getStaticType();
+
+		IGStackFrame sf = aRuntime.pop();
+
 		IGTypeStatic t = getType().computeStaticType(aRuntime, ASTErrorMode.EXCEPTION, null);
 		
 		SourceLocation location = computeSourceLocation();
-		
-		IGStaticValueBuilder b = new IGStaticValueBuilder(t, null, location);
 
-		IGTypeStatic idx2 = t2.getStaticIndexType(location);
-		
-		int off2 = (int) idx2.getStaticLow(location).getOrd();
-		int card2 = (int) idx2.computeCardinality(location);
-		int off1 = b.getArrayOffset();
-		for (int i = off2; i<off2+card2; i++) {
-			b.set(i-off2+off1, v2.getValue(i, location), location);
+		IGObjectDriver driver = sf.getObjectDriver();
+		if (driver != null) {
+			
+			IGObjectDriver aliasDriver = driver.getAlias(t, location);
+
+			if (IGInterpreterRuntimeEnv.dump) {
+				logger.debug ("Interpreter: result of driver alias op: %s", aliasDriver);
+			}
+
+			aRuntime.push(aliasDriver);
+
+		} else {
+
+			IGStaticValue v2 = sf.getValue();
+			if (v2 == null) {
+				ZamiaException e = new ZamiaException("Interpreter: Uninitialized value detected.", location);
+				
+				if (aErrorMode == ASTErrorMode.EXCEPTION) {
+					throw e;
+				}
+				
+				if (aReport != null) {
+					aReport.append(e);
+				}
+				return ReturnStatus.ERROR;
+			}
+
+			IGTypeStatic t2 = v2.getStaticType();
+
+			IGStaticValueBuilder b = new IGStaticValueBuilder(t, null, location);
+
+			IGTypeStatic idx2 = t2.getStaticIndexType(location);
+
+			int off2 = (int) idx2.getStaticLow(location).getOrd();
+			int card2 = (int) idx2.computeCardinality(location);
+			int off1 = b.getArrayOffset();
+			for (int i = off2; i < off2 + card2; i++) {
+				b.set(i - off2 + off1, v2.getValue(i, location), location);
+			}
+
+			aRuntime.push(b.buildConstant());
 		}
 
-		aRuntime.push(b.buildConstant());
-		
 		return ReturnStatus.CONTINUE;
 	}
 
 	@Override
 	public String toString() {
-		return "ALIAS "+getType();
+		return "ALIAS " + getType();
 	}
 }
