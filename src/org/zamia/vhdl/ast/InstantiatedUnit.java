@@ -20,10 +20,10 @@ import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite;
 import org.zamia.analysis.ReferenceSite.RefType;
 import org.zamia.analysis.ast.ASTReferencesSearch;
+import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
 import org.zamia.analysis.ast.MappedFormal;
 import org.zamia.analysis.ast.MappedInterfaces;
 import org.zamia.analysis.ast.SearchJob;
-import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGDUUID;
 import org.zamia.instgraph.IGElaborationEnv;
@@ -40,8 +40,7 @@ import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.rtl.RTLPort.PortDir;
 import org.zamia.util.HashSetArray;
-import org.zamia.util.Pair;
-
+import org.zamia.zdb.ZDB;
 
 /**
  * 
@@ -207,59 +206,66 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 			aParentStructure.addStatement(inst);
 		}
 	}
-	
+
 	public abstract IGInstantiation computeIGInstantiation(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException;
-	
+
 	protected IGInstantiation instantiateIGModule(Architecture aArch, DMUID aParentDUUID, IGContainer aParentContainer, IGStructure aParentStructure, IGElaborationEnv aParentEE) {
 
 		try {
+
+			ZamiaProject zprj = aParentEE.getZamiaProject();
+			ZDB zdb = aParentEE.getZDB();
+
 			DMUID duuid = aArch.getDMUID();
-			
+
 			SourceLocation location = getLocation();
 
 			ToplevelPath path = aParentStructure.getPath().append(getLabel());
 
 			logger.info("   %s: %s", path, duuid);
 
-			IGManager igm = aParentEE.getZamiaProject().getIGM();
+			IGManager igm = zprj.getIGM();
 
-			IGInstantiation inst = new IGInstantiation(aParentDUUID, duuid, getLabel(), location, aParentEE.getZDB());
-
-			/*
-			 * look up the corresponding IGModule
-			 */
-
-			ArrayList<Pair<String, IGStaticValue>> actualGenerics = new ArrayList<Pair<String, IGStaticValue>>();
-
-			String signature = IGInstantiation.computeSignature(duuid, actualGenerics);
-
-			IGModule module = igm.getOrCreateIGModule(path, aParentDUUID, duuid, signature, actualGenerics, false, location);
+			IGInstantiation inst = new IGInstantiation(aParentDUUID, duuid, getLabel(), location, zdb);
 
 			/*
-			 * compute generics
+			 * compute actual generics
 			 */
 
-			try {
-				if (fGMS != null) {
+			if (fGMS != null) {
+				IGElaborationEnv formalEE = new IGElaborationEnv(zprj);
+				IGContainer formalContainer = new IGContainer(0, getLocation(), zdb);
+				Context formalContext = aArch.getContext();
 
-					IGContainer formalContainer = module.getStructure().getContainer();
-					
-					IGContainer formalGenericsContainer = new IGContainer(aParentContainer.getDBID(), getLocation(), aParentEE.getZDB());
-					int n = formalContainer.getNumGenerics();
-					for (int i = 0; i<n; i++) {
-						IGObject intf = formalContainer.getGeneric(i);
-						formalGenericsContainer.add(intf);
+				formalContext.computeIG(formalContainer, formalEE);
+
+				Entity entity = aArch.findEntity(formalContainer, formalEE);
+
+				InterfaceList formalGenerics = entity.getGenerics();
+				if (formalGenerics != null) {
+
+					Context entityContext = entity.getContext();
+
+					entityContext.computeIG(formalContainer, formalEE);
+
+					int n = formalGenerics.getNumInterfaces();
+					for (int i = 0; i < n; i++) {
+						InterfaceDeclaration interf = formalGenerics.get(i);
+
+						IGObject igg = (IGObject) interf.computeIG(null, formalContainer, formalEE);
+
+						formalContainer.addGeneric(igg);
+
 					}
+
+					ErrorReport report = new ErrorReport();
 					
-					IGElaborationEnv formalEE = new IGElaborationEnv(aParentEE.getZamiaProject());
 					IGOperationCache formalCache = new IGOperationCache();
-					
 					IGOperationCache actualCache = new IGOperationCache();
 
 					ArrayList<IGObject> generics = formalContainer.getGenerics();
-
-					ErrorReport report = new ErrorReport();
-					IGMappings mappings = fGMS.map(formalGenericsContainer, formalEE, formalCache, aParentContainer, aParentEE, actualCache, generics, true, report, true);
+					
+					IGMappings mappings = fGMS.map(formalContainer, formalEE, formalCache, aParentContainer, aParentEE, actualCache, generics, true, report, true);
 					if (mappings == null) {
 						throw new ZamiaException("Generics mapping failed:\n" + report, getLocation());
 					}
@@ -267,7 +273,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 						ZamiaException msg = new ZamiaException("Generics mapping failed:\n" + report, getLocation());
 						reportError(msg);
 					}
-
+					
 					/*
 					 * use our interpreter to compute actual generic values
 					 */
@@ -312,35 +318,36 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 					}
 
 					env.exitContext();
+
 				}
-			} catch (ZamiaException e) {
-				reportError(e);
-			} catch (Throwable t) {
-				el.logException(t);
 			}
+
+			/*
+			 * look up the corresponding IGModule
+			 */
 
 			inst.computeSignature();
 
 			// logger.info("   Signature is '%s'", inst.getSignature());
 
 			try {
-				module = igm.getOrCreateIGModule(path, aParentDUUID, duuid, inst.getSignature(), inst.getActualGenerics(), true, location);
+				IGModule module = igm.getOrCreateIGModule(path, aParentDUUID, duuid, inst.getSignature(), inst.getActualGenerics(), true, location);
 
 				if (fPMS != null) {
 
 					IGContainer formalContainer = module.getStructure().getContainer();
-					
+
 					if (formalContainer == null) {
-						throw new ZamiaException ("Instantiated module doesn't have a container: " + module, location);
+						throw new ZamiaException("Instantiated module doesn't have a container: " + module, location);
 					}
-					
+
 					IGContainer formalIntfContainer = new IGContainer(aParentContainer.getDBID(), getLocation(), aParentEE.getZDB());
 					int n = formalContainer.getNumInterfaces();
-					for (int i = 0; i<n; i++) {
+					for (int i = 0; i < n; i++) {
 						IGObject intf = formalContainer.getInterface(i);
 						formalIntfContainer.add(intf);
 					}
-					
+
 					IGElaborationEnv formalEE = new IGElaborationEnv(aParentEE.getZamiaProject());
 					IGOperationCache formalCache = new IGOperationCache();
 

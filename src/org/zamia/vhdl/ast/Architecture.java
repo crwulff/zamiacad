@@ -12,15 +12,14 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 
 import org.zamia.DMManager;
-import org.zamia.IASTNodeVisitor;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite.RefType;
 import org.zamia.analysis.ast.ASTDeclarationSearch;
-import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
+import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGContainerItem;
 import org.zamia.instgraph.IGDesignUnit;
@@ -323,7 +322,7 @@ public class Architecture extends SecondaryUnit {
 
 		ZamiaProject zprj = aIGM.getProject();
 
-		IGElaborationEnv cache = new IGElaborationEnv(zprj);
+		IGElaborationEnv ee = new IGElaborationEnv(zprj);
 
 		/*
 		 * set up an interpreter environment which will be used to 
@@ -338,18 +337,18 @@ public class Architecture extends SecondaryUnit {
 		env.pushContext(zprj.getDUM().getGlobalPackageContext());
 		env.pushContext(structure.getInterpreterContext());
 
-		cache.setInterpreterEnv(env);
+		ee.setInterpreterEnv(env);
 
 		/*
 		 * context
 		 */
 
-		fContext.computeIG(container, cache);
+		fContext.computeIG(container, ee);
 
 		Entity entity = null;
 
 		try {
-			entity = findEntity(container, cache);
+			entity = findEntity(container, ee);
 		} catch (ZamiaException e) {
 			reportError(e);
 		}
@@ -365,7 +364,7 @@ public class Architecture extends SecondaryUnit {
 		 * entity ig
 		 */
 
-		entity.computeEntityIG(module, container, cache);
+		entity.computeEntityIG(module, container, ee);
 
 		container.storeOrUpdate();
 		aModule.storeOrUpdate();

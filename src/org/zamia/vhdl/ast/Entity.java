@@ -16,8 +16,8 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite.RefType;
-import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
+import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGContainerItem;
 import org.zamia.instgraph.IGDesignUnit;
@@ -237,11 +237,11 @@ public class Entity extends PrimaryUnit {
 		}
 	}
 
-	public void computeEntityIG(IGModule aModule, IGContainer aContainer, IGElaborationEnv aCache) {
+	public void computeEntityIG(IGModule aModule, IGContainer aContainer, IGElaborationEnv aEE) {
 
-		IGInterpreterRuntimeEnv env = aCache.getInterpreterEnv();
+		IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
 
-		fContext.computeIG(aContainer, aCache);
+		fContext.computeIG(aContainer, aEE);
 
 		// generics
 
@@ -253,7 +253,7 @@ public class Entity extends PrimaryUnit {
 				try {
 					InterfaceDeclaration interf = fGenerics.get(i);
 
-					IGObject igg = (IGObject) interf.computeIG(null, aContainer, aCache);
+					IGObject igg = (IGObject) interf.computeIG(null, aContainer, aEE);
 
 					aContainer.addGeneric(igg);
 
@@ -280,7 +280,7 @@ public class Entity extends PrimaryUnit {
 				try {
 					InterfaceDeclaration interf = (InterfaceDeclaration) fPorts.get(i);
 
-					IGContainerItem igi = interf.computeIG(null, aContainer, aCache);
+					IGContainerItem igi = interf.computeIG(null, aContainer, aEE);
 
 					aContainer.addInterface((IGObject) igi);
 
@@ -302,7 +302,7 @@ public class Entity extends PrimaryUnit {
 		for (int i = 0; i < n; i++) {
 			try {
 				BlockDeclarativeItem decl = getDeclaration(i);
-				IGContainerItem item = decl.computeIG(null, aContainer, aCache);
+				IGContainerItem item = decl.computeIG(null, aContainer, aEE);
 
 				if (item instanceof IGObject) {
 					IGObject obj = (IGObject) item;
