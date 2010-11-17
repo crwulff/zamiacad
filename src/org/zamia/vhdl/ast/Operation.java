@@ -192,13 +192,13 @@ public abstract class Operation extends VHDLNode {
 
 		if (inv == null) {
 
-			n = report.getNumEntries();
-			if (n > 0) {
-				String msg = report.toString();
-				reportError(msg, this, aErrorMode, report);
-			} else {
-				reportError("Operator " + aOpId + " couldn't be resolved here", this, aErrorMode, report);
-			}
+			//			n = report.getNumEntries();
+			//			if (n > 0) {
+			//				String msg = report.toString();
+			//				reportError(msg, this, aErrorMode, report);
+			//			} else {
+			reportError("Operator " + aOpId + " couldn't be resolved here", this, aErrorMode, report);
+			//			}
 			return null;
 		}
 		return inv;

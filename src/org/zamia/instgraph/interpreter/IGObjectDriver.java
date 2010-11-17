@@ -66,6 +66,8 @@ public class IGObjectDriver implements Serializable {
 	private int fIdxOffset = 0;
 
 	// for logging/debugging purposes only:
+	private final static boolean debug = false;
+
 	private final String fId;
 
 	private static int counter = 0;
@@ -98,7 +100,7 @@ public class IGObjectDriver implements Serializable {
 				IGTypeStatic rft = fDeclaredType.getStaticRecordFieldType(i);
 				String rfid = rf.getId();
 
-				fRecordFieldDrivers.put(rfid, new IGObjectDriver(fId + "." + rfid, fDir, fCat, this, rft, aLocation));
+				fRecordFieldDrivers.put(rfid, new IGObjectDriver(debug ? fId + "." + rfid : fId, fDir, fCat, this, rft, aLocation));
 
 			}
 		}
@@ -134,11 +136,11 @@ public class IGObjectDriver implements Serializable {
 				}
 
 			} else {
-				
+
 				fMappedTo.setValue(aValue, aLocation);
-				
+
 			}
-			
+
 			return;
 		}
 
@@ -167,7 +169,7 @@ public class IGObjectDriver implements Serializable {
 			while (n < card) {
 				int idx = fIdxOffset + n;
 
-				fArrayElementDrivers.add(new IGObjectDriver(fId + "(" + idx + ")", fDir, fCat, this, elementType, aLocation));
+				fArrayElementDrivers.add(new IGObjectDriver(debug ? fId + "(" + idx + ")" : fId, fDir, fCat, this, elementType, aLocation));
 				n++;
 			}
 		}
@@ -466,7 +468,7 @@ public class IGObjectDriver implements Serializable {
 			return this;
 		}
 
-		String id = fId + "(" + aRange + ")";
+		String id = debug ? fId + "(" + aRange + ")" : fId;
 
 		IGObjectDriver rangeDriver = new IGObjectDriver(id, fDir, fCat, null, aRangeType, aLocation);
 
@@ -492,7 +494,7 @@ public class IGObjectDriver implements Serializable {
 			return this;
 		}
 
-		String id = "&[" + toString() + "]{" + aAliasType + "}";
+		String id = debug ? "&[" + toString() + "]{" + aAliasType + "}" : fId;
 
 		IGObjectDriver aliasedDriver = new IGObjectDriver(id, fDir, fCat, null, aAliasType, aLocation);
 

@@ -581,9 +581,25 @@ public class IGTest {
 	}
 
 	@Test
+	public void testLeonDevices() throws Exception {
+
+		runTest("examples/leonExtern", "BuildPathDevices.txt", 1);
+	}
+
+	@Test
 	public void testLeonExtern() throws Exception {
 
 		runTest("examples/leonExtern", 1933);
+	}
+
+	public static void main (String args[]) {
+		IGTest igt = new IGTest();
+		try {
+			igt.testLeonDevices();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 }
