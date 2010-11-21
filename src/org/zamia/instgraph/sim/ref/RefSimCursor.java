@@ -1,12 +1,12 @@
 package org.zamia.instgraph.sim.ref;
 
 
-import java.math.BigInteger;
-
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.sim.IGISimCursor;
 import org.zamia.util.PathName;
+
+import java.math.BigInteger;
 
 /**
  * @author Anton Chepurov
@@ -15,7 +15,7 @@ public class RefSimCursor implements IGISimCursor {
 
 	private final SimData fData;
 
-	private IGSignalInfo curSignalInfo;
+	private IGSignalLog fCurLog;
 
 	public RefSimCursor(SimData aData) {
 		fData = aData;
@@ -23,46 +23,46 @@ public class RefSimCursor implements IGISimCursor {
 
 	@Override
 	public boolean gotoTransition(PathName aSignalName, BigInteger aTimeOffset) throws ZamiaException {
-		curSignalInfo = fData.getSignalInfo(aSignalName);
-		if (curSignalInfo == null) {
+		fCurLog = fData.getLog(aSignalName);
+		if (fCurLog == null) {
 			/* If signal is not being traced, then start tracing it forcedly */
-			curSignalInfo = fData.traceForcedly(aSignalName);
+			fCurLog = fData.traceForcedly(aSignalName);
 		}
-		return curSignalInfo.getTransactionEntry(aTimeOffset) != null;
+		return fCurLog.getTransactionEntry(aTimeOffset) != null;
 	}
 
 	@Override
-	public BigInteger gotoNextTransition(BigInteger aTimeLimit) throws ZamiaException { 
-		if (curSignalInfo == null) {
+	public BigInteger gotoNextTransition(BigInteger aTimeLimit) throws ZamiaException {
+		if (fCurLog == null) {
 			return null;
 		}
-		IGSignalLogEntry signalLogEntry = curSignalInfo.getNextEventEntry();
+		IGSignalLogEntry signalLogEntry = fCurLog.getNextEventEntry();
 		if (signalLogEntry == null) {
 			return fData.getEndTime();
 		}
-		curSignalInfo.setCurEntry(signalLogEntry);
+		fCurLog.setCurEntry(signalLogEntry);
 		return signalLogEntry.fTime;
 	}
 
 	@Override
 	public BigInteger gotoPreviousTransition(BigInteger aTimeLimit) throws ZamiaException {
-		if (curSignalInfo == null) {
+		if (fCurLog == null) {
 			return null;
 		}
-		IGSignalLogEntry signalLogEntry = curSignalInfo.getPrevEventEntry();
+		IGSignalLogEntry signalLogEntry = fCurLog.getPrevEventEntry();
 		if (signalLogEntry == null) {
 			return null;
 		}
-		curSignalInfo.setCurEntry(signalLogEntry);
+		fCurLog.setCurEntry(signalLogEntry);
 		return signalLogEntry.fTime;
 	}
 
 	@Override
 	public BigInteger getCurrentTime() throws ZamiaException {
-		if (curSignalInfo == null) {
+		if (fCurLog == null) {
 			return null;
 		}
-		IGSignalLogEntry signalLogEntry = curSignalInfo.getCurrentEntry();
+		IGSignalLogEntry signalLogEntry = fCurLog.getCurrentEntry();
 		if (signalLogEntry == null) {
 			return null;
 		}
@@ -71,10 +71,10 @@ public class RefSimCursor implements IGISimCursor {
 
 	@Override
 	public IGStaticValue getCurrentValue() throws ZamiaException {
-		if (curSignalInfo == null) {
+		if (fCurLog == null) {
 			return null;
 		}
-		IGSignalLogEntry signalLogEntry = curSignalInfo.getCurrentEntry();
+		IGSignalLogEntry signalLogEntry = fCurLog.getCurrentEntry();
 		if (signalLogEntry == null) {
 			return null;
 		}

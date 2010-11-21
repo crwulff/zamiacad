@@ -8,27 +8,20 @@ import org.zamia.util.PathName;
  */
 public class IGSignalChange {
 
-	private Long fSignalDBID;
-
 	private IGStaticValue fValue;
 
 	private boolean fIsEvent;
 
-	private PathName fPath;
+	private IGSignalDriver fDriver;
 
-	public IGSignalChange(PathName aPath, Long aSignalDBID, IGStaticValue aValue, boolean aIsEvent) {
-		fPath = aPath;
-		fSignalDBID = aSignalDBID;
+	public IGSignalChange(IGStaticValue aValue, boolean aIsEvent, IGSignalDriver aDriver) {
 		fValue = aValue;
 		fIsEvent = aIsEvent;
+		fDriver = aDriver;
 	}
 
-	public PathName getPath() {
-		return fPath;
-	}
-
-	public Long getSignal() {
-		return fSignalDBID;
+	public PathName getName() {
+		return fDriver.getPath();
 	}
 
 	public IGStaticValue getValue() {
@@ -39,8 +32,12 @@ public class IGSignalChange {
 		return fIsEvent;
 	}
 
+	public IGSignalDriver getDriver() {
+		return fDriver;
+	}
+
 	@Override
 	public String toString() {
-		return fSignalDBID + " = " + fValue + (fIsEvent ? "(EVENT)" : "");
+		return getName() + " = " + fValue + (fIsEvent ? "(EVENT)" : "");
 	}
 }

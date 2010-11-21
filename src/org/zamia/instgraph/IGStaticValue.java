@@ -24,7 +24,6 @@ import org.zamia.instgraph.IGType.TypeCat;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGPushStmt;
-import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
@@ -55,6 +54,8 @@ public class IGStaticValue extends IGOperation {
 	public final static char BIT_L = 'L';
 
 	public final static char BIT_H = 'H';
+
+	public final static char BIT_W = 'W';
 
 	private BigInteger fNum;
 
@@ -312,8 +313,15 @@ public class IGStaticValue extends IGOperation {
 	}
 
 	public static IGStaticValue generateZ(IGTypeStatic aType, SourceLocation aSrc) throws ZamiaException {
+		return generateZ(aType, aSrc, false);
+	}
+
+	public static IGStaticValue generateZ(IGTypeStatic aType, SourceLocation aSrc, boolean aUseWeakest) throws ZamiaException {
 
 		if (aType.isEnum()) {
+			if (aUseWeakest && aType.getId().equals("STD_LOGIC")) {
+				return aType.findEnumLiteral(BIT_Z);
+			}
 			return aType.getStaticLow(aSrc);
 		}
 
@@ -335,7 +343,7 @@ public class IGStaticValue extends IGOperation {
 
 			IGTypeStatic elementType = aType.getStaticElementType(aSrc);
 
-			IGStaticValue o = generateZ(elementType, aSrc);
+			IGStaticValue o = generateZ(elementType, aSrc, aUseWeakest);
 
 			IGTypeStatic idxType = aType.getStaticIndexType(aSrc);
 			if (!aType.isUnconstrained()) {
@@ -375,7 +383,7 @@ public class IGStaticValue extends IGOperation {
 
 				elementType = aType.getStaticRecordFieldType(i);
 
-				o = generateZ(elementType, aSrc);
+				o = generateZ(elementType, aSrc, aUseWeakest);
 
 				//logger.info("IGStaticValue: Field #%d is %s (hash=%d), type=%s, obj=%s", i, rf, rf.hashCode(), elementType, o);
 
@@ -1145,6 +1153,100 @@ public class IGStaticValue extends IGOperation {
 			throw new ZamiaException("IGStaticValue: Sorry, not implemented: " + aOp, aSrc);
 		}
 		return resValue;
+	}
+
+	public static IGStaticValue resolveStdLogic(IGStaticValue aCurV, IGStaticValue aNewV) throws ZamiaException {
+
+		IGTypeStatic tCur = aCurV.getStaticType();
+		IGTypeStatic tNew = aNewV.getStaticType();
+		if (!tCur.conforms(tNew)) {
+			throw new ZamiaException("IGStaticValue: types of values being resolved don't conform to each other");
+		}
+
+		if (tCur.isArray()) {
+
+			IGTypeStatic elementType = tCur.getStaticElementType(null);
+			if (!elementType.isCharEnum()) {
+				throw new ZamiaException("IGStaticValue: resolution of array type with element " + elementType + " is not supported");
+			}
+
+			IGStaticValueBuilder builder = new IGStaticValueBuilder(aCurV, null);
+			for (int i = 0, n = aCurV.fArrayValues.size(); i < n; i++) {
+				IGStaticValue elA = aCurV.fArrayValues.get(i - aCurV.fArrayOffset);
+				IGStaticValue elB = aNewV.fArrayValues.get(i - aNewV.fArrayOffset);
+				builder.set(i, resolveStdLogic(elA, elB), null);
+			}
+			return builder.buildConstant();
+		}
+		if (aCurV.fIsCharLiteral) {
+			char curC = aCurV.fCharLiteral;
+			char newC = aNewV.fCharLiteral;
+
+			if (curC == BIT_U || newC == BIT_U) {
+				curC = BIT_U;
+			} else {
+				switch (curC) {
+					case BIT_X:
+						break;
+					case BIT_0:
+						if (newC == BIT_X || newC == BIT_1 || newC == BIT_DC) {
+							curC = BIT_X;
+						}
+						break;
+					case BIT_1:
+						if (newC == BIT_X || newC == BIT_0 || newC == BIT_DC) {
+							curC = BIT_X;
+						}
+						break;
+					case BIT_Z:
+						curC = newC;
+						if (newC == BIT_DC) {
+							curC = BIT_X;
+						}
+						break;
+					case BIT_W:
+						if (newC == BIT_X || newC == BIT_DC) {
+							curC = BIT_X;
+						} else
+						if (newC == BIT_0 || newC == BIT_1) {
+							curC = newC;
+						}
+						break;
+					case BIT_L:
+						if (newC == BIT_X || newC == BIT_DC) {
+							curC = BIT_X;
+						} else
+						if (newC == BIT_0 || newC == BIT_1 || newC == BIT_W) {
+							curC = newC;
+						} else
+						if (newC == BIT_H) {
+							curC = BIT_W;
+						}
+						break;
+					case BIT_H:
+						curC = newC;
+						if (newC == BIT_Z){
+							curC = BIT_H;
+						} else
+						if (newC == BIT_L){
+							curC = BIT_W;
+						} else
+						if (newC == BIT_DC){
+							curC = BIT_X;
+						}
+						break;
+					case BIT_DC:
+						curC = BIT_X;
+						break;
+					default:
+						throw new ZamiaException("IGStaticValue: resolution of charLiteral " + curC + " is not supported");
+				}
+			}
+			return tCur.findEnumLiteral(curC);
+
+		} else {
+			throw new ZamiaException("IGStaticValue: resolution of " + tCur + " is not supported");
+		}
 	}
 
 	public static int getInt(String aString) {

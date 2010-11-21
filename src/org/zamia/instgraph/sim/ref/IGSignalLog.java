@@ -24,7 +24,7 @@ import org.zamia.util.PathName;
  *
  */
 
-public class IGSignalInfo {
+public class IGSignalLog {
 
 	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
@@ -34,7 +34,7 @@ public class IGSignalInfo {
 
 	private IGSignalLogEntry fCurEntry;
 
-	public IGSignalInfo(PathName aPath) {
+	public IGSignalLog(PathName aPath) {
 		fPath = aPath;
 	}
 
@@ -129,7 +129,7 @@ public class IGSignalInfo {
 	public void fillLeadingU() throws ZamiaException {
 
 		if (fFirstEntry != fLastEntry) {
-			throw new ZamiaException("IGSignalInfo: signal history with only 1 log entry can be filled with 'U'-s");
+			throw new ZamiaException("IGSignalLog: signal history with only 1 log entry can be filled with 'U'-s");
 		}
 
 		// create U value

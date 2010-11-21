@@ -61,9 +61,9 @@ public class IGMapStmt extends IGStmt {
 					throw e;
 				}
 			}
-			
-			formal.setValue(v, computeSourceLocation());
-			
+
+			formal.schedule(false, null, null, v, aRuntime, computeSourceLocation());
+
 		} else {
 			formal.map(actual, computeSourceLocation());
 		}

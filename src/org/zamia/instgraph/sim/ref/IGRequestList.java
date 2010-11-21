@@ -8,16 +8,16 @@
  */
 package org.zamia.instgraph.sim.ref;
 
+import org.zamia.ZamiaException;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
-
-import org.zamia.ZamiaException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 
 /**
- * 
  * @author Guenter Bartsch
- * 
  */
 public class IGRequestList {
 
@@ -81,5 +81,15 @@ public class IGRequestList {
 		}
 
 		return buf.toString();
+	}
+
+	public Collection<IGSignalChangeRequest> filterSignalChanges() {
+		Collection<IGSignalChangeRequest> signalChanges = new LinkedList<IGSignalChangeRequest>();
+		for (IGSimRequest req : fRequests) {
+			if (req instanceof IGSignalChangeRequest) {
+				signalChanges.add((IGSignalChangeRequest) req);
+			}
+		}
+		return signalChanges;
 	}
 }

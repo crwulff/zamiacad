@@ -8,45 +8,51 @@
  */
 package org.zamia.instgraph.sim.ref;
 
+import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGStaticValue;
+import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGInterpreterContext;
+import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.util.PathName;
 
 /**
- * 
  * @author Guenter Bartsch
- *
  */
 
 @SuppressWarnings("serial")
 public class IGSimContext extends IGInterpreterContext {
 
-	private IGSimRef fSim;
 	private PathName fPath;
 
-	public IGSimContext(IGSimRef aSim, PathName aPath) {
-		fSim = aSim;
+	public IGSimContext(PathName aPath) {
 		fPath = aPath;
 	}
 
-	public IGStaticValue getCurrentValue(long aDBID) throws ZamiaException {
-		return super.getObjectValue(aDBID);
+	@Override
+	protected IGObjectDriver createDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
+		if (aCat == IGObject.IGObjectCat.SIGNAL) {
+			return new IGSignalDriver(aId, aDir, aCat, null, aType, aLocation);
+		} else {
+			return super.createDriver(aId, aDir, aCat, aType, aLocation);
+		}
 	}
 
 	@Override
 	public IGStaticValue getObjectValue(long aDBID) throws ZamiaException {
 		// For signals -- get delta
 		// For others -- current value
-		IGStaticValue v = fSim.getSignalNextValue(aDBID, fPath);
-		if (v != null) {
-			return v;
+		IGObjectDriver driver = getObjectDriver(aDBID);
+
+		if (driver instanceof IGSignalDriver) {
+			return ((IGSignalDriver) driver).getNextValue();
+		} else {
+			return driver.getValue(null);
 		}
-		
-		return getCurrentValue(aDBID);
 	}
 
-	
+
 	public PathName getPath() {
 		return fPath;
 	}

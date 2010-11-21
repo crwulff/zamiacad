@@ -161,7 +161,7 @@ public class IGRefSimTest {
 	@Test
 	public void testPlasma() throws Exception {
 
-		runTest("examples/plasma", "BuildPathTbench.txt", 19, 0);
+		runTest("examples/plasma", "BuildPathTbench.txt", 19, 10000);
 	}
 	@Test
 	public void testEntityInst() throws Exception {

@@ -8,32 +8,32 @@
  */
 package org.zamia.instgraph.sim.ref;
 
-import java.math.BigInteger;
-
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGStaticValue;
-import org.zamia.instgraph.interpreter.IGObjectWriter;
+
+import java.math.BigInteger;
 
 
 /**
- * 
  * @author Guenter Bartsch
- *
  */
 
 public class IGSignalChangeRequest extends IGSimRequest {
 
-	private IGObjectWriter fObjectWriter;
-	private long fSignalDBID;
-	private SourceLocation fLocation;
 	private BigInteger fTime;
 
-	public IGSignalChangeRequest(IGSimProcess aRuntime, long aSignalDBID, BigInteger aTime, IGObjectWriter aObjectWriter, SourceLocation aLocation) {
-		super(aRuntime);
-		fSignalDBID = aSignalDBID;
+	private IGStaticValue fValue;
+
+	private IGSignalDriver fSignalDriver;
+
+	private SourceLocation fLocation;
+
+	public IGSignalChangeRequest(IGSimProcess aProcess, BigInteger aTime, IGStaticValue aValue, IGSignalDriver aSignalDriver, SourceLocation aLocation) {
+		super(aProcess);
 		fTime = aTime;
-		fObjectWriter = aObjectWriter;
+		fValue = aValue;
+		fSignalDriver = aSignalDriver;
 		fLocation = aLocation;
 	}
 
@@ -42,19 +42,20 @@ public class IGSignalChangeRequest extends IGSimRequest {
 		if (isCanceled()) {
 			return;
 		}
-		fObjectWriter.execute(fProcess);
+		fSignalDriver.setNextValue(fValue, fLocation);
 	}
 
 	public BigInteger getTime() {
 		return fTime;
 	}
 
-	@Override
-	public String toString() {
-		return "@ " + fTime + ": " + fObjectWriter; //fObjectWriter.getObject().getId() + " <= " + fObjectWriter.getValue();
+	public IGSignalDriver getDriver() {
+		return fSignalDriver;
 	}
 
-	public IGStaticValue getValue() {
-		return fObjectWriter.getValue();
+	@Override
+	public String toString() {
+		return "@ " + fTime + ": " + fSignalDriver + "<=" + fValue;
 	}
+
 }

@@ -23,7 +23,7 @@ import org.zamia.instgraph.IGObject.IGObjectCat;
  * @author Guenter Bartsch
  * 
  */
-
+@Deprecated
 public class IGObjectWriter {
 
 	public enum SNOp {

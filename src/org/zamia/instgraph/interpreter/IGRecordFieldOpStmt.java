@@ -17,9 +17,7 @@ import org.zamia.zdb.ZDB;
 
 
 /**
- * 
  * @author Guenter Bartsch
- * 
  */
 @SuppressWarnings("serial")
 public class IGRecordFieldOpStmt extends IGStmt {
@@ -35,11 +33,23 @@ public class IGRecordFieldOpStmt extends IGStmt {
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
 		IGStackFrame sf = aRuntime.pop();
-		IGStaticValue op = sf.getValue();
 
-		IGStaticValue resValue = op.getRecordFieldValue(fRF.getId(), null);
+		IGObjectDriver driver = sf.getObjectDriver();
 
-		aRuntime.push(resValue);
+		if (driver != null) {
+
+			driver = driver.getRecordFieldDriver(fRF.getId(), null);
+
+			aRuntime.push(driver);
+
+		} else {
+
+			IGStaticValue op = sf.getValue();
+
+			IGStaticValue resValue = op.getRecordFieldValue(fRF.getId(), null);
+
+			aRuntime.push(resValue);
+		}
 
 		return ReturnStatus.CONTINUE;
 

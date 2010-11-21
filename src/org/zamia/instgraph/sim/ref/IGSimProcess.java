@@ -8,29 +8,25 @@
  */
 package org.zamia.instgraph.sim.ref;
 
-import java.math.BigInteger;
-import java.io.File;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGStaticValue;
-import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
-import org.zamia.instgraph.interpreter.IGObjectWriter;
 import org.zamia.util.PathName;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.math.BigInteger;
 
 
 /**
- * 
  * @author Guenter Bartsch
- * 
  */
 
 public class IGSimProcess extends IGInterpreterRuntimeEnv {
@@ -38,8 +34,8 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 	private IGSimRef fSim;
 	private PathName fPath;
 
-	public IGSimProcess(IGSimRef aSim, PathName aPath, IGInterpreterCode aCode, ZamiaProject aZPrj) {
-		super(aCode, aZPrj);
+	public IGSimProcess(IGSimRef aSim, PathName aPath, ZamiaProject aZPrj) {
+		super(null, aZPrj);
 		fSim = aSim;
 		fPath = aPath;
 	}
@@ -51,17 +47,19 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 
 	@Override
 	public void scheduleWakeup(IGObjectDriver aDriver, SourceLocation aLocation) throws ZamiaException {
-		
-		// FIXME
-		
-		throw new ZamiaException ("Sorry, broken.");
-		
-		//fSim.scheduleWakeup(aSignal, this);
+		if (!(aDriver instanceof IGSignalDriver)) {
+			throw new ZamiaException("IGRefSim: wakeup scheduled on a non-signal driver: " + aDriver, aLocation);
+		}
+		((IGSignalDriver) aDriver).addListener(this);
 	}
 
-	public void scheduleSignalChange(boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGObjectWriter aObjectWriter, SourceLocation aLocation) throws ZamiaException {
+	@Override
+	public void scheduleSignalChange(boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGStaticValue aValue, IGObjectDriver aIgObjectDriver, SourceLocation aLocation) throws ZamiaException {
+		if (!(aIgObjectDriver instanceof IGSignalDriver)) {
+			throw new ZamiaException("IGSimProcess: non-signal driver scheduled for change: " + aIgObjectDriver, aLocation);
+		}
 
-		fSim.scheduleSignalChange(this, aInertial, aDelay, aReject, aObjectWriter, aLocation);
+		fSim.scheduleSignalChange(this, aInertial, aDelay, aReject, aValue, (IGSignalDriver) aIgObjectDriver, aLocation);
 	}
 
 	public void cancelAllWakeups(SourceLocation aLocation) throws ZamiaException {
@@ -70,12 +68,7 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 
 	@Override
 	public void setObjectValue(IGObject aObject, IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
-		// For signals -- set delta
-		// For others -- immediate change
-		IGObject.IGObjectCat objectCat = aObject.getCat();
-		if (objectCat == IGObject.IGObjectCat.SIGNAL) {
-			fSim.setSignalNextValue(aObject, aValue, this);
-		} else if (objectCat == IGObject.IGObjectCat.FILE) {
+		if (aObject.getCat() == IGObject.IGObjectCat.FILE) {
 			writeToFile(aObject, aValue, aLocation);
 		} else {
 			super.setObjectValue(aObject, aValue, aLocation);
@@ -106,22 +99,10 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 				if (writer != null) { // always close the writer
 					writer.close();
 				}
-			} catch (IOException e) {}
+			} catch (IOException e) {
+			}
 		}
 
-	}
-
-	@Override
-	public IGSignalChange getSignalActivity(IGObject aSignal, SourceLocation aLocation) {
-		return fSim.getSignalActivity(aSignal, fPath);
-	}
-
-	@Override
-	public boolean isChanged(IGObject aSignal, SourceLocation aLocation) throws ZamiaException {
-
-		IGSignalChange signalChange = getSignalActivity(aSignal, aLocation);
-
-		return signalChange != null && signalChange.isEvent();
 	}
 
 	public BigInteger getCurrentTime(SourceLocation aLocation) throws ZamiaException {

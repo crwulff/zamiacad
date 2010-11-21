@@ -22,7 +22,6 @@ import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
-import org.zamia.instgraph.sim.ref.IGSignalChange;
 import org.zamia.util.ZStack;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
@@ -284,7 +283,7 @@ public class IGInterpreterRuntimeEnv {
 	
 	public IGStaticValue getObjectValue(IGObject aObj) throws ZamiaException {
 		
-		IGObjectDriver driver = getDriver (aObj, ASTErrorMode.EXCEPTION, null);
+		IGObjectDriver driver = getDriver(aObj, ASTErrorMode.EXCEPTION, null);
 		if (driver == null) {
 			return null;
 		}
@@ -420,6 +419,7 @@ public class IGInterpreterRuntimeEnv {
 		throw new ZamiaException("Error: this environment doesn't support wakeup requests.", aLocation);
 	}
 
+	@Deprecated
 	public void scheduleSignalChange(boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGObjectWriter aObjectWriter, SourceLocation aLocation) throws ZamiaException {
 		throw new ZamiaException("Error: this environment doesn't support signals.", aLocation);
 	}
@@ -428,19 +428,11 @@ public class IGInterpreterRuntimeEnv {
 		throw new ZamiaException("Error: this environment doesn't support wakeup requests.", aLocation);
 	}
 
-	public IGSignalChange getSignalActivity(IGObject aSignal, SourceLocation aLocation) throws ZamiaException {
-		throw new ZamiaException("Error: this environment doesn't support signals.", aLocation);
-	}
-
-	public boolean isChanged(IGObject aSignal, SourceLocation aLocation) throws ZamiaException {
-		throw new ZamiaException("Error: this environment doesn't support signals.", aLocation);
-	}
-
 	public BigInteger getCurrentTime(SourceLocation aLocation) throws ZamiaException {
 		throw new ZamiaException("Error: this environment doesn't support simulation time retrieval.", aLocation);
 	}
 
-	public void scheduleSignalChange(boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGObjectDriver aIgObjectDriver, SourceLocation aLocation) throws ZamiaException {
+	public void scheduleSignalChange(boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGStaticValue aValue, IGObjectDriver aIgObjectDriver, SourceLocation aLocation) throws ZamiaException {
 		throw new ZamiaException("Error: this environment doesn't support signals.", aLocation);
 	}
 

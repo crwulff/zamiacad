@@ -52,11 +52,15 @@ public class IGInterpreterContext implements Serializable {
 		
 		IGObject obj = aObject.getObject();
 		
-		IGObjectDriver driver = new IGObjectDriver(id, obj.getDirection(), obj.getCat(), null, aObject.getStaticType(), aLocation);
+		IGObjectDriver driver = createDriver(id, obj.getDirection(), obj.getCat(), aObject.getStaticType(), aLocation);
 
 		fDrivers.put(dbid, driver);
 
 		return driver;
+	}
+
+	protected IGObjectDriver createDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
+		return new IGObjectDriver(aId, aDir, aCat, null, aType, aLocation);
 	}
 
 	public IGObjectDriver getObjectDriver(long aDBID) {

@@ -100,10 +100,14 @@ public class IGObjectDriver implements Serializable {
 				IGTypeStatic rft = fDeclaredType.getStaticRecordFieldType(i);
 				String rfid = rf.getId();
 
-				fRecordFieldDrivers.put(rfid, new IGObjectDriver(debug ? fId + "." + rfid : fId, fDir, fCat, this, rft, aLocation));
+				fRecordFieldDrivers.put(rfid, createChildDriver(debug ? fId + "." + rfid : fId, fDir, fCat, this, rft, aLocation));
 
 			}
 		}
+	}
+
+	protected IGObjectDriver createChildDriver(String aId, OIDir aDir, IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
+		return new IGObjectDriver(aId, aDir, aCat, aParent, aType, aLocation);
 	}
 
 	public void setValue(IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
@@ -169,7 +173,7 @@ public class IGObjectDriver implements Serializable {
 			while (n < card) {
 				int idx = fIdxOffset + n;
 
-				fArrayElementDrivers.add(new IGObjectDriver(debug ? fId + "(" + idx + ")" : fId, fDir, fCat, this, elementType, aLocation));
+				fArrayElementDrivers.add(createChildDriver(debug ? fId + "(" + idx + ")" : fId, fDir, fCat, this, elementType, aLocation));
 				n++;
 			}
 		}
@@ -381,7 +385,6 @@ public class IGObjectDriver implements Serializable {
 		return "DRIVER@" + fCnt + "[" + fId + "]";
 	}
 
-	// to be overriden in simulator subclass
 	public boolean isEvent() {
 		if (fMappedTo != null) {
 			return fMappedTo.isEvent();
@@ -400,6 +403,11 @@ public class IGObjectDriver implements Serializable {
 		//		// check signal event
 		//		boolean isChanged = aRuntime.isChanged(signal, computeSourceLocation());
 
+		return isEventInternal();
+	}
+
+	// to be overriden in simulator subclass
+	protected boolean isEventInternal() {
 		return false;
 	}
 
@@ -411,12 +419,37 @@ public class IGObjectDriver implements Serializable {
 		return false;
 	}
 
+	protected IGObjectDriver getTargetDriver() {
+
+		IGObjectDriver targetDriver = this;
+
+		IGObjectDriver mappedTo;
+
+		while ((mappedTo = targetDriver.fMappedTo) != null) {
+			targetDriver = mappedTo;
+		}
+
+		return targetDriver;
+	}
+
 	public IGObjectDriver getArrayElementDriver(int aIdx, SourceLocation aLocation) throws ZamiaException {
 		if (fMappedTo != null) {
-			return fMappedTo.getArrayElementDriver(aIdx - fIdxOffset, aLocation);
+			if (fAliasedType != null) {
+				return fMappedTo.getArrayElementDriver(aIdx - fIdxOffset, aLocation);
+			} else {
+				return fMappedTo.getArrayElementDriver(aIdx, aLocation);
+			}
 		}
 
 		return fArrayElementDrivers.get(aIdx - fIdxOffset);
+	}
+
+	public IGObjectDriver getRecordFieldDriver(String aId, SourceLocation aLocation) throws ZamiaException {
+		if (fMappedTo != null) {
+			return fMappedTo.getRecordFieldDriver(aId, aLocation);
+		}
+
+		return fRecordFieldDrivers.get(aId);
 	}
 
 	public void schedule(boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGStaticValue aValue, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation)
@@ -424,7 +457,7 @@ public class IGObjectDriver implements Serializable {
 
 		if (fCat == IGObjectCat.SIGNAL) {
 
-			aRuntime.scheduleSignalChange(aInertial, aDelay, aReject, this, aLocation);
+			aRuntime.scheduleSignalChange(aInertial, aDelay, aReject, aValue, this, aLocation);
 
 		} else {
 
@@ -439,6 +472,10 @@ public class IGObjectDriver implements Serializable {
 		}
 
 		return fCat;
+	}
+
+	protected String getId() {
+		return fId + "@" + fCnt;
 	}
 
 	public void map(IGObjectDriver aActual, SourceLocation aLocation) throws ZamiaException {
@@ -470,7 +507,7 @@ public class IGObjectDriver implements Serializable {
 
 		String id = debug ? fId + "(" + aRange + ")" : fId;
 
-		IGObjectDriver rangeDriver = new IGObjectDriver(id, fDir, fCat, null, aRangeType, aLocation);
+		IGObjectDriver rangeDriver = createChildDriver(id, fDir, fCat, null, aRangeType, aLocation);
 
 		int rangeOffset = (int) aRangeType.getStaticIndexType(aLocation).getStaticLow(aLocation).getOrd();
 		IGTypeStatic currentType = getCurrentType();
@@ -496,7 +533,7 @@ public class IGObjectDriver implements Serializable {
 
 		String id = debug ? "&[" + toString() + "]{" + aAliasType + "}" : fId;
 
-		IGObjectDriver aliasedDriver = new IGObjectDriver(id, fDir, fCat, null, aAliasType, aLocation);
+		IGObjectDriver aliasedDriver = createChildDriver(id, fDir, fCat, null, aAliasType, aLocation);
 
 		int aliasOffset = (int) aAliasType.getStaticIndexType(aLocation).getStaticLow(aLocation).getOrd();
 		IGTypeStatic currentType = getCurrentType();
