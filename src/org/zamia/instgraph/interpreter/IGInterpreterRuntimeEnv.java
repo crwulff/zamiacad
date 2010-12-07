@@ -419,11 +419,6 @@ public class IGInterpreterRuntimeEnv {
 		throw new ZamiaException("Error: this environment doesn't support wakeup requests.", aLocation);
 	}
 
-	@Deprecated
-	public void scheduleSignalChange(boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGObjectWriter aObjectWriter, SourceLocation aLocation) throws ZamiaException {
-		throw new ZamiaException("Error: this environment doesn't support signals.", aLocation);
-	}
-
 	public void cancelAllWakeups(SourceLocation aLocation) throws ZamiaException {
 		throw new ZamiaException("Error: this environment doesn't support wakeup requests.", aLocation);
 	}

@@ -87,7 +87,7 @@ public class IGSimAnnotator {
 
 	private IGManager fIGM;
 
-	private IGAnnotationsEnv fAnnotationsEnv;
+	private IGInterpreterRuntimeEnv fAnnotationsEnv;
 
 	private Toplevel fToplevel;
 
@@ -354,7 +354,7 @@ public class IGSimAnnotator {
 
 			n = path.getNumSegments();
 
-			fAnnotationsEnv = new IGAnnotationsEnv(null, fZPrj);
+			fAnnotationsEnv = new IGInterpreterRuntimeEnv(null, fZPrj);
 			fAnnotationsEnv.pushContext(fGlobalPackageContext);
 
 			PathName cp = new PathName("");
