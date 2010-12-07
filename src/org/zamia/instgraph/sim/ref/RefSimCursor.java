@@ -28,7 +28,9 @@ public class RefSimCursor implements IGISimCursor {
 			/* If signal is not being traced, then start tracing it forcedly */
 			fCurLog = fData.traceForcedly(aSignalName);
 		}
-		return fCurLog.getTransactionEntry(aTimeOffset) != null;
+		IGSignalLogEntry transactionEntry = fCurLog.getTransactionEntry(aTimeOffset);
+		fCurLog.setCurEntry(transactionEntry);
+		return transactionEntry != null;
 	}
 
 	@Override

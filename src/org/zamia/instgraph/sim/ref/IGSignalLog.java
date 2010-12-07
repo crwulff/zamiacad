@@ -56,13 +56,14 @@ public class IGSignalLog {
 
 	public IGSignalLogEntry getTransactionEntry(BigInteger aTime) {
 
-		fCurEntry = fFirstEntry;
+		IGSignalLogEntry entry = fFirstEntry;
 
-		while (fCurEntry.fNext != null && fCurEntry.fNext.fTime.compareTo(aTime)<=0) {
-			fCurEntry = fCurEntry.fNext;
+		IGSignalLogEntry nextEvent;
+		while ((nextEvent = entry.getNextEvent()) != null && nextEvent.fTime.compareTo(aTime) <= 0) {
+			entry = nextEvent;
 		}
 
-		return fCurEntry;
+		return entry;
 	}
 
 	public IGSignalLogEntry getEventEntry(BigInteger aTime) {
