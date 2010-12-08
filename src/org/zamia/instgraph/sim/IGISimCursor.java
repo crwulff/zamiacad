@@ -89,6 +89,13 @@ public interface IGISimCursor {
 	public IGStaticValue getCurrentValue() throws ZamiaException;
 
 	/**
+	 * Check current signal for event at the current time.
+	 *
+	 * @return true if signal has an event at the current time, false otherwise
+	 */
+	public boolean isEvent();
+
+	/**
 	 * Call this method to free resources allocated to this sim cursor when 
 	 * it is no longer needed
 	 * 

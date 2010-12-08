@@ -76,6 +76,18 @@ public class VCDSimCursor implements IGISimCursor {
 	}
 
 	@Override
+	public boolean isEvent() {
+		if (fCurSignalInfo == null) {
+			return false;
+		}
+		SignalLogEntry entry = fCurSignalInfo.getCurrentEntry();
+		if (entry == null) {
+			return false;
+		}
+		return entry.fIsEvent;
+	}
+
+	@Override
 	public BigInteger gotoNextTransition(BigInteger aTimeLimit) throws ZamiaException {
 		if (fCurSignalInfo == null) {
 			return null;

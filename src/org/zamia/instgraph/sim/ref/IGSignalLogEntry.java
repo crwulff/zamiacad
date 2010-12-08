@@ -53,4 +53,14 @@ public class IGSignalLogEntry {
 		}
 		return entry;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(fTime).append("(").append(fValue).append(")").append(fIsEvent ? " E" : "").append("\n");
+		if (fNext != null) {
+			sb.append(fNext);
+		}
+		return sb.toString();
+	}
 }

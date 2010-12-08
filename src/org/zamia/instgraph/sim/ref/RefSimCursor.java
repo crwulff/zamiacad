@@ -84,6 +84,18 @@ public class RefSimCursor implements IGISimCursor {
 	}
 
 	@Override
+	public boolean isEvent() {
+		if (fCurLog == null) {
+			return false;
+		}
+		IGSignalLogEntry signalLogEntry = fCurLog.getCurrentEntry();
+		if (signalLogEntry == null) {
+			return false;
+		}
+		return signalLogEntry.fIsEvent;
+	}
+
+	@Override
 	public void dispose() {
 	}
 }

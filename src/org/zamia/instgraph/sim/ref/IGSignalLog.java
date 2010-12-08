@@ -38,8 +38,13 @@ public class IGSignalLog {
 		fPath = aPath;
 	}
 
-	public void add(BigInteger aTime, IGStaticValue aValue, boolean aIsEvent) {
+	public void add(BigInteger aTime, IGStaticValue aValue, boolean aIsEvent) throws ZamiaException {
 
+		if (fLastEntry != null && aTime.equals(fLastEntry.fTime)) {
+			removeLastEntry();
+			IGStaticValue lastValue = fLastEntry != null ? fLastEntry.fValue : null;
+			aIsEvent = IGSignalDriver.hasValueChanged(lastValue, aValue);
+		}
 		IGSignalLogEntry entry = new IGSignalLogEntry(aTime, aValue, aIsEvent);
 
 		entry.fPrev = fLastEntry;
@@ -58,9 +63,8 @@ public class IGSignalLog {
 
 		IGSignalLogEntry entry = fFirstEntry;
 
-		IGSignalLogEntry nextEvent;
-		while ((nextEvent = entry.getNextEvent()) != null && nextEvent.fTime.compareTo(aTime) <= 0) {
-			entry = nextEvent;
+		while (entry.fNext != null && entry.fNext.fTime.compareTo(aTime)<=0) {
+			entry = entry.fNext;
 		}
 
 		return entry;

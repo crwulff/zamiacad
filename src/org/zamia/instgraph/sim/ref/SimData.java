@@ -56,13 +56,13 @@ public class SimData {
 		return fAllSignals.get(aSignalName);
 	}
 
-	public void logChanges(List<IGSignalChange> aChangeList, BigInteger aTime) {
+	public void logChanges(List<IGSignalChange> aChangeList, BigInteger aTime) throws ZamiaException {
 		for (IGSignalChange signalChange : aChangeList) {
 			addSignalValue(signalChange.getName(), aTime, signalChange.getValue(), signalChange.isEvent());
 		}
 	}
 
-	public void addSignalValue(PathName aSignalName, BigInteger aTime, IGStaticValue aValue, boolean aIsEvent) {
+	public void addSignalValue(PathName aSignalName, BigInteger aTime, IGStaticValue aValue, boolean aIsEvent) throws ZamiaException {
 		IGSignalLog log = fTracedSignals.get(aSignalName);
 		if (log != null) {
 			log.add(aTime, aValue, aIsEvent);
@@ -202,8 +202,9 @@ public class SimData {
 
 	/**
 	 * Removes overwritten value (entry) from SignalInfos affected by other signals' value forcing
+	 * @throws org.zamia.ZamiaException if cannot compare values to determine event status
 	 */
-	void repairActiveSignals() {
+	void repairActiveSignals() throws ZamiaException {
 
 		for (IGSignalLog activeLog : fActiveSignals) {
 

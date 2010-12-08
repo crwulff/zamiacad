@@ -92,7 +92,7 @@ public class IGSignalDriver extends IGObjectDriver {
 		return fIsEvent;
 	}
 
-	private boolean hasValueChanged(IGStaticValue aOldValue, IGStaticValue aNewValue) throws ZamiaException {
+	static boolean hasValueChanged(IGStaticValue aOldValue, IGStaticValue aNewValue) throws ZamiaException {
 
 		if (aOldValue == null) {
 			return aNewValue != null;
