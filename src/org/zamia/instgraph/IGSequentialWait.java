@@ -27,7 +27,6 @@ import org.zamia.instgraph.interpreter.IGWaitStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -148,15 +147,14 @@ public class IGSequentialWait extends IGSequentialStatement {
 		if (fConditionClause != null) {
 
 			fConditionClause.generateCode(true, aCode);
-			
+
 			aCode.add(new IGJumpCStmt(waitDoneLabel, computeSourceLocation(), getZDB()));
 		}
-		
-		
+
 		aCode.add(new IGJumpStmt(waitLoopLabel, computeSourceLocation(), getZDB()));
 
 		aCode.defineLabel(waitDoneLabel);
-		
+
 		aCode.add(new IGCancelAllWakeupsStmt(computeSourceLocation(), getZDB()));
 	}
 
@@ -182,6 +180,23 @@ public class IGSequentialWait extends IGSequentialStatement {
 
 	public IGOperation getSensitivityListOp(int aIdx) {
 		return fSensitivityList.get(aIdx);
+	}
+
+	@Override
+	public void dump(int aIndent) {
+		logger.debug(aIndent, "wait cond=%s sens=%s time=%s", fConditionClause, fSensitivityList, fTimeoutClause);
+	}
+
+	public IGOperation getTimeoutClause() {
+		return fTimeoutClause;
+	}
+
+	public IGOperation getConditionClause() {
+		return fConditionClause;
+	}
+
+	public ArrayList<IGOperation> getSensitivityList() {
+		return fSensitivityList;
 	}
 
 }

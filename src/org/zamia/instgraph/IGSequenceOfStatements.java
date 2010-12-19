@@ -18,7 +18,6 @@ import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -28,7 +27,7 @@ import org.zamia.zdb.ZDB;
 public class IGSequenceOfStatements extends IGSequentialStatement {
 
 	private ArrayList<IGSequentialStatement> fStmts = new ArrayList<IGSequentialStatement>();
-	
+
 	public IGSequenceOfStatements(String aId, SourceLocation aSrc, ZDB aZDB) {
 		super(aId, aSrc, aZDB);
 	}
@@ -38,30 +37,30 @@ public class IGSequenceOfStatements extends IGSequentialStatement {
 	}
 
 	public void computeAccessedItems(IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
-		
+
 		int n = fStmts.size();
-		
-		for (int i = 0; i<n; i++) {
-	
+
+		for (int i = 0; i < n; i++) {
+
 			IGSequentialStatement stmt = fStmts.get(i);
-			
+
 			stmt.computeAccessedItems(aFilterItem, aFilterType, 0, aAccessedItems);
 		}
 	}
 
 	public void computeReadSignals(HashSetArray<IGObject> aSignals) {
-		
+
 		HashSetArray<IGItemAccess> accessedItems = new HashSetArray<IGItemAccess>();
-		
+
 		computeAccessedItems(null, AccessType.Read, 0, accessedItems);
-		
+
 		int n = accessedItems.size();
-		for (int i = 0; i<n; i++) {
-			
+		for (int i = 0; i < n; i++) {
+
 			IGItemAccess access = accessedItems.get(i);
-			
+
 			IGItem item = access.getItem();
-			
+
 			if (item instanceof IGObject) {
 				IGObject obj = (IGObject) item;
 				if (obj.getCat() == IGObjectCat.SIGNAL) {
@@ -82,9 +81,9 @@ public class IGSequenceOfStatements extends IGSequentialStatement {
 	@Override
 	public void generateCode(IGInterpreterCode aCode) throws ZamiaException {
 		int n = getNumStatements();
-		for (int i = 0; i<n; i++) {
+		for (int i = 0; i < n; i++) {
 			IGSequentialStatement stmt = getStatement(i);
-			
+
 			stmt.generateCode(aCode);
 		}
 	}
@@ -97,6 +96,15 @@ public class IGSequenceOfStatements extends IGSequentialStatement {
 	@Override
 	public int getNumChildren() {
 		return fStmts.size();
+	}
+
+	@Override
+	public void dump(int aIndent) {
+		int n = getNumStatements();
+		for (int i = 0; i < n; i++) {
+			IGSequentialStatement stmt = getStatement(i);
+			stmt.dump(aIndent + 2);
+		}
 	}
 
 }

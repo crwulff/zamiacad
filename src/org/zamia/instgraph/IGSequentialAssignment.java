@@ -103,4 +103,28 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 		return fTarget.toString() + " := " + fValue;
 	}
 
+	public IGOperation getValue() {
+		return fValue;
+	}
+
+	public IGOperation getTarget() {
+		return fTarget;
+	}
+
+	public IGOperation getReject() {
+		return fReject;
+	}
+
+	public boolean isInertial() {
+		return fInertial;
+	}
+
+	public IGOperation getDelay() {
+		return fDelay;
+	}
+
+	@Override
+	public void dump(int aIndent) {
+		logger.debug(aIndent, "%s := %s [delay=%s, inertial=%s, reject=%s]", fTarget, fValue, fDelay, fInertial, fReject);
+	}
 }

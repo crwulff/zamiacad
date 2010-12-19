@@ -112,4 +112,8 @@ public class IGOperationAttribute extends IGOperation {
 			fOp.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, aAccessedItems);
 		}
 	}
+
+	public IGItem getItem() {
+		return fItem;
+	}
 }

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.zamia.instgraph.IGManager;
+import org.zamia.rtlng.RTLManager;
 import org.zamia.util.ZHash;
 import org.zamia.util.ZamiaTmpDir;
 import org.zamia.verilog.VerilogParser;
@@ -63,6 +64,8 @@ public class ZamiaProject {
 	// error manager
 	private ERManager fERM;
 
+	private RTLManager fRTLM;
+	
 	//private ZamiaTclInterpreter fZTI;
 
 	private static final String BUILDPATH_OBJ_NAME = "ZPRJ_BuildPath";
@@ -83,6 +86,7 @@ public class ZamiaProject {
 		fZDB = new ZDB(dbDir, this);
 
 		fERM = new ERManager(this);
+		fRTLM = new RTLManager(this);
 
 		fVHDLParser = new VHDL2008Parser();
 		fVHDLIndexer = new VHDLIndexer();
@@ -201,6 +205,10 @@ public class ZamiaProject {
 
 	public ERManager getERM() {
 		return fERM;
+	}
+	
+	public RTLManager getRTLM() {
+		return fRTLM;
 	}
 
 	public VHDLIndexer getVHDLIndexer() {

@@ -6,7 +6,7 @@
  * 
  * Created by Guenter Bartsch on Dec 20, 2009
  */
-package org.zamia.vg;
+package org.zamia.analysis.ig;
 
 import java.io.PrintStream;
 
@@ -28,15 +28,15 @@ import org.zamia.util.PathName;
  * 
  */
 
-public class VisualGraph {
+public class IGRSGraph {
 
 	public static final ZamiaLogger logger = ZamiaLogger.getInstance();
 
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private HashMapArray<PathName, VGBox> nodeMap;
+	private HashMapArray<PathName, IGRSBox> nodeMap;
 
-	private final VGBox fRoot;
+	private final IGRSBox fRoot;
 
 	private final Toplevel fToplevel;
 
@@ -44,7 +44,7 @@ public class VisualGraph {
 
 	private IGManager fIGM;
 
-	public VisualGraph(Toplevel aToplevel, ZamiaProject aZPrj) throws ZamiaException {
+	public IGRSGraph(Toplevel aToplevel, ZamiaProject aZPrj) throws ZamiaException {
 		fToplevel = aToplevel;
 		fZPrj = aZPrj;
 		fIGM = fZPrj.getIGM();
@@ -54,11 +54,11 @@ public class VisualGraph {
 			throw new ZamiaException("Couldn't find toplevel " + aToplevel);
 		}
 
-		fRoot = new VGBox(aToplevel.getDUUID().getId(), module.getDBID(), null, module.computeSourceLocation(), new PathName(""));
-		nodeMap = new HashMapArray<PathName, VGBox>();
+		fRoot = new IGRSBox(aToplevel.getDUUID().getId(), module.getDBID(), null, module.computeSourceLocation(), new PathName(""));
+		nodeMap = new HashMapArray<PathName, IGRSBox>();
 	}
 
-	public VGBox getOrCreateBox(PathName aPath, IGItem aItem) {
+	public IGRSBox getOrCreateBox(PathName aPath, IGItem aItem) {
 
 		PathName path = aPath;
 
@@ -66,7 +66,7 @@ public class VisualGraph {
 			path = path.getParent();
 		}
 
-		VGBox box = nodeMap.get(path);
+		IGRSBox box = nodeMap.get(path);
 		if (box != null) {
 			return box;
 		}
@@ -110,7 +110,7 @@ public class VisualGraph {
 		return fRoot.countConns();
 	}
 
-	public VGBox getRoot() {
+	public IGRSBox getRoot() {
 		return fRoot;
 	}
 

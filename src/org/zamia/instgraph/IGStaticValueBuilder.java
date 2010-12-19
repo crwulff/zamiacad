@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -23,7 +23,7 @@ import org.zamia.zdb.ZDB;
 
 /**
  * Builder class to construct complex (array/record typed), immutable
- * IGActualConstant objects
+ * IGStaticValue objects
  * 
  * @author Guenter Bartsch
  * 
@@ -362,6 +362,10 @@ public class IGStaticValueBuilder {
 				fArrayOffset = (int) indexType.getStaticLow(fSrc).getOrd();
 
 				if (card > 0) {
+					
+					// FIXME: why preserve the old fArrayValue ArrayList ?
+					// potential performance optimization!
+					
 					if (fArrayValues == null) {
 						fArrayValues = new ArrayList<BuilderEntry>(card);
 

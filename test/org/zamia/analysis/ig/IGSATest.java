@@ -1,5 +1,5 @@
 /* 
- * Copyright 2006-2009 by the authors indicated in the @author tags. 
+ * Copyright 2006-2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -17,13 +17,13 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
 import org.zamia.analysis.SourceLocation2IG;
+import org.zamia.analysis.ig.IGRSGraph;
 import org.zamia.instgraph.IGInstantiation;
 import org.zamia.instgraph.IGItem;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGOperationObject;
 import org.zamia.util.Pair;
-import org.zamia.vg.VisualGraph;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +61,7 @@ public class IGSATest {
 
 	}
 
-	private VisualGraph runIGReferenceSearch(SourceFile aSF, String aTLPath, int aLine, int aCol, boolean aUpwards, boolean aDownwards) throws ZamiaException, IOException {
+	private IGRSGraph runIGReferenceSearch(SourceFile aSF, String aTLPath, int aLine, int aCol, boolean aUpwards, boolean aDownwards) throws ZamiaException, IOException {
 		ToplevelPath tlp = new ToplevelPath(aTLPath);
 
 		SourceLocation location = new SourceLocation(aSF, aLine, aCol);
@@ -93,7 +93,7 @@ public class IGSATest {
 				fail("Unknown item class: " + item);
 			}
 
-			VisualGraph result = rs.search(object, path, true, true);
+			IGRSGraph result = rs.search(object, path, true, true);
 
 			return result;
 
@@ -110,7 +110,7 @@ public class IGSATest {
 
 		SourceFile sf = new SourceFile(new File("examples/gcounter/addg.vhdl"));
 
-		VisualGraph result = runIGReferenceSearch(sf, "COUNTER_TB:COUNTER0.ADDG", 22, 35, true, true);
+		IGRSGraph result = runIGReferenceSearch(sf, "COUNTER_TB:COUNTER0.ADDG", 22, 35, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
 		assertEquals(35, result.countBoxes());

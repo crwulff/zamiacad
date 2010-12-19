@@ -100,4 +100,27 @@ public class IGSequentialIf extends IGSequentialStatement {
 		return "IF " + fCond + " THEN " + fThenSOS + " ELSE " + fElseSOS;
 	}
 
+	public IGSequenceOfStatements getThenSOS() {
+		return fThenSOS;
+	}
+
+	public IGSequenceOfStatements getElseSOS() {
+		return fElseSOS;
+	}
+
+	public IGOperation getCond() {
+		return fCond;
+	}
+
+	@Override
+	public void dump(int aIndent) {
+		logger.debug(aIndent, "if %s then", fCond);
+		fThenSOS.dump(aIndent+2);
+		if (fElseSOS != null) {
+			logger.debug(aIndent, "else");
+			fElseSOS.dump(aIndent+2);
+		}
+		logger.debug(aIndent, "end if");
+	}
+
 }

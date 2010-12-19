@@ -73,7 +73,11 @@ public class IGOperationObject extends IGOperation {
 
 	@Override
 	public String toString() {
-		return "IGOperationObject(" + getObject() + ")";
+		
+		IGObject obj = getObject();
+		String id = obj != null ? obj.getId() : "null";
+		
+		return "IGOperationObject(" + id + ")";
 	}
 
 	@Override

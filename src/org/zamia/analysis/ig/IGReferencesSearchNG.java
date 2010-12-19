@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2009 by the authors indicated in the @author tags.
+ * Copyright 2008-2010 by the authors indicated in the @author tags.
  * All rights reserved.
  *
  * See the LICENSE file for details.
@@ -35,9 +35,6 @@ import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
 import org.zamia.util.ZStack;
-import org.zamia.vg.VGBox;
-import org.zamia.vg.VGSignal;
-import org.zamia.vg.VisualGraph;
 
 
 /**
@@ -149,11 +146,11 @@ public class IGReferencesSearchNG {
 
 		private final PathName fPath;
 
-		private final VGSignal fSignal;
+		private final IGRSSignal fSignal;
 
 		private final IGConcurrentStatement fScope;
 
-		public VGSearchJob(IGObject aObject, PathName aPath, IGConcurrentStatement aScope, VGSignal aSignal) {
+		public VGSearchJob(IGObject aObject, PathName aPath, IGConcurrentStatement aScope, IGRSSignal aSignal) {
 			fObject = aObject;
 			fPath = aPath;
 			fScope = aScope;
@@ -168,7 +165,7 @@ public class IGReferencesSearchNG {
 			return fPath;
 		}
 
-		public VGSignal getSignal() {
+		public IGRSSignal getSignal() {
 			return fSignal;
 		}
 
@@ -217,7 +214,7 @@ public class IGReferencesSearchNG {
 		fIGM = fZPrj.getIGM();
 	}
 
-	public VisualGraph search(IGObject aItem, ToplevelPath aPath, boolean aSearchUpward, boolean aSearchDownward) {
+	public IGRSGraph search(IGObject aItem, ToplevelPath aPath, boolean aSearchUpward, boolean aSearchDownward) {
 
 		logger.debug("IGObjectReferenceSearch: search(): start. item=%s, path=%s, searchUpward=%b, searchDownward=%b", aItem, aPath, aSearchUpward, aSearchDownward);
 
@@ -364,9 +361,9 @@ public class IGReferencesSearchNG {
 		}
 	}
 
-	private VisualGraph searchReferences(boolean aSearchDownward) throws ZamiaException {
+	private IGRSGraph searchReferences(boolean aSearchDownward) throws ZamiaException {
 
-		VisualGraph vg = new VisualGraph(fToplevel, fZPrj);
+		IGRSGraph vg = new IGRSGraph(fToplevel, fZPrj);
 
 		ZStack<VGSearchJob> stack = new ZStack<VGSearchJob>();
 
@@ -378,9 +375,9 @@ public class IGReferencesSearchNG {
 
 			PathName path = job.getPath();
 
-			VGBox box = vg.getOrCreateBox(path, null);
+			IGRSBox box = vg.getOrCreateBox(path, null);
 
-			VGSignal s = box.getOrCreateSignal(obj);
+			IGRSSignal s = box.getOrCreateSignal(obj);
 
 			VGSearchJob vgj = new VGSearchJob(obj, path, job.getScope(), s);
 			stack.push(vgj);
@@ -397,7 +394,7 @@ public class IGReferencesSearchNG {
 			IGConcurrentStatement scope = job.getScope();
 			IGObject object = job.getObject();
 			PathName path = job.getPath();
-			VGSignal signal = job.getSignal();
+			IGRSSignal signal = job.getSignal();
 
 			if (scope instanceof IGStructure) {
 
@@ -460,9 +457,9 @@ public class IGReferencesSearchNG {
 
 							IGObject obj = objs.get(k);
 
-							VGBox box = vg.getOrCreateBox(path, null);
+							IGRSBox box = vg.getOrCreateBox(path, null);
 
-							VGSignal s = box.getOrCreateSignal(obj);
+							IGRSSignal s = box.getOrCreateSignal(obj);
 
 							VGSearchJob vgj = new VGSearchJob(obj, path, module.getStructure(), s);
 
@@ -483,7 +480,7 @@ public class IGReferencesSearchNG {
 					path = path.append(id);
 				}
 
-				VGBox procBox = null; // created on demand
+				IGRSBox procBox = null; // created on demand
 
 				IGSequenceOfStatements sos = proc.getSequenceOfStatements();
 
@@ -504,7 +501,7 @@ public class IGReferencesSearchNG {
 							procBox = vg.getOrCreateBox(path, proc);
 						}
 						
-						VGBox box = procBox.createChild(stmt.toString(), stmt.getDBID(), stmt.computeSourceLocation(), path.append("stmt#"+i));
+						IGRSBox box = procBox.createChild(stmt.toString(), stmt.getDBID(), stmt.computeSourceLocation(), path.append("stmt#"+i));
 
 						for (int j = 0; j < m; j++) {
 							IGItemAccess ai = accessedItems.get(j);
@@ -518,7 +515,7 @@ public class IGReferencesSearchNG {
 
 							IGObject obj = (IGObject) item;
 
-							VGSignal s = box.getOrCreateSignal(obj);
+							IGRSSignal s = box.getOrCreateSignal(obj);
 
 							signal.connect(s);
 						}

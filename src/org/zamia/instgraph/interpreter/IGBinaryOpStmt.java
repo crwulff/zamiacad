@@ -11,11 +11,10 @@ package org.zamia.instgraph.interpreter;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
-import org.zamia.instgraph.IGOperationBinary.BinOp;
-import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 

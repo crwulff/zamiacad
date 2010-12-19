@@ -149,4 +149,12 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 		return fMappings.getScore();
 	}
 
+	public int getNumMappings() {
+		return fMappings.getNumMappings();
+	}
+	
+	public IGMapping getMapping(int aIdx) {
+		return fMappings.getMapping(aIdx);
+	}
+
 }

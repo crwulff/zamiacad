@@ -27,7 +27,7 @@ import org.zamia.zdb.ZDB;
 public class IGOperationBinary extends IGOperation {
 
 	public enum BinOp {
-		ADD, SUB, MUL, DIV, MOD, REM, POWER, EQUAL, LESSEQ, LESS, GREATER, GREATEREQ, NEQUAL, AND, NAND, OR, NOR, XOR, XNOR, MIN, MAX, SLL, SRL, SLA, SRA, ROL, ROR
+		ADD, SUB, MUL, DIV, MOD, REM, POWER, EQUAL, LESSEQ, LESS, GREATER, GREATEREQ, NEQUAL, AND, NAND, OR, NOR, XOR, XNOR, MIN, MAX, SLL, SRL, SLA, SRA, ROL, ROR, CONCAT
 	};
 
 	private IGOperation fA;

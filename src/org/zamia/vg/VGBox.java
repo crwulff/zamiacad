@@ -1,379 +1,259 @@
 /* 
- * Copyright 2009, 2010 by the authors indicated in the @author tags. 
+ * Copyright 2010 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
  * 
- * Created by Guenter Bartsch on Dec 27, 2009
+ * Created by Guenter Bartsch on Dec 8, 2010
  */
 package org.zamia.vg;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 
-import org.zamia.SourceLocation;
-import org.zamia.instgraph.IGObject;
-import org.zamia.instgraph.IGObject.OIDir;
-import org.zamia.util.HashMapArray;
-import org.zamia.util.HashSetArray;
-import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.VHDLNode;
-
+import org.zamia.util.Position;
 
 /**
- * IGModule, IGProcess, IGSequentialStatement, ... counterpart
+ * Wrapper around underlying graph nodes
+ * 
+ * contains utility functions (getSuccessors, num connected inputs, ...)
+ * and layout information
  * 
  * @author Guenter Bartsch
  *
  */
-public class VGBox {
 
-	private final String fTitle;
+public class VGBox<NodeType, PortType, SignalType> {
 
-	private final long fDBID;
+	private final NodeType fNode;
 
-	private final HashMapArray<String, VGSignal> fSignals;
+	private final PortType fPrimaryPort;
 
-	private final HashMapArray<String, VGBox> fChildren;
+	private final VGContentProvider<NodeType, PortType, SignalType> fContentProvider;
 
-	private final VGBox fParent;
+	private final VGLabelProvider<NodeType, PortType, SignalType> fLabelProvider;
 
-	private final SourceLocation fLocation;
+	private final VGLayout<NodeType, PortType, SignalType> fLayout;
 
-	private final PathName fPath;
+	private final VGSymbol<NodeType, PortType, SignalType> fSymbol;
 
-	public VGBox(String aTitle, long aDBID, VGBox aParent, SourceLocation aLocation, PathName aPath) {
-		fTitle = aTitle;
-		fDBID = aDBID;
-		fParent = aParent;
-		fLocation = aLocation;
-		fPath = aPath;
+	private ArrayList<VGPort<NodeType, PortType, SignalType>> fInputs;
 
-		fSignals = new HashMapArray<String, VGSignal>();
-		fChildren = new HashMapArray<String, VGBox>();
-	}
+	private ArrayList<VGPort<NodeType, PortType, SignalType>> fOutputs;
 
-	public VGBox createChild(String aName, long aDBID, SourceLocation aLocation, PathName aPath) {
+	private ArrayList<VGPort<NodeType, PortType, SignalType>> fPorts;
 
-		VGBox box = fChildren.get(aName);
+	private ArrayList<VGBox<NodeType, PortType, SignalType>> fDrivers;
 
-		if (box != null) {
-			return box;
-		}
+	private ArrayList<VGBox<NodeType, PortType, SignalType>> fReceivers;
 
-		box = new VGBox(aName, aDBID, this, aLocation, aPath);
+	private int fCol;
 
-		fChildren.put(aName, box);
+	private int fYPos;
 
-		return box;
-	}
+	/**
+	 * One of the parameters has to be NULL - a VGBox can represent
+	 * either a node or a primary input/output
+	 * 
+	 * @param aNode
+	 * @param aPrimaryPort
+	 */
+	public VGBox(NodeType aNode, PortType aPrimaryPort, VGLayout<NodeType, PortType, SignalType> aLayout) {
 
-	public VGSignal getOrCreateSignal(IGObject aObj) {
+		fLayout = aLayout;
+		fContentProvider = fLayout.getContentProvider();
+		fLabelProvider = fLayout.getLabelProvider();
 
-		String id = aObj.getId();
-		VGSignal signal = fSignals.get(id);
-		if (signal != null) {
-			return signal;
-		}
+		fNode = aNode;
+		fPrimaryPort = aPrimaryPort;
 
-		long dbid = aObj.getDBID();
-		signal = new VGSignal(this, id, aObj.getDirection(), dbid, aObj.computeSourceLocation(), fPath.append(id));
+		fPorts = new ArrayList<VGPort<NodeType, PortType, SignalType>>();
+		fInputs = new ArrayList<VGPort<NodeType, PortType, SignalType>>();
+		fOutputs = new ArrayList<VGPort<NodeType, PortType, SignalType>>();
 
-		fSignals.put(id, signal);
+		if (fPrimaryPort != null) {
 
-		return signal;
-	}
+			/*
+			 * create artificial internal port with opposite direction
+			 * (primare input is _driving_ the internal circuit
+			 * so needs to be an output viewed from inside)
+			 * 
+			 */
 
-	public void dump(int aI, PrintStream aOut) {
+			String label = fLabelProvider.getPortLabel(fPrimaryPort);
+			int width = fLabelProvider.getPortWidth(fPrimaryPort);
+			VGPort<NodeType, PortType, SignalType> internalPort = new VGPort<NodeType, PortType, SignalType>(width, label, !fContentProvider.isOutput(fPrimaryPort), this, fLayout);
 
-		VHDLNode.printlnIndented(fTitle + " {", aI, aOut);
+			fPorts.add(internalPort);
 
-		int n = fSignals.size();
-		for (int i = 0; i < n; i++) {
-			VGSignal s = fSignals.get(i);
-			s.dump(aI + 2, aOut);
-		}
+			SignalType signal = fContentProvider.getSignal(fPrimaryPort);
 
-		n = fChildren.size();
-		for (int i = 0; i < n; i++) {
-			VGBox child = fChildren.get(i);
-			child.dump(aI + 2, aOut);
-		}
-
-		VHDLNode.printlnIndented("}", aI, aOut);
-	}
-
-	public int countBoxes() {
-		int count = 1;
-		int n = fChildren.size();
-		for (int i = 0; i < n; i++) {
-			VGBox child = fChildren.get(i);
-			count += child.countBoxes();
-		}
-		return count;
-	}
-
-	public int countConns() {
-		int count = 0;
-		int n = fChildren.size();
-		for (int i = 0; i < n; i++) {
-			VGBox child = fChildren.get(i);
-			count += child.countConns();
-		}
-		n = fSignals.size();
-		for (int i = 0; i < n; i++) {
-			VGSignal s = fSignals.get(i);
-
-			count += s.getNumConns();
-
-		}
-		return count;
-	}
-
-	public String getTitle() {
-		return fTitle;
-	}
-
-	public long getDBID() {
-		return fDBID;
-	}
-
-	public VGBox getParent() {
-		return fParent;
-	}
-
-	public SourceLocation getLocation() {
-		return fLocation;
-	}
-
-	public PathName getPath() {
-		return fPath;
-	}
-
-	private int getNumSubs() {
-		return fChildren.size();
-	}
-
-	private VGBox getSub(int aIdx) {
-		return fChildren.get(aIdx);
-	}
-
-	public int getNumSignals() {
-		return fSignals.size();
-	}
-
-	public VGSignal getSignal(int aIdx) {
-		return fSignals.get(aIdx);
-	}
-
-	public HashSetArray<VGSignal> getReceivers() {
-		HashSetArray<VGSignal> receivers = new HashSetArray<VGSignal>();
-
-		int n = fSignals.size();
-		for (int i = 0; i < n; i++) {
-			VGSignal s = fSignals.get(i);
-
-			OIDir dir = s.getDir();
-			if (dir == OIDir.IN || dir == OIDir.NONE) {
-				continue;
+			if (signal != null) {
+				VGSignal<NodeType, PortType, SignalType> s = fLayout.getOrCreateSignal(signal);
+				internalPort.connect(s);
 			}
 
-			int m = s.getNumExternalConns();
-			for (int j = 0; j < m; j++) {
+		} else {
 
-				VGSignal conn = s.getExternalConn(j);
+			int n = fContentProvider.getNumPorts(fNode);
+			for (int i = 0; i < n; i++) {
+				PortType port = fContentProvider.getPort(fNode, i);
+				int width = fLabelProvider.getPortWidth(port);
 
-				receivers.add(conn);
+				VGPort<NodeType, PortType, SignalType> p = new VGPort<NodeType, PortType, SignalType>(width, port, this, fLayout);
+
+				fPorts.add(p);
+
+				SignalType signal = fContentProvider.getSignal(port);
+
+				if (signal != null) {
+					VGSignal<NodeType, PortType, SignalType> s = fLayout.getOrCreateSignal(signal);
+					p.connect(s);
+				}
 			}
 		}
 
-		return receivers;
+		if (fNode != null) {
+			VGSymbol<NodeType, PortType, SignalType> symbol = fLabelProvider.getNodeSymbol(fNode, fLayout);
+			if (symbol == null) {
+				symbol = new VGGenericSymbol<NodeType, PortType, SignalType>(fNode, fLayout, this);
+			}
+			fSymbol = symbol;
+		} else {
+			fSymbol = new VGPortSymbol<NodeType, PortType, SignalType>(fContentProvider.isOutput(fPrimaryPort), fLabelProvider.getPortLabel(fPrimaryPort), fLayout);
+		}
+
 	}
 
 	/**
-	 * calculates the depth of each box and stores it into a HashMap. Also
-	 * generates the reverse mapping of levels to lists of boxs
-	 * 
-	 * @param aBoxDepth
-	 *            VGBox -> Integer mapping
-	 * @param aDepthBox
-	 *            Integer -> ArrayList of VGBoxs mapping
-	 * @return maximum depth of graph
+	 * precompute all available information about this boxes connections
 	 */
-	public int levelize(HashMap<VGBox, Integer> aBoxDepth, HashMap<Integer, ArrayList<VGBox>> aDepthBox) {
+	void compute() {
 
-		// step 1: compute number of connected inputs per box
-		// push those boxs which do not have connected inputs
-		// on the stack (input boxes / literals)
+		fDrivers = new ArrayList<VGBox<NodeType, PortType, SignalType>>();
+		fReceivers = new ArrayList<VGBox<NodeType, PortType, SignalType>>();
 
-		HashMap<VGBox, Integer> numConnectedInputs = new HashMap<VGBox, Integer>();
-		LinkedList<VGBox> queue = new LinkedList<VGBox>();
-		HashSet<VGBox> todo = new HashSet<VGBox>();
+		// connected inputs and outputs
 
-		// keep track of how often we have reached each box
-		// and what the maximum logic depth was
-		// when # reached == # connected inputs we know its
-		// logic depth and push it on the stack
-		HashMap<VGBox, Integer> reached = new HashMap<VGBox, Integer>();
+		int n = fPorts.size();
 
-		int n = getNumSubs();
-		for (int i = 0; i < n; i++) {
-			VGBox box = getSub(i);
-			numConnectedInputs.put(box, 0);
-			reached.put(box, 0);
-		}
-
-		n = getNumSignals();
 		for (int i = 0; i < n; i++) {
 
-			VGSignal s = getSignal(i);
+			VGPort<NodeType, PortType, SignalType> port = fPorts.get(i);
 
-			int m = s.getNumConns();
+			if (port.isOutput()) {
+				fInputs.add(port);
+			} else {
+				fOutputs.add(port);
+			}
+
+			VGSignal<NodeType, PortType, SignalType> signal = port.getSignal();
+
+			if (signal == null) {
+				continue;
+			}
+
+			int m = signal.getNumConnections();
 			for (int j = 0; j < m; j++) {
 
-				VGSignal conn = s.getConn(j);
+				VGPort<NodeType, PortType, SignalType> conn = signal.getConnection(j);
 
-				if (conn.getDir() != OIDir.IN) {
+				VGBox<NodeType, PortType, SignalType> box = conn.getBox();
+
+				if (box == this) {
 					continue;
 				}
 
-				VGBox box = conn.getBox();
-
-				int numCI = numConnectedInputs.get(box);
-				numCI++;
-				numConnectedInputs.put(box, numCI);
-
-				todo.add(box);
+				if (port.isOutput()) {
+					fReceivers.add(box);
+				} else {
+					fDrivers.add(box);
+				}
 			}
 		}
-
-		// step 2: put all boxes that do not have any connected inputs 
-		// into the first column
-
-		n = getNumSubs();
-		for (int i = 0; i < n; i++) {
-			VGBox box = getSub(i);
-			int numCI = numConnectedInputs.get(box);
-			if (numCI == 0) {
-				queue.add(box);
-
-				aBoxDepth.put(box, 0);
-			}
-		}
-
-		// step 3: recursively levelize remaining boxes
-
-		int maxDepth = 0;
-
-		while (true) {
-
-			while (!queue.isEmpty()) {
-				VGBox box = queue.poll();
-				if (!todo.contains(box)) {
-					continue;
-				}
-
-				int depth = aBoxDepth.get(box);
-				todo.remove(box);
-
-				HashSetArray<VGSignal> receivers = box.getReceivers();
-				n = receivers.size();
-
-				for (int i = 0; i < n; i++) {
-
-					VGSignal receiver = receivers.get(i);
-					VGBox rbox = receiver.getBox();
-
-					if ((rbox != box) && (todo.contains(rbox))) {
-
-						// calc depth of this receiver
-
-						Integer md = (Integer) aBoxDepth.get(rbox);
-						if (md == null) {
-							aBoxDepth.put(rbox, depth + 1);
-							if (depth >= maxDepth) {
-								maxDepth = depth + 1;
-							}
-						} else {
-							int r_depth = md.intValue();
-							if (depth >= r_depth) {
-								aBoxDepth.put(rbox, depth + 1);
-								if (depth >= maxDepth) {
-									maxDepth = depth + 1;
-								}
-							}
-						}
-
-						// how often have we reached this receiver?
-						int numReached = reached.get(rbox);
-						numReached++;
-						reached.put(rbox, numReached);
-
-						// how many connected inputs has this receiver?
-						int numCI = numConnectedInputs.get(rbox);
-
-						if (numCI == numReached)
-							queue.add(rbox);
-					}
-				}
-
-			}
-			if (!todo.isEmpty()) {
-				// there seem to be some feedbacks in this
-				// graph, so we need to push boxes in
-				// (we want to levelize all boxes)
-
-				// => push in those boxes with the highest
-				// number of already connected inputs
-
-				int mostOftenReached = 0;
-
-				for (Iterator<VGBox> i = todo.iterator(); i.hasNext();) {
-					VGBox box = i.next();
-					int numReached = reached.get(box);
-					if (numReached > mostOftenReached)
-						mostOftenReached = numReached;
-				}
-
-				for (Iterator<VGBox> i = todo.iterator(); i.hasNext();) {
-					VGBox box = i.next();
-
-					int numReached = reached.get(box);
-					if (numReached == mostOftenReached) {
-
-						queue.add(box);
-						aBoxDepth.put(box, maxDepth);
-					}
-				}
-			} else
-				break;
-		}
-
-		// generates depthBox from boxDepth
-		// boxDepth: box --> depth
-		// depthBox: depth (integer) --> list of boxes (arrayList)
-		ArrayList<VGBox> list = null;
-		n = getNumSubs();
-		for (int i = 0; i < n; i++) {
-			VGBox box = getSub(i);
-			Object depth = aBoxDepth.get(box);
-			if (depth == null)
-				continue;
-
-			if (aDepthBox.containsKey(depth)) {
-				list = (ArrayList<VGBox>) aDepthBox.get(depth);
-			} else {
-				list = new ArrayList<VGBox>();
-			}
-			list.add(box);
-			aDepthBox.put((Integer) depth, list);
-		}
-
-		return maxDepth;
 	}
 
+	Position getPortPosition(VGPort<NodeType, PortType, SignalType> aPort) {
+		Position p1 = getPortOffset(aPort);
+		if (p1 == null)
+			return new Position(getXPos(), getYPos());
+		return new Position(p1.getX() + getXPos(), p1.getY() + getYPos());
+	}
+
+	
+	Position getPortOffset(VGPort<NodeType, PortType, SignalType> aPort) {
+		return fSymbol.getPortPosition(aPort.getPort());
+	}
+
+	int getNumDrivers() {
+		return fDrivers.size();
+	}
+
+	int getNumReceivers() {
+		return fReceivers.size();
+	}
+
+	VGBox<NodeType, PortType, SignalType> getReceiver(int aIdx) {
+		return fReceivers.get(aIdx);
+	}
+
+	void setCol(int aCol) {
+		fCol = aCol;
+	}
+
+	int getCol() {
+		return fCol;
+	}
+
+	@Override
+	public String toString() {
+		if (fPrimaryPort != null) {
+			return "VGBox[" + fPrimaryPort + "]";
+		}
+		return "VGBox[" + fNode + "]";
+	}
+
+	VGBox<NodeType, PortType, SignalType> getDriver(int aIdx) {
+		return fDrivers.get(aIdx);
+	}
+
+	int getNumPorts() {
+		return fPorts.size();
+	}
+
+	VGPort<NodeType, PortType, SignalType> getPort(int aIdx) {
+		return fPorts.get(aIdx);
+	}
+
+	int getWidth() {
+		return fSymbol.getWidth();
+	}
+
+	int getHeight() {
+		return fSymbol.getHeight();
+	}
+
+	void setYPos(int yPos) {
+		fYPos = yPos;
+	}
+
+	int getYPos() {
+		return fYPos;
+	}
+
+	int getXPos() {
+		VGChannel<NodeType, PortType, SignalType> channel = fLayout.getChannel(fCol);
+		return channel.getModulesPos();
+	}
+
+	void paint(boolean aHighlight) {
+		if (fSymbol != null) {
+			fSymbol.paint(fNode, getXPos(), fYPos, aHighlight);
+		}
+	}
+	
+	VGSymbol<NodeType, PortType, SignalType> getSymbol() {
+		return fSymbol;
+	}
+	
+	
 }

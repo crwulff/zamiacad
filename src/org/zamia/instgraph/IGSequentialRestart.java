@@ -11,6 +11,7 @@ import org.zamia.SourceLocation;
 /**
  * @author Anton Chepurov
  */
+@SuppressWarnings("serial")
 public class IGSequentialRestart extends IGSequentialStatement {
 
 	public IGSequentialRestart(String aId, SourceLocation aSrc, ZDB aZDB) {
@@ -40,5 +41,15 @@ public class IGSequentialRestart extends IGSequentialStatement {
 	@Override
 	public IGItem getChild(int aIdx) {
 		return null;
+	}
+	
+	@Override
+	public void dump(int aIndent) {
+		logger.debug(aIndent, "restart");
+	}
+
+	@Override
+	public String toString() {
+		return "RESTART";
 	}
 }

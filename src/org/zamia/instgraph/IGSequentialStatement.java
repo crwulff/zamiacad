@@ -31,4 +31,10 @@ public abstract class IGSequentialStatement extends IGContainerItem {
 	public abstract void computeAccessedItems(IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems);
 
 	public abstract void generateCode(IGInterpreterCode aCode) throws ZamiaException;
+	
+	public void dump(int aIndent) {
+		logger.debug(aIndent, "Unknown stmt: %s", this);
+		
+	}
+
 }
