@@ -73,7 +73,7 @@ public class IGSynthTest {
 		return aZPrj.getDUM().getArchDUUID(tl.getDUUID());
 	}
 
-	private RTLModule runSynth(String aTestDir, String aBuildPathName, int aNumNodes, String aSynthUID, int aNumRTLNodes) throws Exception {
+	private RTLModule runSynth(String aTestDir, String aBuildPathName, String aSynthUID) throws Exception {
 		setupTest(aTestDir, aTestDir + File.separator + aBuildPathName);
 
 		ZamiaProjectBuilder builder = fZPrj.getBuilder();
@@ -96,7 +96,6 @@ public class IGSynthTest {
 
 		n = igm.countNodes(dmuid);
 		logger.info("IGSynthTest: elaborated model for %s has %d unique modules.", dmuid, n);
-		assertEquals(aNumNodes, n);
 
 		dmuid = DMUID.parse(aSynthUID);
 
@@ -111,7 +110,6 @@ public class IGSynthTest {
 		n = rtlm.getNumNodes();
 
 		logger.info("IGSynthTest: synthesized RTL graph for %s has %d nodes.", dmuid, n);
-		assertEquals(aNumRTLNodes, n);
 
 		rtlm.dump(System.out);
 
@@ -145,21 +143,115 @@ public class IGSynthTest {
 		return rtlm;
 	}
 
-	private RTLModule runSynth(String aTestDir, int aNumNodes, String aSynthUID, int aRTLNodes) throws Exception {
-		return runSynth(aTestDir, "BuildPath.txt", aNumNodes, aSynthUID, aRTLNodes);
+	private RTLModule runSynth(String aTestDir, String aSynthUID) throws Exception {
+		return runSynth(aTestDir, "BuildPath.txt", aSynthUID);
+	}
+
+	@Test
+	public void testClock1() throws Exception {
+
+		RTLModule rtlm = runSynth("examples/synth/clock1Test", "WORK.FOO(RTL)");
+		 
+		 RTLSimulator sim = new RTLSimulator(fZPrj);
+		 
+		 sim.open(rtlm);
+		 
+		 sim.assign(new PathName("A"), "0");
+		 sim.assign(new PathName("B"), "0");
+		 sim.assign(new PathName("CLK"), "0");
+		 
+		 sim.simulate();
+
+		 sim.assign(new PathName("CLK"), "1");
+		 sim.simulate();
+		 sim.assign(new PathName("CLK"), "0");
+		 sim.simulate();
+		 
+		 RTLValue vz = sim.getCurrentValue (new PathName ("Z"));
+		 assertEquals(BitValue.BV_0, vz.getBit());
+		 
+		 sim.assign(new PathName("CLK"), "1");
+		 
+		 sim.simulate();
+		 
+		 vz = sim.getCurrentValue (new PathName ("Z"));
+		 assertEquals(BitValue.BV_0, vz.getBit());
+		 
+		 sim.assign(new PathName("A"), "1");
+		 sim.assign(new PathName("B"), "0");
+		 sim.assign(new PathName("CLK"), "0");
+		 
+		 sim.simulate();
+		 
+		 vz = sim.getCurrentValue (new PathName ("Z"));
+		 
+		 assertEquals(BitValue.BV_0, vz.getBit());
+		 
+		 sim.assign(new PathName("CLK"), "1");
+		 
+		 sim.simulate();
+		 
+		 vz = sim.getCurrentValue (new PathName ("Z"));
+		 
+		 assertEquals(BitValue.BV_0, vz.getBit());
+		 
+		 sim.assign(new PathName("A"), "1");
+		 sim.assign(new PathName("B"), "1");
+		 sim.assign(new PathName("CLK"), "0");
+		 
+		 sim.simulate();
+		 
+		 vz = sim.getCurrentValue (new PathName ("Z"));
+		 
+		 assertEquals(BitValue.BV_0, vz.getBit());
+		 
+		 sim.assign(new PathName("CLK"), "1");
+		 
+		 sim.simulate();
+		 
+		 vz = sim.getCurrentValue (new PathName ("Z"));
+		 
+		 assertEquals(BitValue.BV_1, vz.getBit());
+		 
+		 sim.assign(new PathName("CLK"), "0");
+		 
+		 sim.simulate();
+		 
+		 vz = sim.getCurrentValue (new PathName ("Z"));
+		 
+		 assertEquals(BitValue.BV_1, vz.getBit());
+		 
+		 sim.assign(new PathName("B"), "0");
+		 
+		 sim.simulate();
+		 
+		 vz = sim.getCurrentValue (new PathName ("Z"));
+		 
+		 assertEquals(BitValue.BV_1, vz.getBit());
+		 
+		 sim.assign(new PathName("CLK"), "1");
+		 
+		 sim.simulate();
+		 
+		 vz = sim.getCurrentValue (new PathName ("Z"));
+		 
+		 assertEquals(BitValue.BV_0, vz.getBit());
+		 
+		 sim.assign(new PathName("CLK"), "0");
+		 
+		 sim.simulate();
+		 
+		 vz = sim.getCurrentValue (new PathName ("Z"));
+		 
+		 assertEquals(BitValue.BV_0, vz.getBit());
+		 
 	}
 
 	@Test
 	@Ignore
-	public void testClock1() throws Exception {
-
-		runSynth("examples/synth/clock1Test", 1, "WORK.FOO(RTL)", 3);
-	}
-
-	@Test
 	public void testCombProc() throws Exception {
 
-		 RTLModule rtlm = runSynth("examples/synth/combProcTest", 1, "WORK.FOO(RTL)", 5);
+		 RTLModule rtlm = runSynth("examples/synth/combProcTest", "WORK.FOO(RTL)");
 		 
 		 RTLSimulator sim = new RTLSimulator(fZPrj);
 		 
@@ -207,7 +299,7 @@ public class IGSynthTest {
 	@Ignore
 	public void testPlasmaAlu() throws Exception {
 
-		runSynth("examples/plasma", 14, "WORK.ALU(LOGIC)", 0);
+		runSynth("examples/plasma", "WORK.ALU(LOGIC)");
 	}
 
 	@After

@@ -108,6 +108,24 @@ public class RTLBBinaryOp implements RTLNodeBehavior {
 					vz = RTLValueBuilder.generateBit(t, BitValue.BV_X, location, aSimulator.getZDB());
 					break;
 				}
+				break;
+			case AND:
+				
+				switch (va.getBit()) {
+				case BV_0:
+					vz = va;
+					break;
+					
+				case BV_1:
+					vz = vb;
+					break;
+
+				case BV_U:
+				case BV_X:
+				case BV_Z:
+					vz = RTLValueBuilder.generateBit(t, BitValue.BV_X, location, aSimulator.getZDB());
+					break;
+				}
 			}
 			break;
 		}
