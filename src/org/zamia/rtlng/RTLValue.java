@@ -8,6 +8,11 @@
  */
 package org.zamia.rtlng;
 
+import java.util.ArrayList;
+
+import org.zamia.SourceLocation;
+import org.zamia.ZamiaException;
+
 /**
  * 
  * @author Guenter Bartsch
@@ -25,11 +30,38 @@ public class RTLValue extends RTLItem {
 
 	private final RTLType fType;
 
-	public RTLValue(RTLValueBuilder aBuilder) {
+	private int fArrayOffset;
+
+	private ArrayList<RTLValue> fArrayValues;
+
+	public RTLValue(RTLValueBuilder aBuilder) throws ZamiaException {
 		super(aBuilder.getLocation(), aBuilder.getZDB());
 
 		fType = aBuilder.getType();
 		fBit = aBuilder.getBit();
+
+		switch (fType.getCat()) {
+		case BIT:
+			break;
+
+		case ARRAY:
+			SourceLocation location = computeSourceLocation();
+
+			fArrayOffset = fType.getArrayLow();
+			int card = fType.computeCardinality();
+			fArrayValues = new ArrayList<RTLValue>(card);
+
+			for (int i = 0; i < card; i++) {
+				fArrayValues.add(aBuilder.get(i + fArrayOffset, location));
+			}
+
+			break;
+
+		case RECORD:
+			// FIXME: implement
+			throw new RuntimeException("Sorry, not implemented.");
+		}
+
 	}
 
 	public RTLType getType() {
@@ -56,18 +88,25 @@ public class RTLValue extends RTLItem {
 		case BIT:
 			switch (fBit) {
 			case BV_0:
-				return "'0'";
+				return "0";
 			case BV_1:
-				return "'1'";
+				return "1";
 			case BV_U:
-				return "'U'";
+				return "U";
 			case BV_X:
-				return "'X'";
+				return "X";
 			}
 			return fBit.toString();
 		case ARRAY:
-			// FIXME: implement
-			return "ARRAY VALUE";
+			StringBuilder buf = new StringBuilder();
+
+			int n = fArrayValues.size();
+			for (int i = n - 1; i >= 0; i--) {
+				RTLValue v = fArrayValues.get(i);
+				buf.append(v != null ? v.toString() : "[null]");
+			}
+			return buf.toString();
+
 		case RECORD:
 			// FIXME: implement
 			return "RECORD VALUE";

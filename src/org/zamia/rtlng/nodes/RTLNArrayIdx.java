@@ -24,13 +24,7 @@ import org.zamia.zdb.ZDB;
  */
 
 @SuppressWarnings("serial")
-public class RTLNUnaryOp extends RTLNode {
-
-	public enum UnaryOp {
-		NOT, BUF, NEG
-	}
-
-	private final UnaryOp fOp;
+public class RTLNArrayIdx extends RTLNode {
 
 	private final RTLType fType;
 
@@ -38,32 +32,32 @@ public class RTLNUnaryOp extends RTLNode {
 
 	private final RTLPort fZ;
 
-	public RTLNUnaryOp(UnaryOp aOp, RTLType aType, RTLModule aModule, SourceLocation aLocation, ZDB aZDB) throws ZamiaException {
-		super(aModule.getUniqueId(getClassName(aOp)), aModule, aLocation, aZDB);
+	private final RTLPort fS;
 
-		fOp = aOp;
+	private RTLType fIdxType;
+
+	public RTLNArrayIdx(RTLType aType, RTLType aIdxType, RTLModule aModule, SourceLocation aLocation, ZDB aZDB) throws ZamiaException {
+		super(aModule.getUniqueId("IDX"), aModule, aLocation, aZDB);
+
 		fType = aType;
+		fIdxType = aIdxType;
 
 		fA = createPort(RTLPort.a_str, fType, PortDir.IN, aLocation);
+		fS = createPort(RTLPort.s_str, fIdxType, PortDir.IN, aLocation);
 		fZ = createPort(RTLPort.z_str, fType, PortDir.OUT, aLocation);
-
-	}
-
-	private static String getClassName(UnaryOp aOp) {
-		return aOp.name();
 	}
 
 	@Override
 	public String getClassName() {
-		return getClassName(fOp);
-	}
-
-	public UnaryOp getOp() {
-		return fOp;
+		return "IDX";
 	}
 
 	public RTLType getType() {
 		return fType;
+	}
+
+	public RTLType getIdxType() {
+		return fIdxType;
 	}
 
 	public RTLPort getA() {
@@ -74,10 +68,13 @@ public class RTLNUnaryOp extends RTLNode {
 		return fZ;
 	}
 
-	@Override
-	public String toString() {
-		return "RTLNUnaryOp(op=" + fOp + ")";
+	public RTLPort getS() {
+		return fS;
 	}
 
+	@Override
+	public String toString() {
+		return "RTLNArrayIdx";
+	}
 
 }

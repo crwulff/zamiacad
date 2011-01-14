@@ -13,6 +13,7 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGSequenceOfStatements;
 import org.zamia.instgraph.IGSequentialStatement;
+import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 
 /**
  * 
@@ -26,6 +27,19 @@ public abstract class IGStmtSynthAdapter {
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
 	/**
+	 * Inline subprograms, unroll loops
+	 * 
+	 * @param aStmt
+	 * @param aOR
+	 * @param aPreprocessedSOS
+	 * @param aReturnVarName
+	 * @param aClock TODO
+	 * @param aSynth
+	 */
+	
+	public abstract void preprocess(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGClock aClock, IGSynth aSynth) throws ZamiaException;
+	
+	/**
 	 * 
 	 * @param aStmt
 	 * @param aOR
@@ -38,6 +52,9 @@ public abstract class IGStmtSynthAdapter {
 	public abstract void inlineSubprograms(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSequenceOfStatements aInlinedSOS, String aReturnVarName, IGSynth aSynth)
 			throws ZamiaException;
 
+	
+	
+	
 	/**
 	 * 
  	 * this only needs to be implemented in SequentialIf and SequentialAssignments,

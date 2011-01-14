@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="share"/>
 	<classpathentry kind="lib" path="share/jars/jakarta-oro-2.0.8.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="share/jars/minijdd_103.jar" sourcepath="/home/guenter/tmp/jdd/jdd/src"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

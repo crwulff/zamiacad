@@ -13,6 +13,9 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGSequenceOfStatements;
+import org.zamia.instgraph.synth.model.IGSMExprNode;
+import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
+import org.zamia.instgraph.synth.model.IGSMTarget;
 import org.zamia.rtlng.RTLSignal;
 
 /**
@@ -26,6 +29,25 @@ public abstract class IGOperationSynthAdapter {
 
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
+	/**
+	 * - inline any subprogram calls contained in this operation (and its children)
+	 * - unroll loops
+	 * - convert case-statements to if-then-else
+	 * 
+	 * @param aValue
+	 * @param aOR
+	 * @param aPreprocessedSOS
+	 * @param aSynth
+	 * @return
+	 */
+
+	public IGSMExprNode preprocess(IGOperation aOperation, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, IGSynth aSynth) throws ZamiaException {
+		throw new ZamiaException("Sorry, not implemented yet.");
+	}
+
+	public IGSMTarget preprocessTarget(IGOperation aOperation, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, IGSynth aSynth) throws ZamiaException {
+		throw new ZamiaException("Sorry, not implemented yet.");
+	}
 
 	/**
 	 * - inline any subprogram calls contained in this operation (and its children)

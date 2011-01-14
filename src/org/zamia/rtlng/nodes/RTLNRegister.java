@@ -49,7 +49,7 @@ public class RTLNRegister extends RTLNode {
 
 	@Override
 	public String getClassName() {
-		return "Literal";
+		return "Register";
 	}
 
 	public RTLPort getZ() {

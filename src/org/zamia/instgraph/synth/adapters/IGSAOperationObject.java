@@ -24,6 +24,7 @@ import org.zamia.instgraph.synth.IGSynth;
 import org.zamia.rtlng.RTLModule;
 import org.zamia.rtlng.RTLSignal;
 import org.zamia.rtlng.RTLType;
+import org.zamia.rtlng.RTLValue.BitValue;
 
 /**
  * 
@@ -60,10 +61,10 @@ public class IGSAOperationObject extends IGOperationSynthAdapter {
 		IGObject obj2 = aOR.get(obj);
 
 		IGBinding binding = aBindings.getBinding(obj2);
-	
+
 		IGOperationObject oobj2 = new IGOperationObject(obj2, oobj.computeSourceLocation(), aSynth.getZDB());
 		aSynth.setVariableOperationBinding(oobj2, binding);
-		
+
 		return oobj2;
 	}
 
@@ -75,34 +76,33 @@ public class IGSAOperationObject extends IGOperationSynthAdapter {
 
 		if (obj.getCat() == IGObjectCat.VARIABLE) {
 			IGBinding binding = aSynth.getVariableOperationBinding(oobj);
-			
+
 			if (binding == null) {
-				throw new ZamiaException ("Error: unbound variable detected.", oobj.computeSourceLocation());
+				throw new ZamiaException("Error: unbound variable detected.", oobj.computeSourceLocation());
 			}
 
 			return binding.synthesize(aSynth);
 		}
-		
+
 		return aSynth.getOrCreateSignal(obj);
 	}
 
 	@Override
 	public RTLSignal synthesizeEnable(IGOperation aOperation, IGSynth aSynth) throws ZamiaException {
-		
+
 		IGOperationObject oobj = (IGOperationObject) aOperation;
 
 		IGObject obj = oobj.getObject();
 
 		IGType type = obj.getType();
-		
+
 		RTLType t = aSynth.synthesizeType(type);
 
 		RTLType et = t.computeEnableType();
-		
-		RTLModule module = aSynth.getRTLModule();
-		
-		return module.createOne(et, oobj.computeSourceLocation());
-	}
 
+		RTLModule module = aSynth.getRTLModule();
+
+		return module.createBitLiteral(BitValue.BV_1, et, oobj.computeSourceLocation());
+	}
 
 }

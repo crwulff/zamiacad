@@ -1,5 +1,5 @@
 /* 
- * Copyright 2010 by the authors indicated in the @author tags. 
+ * Copyright 2010,2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -18,6 +18,7 @@ import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGObjectRemapping;
 import org.zamia.instgraph.synth.IGStmtSynthAdapter;
 import org.zamia.instgraph.synth.IGSynth;
+import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 
 /**
  * 
@@ -26,6 +27,20 @@ import org.zamia.instgraph.synth.IGSynth;
  */
 
 public class IGSASequenceOfStatements extends IGStmtSynthAdapter {
+
+	@Override
+	public void preprocess(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGClock aClock, IGSynth aSynth)
+			throws ZamiaException {
+
+		IGSequenceOfStatements seq = (IGSequenceOfStatements) aStmt;
+
+		int n = seq.getNumStatements();
+		for (int i = 0; i < n; i++) {
+			IGSequentialStatement stmt = seq.getStatement(i);
+
+			aSynth.getSynthAdapter(stmt).preprocess(stmt, aOR, aPreprocessedSOS, aReturnVarName, aClock, aSynth);
+		}
+	}
 
 	@Override
 	public void inlineSubprograms(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSequenceOfStatements aInlinedSOS, String aReturnVarName, IGSynth aSynth)

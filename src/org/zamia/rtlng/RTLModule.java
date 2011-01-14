@@ -9,15 +9,19 @@ package org.zamia.rtlng;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.rtlng.RTLPort.PortDir;
+import org.zamia.rtlng.RTLType.TypeCat;
 import org.zamia.rtlng.RTLValue.BitValue;
+import org.zamia.rtlng.nodes.RTLNArrayIdx;
 import org.zamia.rtlng.nodes.RTLNBinaryOp;
 import org.zamia.rtlng.nodes.RTLNBinaryOp.BinaryOp;
+import org.zamia.rtlng.nodes.RTLNDecoder;
 import org.zamia.rtlng.nodes.RTLNLiteral;
 import org.zamia.rtlng.nodes.RTLNRegister;
 import org.zamia.rtlng.nodes.RTLNUnaryOp;
@@ -52,6 +56,8 @@ public class RTLModule extends RTLNode {
 	// "unnamed" signals (signals that have not been
 	// given a name by the user, that is)
 	private int fUniqueSignalCnt, fUniqueModuleCnt, fUniqueId;
+
+	private HashMap<BitValue, RTLSignal> fBitLiterals;
 
 	public RTLModule(String aSignature, String aUID, SourceLocation aLocation, ZDB aZDB) {
 		super(null, null, aLocation, aZDB);
@@ -246,6 +252,39 @@ public class RTLModule extends RTLNode {
 		}
 	}
 
+	public RTLSignal createComponentArrayIdx(RTLSignal aS, RTLSignal aIdx, SourceLocation aLocation) throws ZamiaException {
+		RTLNArrayIdx node = new RTLNArrayIdx(aS.getType(), aIdx.getType(), this, aLocation, getZDB());
+		add(node);
+
+		RTLPort pa = node.getA();
+		pa.setSignal(aS.getCurrent());
+
+		RTLPort ps = node.getS();
+		ps.setSignal(aIdx.getCurrent());
+
+		RTLPort pz = node.getZ();
+		RTLSignal res = createUnnamedSignal(pz.getType(), aLocation);
+
+		pz.setSignal(res);
+
+		return res;
+	}
+
+	public RTLSignal createComponentDecoder(int aOutputWidth, RTLSignal aA, SourceLocation aLocation) throws ZamiaException {
+		RTLNDecoder node = new RTLNDecoder(aOutputWidth, this, aLocation, getZDB());
+		add(node);
+
+		RTLPort pa = node.getA();
+		pa.setSignal(aA.getCurrent());
+
+		RTLPort pz = node.getZ();
+		RTLSignal res = createUnnamedSignal(pz.getType(), aLocation);
+
+		pz.setSignal(res);
+
+		return res;
+	}
+
 	public RTLSignal createComponentUnary(UnaryOp aOp, RTLSignal aA, SourceLocation aLocation) throws ZamiaException {
 
 		RTLNUnaryOp node = new RTLNUnaryOp(aOp, aA.getType(), this, aLocation, getZDB());
@@ -255,7 +294,7 @@ public class RTLModule extends RTLNode {
 		pa.setSignal(aA.getCurrent());
 
 		RTLPort pz = node.getZ();
-		RTLSignal res = createUnnamedSignal(pz.getType(), aLocation);
+		RTLSignal res = createUniqueSignal(aOp.name().toLowerCase(), pz.getType(), aLocation);
 
 		pz.setSignal(res);
 
@@ -274,7 +313,8 @@ public class RTLModule extends RTLNode {
 		pb.setSignal(aB.getCurrent());
 
 		RTLPort pz = node.getZ();
-		RTLSignal res = createUnnamedSignal(pz.getType(), aLocation);
+		
+		RTLSignal res = createUniqueSignal(aOp.name().toLowerCase(), pz.getType(), aLocation);
 
 		pz.setSignal(res);
 
@@ -287,27 +327,33 @@ public class RTLModule extends RTLNode {
 		add(node);
 
 		RTLPort pz = node.getZ();
-		RTLSignal res = createUnnamedSignal(pz.getType(), aLocation);
+		RTLSignal res = createUniqueSignal("lit_"+aValue.toString(), pz.getType(), aLocation);
 
 		pz.setSignal(res);
 
 		return res;
 	}
 
-	public RTLSignal createOne(RTLType aType, SourceLocation aLocation) throws ZamiaException {
+	public RTLSignal createBitLiteral(BitValue aBitValue, RTLType aType, SourceLocation aLocation) throws ZamiaException {
 
-		switch (aType.getCat()) {
-		case BIT:
-
-			RTLValueBuilder builder = new RTLValueBuilder(aType, aLocation, getZDB());
-
-			builder.setBit(BitValue.BV_1);
-			return createLiteral(builder.buildValue(), aLocation);
-
-		default:
-			// FIXME: implement arrays, records
-			throw new ZamiaException("Sorry, not implemented yet.", aLocation);
+		if (aType.getCat() != TypeCat.BIT) {
+			throw new ZamiaException("Internal error: bit type expected here.", aLocation);
 		}
+
+		RTLSignal s = fBitLiterals.get(aBitValue);
+
+		if (s != null) {
+			return s;
+		}
+
+		RTLValueBuilder builder = new RTLValueBuilder(aType, aLocation, getZDB());
+		builder.setBit(aBitValue);
+		s = createLiteral(builder.buildValue(), aLocation);
+
+		fBitLiterals.put(aBitValue, s);
+
+		return s;
+
 	}
 
 	public RTLNRegister createRegister(RTLType aType, SourceLocation aLocation) throws ZamiaException {
@@ -346,6 +392,20 @@ public class RTLModule extends RTLNode {
 
 	public RTLSignal createUnnamedSignal(RTLType aType, SourceLocation aLocation) throws ZamiaException {
 		String id = getUnnamedSignalId();
+		return createSignal(id, aType, aLocation);
+	}
+
+	RTLSignal createUniqueSignal(String aPrefix, RTLType aType, SourceLocation aLocation) throws ZamiaException {
+
+		String id = "$" + aPrefix;
+
+		int count = 0;
+
+		while (fSignals.containsKey(id)) {
+			id = "$" + aPrefix + "_" + count;
+			count++;
+		}
+
 		return createSignal(id, aType, aLocation);
 	}
 
@@ -393,6 +453,7 @@ public class RTLModule extends RTLNode {
 		super.clear();
 		fSignals = new HashMapArray<String, RTLSignal>(10);
 		fNodes = new HashMapArray<String, RTLNode>(1);
+		fBitLiterals = new HashMap<RTLValue.BitValue, RTLSignal>();
 		fUniqueSignalCnt = 0;
 		fUniqueModuleCnt = 0;
 		fUniqueId = 0;

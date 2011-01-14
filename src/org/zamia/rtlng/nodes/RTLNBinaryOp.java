@@ -83,7 +83,7 @@ public class RTLNBinaryOp extends RTLNode {
 
 	@Override
 	public String toString() {
-		return "RTLCBinaryOp(op=" + fOp + ")";
+		return "RTLNBinaryOp(op=" + fOp + ")";
 	}
 
 }

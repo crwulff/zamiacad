@@ -67,7 +67,7 @@ public class RTLType extends RTLItem {
 	public TypeCat getCat() {
 		return fCat;
 	}
-	
+
 	public void addField(String aId, RTLType aType) {
 		fRecordFields.put(aId, new RTLRecordField(aId, aType));
 	}
@@ -111,14 +111,14 @@ public class RTLType extends RTLItem {
 
 		if (aType.getCat() != fCat)
 			return false;
-		
-		switch(fCat) {
+
+		switch (fCat) {
 		case BIT:
 			return true;
 		case ARRAY:
 		case RECORD:
 		}
-		
+
 		// FIXME: implement
 
 		throw new RuntimeException("Sorry, not implemented.");
@@ -126,10 +126,17 @@ public class RTLType extends RTLItem {
 
 	public RTLType computeEnableType() {
 
-		switch(fCat) {
+		switch (fCat) {
 		case BIT:
 			return this;
+
 		case ARRAY:
+			RTLType res = new RTLType(TypeCat.ARRAY, computeSourceLocation(), getZDB());
+
+			res.setArrayParams(fArrayElementType.computeEnableType(), fLeft, fAscending, fRight);
+
+			return res;
+
 		case RECORD:
 		}
 
@@ -148,6 +155,21 @@ public class RTLType extends RTLItem {
 
 	public int getArrayHigh() {
 		return fAscending ? fRight : fLeft;
+	}
+
+	public String toString() {
+		switch (fCat) {
+		case ARRAY:
+			if (fAscending)
+				return fLeft + " to " + fRight;
+			else
+				return fLeft + " downto " + fRight;
+		case BIT:
+			return "BIT";
+		case RECORD:
+			return "RECORD";
+		}
+		return "???";
 	}
 
 }

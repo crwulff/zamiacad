@@ -61,6 +61,8 @@ import org.zamia.instgraph.synth.adapters.IGSASequentialAssignment;
 import org.zamia.instgraph.synth.adapters.IGSASequentialIf;
 import org.zamia.instgraph.synth.adapters.IGSASequentialRestart;
 import org.zamia.instgraph.synth.adapters.IGSAStaticValue;
+import org.zamia.instgraph.synth.model.IGSMIfClock;
+import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 import org.zamia.rtlng.RTLManager;
 import org.zamia.rtlng.RTLModule;
 import org.zamia.rtlng.RTLPort;
@@ -68,6 +70,9 @@ import org.zamia.rtlng.RTLPort.PortDir;
 import org.zamia.rtlng.RTLSignal;
 import org.zamia.rtlng.RTLType;
 import org.zamia.rtlng.RTLType.TypeCat;
+import org.zamia.rtlng.RTLValue;
+import org.zamia.rtlng.RTLValue.BitValue;
+import org.zamia.rtlng.RTLValueBuilder;
 import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zdb.ZDB;
 
@@ -106,7 +111,17 @@ public class IGSynth {
 
 	private HashMap<Long, RTLSignal> fSignals;
 
-	public IGSynth(ZamiaProject aZPrj) {
+	private HashMap<Long, RTLType> fTypeCache;
+
+	private final RTLValue fBitValue0;
+
+	private final RTLValue fBitValue1;
+
+	private final RTLValue fBitValueU;
+
+	private final RTLValue fBitValueX;
+
+	public IGSynth(ZamiaProject aZPrj) throws ZamiaException {
 		fZPrj = aZPrj;
 		fZDB = fZPrj.getZDB();
 
@@ -131,6 +146,13 @@ public class IGSynth {
 		fOperationSynthAdapters.put(IGOperationRange.class, new IGSAOperationRange());
 		fOperationSynthAdapters.put(IGOperationAttribute.class, new IGSAOperationAttribute());
 		fOperationSynthAdapters.put(IGRange.class, new IGSARange());
+
+		fTypeCache = new HashMap<Long, RTLType>();
+
+		fBitValue0 = new RTLValueBuilder(getBitType(), null, fZDB).setBit(BitValue.BV_0).buildValue();
+		fBitValue1 = new RTLValueBuilder(getBitType(), null, fZDB).setBit(BitValue.BV_1).buildValue();
+		fBitValueU = new RTLValueBuilder(getBitType(), null, fZDB).setBit(BitValue.BV_U).buildValue();
+		fBitValueX = new RTLValueBuilder(getBitType(), null, fZDB).setBit(BitValue.BV_X).buildValue();
 
 	}
 
@@ -289,15 +311,65 @@ public class IGSynth {
 		sos.dump(0);
 
 		/*
+		 * Phase 1: Preprocessing
+		 * 
+		 * inline SubPrograms, unroll loops, remove wait stmts, detect global clock
+		 */
+
+		logger.debug("IGSynth: synthesizeProcess():  Phase 1: preprocessing");
+
+		int n = sos.getNumStatements();
+		IGClock globalClock = null;
+
+		IGSMSequenceOfStatements preprocessedSOS = new IGSMSequenceOfStatements(aProc.getLabel(), sos.computeSourceLocation(), this);
+
+		IGSMSequenceOfStatements pSOS = preprocessedSOS;
+
+		IGObjectRemapping or = new IGObjectRemapping(this);
+
+		for (int i = 0; i < n; i++) {
+
+			IGSequentialStatement stmt = sos.getStatement(i);
+
+			if (stmt instanceof IGSequentialWait) {
+
+				IGSequentialWait waitStmt = (IGSequentialWait) stmt;
+
+				if (i == 0) {
+					globalClock = findClock(waitStmt);
+
+					pSOS = new IGSMSequenceOfStatements(null, sos.computeSourceLocation(), this);
+
+					IGSMIfClock ic = new IGSMIfClock(globalClock, pSOS, null, waitStmt.computeSourceLocation(), this);
+
+					preprocessedSOS.add(ic);
+
+				} else {
+					throw new ZamiaException("Not synthesizable.");
+				}
+
+			} else {
+				getSynthAdapter(stmt).preprocess(stmt, or, pSOS, null, null, this);
+			}
+		}
+
+		logger.debug("IGSynth: synthesizeProcess(): preprocessing done:");
+		preprocessedSOS.dump(0);
+
+		/***********************************************************************************************
+		 * old code
+		 */
+
+		/*
 		 * Phase 1: inline SubPrograms, remove wait stmts, detect global clock
 		 */
 
 		logger.debug("IGSynth: synthesizeProcess():  Phase 1: inline SubPrograms, remove wait stmts, detect global clock");
 
-		int n = sos.getNumStatements();
-		IGClock globalClock = null;
+		n = sos.getNumStatements();
+		globalClock = null;
 		IGSequenceOfStatements inlinedSOS = new IGSequenceOfStatements(aProc.getLabel(), sos.computeSourceLocation(), fZDB);
-		IGObjectRemapping or = new IGObjectRemapping(this);
+		or = new IGObjectRemapping(this);
 
 		for (int i = 0; i < n; i++) {
 
@@ -356,6 +428,21 @@ public class IGSynth {
 		bindings.elaborate(this);
 	}
 
+	public RTLType getBitType() {
+		return fRTLM.getBitType();
+	}
+
+	private RTLType getCachedType(IGTypeStatic aType) {
+
+		long dbid = aType.getDBID();
+
+		return fTypeCache.get(dbid);
+	}
+
+	private void setCachedType(IGTypeStatic aType, RTLType aT) {
+		fTypeCache.put(aType.getDBID(), aT);
+	}
+
 	public RTLType synthesizeType(IGType aType) throws ZamiaException {
 
 		SourceLocation location = aType.computeSourceLocation();
@@ -366,7 +453,7 @@ public class IGSynth {
 
 		IGTypeStatic type = (IGTypeStatic) aType;
 
-		RTLType t = fRTLM.getCachedType(type);
+		RTLType t = getCachedType(type);
 		if (t != null) {
 			return t;
 		}
@@ -380,7 +467,7 @@ public class IGSynth {
 
 			t = new RTLType(TypeCat.ARRAY, location, fZDB);
 
-			t.setArrayParams(et, (int) it.getStaticLeft(location).getOrd(), it.isAscending(), (int) it.getStaticLeft(location).getOrd());
+			t.setArrayParams(et, (int) it.getStaticLeft(location).getOrd(), it.isAscending(), (int) it.getStaticRight(location).getOrd());
 
 			break;
 
@@ -398,6 +485,21 @@ public class IGSynth {
 
 			break;
 
+		case INTEGER:
+
+			int w = 32;
+
+			if (type.getRange() instanceof IGStaticValue) {
+				long low = type.getStaticLow(location).getOrd();
+				long high = type.getStaticHigh(location).getOrd();
+
+				long card = high - low + 1;
+				w = (int) Math.ceil(Math.log(card) / Math.log(2));
+			}
+
+			t = fRTLM.getBitVectorType(w);
+			break;
+
 		default:
 			if (!type.isBit() && !type.isBool() && !isStdLogic(type)) {
 				throw new ZamiaException("Type " + type + " is not synthesizable", location);
@@ -406,7 +508,7 @@ public class IGSynth {
 			t = fRTLM.getBitType();
 		}
 
-		fRTLM.setCachedType(type, t);
+		setCachedType(type, t);
 
 		return t;
 	}
@@ -543,4 +645,23 @@ public class IGSynth {
 		return fBindingSynthCache.get(aBinding);
 	}
 
+	public RTLManager getRTLM() {
+		return fRTLM;
+	}
+
+	public RTLValue getBitValue(BitValue aBV) {
+
+		switch (aBV) {
+		case BV_0:
+			return fBitValue0;
+		case BV_1:
+			return fBitValue1;
+		case BV_U:
+			return fBitValueU;
+		case BV_X:
+			return fBitValueX;
+		}
+
+		return null;
+	}
 }

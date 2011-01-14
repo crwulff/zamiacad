@@ -1,5 +1,5 @@
 /* 
- * Copyright 2010 by the authors indicated in the @author tags. 
+ * Copyright 2010,2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -8,11 +8,9 @@
  */
 package org.zamia.rtlng;
 
-import java.util.HashMap;
-
 import org.zamia.ZamiaProject;
-import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.rtlng.RTLType.TypeCat;
+import org.zamia.zdb.ZDB;
 
 /**
  * 
@@ -26,38 +24,30 @@ public class RTLManager {
 
 	private final ZamiaProject fZPrj;
 
-	private HashMap<Long, RTLType> fTypeCache;
+	private ZDB fZDB;
 
 	public RTLManager(ZamiaProject aZPrj) {
-
 		fZPrj = aZPrj;
-
+		fZDB = fZPrj.getZDB();
 		fBitType = new RTLType(TypeCat.BIT, null, fZPrj.getZDB());
-		clear();
-	}
-
-	public void clear() {
-		fTypeCache = new HashMap<Long, RTLType>();
 	}
 
 	public RTLType getBitType() {
 		return fBitType;
 	}
 
-	public RTLType getCachedType(IGTypeStatic aType) {
+	public RTLType getBitVectorType(int aWidth) {
 		
-		long dbid = aType.getDBID();
+		RTLType bvt = new RTLType(TypeCat.ARRAY, null, fZDB);
 		
-		return fTypeCache.get(dbid);
-	}
-
-	public void setCachedType(IGTypeStatic aType, RTLType aT) {
-		fTypeCache.put(aType.getDBID(), aT);
+		bvt.setArrayParams(fBitType, aWidth-1, false, 0);
+		
+		return bvt;
 	}
 
 	public RTLModule loadRTLModule(String aSignature) {
 		// FIXME: implement
-		
-		throw new RuntimeException ("Sorry, not implemented yet.");
+
+		throw new RuntimeException("Sorry, not implemented yet.");
 	}
 }

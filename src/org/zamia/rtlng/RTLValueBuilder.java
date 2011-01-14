@@ -15,6 +15,7 @@ import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
+import org.zamia.rtlng.RTLType.TypeCat;
 import org.zamia.rtlng.RTLValue.BitValue;
 import org.zamia.zdb.ZDB;
 
@@ -107,7 +108,7 @@ public class RTLValueBuilder {
 
 	}
 
-	public RTLValue buildValue() {
+	public RTLValue buildValue() throws ZamiaException {
 		return new RTLValue(this);
 	}
 
@@ -146,8 +147,9 @@ public class RTLValueBuilder {
 		}
 	}
 
-	public void setBit(BitValue aBit) {
+	public RTLValueBuilder setBit(BitValue aBit) {
 		fBit = aBit;
+		return this;
 	}
 
 	public BitValue getBit() {
@@ -166,8 +168,26 @@ public class RTLValueBuilder {
 		return fLocation;
 	}
 
-	public static RTLValue generateUValue(RTLType aType, SourceLocation aLocation, ZDB aZDB) {
+	public static RTLValue generateUValue(RTLType aType, SourceLocation aLocation, ZDB aZDB) throws ZamiaException {
 		RTLValueBuilder b = new RTLValueBuilder(aType, aLocation, aZDB);
+
+		switch (aType.getCat()) {
+
+		case ARRAY:
+			
+			for (int i = aType.getArrayLow(); i<=aType.getArrayHigh(); i++) {
+				b.set(i, generateUValue(aType.getArrayElementType(), aLocation, aZDB), aLocation);
+			}
+			
+			break;
+		case BIT:
+			b.setBit(BitValue.BV_U);
+			break;
+		case RECORD:
+			// FIXME: implement
+			throw new ZamiaException("Sorry, not implemented yet.");
+		}
+
 		return b.buildValue();
 	}
 
@@ -214,11 +234,52 @@ public class RTLValueBuilder {
 
 	}
 
-	public static RTLValue generateBit(RTLType aType, BitValue aBit, SourceLocation aLocation, ZDB aZDB) {
+	public static RTLValue generateBit(RTLType aType, BitValue aBit, SourceLocation aLocation, ZDB aZDB) throws ZamiaException {
 		RTLValueBuilder b = new RTLValueBuilder(aType, aLocation, aZDB);
 
 		b.setBit(aBit);
 
 		return b.buildValue();
 	}
+
+	/************************************************
+	 * 
+	 * Arrays
+	 * 
+	 ************************************************/
+
+	public void set(int aIdx, RTLValueBuilder aBuilder, SourceLocation aLocation) throws ZamiaException {
+		if (fType.getCat() != TypeCat.ARRAY) {
+			throw new ZamiaException("RTLValueBuilder: set(): this is not an array.", aLocation);
+		}
+
+		fArrayValues.set(aIdx - fArrayOffset, new BuilderEntry(aBuilder));
+	}
+
+	public void set(int aIdx, RTLValue aConstant, SourceLocation aLocation) throws ZamiaException {
+		if (fType.getCat() != TypeCat.ARRAY) {
+			throw new ZamiaException("RTLValueBuilder: set(): this is not an array.", aLocation);
+		}
+
+		if (fArrayValues == null) {
+			throw new ZamiaException("RTLValueBuilder: getBuilder(): this is an unconstrained array.", aLocation);
+		}
+
+		fArrayValues.set(aIdx - fArrayOffset, new BuilderEntry(aConstant));
+	}
+
+	public RTLValue get(int aIdx, SourceLocation aLocation) throws ZamiaException {
+		if (fType.getCat() != TypeCat.ARRAY) {
+			throw new ZamiaException("RTLValueBuilder: get(): this is not an array.", aLocation);
+		}
+
+		BuilderEntry entry = fArrayValues.get(aIdx - fArrayOffset);
+
+		if (entry == null) {
+			throw new ZamiaException("RTLValueBuilder: get(): Element " + aIdx + " not set.", aLocation);
+		}
+
+		return entry.getConstant();
+	}
+
 }
