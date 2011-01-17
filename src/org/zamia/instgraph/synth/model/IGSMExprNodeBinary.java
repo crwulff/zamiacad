@@ -40,4 +40,9 @@ public class IGSMExprNodeBinary extends IGSMExprNode {
 		return null;
 	}
 
+	@Override
+	public String toString() {
+		return "(" + fA + ")" + fOp + "(" + fB + ")";
+	}
+
 }

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2010 by the authors indicated in the @author tags. 
+ * Copyright 2010,2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -311,12 +311,12 @@ public class IGSynth {
 		sos.dump(0);
 
 		/*
-		 * Phase 1: Preprocessing
+		 * Pass 1: Preprocessing
 		 * 
 		 * inline SubPrograms, unroll loops, remove wait stmts, detect global clock
 		 */
 
-		logger.debug("IGSynth: synthesizeProcess():  Phase 1: preprocessing");
+		logger.debug("IGSynth: synthesizeProcess():  Pass 1: preprocessing");
 
 		int n = sos.getNumStatements();
 		IGClock globalClock = null;
@@ -345,7 +345,12 @@ public class IGSynth {
 					preprocessedSOS.add(ic);
 
 				} else {
-					throw new ZamiaException("Not synthesizable.");
+
+					// if this is not the implicit wait stmt at the
+					// end of the process (location==null) => throw exception
+					if (waitStmt.computeSourceLocation() != null) {
+						throw new ZamiaException("Not synthesizable.");
+					}
 				}
 
 			} else {
@@ -356,67 +361,17 @@ public class IGSynth {
 		logger.debug("IGSynth: synthesizeProcess(): preprocessing done:");
 		preprocessedSOS.dump(0);
 
-		/***********************************************************************************************
-		 * old code
-		 */
-
 		/*
-		 * Phase 1: inline SubPrograms, remove wait stmts, detect global clock
+		 * Pass 2: compute bindings
+		 * 
 		 */
 
-		logger.debug("IGSynth: synthesizeProcess():  Phase 1: inline SubPrograms, remove wait stmts, detect global clock");
+		logger.debug("IGSynth: synthesizeProcess():  Pass 2: compute bindings");
 
-		n = sos.getNumStatements();
-		globalClock = null;
-		IGSequenceOfStatements inlinedSOS = new IGSequenceOfStatements(aProc.getLabel(), sos.computeSourceLocation(), fZDB);
-		or = new IGObjectRemapping(this);
-
-		for (int i = 0; i < n; i++) {
-
-			IGSequentialStatement stmt = sos.getStatement(i);
-
-			if (stmt instanceof IGSequentialWait) {
-
-				IGSequentialWait waitStmt = (IGSequentialWait) stmt;
-
-				if (i == 0) {
-					globalClock = findClock(waitStmt);
-				}
-
-			} else {
-				getSynthAdapter(stmt).inlineSubprograms(stmt, or, inlinedSOS, null, this);
-			}
-		}
-
-		logger.debug("IGSynth: synthesizeProcess():  Subprograms inlined:");
-		inlinedSOS.dump(0);
-
-		/*
-		 * Phase 2: resolve variables
-		 */
-
-		logger.debug("IGSynth: synthesizeProcess():  Phase 2: resolve variables");
-		IGBindings vb = new IGBindings();
-
-		IGSequenceOfStatements resolvedSOS = new IGSequenceOfStatements(aProc.getLabel(), sos.computeSourceLocation(), fZDB);
-
-		IGBindings lastBindings = getSynthAdapter(inlinedSOS).resolveVariables(inlinedSOS, resolvedSOS, vb, resolvedSOS, null, or, this);
-
-		logger.debug("IGSynth: synthesizeProcess():  Variables resolved:");
-		resolvedSOS.dump(0);
-
-		logger.debug("IGSynth: synthesizeProcess():  Variable bindings:");
-
-		lastBindings.dumpBindings();
-
-		/*
-		 * Phase 3: compute bindings
-		 */
-
-		logger.debug("IGSynth: synthesizeProcess():  Phase 3: compute bindings");
-
-		IGBindings bindings = getSynthAdapter(resolvedSOS).computeBindings(resolvedSOS, resolvedSOS, lastBindings, globalClock, this);
-
+		IGBindings bindings = new IGBindings();
+		
+		bindings = preprocessedSOS.computeBindings(bindings, null, this);
+		
 		logger.debug("IGSynth: synthesizeProcess():  " + bindings.getNumBindings() + " bindings computed.");
 
 		bindings.dumpBindings();
@@ -425,7 +380,7 @@ public class IGSynth {
 		 * Phase 4: generate RTL graph
 		 */
 
-		bindings.elaborate(this);
+		//bindings.elaborate(this);
 	}
 
 	public RTLType getBitType() {

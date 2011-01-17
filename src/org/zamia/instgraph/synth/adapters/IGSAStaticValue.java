@@ -1,5 +1,5 @@
 /* 
- * Copyright 2010 by the authors indicated in the @author tags. 
+ * Copyright 2010,2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -11,17 +11,15 @@ package org.zamia.instgraph.synth.adapters;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGOperation;
-import org.zamia.instgraph.IGSequenceOfStatements;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGType;
-import org.zamia.instgraph.synth.IGBindings;
-import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGObjectRemapping;
 import org.zamia.instgraph.synth.IGOperationSynthAdapter;
 import org.zamia.instgraph.synth.IGSynth;
+import org.zamia.instgraph.synth.model.IGSMExprNode;
+import org.zamia.instgraph.synth.model.IGSMExprNodeValue;
+import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 import org.zamia.rtlng.RTLManager;
-import org.zamia.rtlng.RTLModule;
-import org.zamia.rtlng.RTLSignal;
 import org.zamia.rtlng.RTLType;
 import org.zamia.rtlng.RTLValue;
 import org.zamia.rtlng.RTLValue.BitValue;
@@ -36,19 +34,7 @@ import org.zamia.rtlng.RTLValueBuilder;
 public class IGSAStaticValue extends IGOperationSynthAdapter {
 
 	@Override
-	public IGOperation inlineSubprograms(IGOperation aOperation, IGObjectRemapping aOR, IGSequenceOfStatements aInlinedSOS, IGSynth aSynth) throws ZamiaException {
-		return aOperation;
-	}
-
-	@Override
-	public IGOperation resolveVariables(IGOperation aOperation, IGBindings aBindings, IGSequenceOfStatements aResolvedSOS, IGClock aClock, IGObjectRemapping aOR, IGSynth aSynth)
-			throws ZamiaException {
-		return aOperation;
-	}
-
-	@Override
-	public RTLSignal synthesizeValue(IGOperation aOperation, IGSynth aSynth) throws ZamiaException {
-
+	public IGSMExprNode preprocess(IGOperation aOperation, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, IGSynth aSynth) throws ZamiaException {
 		IGStaticValue sv = (IGStaticValue) aOperation;
 
 		SourceLocation location = sv.computeSourceLocation();
@@ -130,10 +116,7 @@ public class IGSAStaticValue extends IGOperationSynthAdapter {
 
 		RTLValue rtlv = b.buildValue();
 
-		RTLModule module = aSynth.getRTLModule();
-
-		return module.createLiteral(rtlv, location);
-
+		return new IGSMExprNodeValue(rtlv, location, aSynth);
 	}
 
 }

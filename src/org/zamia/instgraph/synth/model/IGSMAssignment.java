@@ -8,8 +8,18 @@
  */
 package org.zamia.instgraph.synth.model;
 
+import java.util.ArrayList;
+
 import org.zamia.SourceLocation;
+import org.zamia.ZamiaException;
+import org.zamia.instgraph.synth.IGBinding;
+import org.zamia.instgraph.synth.IGBindingNode;
+import org.zamia.instgraph.synth.IGBindingNodePhi;
+import org.zamia.instgraph.synth.IGBindingNodeValue;
+import org.zamia.instgraph.synth.IGBindings;
+import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGSynth;
+import org.zamia.rtlng.RTLSignal;
 
 /**
  * 
@@ -19,12 +29,54 @@ import org.zamia.instgraph.synth.IGSynth;
 
 public class IGSMAssignment extends IGSMStatement {
 
+	private IGSMTarget fTarget;
+
+	private IGSMExprNode fValue;
+
 	public IGSMAssignment(IGSMExprNode aValue, IGSMTarget aTarget, String aLabel, SourceLocation aLocation, IGSynth aSynth) {
-		super (aLabel, aLocation, aSynth);
+		super(aLabel, aLocation, aSynth);
+		fTarget = aTarget;
+		fValue = aValue;
 	}
 
 	@Override
 	public void dump(int aIndent) {
+		logger.debug(aIndent, "%s <- %s", fTarget, fValue);
+	}
+
+	@Override
+	public IGBindings computeBindings(IGBindings aBindingsBefore, IGClock aClock, IGSynth aSynth) throws ZamiaException {
+
+		ArrayList<IGSMConditionalTarget> condTargets = new ArrayList<IGSMConditionalTarget>();
+
+		fTarget.computeTargets(condTargets);
+
+		// FIXME: handle variables
+
+		IGBindings newBindings = new IGBindings();
+
+		for (IGSMConditionalTarget condTarget : condTargets) {
+
+			RTLSignal target = condTarget.getTarget();
+
+			IGSMExprNode cond = condTarget.getCond();
+
+			IGBindingNode node = new IGBindingNodeValue(fValue);
+
+			if (cond != null) {
+				node = new IGBindingNodePhi(cond, node, null);
+			}
+
+			IGBinding binding;
+			if (aClock != null) {
+				binding = new IGBinding(target, aClock, node, null);
+			} else {
+				binding = new IGBinding(target, null, null, node);
+			}
+			newBindings.setBinding(target, binding);
+		}
+
+		return newBindings;
 
 	}
 

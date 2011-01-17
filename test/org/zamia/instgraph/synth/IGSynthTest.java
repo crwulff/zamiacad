@@ -148,6 +148,28 @@ public class IGSynthTest {
 	}
 
 	@Test
+	public void testLatch() throws Exception {
+
+		RTLModule rtlm = runSynth("examples/synth/latchTest", "WORK.FOO(RTL)");
+
+		RTLSimulator sim = new RTLSimulator(fZPrj);
+
+		sim.open(rtlm);
+
+		sim.assign(new PathName("A"), "0");
+		sim.assign(new PathName("B"), "0");
+		sim.assign(new PathName("C1"), "0");
+		sim.assign(new PathName("C2"), "0");
+
+		sim.simulate();
+
+		RTLValue vz = sim.getCurrentValue(new PathName("Z"));
+
+		assertEquals(BitValue.BV_0, vz.getBit());
+
+	}
+
+	@Test
 	public void testArrayIdx() throws Exception {
 
 		RTLModule rtlm = runSynth("examples/synth/arrayIdxTest", "WORK.FOO(RTL)");

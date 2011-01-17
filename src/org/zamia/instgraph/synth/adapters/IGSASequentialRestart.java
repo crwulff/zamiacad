@@ -9,7 +9,6 @@
 package org.zamia.instgraph.synth.adapters;
 
 import org.zamia.ZamiaException;
-import org.zamia.instgraph.IGSequenceOfStatements;
 import org.zamia.instgraph.IGSequentialStatement;
 import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGObjectRemapping;
@@ -24,11 +23,6 @@ import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
  */
 
 public class IGSASequentialRestart extends IGStmtSynthAdapter {
-
-	@Override
-	public void inlineSubprograms(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSequenceOfStatements aInlinedSOS, String aReturnVarName, IGSynth aSynth)
-			throws ZamiaException {
-	}
 
 	@Override
 	public void preprocess(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGClock aClock, IGSynth aSynth)
