@@ -28,6 +28,8 @@ public class IGSignalDriver extends IGObjectDriver {
 	private IGStaticValue fNextValue;
 
 	private SourceLocation fNextValueLocation;
+
+	private IGStaticValue fLastValue;
 	/**
 	 * {@link #isEvent()} can be accessed during the whole delta cycle.
 	 * We therefore need to retain the value of <tt>isEvent()</tt> for the whole
@@ -191,6 +193,13 @@ public class IGSignalDriver extends IGObjectDriver {
 		super.setValueInternal(aValue, aLocation);
 
 		fIsEvent = hasValueChanged(oldValue, aValue);
+
+		if (fIsEvent) {
+			if (oldValue == null) {
+				oldValue = aValue; // "otherwise, S'LAST_VALUE returns the current value of S" (std.)
+			}
+			fLastValue = oldValue;
+		}
 	}
 
 	@Override
@@ -217,6 +226,10 @@ public class IGSignalDriver extends IGObjectDriver {
 			fNextValueLocation = null;
 
 		}
+	}
+
+	public IGStaticValue getLastValue() {
+		return fLastValue;
 	}
 
 	public void scheduleChange(boolean aInertial, BigInteger aReject, IGSignalChangeRequest aReq, BigInteger aSimTime) throws ZamiaException {

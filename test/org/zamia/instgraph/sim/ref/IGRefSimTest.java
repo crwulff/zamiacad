@@ -100,10 +100,20 @@ public class IGRefSimTest {
 	}
 
 	@Test
-	public void testRisingEdge() throws Exception {
-		runTest("examples/refsim/params2", 1, 152);
+	public void testParamsEvent() throws Exception {
+		runTest("examples/refsim/params2", 1, 60);
 	}
-	
+
+	@Test
+	public void testLastValuePure() throws Exception {
+		runTest("examples/refsim/lastValue1", 1, 400);
+	}
+
+	@Test
+	public void testLastValueInsideRisingEdge() throws Exception {
+		runTest("examples/refsim/lastValue2", 1, 400);
+	}
+
 	@Test
 	public void testParams1() throws Exception {
 		runTest("examples/refsim/params1", 1, 100);
