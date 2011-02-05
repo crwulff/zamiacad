@@ -61,7 +61,9 @@ import org.zamia.instgraph.synth.adapters.IGSASequentialAssignment;
 import org.zamia.instgraph.synth.adapters.IGSASequentialIf;
 import org.zamia.instgraph.synth.adapters.IGSASequentialRestart;
 import org.zamia.instgraph.synth.adapters.IGSAStaticValue;
-import org.zamia.instgraph.synth.model.IGSMIfClock;
+import org.zamia.instgraph.synth.model.IGSMExprNode;
+import org.zamia.instgraph.synth.model.IGSMExprNodeClockEdge;
+import org.zamia.instgraph.synth.model.IGSMIf;
 import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 import org.zamia.rtlng.RTLManager;
 import org.zamia.rtlng.RTLModule;
@@ -73,6 +75,7 @@ import org.zamia.rtlng.RTLType.TypeCat;
 import org.zamia.rtlng.RTLValue;
 import org.zamia.rtlng.RTLValue.BitValue;
 import org.zamia.rtlng.RTLValueBuilder;
+import org.zamia.util.Pair;
 import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zdb.ZDB;
 
@@ -105,13 +108,13 @@ public class IGSynth {
 
 	private RTLModule fModule;
 
-	private HashMap<IGOperationObject, IGBinding> fVariableOperationBindings; // for variables
-
-	private HashMap<IGBinding, RTLSignal> fBindingSynthCache;
-
 	private HashMap<Long, RTLSignal> fSignals;
 
 	private HashMap<Long, RTLType> fTypeCache;
+
+	// very crude implementation of common sub-expressions:
+	// string-representation of operation -> resulting signal
+	private HashMap<String, RTLSignal> fLogicCache;
 
 	private final RTLValue fBitValue0;
 
@@ -148,6 +151,7 @@ public class IGSynth {
 		fOperationSynthAdapters.put(IGRange.class, new IGSARange());
 
 		fTypeCache = new HashMap<Long, RTLType>();
+		fLogicCache = new HashMap<String, RTLSignal>();
 
 		fBitValue0 = new RTLValueBuilder(getBitType(), null, fZDB).setBit(BitValue.BV_0).buildValue();
 		fBitValue1 = new RTLValueBuilder(getBitType(), null, fZDB).setBit(BitValue.BV_1).buildValue();
@@ -170,9 +174,7 @@ public class IGSynth {
 
 		DMUID dmuid = aModule.getDUUID();
 
-		fVariableOperationBindings = new HashMap<IGOperationObject, IGBinding>();
 		fSignals = new HashMap<Long, RTLSignal>();
-		fBindingSynthCache = new HashMap<IGBinding, RTLSignal>();
 
 		fModule = new RTLModule(dmuid.getUID(), "", aModule.computeSourceLocation(), fZDB);
 
@@ -319,7 +321,6 @@ public class IGSynth {
 		logger.debug("IGSynth: synthesizeProcess():  Pass 1: preprocessing");
 
 		int n = sos.getNumStatements();
-		IGClock globalClock = null;
 
 		IGSMSequenceOfStatements preprocessedSOS = new IGSMSequenceOfStatements(aProc.getLabel(), sos.computeSourceLocation(), this);
 
@@ -336,11 +337,11 @@ public class IGSynth {
 				IGSequentialWait waitStmt = (IGSequentialWait) stmt;
 
 				if (i == 0) {
-					globalClock = findClock(waitStmt);
+					IGSMExprNode globalClock = findClock(waitStmt, pSOS);
 
 					pSOS = new IGSMSequenceOfStatements(null, sos.computeSourceLocation(), this);
 
-					IGSMIfClock ic = new IGSMIfClock(globalClock, pSOS, null, waitStmt.computeSourceLocation(), this);
+					IGSMIf ic = new IGSMIf(globalClock, pSOS, new IGSMSequenceOfStatements(null, sos.computeSourceLocation(), this), null, waitStmt.computeSourceLocation(), this);
 
 					preprocessedSOS.add(ic);
 
@@ -354,7 +355,7 @@ public class IGSynth {
 				}
 
 			} else {
-				getSynthAdapter(stmt).preprocess(stmt, or, pSOS, null, null, this);
+				getSynthAdapter(stmt).inline(stmt, or, pSOS, null, this);
 			}
 		}
 
@@ -369,9 +370,9 @@ public class IGSynth {
 		logger.debug("IGSynth: synthesizeProcess():  Pass 2: compute bindings");
 
 		IGBindings bindings = new IGBindings();
-		
-		bindings = preprocessedSOS.computeBindings(bindings, null, this);
-		
+
+		bindings = preprocessedSOS.computeBindings(bindings, this);
+
 		logger.debug("IGSynth: synthesizeProcess():  " + bindings.getNumBindings() + " bindings computed.");
 
 		bindings.dumpBindings();
@@ -380,7 +381,7 @@ public class IGSynth {
 		 * Phase 4: generate RTL graph
 		 */
 
-		//bindings.elaborate(this);
+		bindings.synthesize(this);
 	}
 
 	public RTLType getBitType() {
@@ -481,15 +482,7 @@ public class IGSynth {
 		return fEnv;
 	}
 
-	public void setVariableOperationBinding(IGOperationObject aOp, IGBinding aBinding) {
-		fVariableOperationBindings.put(aOp, aBinding);
-	}
-
-	public IGBinding getVariableOperationBinding(IGOperationObject aOp) {
-		return fVariableOperationBindings.get(aOp);
-	}
-
-	public IGClock findClock(IGSequentialWait aWaitStmt) throws ZamiaException {
+	public IGSMExprNode findClock(IGSequentialWait aWaitStmt, IGSMSequenceOfStatements aPreprocessedSOS) throws ZamiaException {
 
 		ArrayList<IGOperation> sens = aWaitStmt.getSensitivityList();
 		if (sens != null) {
@@ -504,15 +497,112 @@ public class IGSynth {
 		if (cond == null) {
 			return null;
 		}
-		return findClock(cond);
 
+		return getSynthAdapter(cond).preprocess(cond, null, aPreprocessedSOS, this);
 	}
 
-	public IGClock findClock(IGOperation aOp) throws ZamiaException {
+	private RTLSignal findSignal(IGOperation aOp) throws ZamiaException {
 
-		// clk'event and clk='1'
+		if (!(aOp instanceof IGOperationObject)) {
+			return null;
+		}
 
-		if (aOp instanceof IGOperationBinary) {
+		IGOperationObject oo = (IGOperationObject) aOp;
+
+		IGObject signal = oo.getObject();
+		if (signal.getCat() != IGObjectCat.SIGNAL) {
+			return null;
+		}
+
+		return getOrCreateSignal(signal);
+	}
+
+	private Pair<IGOperation, IGOperation> findEquals(IGOperation aOp) {
+
+		if (aOp instanceof IGOperationInvokeSubprogram) {
+
+			IGOperationInvokeSubprogram inv = (IGOperationInvokeSubprogram) aOp;
+
+			String opStr = inv.getSub().getId();
+
+			BinOp bop = IGSAOperationInvokeSubprogram.identifyStdBinOp(opStr);
+			if (bop != BinOp.EQUAL) {
+				return null;
+			}
+
+			return new Pair<IGOperation, IGOperation>(inv.getMapping(0).getActual(), inv.getMapping(1).getActual());
+		}
+
+		if (!(aOp instanceof IGOperationBinary)) {
+			return null;
+		}
+
+		IGOperationBinary bop = (IGOperationBinary) aOp;
+		if (bop.getBinOp() != BinOp.EQUAL) {
+			return null;
+		}
+
+		return new Pair<IGOperation, IGOperation>(bop.getA(), bop.getB());
+	}
+
+	private IGOperationAttribute findAttr(IGOperation aOp) {
+		if (aOp instanceof IGOperationAttribute) {
+			IGOperationAttribute opattr = (IGOperationAttribute) aOp;
+
+			if (opattr.getAttrOp() != AttrOp.EVENT) {
+				return null;
+			}
+
+			return opattr;
+		}
+		return null;
+	}
+
+	public IGSMExprNodeClockEdge findClock(IGOperation aOp) throws ZamiaException {
+		SourceLocation location = aOp.computeSourceLocation();
+
+		IGOperation a = null;
+		IGOperation b = null;
+
+		if (aOp instanceof IGOperationInvokeSubprogram) {
+
+			IGOperationInvokeSubprogram inv = (IGOperationInvokeSubprogram) aOp;
+
+			String opStr = inv.getSub().getId();
+
+			if (opStr.equals("RISING_EDGE")) {
+
+				a = inv.getMapping(0).getActual();
+
+				RTLSignal rtls = findSignal(a);
+
+				if (rtls == null) {
+					return null;
+				}
+
+				return new IGSMExprNodeClockEdge(rtls, true, location, this);
+			} else if (opStr.equals("FALLING_EDGE")) {
+
+				a = inv.getMapping(0).getActual();
+
+				RTLSignal rtls = findSignal(a);
+
+				if (rtls == null) {
+					return null;
+				}
+
+				return new IGSMExprNodeClockEdge(rtls, false, location, this);
+			}
+
+			BinOp bop = IGSAOperationInvokeSubprogram.identifyStdBinOp(opStr);
+			if (bop != BinOp.AND) {
+				return null;
+			}
+
+			a = inv.getMapping(0).getActual();
+			b = inv.getMapping(1).getActual();
+
+		} else if (aOp instanceof IGOperationBinary) {
 
 			IGOperationBinary bop = (IGOperationBinary) aOp;
 
@@ -520,84 +610,56 @@ public class IGSynth {
 				return null;
 			}
 
-			IGOperation a = bop.getA();
-			IGOperation b = bop.getB();
-
-			IGOperationAttribute opattr = null;
-			IGOperationBinary compare = null;
-
-			if ((a instanceof IGOperationAttribute) && (b instanceof IGOperationBinary)) {
-
-				opattr = (IGOperationAttribute) a;
-
-				IGOperationBinary bop2 = (IGOperationBinary) b;
-				if (bop2.getBinOp() != BinOp.EQUAL) {
-					return null;
-				}
-				compare = bop2;
-			} else if ((b instanceof IGOperationAttribute) && (a instanceof IGOperationBinary)) {
-
-				opattr = (IGOperationAttribute) b;
-
-				IGOperationBinary bop2 = (IGOperationBinary) a;
-				if (bop2.getBinOp() != BinOp.EQUAL) {
-					return null;
-				}
-				compare = bop2;
-			} else {
-				return null;
-			}
-
-			if (opattr.getAttrOp() != AttrOp.EVENT) {
-				return null;
-			}
-
-			IGOperationObject oo = null;
-			IGStaticValue sv = null;
-			a = compare.getA();
-			b = compare.getB();
-			if ((a instanceof IGOperationObject) && (b instanceof IGStaticValue)) {
-				oo = (IGOperationObject) a;
-				sv = (IGStaticValue) b;
-			} else if ((b instanceof IGOperationObject) && (a instanceof IGStaticValue)) {
-				oo = (IGOperationObject) b;
-				sv = (IGStaticValue) a;
-			} else {
-				return null;
-			}
-
-			IGTypeStatic t = sv.getStaticType();
-			if (!t.isLogic()) {
-				return null;
-			}
-
-			boolean rising = sv.isLogicOne();
-
-			IGObject signal = oo.getObject();
-			if (signal.getCat() != IGObjectCat.SIGNAL) {
-				return null;
-			}
-
-			return new IGClock(signal, rising);
-
+			a = bop.getA();
+			b = bop.getB();
 		}
 
-		// FIXME: implement RISING_EDGE...
+		IGOperationAttribute opattr = null;
+		Pair<IGOperation, IGOperation> compare = findEquals(a);
+		if (compare == null) {
+			compare = findEquals(b);
+			if (compare == null) {
+				return null;
+			}
 
-		return null;
+			opattr = findAttr(a);
 
+		} else {
+			opattr = findAttr(b);
+		}
+
+		if (opattr == null) {
+			return null;
+		}
+
+		IGOperationObject oo = null;
+		IGStaticValue sv = null;
+		a = compare.getFirst();
+		b = compare.getSecond();
+		if ((a instanceof IGOperationObject) && (b instanceof IGStaticValue)) {
+			oo = (IGOperationObject) a;
+			sv = (IGStaticValue) b;
+		} else if ((b instanceof IGOperationObject) && (a instanceof IGStaticValue)) {
+			oo = (IGOperationObject) b;
+			sv = (IGStaticValue) a;
+		} else {
+			return null;
+		}
+
+		IGTypeStatic t = sv.getStaticType();
+		if (!t.isLogic()) {
+			return null;
+		}
+
+		boolean rising = sv.isLogicOne();
+
+		RTLSignal rtls = findSignal(oo);
+
+		return new IGSMExprNodeClockEdge(rtls, rising, location, this);
 	}
 
 	public RTLModule getRTLModule() {
 		return fModule;
-	}
-
-	public void setCachedBindingSynth(IGBinding aBinding, RTLSignal aDest) {
-		fBindingSynthCache.put(aBinding, aDest);
-	}
-
-	public RTLSignal getCachedBindingSynth(IGBinding aBinding) {
-		return fBindingSynthCache.get(aBinding);
 	}
 
 	public RTLManager getRTLM() {
@@ -618,5 +680,19 @@ public class IGSynth {
 		}
 
 		return null;
+	}
+
+	public RTLSignal placeLiteral(RTLValue aValue, SourceLocation aLocation) throws ZamiaException {
+
+		String signature = "L" + aValue;
+
+		RTLSignal s = fLogicCache.get(signature);
+
+		if (s == null) {
+			s = fModule.createLiteral(aValue, aLocation);
+			fLogicCache.put(signature, s);
+		}
+
+		return s;
 	}
 }

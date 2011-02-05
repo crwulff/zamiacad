@@ -14,7 +14,6 @@ import org.zamia.instgraph.synth.IGBinding;
 import org.zamia.instgraph.synth.IGBindingNode;
 import org.zamia.instgraph.synth.IGBindingNodePhi;
 import org.zamia.instgraph.synth.IGBindings;
-import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGSynth;
 import org.zamia.rtlng.RTLSignal;
 import org.zamia.util.HashSetArray;
@@ -72,14 +71,14 @@ public class IGSMIf extends IGSMStatement {
 	}
 
 	@Override
-	public IGBindings computeBindings(IGBindings aBindingsBefore, IGClock aClock, IGSynth aSynth) throws ZamiaException {
+	public IGBindings computeBindings(IGBindings aBindingsBefore, IGSynth aSynth) throws ZamiaException {
 
-		logger.debug("IGSMIf: computeBindings() cond=" + fCond + " fThenStmt=" + fThenStmt + " fElseStmt=" + fElseStmt + " clock=" + aClock);
+		logger.debug("IGSMIf: computeBindings() cond=" + fCond + " fThenStmt=" + fThenStmt + " fElseStmt=" + fElseStmt);
 
 		// compute bindings for both then and else branch
 
-		IGBindings thenBindings = fThenStmt.computeBindings(aBindingsBefore, aClock, aSynth);
-		IGBindings elseBindings = fElseStmt.computeBindings(aBindingsBefore, aClock, aSynth);
+		IGBindings thenBindings = fThenStmt.computeBindings(aBindingsBefore, aSynth);
+		IGBindings elseBindings = fElseStmt.computeBindings(aBindingsBefore, aSynth);
 
 		// compute set of all driven Signals
 
@@ -97,25 +96,11 @@ public class IGSMIf extends IGSMStatement {
 			IGBinding thenBinding = thenBindings.getBinding(signal);
 			IGBinding elseBinding = elseBindings.getBinding(signal);
 
-			IGBindingNode thenNode = thenBinding != null ? thenBinding.getASyncBinding() : null;
-			IGBindingNode elseNode = elseBinding != null ? elseBinding.getASyncBinding() : null;
+			IGBindingNode thenNode = thenBinding != null ? thenBinding.getBinding() : null;
+			IGBindingNode elseNode = elseBinding != null ? elseBinding.getBinding() : null;
 
-			IGBindingNode asyncNode = null;
-			if (thenNode != null || elseNode != null) {
-				asyncNode = new IGBindingNodePhi(fCond, thenNode, elseNode);
-			}
-
-			thenNode = thenBinding != null ? thenBinding.getSyncBinding() : null;
-			elseNode = elseBinding != null ? elseBinding.getSyncBinding() : null;
-
-			IGBindingNode syncNode = null;
-			if (thenNode != null || elseNode != null) {
-				syncNode = new IGBindingNodePhi(fCond, thenNode, elseNode);
-			}
-
-			IGClock clock = thenBinding != null ? thenBinding.getClock() : elseBinding.getClock();
-
-			IGBinding binding = new IGBinding(signal, clock, syncNode, asyncNode);
+			IGBindingNode node = new IGBindingNodePhi(fCond, thenNode, elseNode, fLocation);
+			IGBinding binding = new IGBinding(signal, node);
 			newBindings.setBinding(signal, binding);
 		}
 

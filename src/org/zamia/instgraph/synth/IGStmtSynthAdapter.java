@@ -25,8 +25,9 @@ public abstract class IGStmtSynthAdapter {
 
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
+	
 	/**
-	 * Inline subprograms, unroll loops
+	 * Inline subprograms, map std operators
 	 * 
 	 * @param aStmt
 	 * @param aOR
@@ -36,7 +37,6 @@ public abstract class IGStmtSynthAdapter {
 	 * @param aSynth
 	 */
 
-	public abstract void preprocess(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGClock aClock,
-			IGSynth aSynth) throws ZamiaException;
+	public abstract void inline(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGSynth aSynth) throws ZamiaException;
 
 }

@@ -24,6 +24,7 @@ import org.zamia.instgraph.synth.IGOperationSynthAdapter;
 import org.zamia.instgraph.synth.IGSynth;
 import org.zamia.instgraph.synth.model.IGSMExprEngine;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
+import org.zamia.instgraph.synth.model.IGSMExprNodeClockEdge;
 import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 import org.zamia.instgraph.synth.model.IGSMTarget;
 
@@ -72,69 +73,23 @@ public class IGSAOperationInvokeSubprogram extends IGOperationSynthAdapter {
 
 			switch (ni) {
 			case 2:
+				BinOp bop = identifyStdBinOp(ops);
+				if (bop == null) {
+					throw new ZamiaException("Not synthesizable.", location);
+				}
+
+				if (bop == BinOp.AND) {
+					IGSMExprNodeClockEdge en = aSynth.findClock(inv);
+					if (en != null) {
+						return en;
+					}
+				}
+				
 				opA = inv.getMapping(0).getActual();
 				exA = aSynth.getSynthAdapter(opA).preprocess(opA, aOR, aPreprocessedSOS, aSynth);
 
 				opB = inv.getMapping(1).getActual();
 				exB = aSynth.getSynthAdapter(opB).preprocess(opB, aOR, aPreprocessedSOS, aSynth);
-
-				BinOp bop = null;
-				if (ops.equals("\"+\"")) {
-					bop = BinOp.ADD;
-				} else if (ops.equals("\"AND\"")) {
-					bop = BinOp.AND;
-				} else if (ops.equals("\"/\"")) {
-					bop = BinOp.DIV;
-				} else if (ops.equals("\"=\"")) {
-					bop = BinOp.EQUAL;
-				} else if (ops.equals("\">\"")) {
-					bop = BinOp.GREATER;
-				} else if (ops.equals("\">=\"")) {
-					bop = BinOp.GREATEREQ;
-				} else if (ops.equals("\"<\"")) {
-					bop = BinOp.LESS;
-				} else if (ops.equals("\"<=\"")) {
-					bop = BinOp.LESSEQ;
-				} else if (ops.equals("\"=\"")) {
-					bop = BinOp.MOD;
-				} else if (ops.equals("\"MOD\"")) {
-					bop = BinOp.MUL;
-				} else if (ops.equals("\"NAND\"")) {
-					bop = BinOp.NAND;
-				} else if (ops.equals("\"/=\"")) {
-					bop = BinOp.NEQUAL;
-				} else if (ops.equals("\"NOR\"")) {
-					bop = BinOp.NOR;
-				} else if (ops.equals("\"OR\"")) {
-					bop = BinOp.OR;
-				} else if (ops.equals("\"**\"")) {
-					bop = BinOp.POWER;
-				} else if (ops.equals("\"REM\"")) {
-					bop = BinOp.REM;
-				} else if (ops.equals("\"ROL\"")) {
-					bop = BinOp.ROL;
-				} else if (ops.equals("\"ROR\"")) {
-					bop = BinOp.ROR;
-				} else if (ops.equals("\"SLA\"")) {
-					bop = BinOp.SLA;
-				} else if (ops.equals("\"SLL\"")) {
-					bop = BinOp.SLL;
-				} else if (ops.equals("\"SRA\"")) {
-					bop = BinOp.SRA;
-				} else if (ops.equals("\"SRL\"")) {
-					bop = BinOp.SRL;
-				} else if (ops.equals("\"-\"")) {
-					bop = BinOp.SUB;
-				} else if (ops.equals("\"XNOR\"")) {
-					bop = BinOp.XNOR;
-				} else if (ops.equals("\"XOR\"")) {
-					bop = BinOp.XOR;
-				} else if (ops.equals("\"&\"")) {
-					bop = BinOp.CONCAT;
-				}
-				if (bop == null) {
-					throw new ZamiaException("Not synthesizable.", location);
-				}
 
 				ex = ee.binary(bop, exA, exB, location);
 				break;
@@ -191,6 +146,65 @@ public class IGSAOperationInvokeSubprogram extends IGOperationSynthAdapter {
 			//			return inv2;
 		}
 		throw new ZamiaException("Sorry, not implemented yet.");
+	}
+
+	public static BinOp identifyStdBinOp(String aOperationString) {
+		
+		BinOp bop = null;
+		if (aOperationString.equals("\"+\"")) {
+			bop = BinOp.ADD;
+		} else if (aOperationString.equals("\"AND\"")) {
+			bop = BinOp.AND;
+		} else if (aOperationString.equals("\"/\"")) {
+			bop = BinOp.DIV;
+		} else if (aOperationString.equals("\"=\"")) {
+			bop = BinOp.EQUAL;
+		} else if (aOperationString.equals("\">\"")) {
+			bop = BinOp.GREATER;
+		} else if (aOperationString.equals("\">=\"")) {
+			bop = BinOp.GREATEREQ;
+		} else if (aOperationString.equals("\"<\"")) {
+			bop = BinOp.LESS;
+		} else if (aOperationString.equals("\"<=\"")) {
+			bop = BinOp.LESSEQ;
+		} else if (aOperationString.equals("\"=\"")) {
+			bop = BinOp.MOD;
+		} else if (aOperationString.equals("\"MOD\"")) {
+			bop = BinOp.MUL;
+		} else if (aOperationString.equals("\"NAND\"")) {
+			bop = BinOp.NAND;
+		} else if (aOperationString.equals("\"/=\"")) {
+			bop = BinOp.NEQUAL;
+		} else if (aOperationString.equals("\"NOR\"")) {
+			bop = BinOp.NOR;
+		} else if (aOperationString.equals("\"OR\"")) {
+			bop = BinOp.OR;
+		} else if (aOperationString.equals("\"**\"")) {
+			bop = BinOp.POWER;
+		} else if (aOperationString.equals("\"REM\"")) {
+			bop = BinOp.REM;
+		} else if (aOperationString.equals("\"ROL\"")) {
+			bop = BinOp.ROL;
+		} else if (aOperationString.equals("\"ROR\"")) {
+			bop = BinOp.ROR;
+		} else if (aOperationString.equals("\"SLA\"")) {
+			bop = BinOp.SLA;
+		} else if (aOperationString.equals("\"SLL\"")) {
+			bop = BinOp.SLL;
+		} else if (aOperationString.equals("\"SRA\"")) {
+			bop = BinOp.SRA;
+		} else if (aOperationString.equals("\"SRL\"")) {
+			bop = BinOp.SRL;
+		} else if (aOperationString.equals("\"-\"")) {
+			bop = BinOp.SUB;
+		} else if (aOperationString.equals("\"XNOR\"")) {
+			bop = BinOp.XNOR;
+		} else if (aOperationString.equals("\"XOR\"")) {
+			bop = BinOp.XOR;
+		} else if (aOperationString.equals("\"&\"")) {
+			bop = BinOp.CONCAT;
+		}
+		return bop;
 	}
 
 	@Override

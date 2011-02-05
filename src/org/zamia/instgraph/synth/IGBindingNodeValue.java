@@ -8,7 +8,11 @@
 
 package org.zamia.instgraph.synth;
 
+import org.zamia.SourceLocation;
+import org.zamia.ZamiaException;
+import org.zamia.instgraph.synth.model.IGSMExprEngine;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
+import org.zamia.rtlng.RTLValue.BitValue;
 
 /**
  * 
@@ -22,7 +26,8 @@ public class IGBindingNodeValue extends IGBindingNode {
 
 	private final IGSMExprNode fValue;
 
-	public IGBindingNodeValue(IGSMExprNode aValue) {
+	public IGBindingNodeValue(IGSMExprNode aValue, SourceLocation aLocation) {
+		super(aLocation);
 		fValue = aValue;
 	}
 
@@ -40,5 +45,17 @@ public class IGBindingNodeValue extends IGBindingNode {
 		logger.debug(aI, "IGBindingNodeValue");
 		logger.debug(aI + 2, "value=" + fValue);
 	}
+
+	@Override
+	public IGBindingNode replaceOmega(IGBindingNode aNode) {
+		return this;
+	}
+
+	@Override
+	public IGSMExprNode computeEnable(IGSynth aSynth) throws ZamiaException {
+		IGSMExprEngine ee = IGSMExprEngine.getInstance();
+		return ee.literal(aSynth.getBitValue(BitValue.BV_1), aSynth, fLocation);
+	}
+
 
 }

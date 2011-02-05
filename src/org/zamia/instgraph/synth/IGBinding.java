@@ -8,7 +8,6 @@
  */
 package org.zamia.instgraph.synth;
 
-
 import org.zamia.ZamiaLogger;
 import org.zamia.rtlng.RTLSignal;
 
@@ -23,47 +22,26 @@ public class IGBinding {
 
 	private final RTLSignal fTarget;
 
-	private final IGClock fClock;
+	private final IGBindingNode fBindingNode;
 
-	private final IGBindingNode fSyncBinding;
-
-	private final IGBindingNode fASyncBinding;
-
-	public IGBinding(RTLSignal aTarget, IGClock aClock, IGBindingNode aSyncBinding, IGBindingNode aASyncBinding) {
+	public IGBinding(RTLSignal aTarget, IGBindingNode aNode) {
 		fTarget = aTarget;
-		fClock = aClock;
-		fSyncBinding = aSyncBinding;
-		fASyncBinding = aASyncBinding;
+		fBindingNode = aNode;
 	}
 
-	public IGClock getClock() {
-		return fClock;
-	}
-
-	public IGBindingNode getSyncBinding() {
-		return fSyncBinding;
-	}
-
-	public IGBindingNode getASyncBinding() {
-		return fASyncBinding;
+	public IGBindingNode getBinding() {
+		return fBindingNode;
 	}
 
 	public void dump() {
-		logger.debug("  IGBinding target=%s clock=%s", fTarget, fClock);
-		logger.debug("    sync binding=");
-		if (fSyncBinding != null) {
-			fSyncBinding.dump(6);
-		}
-
-		logger.debug("    async binding=");
-		if (fASyncBinding != null) {
-			fASyncBinding.dump(6);
+		logger.debug("  IGBinding target=%s", fTarget);
+		if (fBindingNode != null) {
+			fBindingNode.dump(6);
 		}
 	}
 
 	public RTLSignal getTarget() {
 		return fTarget;
 	}
-
 
 }

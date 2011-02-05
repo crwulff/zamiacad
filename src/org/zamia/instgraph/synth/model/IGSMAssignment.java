@@ -17,7 +17,6 @@ import org.zamia.instgraph.synth.IGBindingNode;
 import org.zamia.instgraph.synth.IGBindingNodePhi;
 import org.zamia.instgraph.synth.IGBindingNodeValue;
 import org.zamia.instgraph.synth.IGBindings;
-import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGSynth;
 import org.zamia.rtlng.RTLSignal;
 
@@ -45,7 +44,7 @@ public class IGSMAssignment extends IGSMStatement {
 	}
 
 	@Override
-	public IGBindings computeBindings(IGBindings aBindingsBefore, IGClock aClock, IGSynth aSynth) throws ZamiaException {
+	public IGBindings computeBindings(IGBindings aBindingsBefore, IGSynth aSynth) throws ZamiaException {
 
 		ArrayList<IGSMConditionalTarget> condTargets = new ArrayList<IGSMConditionalTarget>();
 
@@ -61,18 +60,13 @@ public class IGSMAssignment extends IGSMStatement {
 
 			IGSMExprNode cond = condTarget.getCond();
 
-			IGBindingNode node = new IGBindingNodeValue(fValue);
+			IGBindingNode node = new IGBindingNodeValue(fValue, fLocation);
 
 			if (cond != null) {
-				node = new IGBindingNodePhi(cond, node, null);
+				node = new IGBindingNodePhi(cond, node, null, fLocation);
 			}
 
-			IGBinding binding;
-			if (aClock != null) {
-				binding = new IGBinding(target, aClock, node, null);
-			} else {
-				binding = new IGBinding(target, null, null, node);
-			}
+			IGBinding binding = new IGBinding(target, node);
 			newBindings.setBinding(target, binding);
 		}
 

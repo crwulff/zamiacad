@@ -14,9 +14,7 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.synth.IGBinding;
 import org.zamia.instgraph.synth.IGBindingNode;
-import org.zamia.instgraph.synth.IGBindingNodePhi;
 import org.zamia.instgraph.synth.IGBindings;
-import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGSynth;
 import org.zamia.rtlng.RTLSignal;
 
@@ -56,7 +54,7 @@ public class IGSMSequenceOfStatements extends IGSMStatement {
 	}
 
 	@Override
-	public IGBindings computeBindings(IGBindings aBindingsBefore, IGClock aClock, IGSynth aSynth) throws ZamiaException {
+	public IGBindings computeBindings(IGBindings aBindingsBefore, IGSynth aSynth) throws ZamiaException {
 
 		IGBindings newBindings = new IGBindings();
 
@@ -64,7 +62,7 @@ public class IGSMSequenceOfStatements extends IGSMStatement {
 		for (int i = 0; i < n; i++) {
 			IGSMStatement stmt = getStatement(i);
 
-			IGBindings stmtBindings = stmt.computeBindings(newBindings, aClock, aSynth);
+			IGBindings stmtBindings = stmt.computeBindings(newBindings, aSynth);
 
 			int m = stmtBindings.getNumBindings();
 			for (int j = 0; j < m; j++) {
@@ -77,12 +75,11 @@ public class IGSMSequenceOfStatements extends IGSMStatement {
 
 				if (prevBinding != null) {
 
-					// replace omega-values in new binding by old binding
+					// replace omega-values in new binding by previous binding
 
-					IGBindingNode syncNode = replaceOmega(binding.getSyncBinding(), prevBinding.getSyncBinding());
-					IGBindingNode asyncNode = replaceOmega(binding.getASyncBinding(), prevBinding.getASyncBinding());
+					IGBindingNode node = binding.getBinding().replaceOmega(prevBinding.getBinding());
 
-					binding = new IGBinding(target, binding.getClock(), syncNode, asyncNode);
+					binding = new IGBinding(target, node);
 
 				}
 
@@ -93,33 +90,5 @@ public class IGSMSequenceOfStatements extends IGSMStatement {
 		return newBindings;
 	}
 
-	private IGBindingNode replaceOmega(IGBindingNode aNode, IGBindingNode aPrevNode) {
-
-		if (aNode instanceof IGBindingNodePhi) {
-
-			IGBindingNodePhi phi = (IGBindingNodePhi) aNode;
-
-			IGSMExprNode cond = phi.getCond();
-
-			IGBindingNode thenNode = phi.getThenBinding();
-			IGBindingNode elseNode = phi.getElseBinding();
-
-			if (thenNode == null) {
-				thenNode = aPrevNode;
-			} else {
-				thenNode = replaceOmega(thenNode, aPrevNode);
-			}
-
-			if (elseNode == null) {
-				elseNode = aPrevNode;
-			} else {
-				elseNode = replaceOmega(elseNode, aPrevNode);
-			}
-
-			return new IGBindingNodePhi(cond, thenNode, elseNode);
-		}
-
-		return aNode;
-	}
 
 }

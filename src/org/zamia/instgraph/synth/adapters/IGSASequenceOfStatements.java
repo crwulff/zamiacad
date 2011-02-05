@@ -11,7 +11,6 @@ package org.zamia.instgraph.synth.adapters;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGSequenceOfStatements;
 import org.zamia.instgraph.IGSequentialStatement;
-import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGObjectRemapping;
 import org.zamia.instgraph.synth.IGStmtSynthAdapter;
 import org.zamia.instgraph.synth.IGSynth;
@@ -26,7 +25,7 @@ import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 public class IGSASequenceOfStatements extends IGStmtSynthAdapter {
 
 	@Override
-	public void preprocess(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGClock aClock, IGSynth aSynth)
+	public void inline(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGSynth aSynth)
 			throws ZamiaException {
 
 		IGSequenceOfStatements seq = (IGSequenceOfStatements) aStmt;
@@ -35,7 +34,7 @@ public class IGSASequenceOfStatements extends IGStmtSynthAdapter {
 		for (int i = 0; i < n; i++) {
 			IGSequentialStatement stmt = seq.getStatement(i);
 
-			aSynth.getSynthAdapter(stmt).preprocess(stmt, aOR, aPreprocessedSOS, aReturnVarName, aClock, aSynth);
+			aSynth.getSynthAdapter(stmt).inline(stmt, aOR, aPreprocessedSOS, aReturnVarName, aSynth);
 		}
 	}
 

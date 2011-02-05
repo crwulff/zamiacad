@@ -22,7 +22,7 @@ public abstract class IGSMExprNode {
 
 	protected final RTLType fType;
 
-	private final SourceLocation fLocation;
+	protected final SourceLocation fLocation;
 
 	protected final IGSynth fSynth;
 
@@ -45,4 +45,5 @@ public abstract class IGSMExprNode {
 	}
 
 	public abstract RTLValue getStaticValue();
+
 }

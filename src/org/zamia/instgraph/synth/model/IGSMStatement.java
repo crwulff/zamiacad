@@ -13,7 +13,6 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.synth.IGBindings;
-import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGSynth;
 
 /**
@@ -28,7 +27,7 @@ public abstract class IGSMStatement{
 
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private final SourceLocation fLocation;
+	protected final SourceLocation fLocation;
 
 	public IGSMStatement(String aLabel, SourceLocation aLocation, IGSynth aSynth) {
 		fLocation = aLocation;
@@ -36,7 +35,7 @@ public abstract class IGSMStatement{
 	
 	public abstract void dump(int aIndent) ;
 
-	public abstract IGBindings computeBindings(IGBindings aBindingsBefore, IGClock aClock, IGSynth aSynth) throws ZamiaException;
+	public abstract IGBindings computeBindings(IGBindings aBindingsBefore, IGSynth aSynth) throws ZamiaException;
 
 	public SourceLocation getLocation() {
 		return fLocation;

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2010 by the authors indicated in the @author tags. 
+ * Copyright 2010,2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -9,7 +9,10 @@
 package org.zamia.instgraph.synth;
 
 import org.zamia.ExceptionLogger;
+import org.zamia.SourceLocation;
+import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
+import org.zamia.instgraph.synth.model.IGSMExprNode;
 
 /**
  * 
@@ -23,6 +26,16 @@ public abstract class IGBindingNode {
 
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
+	protected final SourceLocation fLocation;
+	
+	protected IGBindingNode (SourceLocation aLocation) {
+		fLocation = aLocation;
+	}
+	
 	public abstract void dump(int aI);
+
+	public abstract IGBindingNode replaceOmega(IGBindingNode aNode) throws ZamiaException;
+
+	public abstract IGSMExprNode computeEnable(IGSynth aSynth) throws ZamiaException;
 
 }

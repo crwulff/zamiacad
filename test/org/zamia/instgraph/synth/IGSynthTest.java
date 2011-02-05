@@ -148,6 +148,38 @@ public class IGSynthTest {
 	}
 
 	@Test
+	public void testClock2() throws Exception {
+
+		RTLModule rtlm = runSynth("examples/synth/clock2Test", "WORK.FOO(RTL)");
+
+		RTLSimulator sim = new RTLSimulator(fZPrj);
+
+		sim.open(rtlm);
+
+		sim.assign(new PathName("A"), "0");
+		sim.assign(new PathName("B"), "0");
+		sim.assign(new PathName("CLK"), "0");
+
+		sim.simulate();
+
+		sim.assign(new PathName("CLK"), "1");
+		sim.simulate();
+		sim.assign(new PathName("CLK"), "0");
+		sim.simulate();
+
+		RTLValue vz = sim.getCurrentValue(new PathName("Z"));
+		assertEquals(BitValue.BV_0, vz.getBit());
+
+		sim.assign(new PathName("CLK"), "1");
+
+		sim.simulate();
+
+		vz = sim.getCurrentValue(new PathName("Z"));
+		assertEquals(BitValue.BV_0, vz.getBit());
+
+	}
+
+	@Test
 	public void testLatch() throws Exception {
 
 		RTLModule rtlm = runSynth("examples/synth/latchTest", "WORK.FOO(RTL)");

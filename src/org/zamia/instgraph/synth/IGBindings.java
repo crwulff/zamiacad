@@ -8,6 +8,7 @@
 
 package org.zamia.instgraph.synth;
 
+import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.rtlng.RTLSignal;
 import org.zamia.util.HashMapArray;
@@ -53,6 +54,43 @@ public class IGBindings {
 			IGBinding b = getBinding(i);
 			b.dump();
 		}
+	}
+
+	public void synthesize(IGSynth aSynth) throws ZamiaException {
+
+		//		int n = getNumBindings();
+		//		for (int i = 0; i < n; i++) {
+		//			IGBinding b = getBinding(i);
+		//
+		//			RTLSignal syncData = null, syncEnable = null;
+		//			
+		//			IGBindingNode syncBinding = b.getSyncBinding();
+		//			
+		//			if (syncBinding != null) {
+		//				
+		//				syncData = syncBinding.synthesizeData(aSynth);
+		//				
+		//				IGSMExprNode enable = syncBinding.computeEnable(aSynth);
+		//				syncEnable = enable.synthesize(aSynth);
+		//			}
+		//			
+		//			RTLSignal asyncData = null, asyncEnable = null;
+		//
+		//			IGBindingNode asyncBinding = b.getASyncBinding();
+		//			
+		//			if (asyncBinding != null) {
+		//				
+		//				asyncData = asyncBinding.synthesizeData(aSynth);
+		//				
+		//				IGSMExprNode enable = asyncBinding.computeEnable(aSynth);
+		//				asyncEnable = enable.synthesize(aSynth);
+		//			}
+
+		// FIXME
+
+		throw new ZamiaException("Unfinished.");
+
+		//		}
 	}
 
 }

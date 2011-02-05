@@ -13,7 +13,6 @@ import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGSequentialAssignment;
 import org.zamia.instgraph.IGSequentialStatement;
-import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGObjectRemapping;
 import org.zamia.instgraph.synth.IGStmtSynthAdapter;
 import org.zamia.instgraph.synth.IGSynth;
@@ -31,7 +30,7 @@ import org.zamia.instgraph.synth.model.IGSMTarget;
 public class IGSASequentialAssignment extends IGStmtSynthAdapter {
 
 	@Override
-	public void preprocess(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGClock aClock, IGSynth aSynth)
+	public void inline(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGSynth aSynth)
 			throws ZamiaException {
 
 		SourceLocation location = aStmt.computeSourceLocation();

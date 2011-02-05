@@ -8,19 +8,16 @@
  */
 package org.zamia.instgraph.synth.adapters;
 
-import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGSequenceOfStatements;
 import org.zamia.instgraph.IGSequentialIf;
 import org.zamia.instgraph.IGSequentialStatement;
-import org.zamia.instgraph.synth.IGClock;
 import org.zamia.instgraph.synth.IGObjectRemapping;
 import org.zamia.instgraph.synth.IGStmtSynthAdapter;
 import org.zamia.instgraph.synth.IGSynth;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
 import org.zamia.instgraph.synth.model.IGSMIf;
-import org.zamia.instgraph.synth.model.IGSMIfClock;
 import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 
 /**
@@ -32,7 +29,7 @@ import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 public class IGSASequentialIf extends IGStmtSynthAdapter {
 
 	@Override
-	public void preprocess(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGClock aClock, IGSynth aSynth)
+	public void inline(IGSequentialStatement aStmt, IGObjectRemapping aOR, IGSMSequenceOfStatements aPreprocessedSOS, String aReturnVarName, IGSynth aSynth)
 			throws ZamiaException {
 		IGSequentialIf ifstmt = (IGSequentialIf) aStmt;
 
@@ -40,38 +37,16 @@ public class IGSASequentialIf extends IGStmtSynthAdapter {
 		IGSequenceOfStatements elseSOS = ifstmt.getElseSOS();
 		IGOperation cond = ifstmt.getCond();
 
-		SourceLocation location = ifstmt.computeSourceLocation();
-
-		IGClock clock = aSynth.findClock(cond);
-		if (clock != null) {
-
-			if (aClock != null && aClock != clock)
-				throw new ZamiaException("Multiple clocks detected,", location);
-
-			if (elseSOS != null) {
-				throw new ZamiaException("No else branch allowed in clock if statements.", location);
-			}
-
-			IGSMSequenceOfStatements ts = new IGSMSequenceOfStatements(null, thenSOS.computeSourceLocation(), aSynth);
-			aSynth.getSynthAdapter(thenSOS).preprocess(thenSOS, aOR, ts, aReturnVarName, clock, aSynth);
-
-			IGSMIfClock ic = new IGSMIfClock(clock, ts, ifstmt.getId(), location, aSynth);
-			aPreprocessedSOS.add(ic);
-
-			return;
-
-		}
-
 		IGSMExprNode icond = aSynth.getSynthAdapter(cond).preprocess(cond, aOR, aPreprocessedSOS, aSynth);
 
 		IGSMSequenceOfStatements ts = new IGSMSequenceOfStatements(null, thenSOS.computeSourceLocation(), aSynth);
-		aSynth.getSynthAdapter(thenSOS).preprocess(thenSOS, aOR, ts, aReturnVarName, aClock, aSynth);
+		aSynth.getSynthAdapter(thenSOS).inline(thenSOS, aOR, ts, aReturnVarName, aSynth);
 
 		IGSMSequenceOfStatements es;
 
 		if (elseSOS != null) {
 			es = new IGSMSequenceOfStatements(null, elseSOS.computeSourceLocation(), aSynth);
-			aSynth.getSynthAdapter(elseSOS).preprocess(elseSOS, aOR, es, aReturnVarName, aClock, aSynth);
+			aSynth.getSynthAdapter(elseSOS).inline(elseSOS, aOR, es, aReturnVarName, aSynth);
 		} else {
 			es = new IGSMSequenceOfStatements(null, thenSOS.computeSourceLocation(), aSynth);
 		}
