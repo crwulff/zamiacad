@@ -8,9 +8,19 @@
 
 package org.zamia.instgraph.synth;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
+import org.zamia.instgraph.IGOperationUnary.UnaryOp;
+import org.zamia.instgraph.synth.model.IGSMExprEngine;
+import org.zamia.instgraph.synth.model.IGSMExprNode;
+import org.zamia.instgraph.synth.model.IGSMExprNodeBDD;
+import org.zamia.instgraph.synth.model.IGSMExprNodeClockEdge;
 import org.zamia.rtlng.RTLSignal;
+import org.zamia.rtlng.RTLValue.BitValue;
 import org.zamia.util.HashMapArray;
 
 /**
@@ -58,33 +68,73 @@ public class IGBindings {
 
 	public void synthesize(IGSynth aSynth) throws ZamiaException {
 
-		//		int n = getNumBindings();
-		//		for (int i = 0; i < n; i++) {
-		//			IGBinding b = getBinding(i);
-		//
-		//			RTLSignal syncData = null, syncEnable = null;
-		//			
-		//			IGBindingNode syncBinding = b.getSyncBinding();
-		//			
-		//			if (syncBinding != null) {
-		//				
-		//				syncData = syncBinding.synthesizeData(aSynth);
-		//				
-		//				IGSMExprNode enable = syncBinding.computeEnable(aSynth);
-		//				syncEnable = enable.synthesize(aSynth);
-		//			}
-		//			
-		//			RTLSignal asyncData = null, asyncEnable = null;
-		//
-		//			IGBindingNode asyncBinding = b.getASyncBinding();
-		//			
-		//			if (asyncBinding != null) {
-		//				
-		//				asyncData = asyncBinding.synthesizeData(aSynth);
-		//				
-		//				IGSMExprNode enable = asyncBinding.computeEnable(aSynth);
-		//				asyncEnable = enable.synthesize(aSynth);
-		//			}
+		IGSMExprEngine ee = aSynth.getEE();
+		
+		int n = getNumBindings();
+		for (int i = 0; i < n; i++) {
+			IGBinding b = getBinding(i);
+			
+			SourceLocation l = b.getBinding().fLocation;
+
+			IGSMExprNode ec = b.computeCombinedEnable(aSynth);
+
+			logger.debug("IGBindings: Combined enable for %s is %s", b.getTarget(), ec);
+
+			// compute async enable
+
+			Set<IGSMExprNodeClockEdge> clks = new HashSet<IGSMExprNodeClockEdge>();
+
+			ec.findClockEdges(clks);
+			
+			int nClks = clks.size();
+			if (nClks > 1) {
+				throw new ZamiaException ("Multiple clocks are not supported.", b.getBinding().fLocation);
+			} 
+			
+			final RTLSignal clk = nClks == 0 ? null : clks.iterator().next().getSignal();
+
+			IGSMExprNode aE = clk != null ? ec.replaceClockEdge(clk, aSynth.getBitValue(BitValue.BV_0), aSynth) : ec;
+
+			logger.debug("IGBindings: Async enable for %s is %s", b.getTarget(), aE);
+
+			// compute sync enable
+			
+			IGSMExprNode e = clk != null ? ec.replaceClockEdge(clk, aSynth.getBitValue(BitValue.BV_1), aSynth) : null;
+
+			if (e != null) {
+				
+				e = ee.restrict(e, ee.unary(UnaryOp.NOT, aE, l), aSynth, l);
+			}
+			
+			logger.debug("IGBindings: Sync enable for %s is %s", b.getTarget(), e);
+			
+			
+			
+			
+			//
+			//			RTLSignal syncData = null, syncEnable = null;
+			//			
+			//			IGBindingNode syncBinding = b.getSyncBinding();
+			//			
+			//			if (syncBinding != null) {
+			//				
+			//				syncData = syncBinding.synthesizeData(aSynth);
+			//				
+			//				IGSMExprNode enable = syncBinding.computeEnable(aSynth);
+			//				syncEnable = enable.synthesize(aSynth);
+			//			}
+			//			
+			//			RTLSignal asyncData = null, asyncEnable = null;
+			//
+			//			IGBindingNode asyncBinding = b.getASyncBinding();
+			//			
+			//			if (asyncBinding != null) {
+			//				
+			//				asyncData = asyncBinding.synthesizeData(aSynth);
+			//				
+			//				IGSMExprNode enable = asyncBinding.computeEnable(aSynth);
+			//				asyncEnable = enable.synthesize(aSynth);
+		}
 
 		// FIXME
 

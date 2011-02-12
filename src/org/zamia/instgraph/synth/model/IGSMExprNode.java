@@ -8,8 +8,14 @@
  */
 package org.zamia.instgraph.synth.model;
 
+import java.util.Set;
+
+import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
+import org.zamia.ZamiaException;
+import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.synth.IGSynth;
+import org.zamia.rtlng.RTLSignal;
 import org.zamia.rtlng.RTLType;
 import org.zamia.rtlng.RTLValue;
 
@@ -19,6 +25,12 @@ import org.zamia.rtlng.RTLValue;
  */
 
 public abstract class IGSMExprNode {
+
+	public static final ZamiaLogger logger = ZamiaLogger.getInstance();
+
+	public static final ExceptionLogger el = ExceptionLogger.getInstance();
+
+	protected static final IGSMExprEngine ee = IGSMExprEngine.getInstance();
 
 	protected final RTLType fType;
 
@@ -45,5 +57,9 @@ public abstract class IGSMExprNode {
 	}
 
 	public abstract RTLValue getStaticValue();
+
+	public abstract IGSMExprNode replaceClockEdge(RTLSignal aClockSignal, RTLValue aValue, IGSynth aSynth) throws ZamiaException;
+
+	public abstract void findClockEdges(Set<IGSMExprNodeClockEdge> aClockEdges) throws ZamiaException;
 
 }

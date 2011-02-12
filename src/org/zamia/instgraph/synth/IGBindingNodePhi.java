@@ -84,13 +84,13 @@ public class IGBindingNodePhi extends IGBindingNode {
 
 
 	@Override
-	public IGSMExprNode computeEnable(IGSynth aSynth) throws ZamiaException {
+	public IGSMExprNode computeCombinedEnable(IGSynth aSynth) throws ZamiaException {
 
 		IGSMExprEngine ee = IGSMExprEngine.getInstance();
 
-		IGSMExprNode a = fThenNode != null ? ee.binary(BinOp.AND, fCond, fThenNode.computeEnable(aSynth), fLocation) : ee.literal(aSynth.getBitValue(BitValue.BV_0), aSynth,
+		IGSMExprNode a = fThenNode != null ? ee.binary(BinOp.AND, fCond, fThenNode.computeCombinedEnable(aSynth), fLocation) : ee.literal(aSynth.getBitValue(BitValue.BV_0), aSynth,
 				fLocation);
-		IGSMExprNode b = fElseNode != null ? ee.binary(BinOp.AND, ee.unary(UnaryOp.NOT, fCond, fLocation), fElseNode.computeEnable(aSynth), fLocation) : ee.literal(
+		IGSMExprNode b = fElseNode != null ? ee.binary(BinOp.AND, ee.unary(UnaryOp.NOT, fCond, fLocation), fElseNode.computeCombinedEnable(aSynth), fLocation) : ee.literal(
 				aSynth.getBitValue(BitValue.BV_0), aSynth, fLocation);
 
 		return ee.binary(BinOp.OR, a, b, fLocation);

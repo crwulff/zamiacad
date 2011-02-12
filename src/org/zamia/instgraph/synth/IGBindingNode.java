@@ -36,6 +36,6 @@ public abstract class IGBindingNode {
 
 	public abstract IGBindingNode replaceOmega(IGBindingNode aNode) throws ZamiaException;
 
-	public abstract IGSMExprNode computeEnable(IGSynth aSynth) throws ZamiaException;
+	public abstract IGSMExprNode computeCombinedEnable(IGSynth aSynth) throws ZamiaException;
 
 }

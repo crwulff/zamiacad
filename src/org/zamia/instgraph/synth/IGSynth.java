@@ -61,6 +61,7 @@ import org.zamia.instgraph.synth.adapters.IGSASequentialAssignment;
 import org.zamia.instgraph.synth.adapters.IGSASequentialIf;
 import org.zamia.instgraph.synth.adapters.IGSASequentialRestart;
 import org.zamia.instgraph.synth.adapters.IGSAStaticValue;
+import org.zamia.instgraph.synth.model.IGSMExprEngine;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
 import org.zamia.instgraph.synth.model.IGSMExprNodeClockEdge;
 import org.zamia.instgraph.synth.model.IGSMIf;
@@ -694,5 +695,9 @@ public class IGSynth {
 		}
 
 		return s;
+	}
+
+	public IGSMExprEngine getEE() {
+		return IGSMExprEngine.getInstance();
 	}
 }

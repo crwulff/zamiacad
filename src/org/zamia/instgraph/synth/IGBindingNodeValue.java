@@ -52,7 +52,7 @@ public class IGBindingNodeValue extends IGBindingNode {
 	}
 
 	@Override
-	public IGSMExprNode computeEnable(IGSynth aSynth) throws ZamiaException {
+	public IGSMExprNode computeCombinedEnable(IGSynth aSynth) throws ZamiaException {
 		IGSMExprEngine ee = IGSMExprEngine.getInstance();
 		return ee.literal(aSynth.getBitValue(BitValue.BV_1), aSynth, fLocation);
 	}

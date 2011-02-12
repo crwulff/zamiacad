@@ -8,7 +8,9 @@
  */
 package org.zamia.instgraph.synth;
 
+import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
+import org.zamia.instgraph.synth.model.IGSMExprNode;
 import org.zamia.rtlng.RTLSignal;
 
 /**
@@ -42,6 +44,10 @@ public class IGBinding {
 
 	public RTLSignal getTarget() {
 		return fTarget;
+	}
+
+	public IGSMExprNode computeCombinedEnable(IGSynth aSynth) throws ZamiaException {
+		return fBindingNode.computeCombinedEnable(aSynth);
 	}
 
 }

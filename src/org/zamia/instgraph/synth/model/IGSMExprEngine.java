@@ -13,11 +13,14 @@ import java.util.HashMap;
 
 import jdd.bdd.BDD;
 
+import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGOperationUnary.UnaryOp;
 import org.zamia.instgraph.synth.IGSynth;
+import org.zamia.rtlng.RTLSignal;
 import org.zamia.rtlng.RTLType;
 import org.zamia.rtlng.RTLType.TypeCat;
 import org.zamia.rtlng.RTLValue;
@@ -43,7 +46,13 @@ import org.zamia.util.HashMapArray;
 
 public class IGSMExprEngine {
 
+	public static final ZamiaLogger logger = ZamiaLogger.getInstance();
+
+	public static final ExceptionLogger el = ExceptionLogger.getInstance();
+
 	private final BDD fBDD;
+
+	private final HashMap<RTLSignal, IGSMExprNode> fSignalMap = new HashMap<RTLSignal, IGSMExprNode>();
 
 	private final HashMapArray<IGSMExprNode, Integer> fVarMap = new HashMapArray<IGSMExprNode, Integer>();
 
@@ -51,7 +60,6 @@ public class IGSMExprEngine {
 
 	private final ArrayList<IGSMExprNode> fVars = new ArrayList<IGSMExprNode>();
 
-	
 	private IGSMExprEngine() {
 		fBDD = new BDD(5000, 5000);
 	}
@@ -59,11 +67,11 @@ public class IGSMExprEngine {
 	IGSMExprNode levelToExpr(int aLevel) {
 		return fVars.get(aLevel);
 	}
-	
+
 	IGSMExprNode mapToExpr(int aBDDVar) {
 		return fVarMapRev.get(aBDDVar);
 	}
-	
+
 	int mapToBDDVar(IGSMExprNode aNode) {
 
 		int res;
@@ -112,10 +120,37 @@ public class IGSMExprEngine {
 		RTLType typeA = aA.getType();
 		RTLType typeB = aB.getType();
 
-		if (typeA.getCat() == TypeCat.BIT && typeB.getCat() == TypeCat.BIT && isLogicOp(aOp)) {
+		if (typeA.getCat() == TypeCat.BIT && typeB.getCat() == TypeCat.BIT) {
 
-			return new IGSMExprNodeBDD(aOp, aA, aB, aLocation, aA.getSynth());
+			if (isLogicOp(aOp)) {
 
+				return new IGSMExprNodeBDD(aOp, aA, aB, aLocation, aA.getSynth());
+
+			}
+
+			// optimize "s='1'" => s, "s='0'" => not s
+
+			if (aOp == BinOp.EQUAL) {
+
+				RTLValue sv = aA.getStaticValue();
+				IGSMExprNode op = aB;
+
+				if (sv == null) {
+					sv = aB.getStaticValue();
+					op = aA;
+				}
+
+				if (sv != null) {
+
+					switch (sv.getBit()) {
+					case BV_0:
+						return unary(UnaryOp.NOT, op, aLocation);
+
+					case BV_1:
+						return op;
+					}
+				}
+			}
 		}
 
 		return new IGSMExprNodeBinary(aOp, aA, aB, aLocation, aA.getSynth());
@@ -154,6 +189,31 @@ public class IGSMExprEngine {
 
 	public BDD getBDD() {
 		return fBDD;
+	}
+
+	public IGSMExprNode signal(RTLSignal aS, IGSynth aSynth, SourceLocation aLocation) {
+
+		IGSMExprNode node = fSignalMap.get(aS);
+
+		if (node == null) {
+			node = new IGSMExprNodeSignal(aS, aLocation, aSynth);
+			fSignalMap.put(aS, node);
+		}
+
+		return node;
+	}
+
+	public IGSMExprNode restrict(IGSMExprNode aNode, IGSMExprNode aCareFun, IGSynth aSynth, SourceLocation aLocation) {
+		
+		if (aNode instanceof IGSMExprNodeBDD && aCareFun instanceof IGSMExprNodeBDD) {
+			
+			IGSMExprNodeBDD bdd = (IGSMExprNodeBDD) aNode;
+			IGSMExprNodeBDD careBDD = (IGSMExprNodeBDD) aCareFun;
+			
+			return new IGSMExprNodeBDD(bdd, careBDD, aLocation, aSynth);
+		}
+		
+		return aNode;
 	}
 
 }

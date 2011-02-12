@@ -15,6 +15,7 @@ import org.zamia.instgraph.IGOperationObject;
 import org.zamia.instgraph.synth.IGObjectRemapping;
 import org.zamia.instgraph.synth.IGOperationSynthAdapter;
 import org.zamia.instgraph.synth.IGSynth;
+import org.zamia.instgraph.synth.model.IGSMExprEngine;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
 import org.zamia.instgraph.synth.model.IGSMExprNodeSignal;
 import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
@@ -44,7 +45,9 @@ public class IGSAOperationObject extends IGOperationSynthAdapter {
 
 			RTLSignal s = aSynth.getOrCreateSignal(obj2);
 
-			return new IGSMExprNodeSignal(s, oobj.computeSourceLocation(), aSynth);
+			IGSMExprEngine ee = aSynth.getEE();
+			
+			return ee.signal(s, aSynth, oobj.computeSourceLocation());
 		default:
 			// FIXME
 			throw new ZamiaException("Sorry, not implemented yet.");

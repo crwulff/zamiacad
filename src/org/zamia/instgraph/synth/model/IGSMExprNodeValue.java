@@ -8,8 +8,12 @@
  */
 package org.zamia.instgraph.synth.model;
 
+import java.util.Set;
+
 import org.zamia.SourceLocation;
+import org.zamia.ZamiaException;
 import org.zamia.instgraph.synth.IGSynth;
+import org.zamia.rtlng.RTLSignal;
 import org.zamia.rtlng.RTLValue;
 
 /**
@@ -38,6 +42,19 @@ public class IGSMExprNodeValue extends IGSMExprNode {
 	public RTLValue getStaticValue() {
 		return fValue;
 	}
+
+	@Override
+	public IGSMExprNode replaceClockEdge(RTLSignal aClockSignal, RTLValue aValue, IGSynth aSynth) throws ZamiaException {
+		// FIXME: implement
+		throw new ZamiaException ("Sorry, not implemented.");
+	}
+	
+	@Override
+	public void findClockEdges(Set<IGSMExprNodeClockEdge> aClockEdges) throws ZamiaException {
+		// FIXME: implement
+		throw new ZamiaException ("Sorry, not implemented.");
+	}
+
 
 
 }
