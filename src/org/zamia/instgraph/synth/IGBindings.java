@@ -96,18 +96,27 @@ public class IGBindings {
 
 			logger.debug("IGBindings: Async enable for %s is %s", b.getTarget(), aE);
 
+			// compute async data
+			
+			RTLSignal aD = b.synthesizeASyncData(aE, clk, aSynth);
+			
 			// compute sync enable
 			
 			IGSMExprNode e = clk != null ? ec.replaceClockEdge(clk, aSynth.getBitValue(BitValue.BV_1), aSynth) : null;
 
+			RTLSignal d = null;
+			
 			if (e != null) {
 				
-				e = ee.restrict(e, ee.unary(UnaryOp.NOT, aE, l), aSynth, l);
+				IGSMExprNode aEn = ee.unary(UnaryOp.NOT, aE, l);
+				
+				e = ee.restrict(e, aEn, aSynth, l);
+				
+				logger.debug("IGBindings: Sync enable for %s is %s", b.getTarget(), e);
+				
+				d = b.synthesizeSyncData(aEn, clk, aSynth);
+				
 			}
-			
-			logger.debug("IGBindings: Sync enable for %s is %s", b.getTarget(), e);
-			
-			RTLSignal aD = b.synthesizeASyncData(aE, clk, aSynth);
 			
 			
 			//

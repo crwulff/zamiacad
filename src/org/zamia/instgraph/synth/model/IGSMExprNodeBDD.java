@@ -432,8 +432,72 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 
 	@Override
 	public RTLSignal synthesize(IGSynth aSynth) throws ZamiaException {
-		// FIXME: implement
-		throw new ZamiaException("Sorry, not implemented.");
+		BDD nt = ee.getBDD();
+		int max = nt.numberOfVariables();
+
+		int bdd = fResVar;
+
+		if (bdd < 2) {
+
+			return aSynth.placeLiteral(getStaticValue(), fLocation);
+
+		} else {
+
+			RTLSignal res = null;
+
+			SourceLocation l = getLocation();
+
+			char cube[] = new char[max];
+
+			ArrayList<String> cubes = new ArrayList<String>();
+
+			computeCubes(cubes, bdd, 0, max, nt, cube);
+
+			int n = cubes.size();
+			for (int i = 0; i < n; i++) {
+				String cb = cubes.get(i);
+
+				RTLSignal sc = null;
+
+				for (int j = 0; j < max; j++) {
+					char c = cb.charAt(j);
+
+					switch (c) {
+					case '0':
+						IGSMExprNode expr = ee.levelToExpr(j);
+
+						IGSMExprNode e = ee.unary(UnaryOp.NOT, expr, l);
+						if (sc == null) {
+							sc = e.synthesize(aSynth);
+						} else {
+							
+							sc = aSynth.placeBinary(BinOp.AND, sc, e.synthesize(aSynth), l);
+						}
+						break;
+						
+					case '1':
+
+						expr = ee.levelToExpr(j);
+
+						if (sc == null) {
+							sc = expr.synthesize(aSynth);
+						} else {
+							sc = aSynth.placeBinary(BinOp.AND, sc, expr.synthesize(aSynth), l);
+						}
+						break;
+					default:
+					}
+				}
+
+				if (res != null) {
+					res = aSynth.placeBinary(BinOp.OR, res, sc, l);
+				} else {
+					res = sc;
+				}
+			}
+
+			return res;
+		}
 	}
 
 }

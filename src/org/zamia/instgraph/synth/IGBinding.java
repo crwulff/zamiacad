@@ -55,4 +55,8 @@ public class IGBinding {
 		return fBindingNode.synthesizeASyncData(aAE, aClk, aSynth);
 	}
 
+	public RTLSignal synthesizeSyncData(IGSMExprNode aAEn, RTLSignal aClk, IGSynth aSynth) throws ZamiaException {
+		return fBindingNode.synthesizeSyncData(aAEn, aClk, aSynth);
+	}
+
 }

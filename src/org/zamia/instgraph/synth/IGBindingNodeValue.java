@@ -63,5 +63,10 @@ public class IGBindingNodeValue extends IGBindingNode {
 		return fValue.synthesize(aSynth);
 	}
 
+	@Override
+	public RTLSignal synthesizeSyncData(IGSMExprNode aAEn, RTLSignal aClk, IGSynth aSynth) throws ZamiaException {
+		return fValue.synthesize(aSynth);
+	}
+
 
 }

@@ -76,6 +76,7 @@ import org.zamia.rtlng.RTLType.TypeCat;
 import org.zamia.rtlng.RTLValue;
 import org.zamia.rtlng.RTLValue.BitValue;
 import org.zamia.rtlng.RTLValueBuilder;
+import org.zamia.rtlng.nodes.RTLNBinaryOp.BinaryOp;
 import org.zamia.util.Pair;
 import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zdb.ZDB;
@@ -699,7 +700,7 @@ public class IGSynth {
 
 	public RTLSignal placeMUX(RTLSignal aS, RTLSignal aA, RTLSignal aB, SourceLocation aLocation) throws ZamiaException {
 
-		String signature = "MUX" + aS.getId() + aA.getId() + aB.getId();
+		String signature = "MUX" + aS.getId() + "###" + aA.getId() + "###" + aB.getId();
 
 		RTLSignal s = fLogicCache.get(signature);
 
@@ -711,7 +712,86 @@ public class IGSynth {
 		return s;
 	}
 
+	private BinaryOp mapBinOp(BinOp aOp) {
+
+		switch (aOp) {
+		case ADD:
+			return BinaryOp.ADD;
+		case SUB:
+			return BinaryOp.SUB;
+		case MUL:
+			return BinaryOp.MUL;
+		case DIV:
+			return BinaryOp.DIV;
+		case MOD:
+			return BinaryOp.MOD;
+		case REM:
+			return BinaryOp.REM;
+		case POWER:
+			return BinaryOp.POWER;
+		case EQUAL:
+			return BinaryOp.EQUAL;
+		case LESSEQ:
+			return BinaryOp.LESSEQ;
+		case LESS:
+			return BinaryOp.LESS;
+		case GREATER:
+			return BinaryOp.GREATER;
+		case GREATEREQ:
+			return BinaryOp.GREATEREQ;
+		case NEQUAL:
+			return BinaryOp.NEQUAL;
+		case AND:
+			return BinaryOp.AND;
+		case NAND:
+			return BinaryOp.NAND;
+		case OR:
+			return BinaryOp.OR;
+		case NOR:
+			return BinaryOp.NOR;
+		case XOR:
+			return BinaryOp.XOR;
+		case XNOR:
+			return BinaryOp.XNOR;
+		case MIN:
+			return BinaryOp.MIN;
+		case MAX:
+			return BinaryOp.MAX;
+		case SLL:
+			return BinaryOp.SLL;
+		case SRL:
+			return BinaryOp.SRL;
+		case SLA:
+			return BinaryOp.SLA;
+		case SRA:
+			return BinaryOp.SRA;
+		case ROL:
+			return BinaryOp.ROL;
+		case ROR:
+			return BinaryOp.ROR;
+		case CONCAT:
+			return BinaryOp.CONCAT;
+		}
+
+		return null;
+
+	}
+
+	public RTLSignal placeBinary(BinOp aOp, RTLSignal aA, RTLSignal aB, SourceLocation aLocation) throws ZamiaException {
+		String signature = aOp.name() + aA.getId() + "###" + aB.getId();
+
+		RTLSignal s = fLogicCache.get(signature);
+
+		if (s == null) {
+			s = fModule.createComponentBinary(mapBinOp(aOp), aA, aB, aLocation);
+			fLogicCache.put(signature, s);
+		}
+
+		return s;
+	}
+
 	public IGSMExprEngine getEE() {
 		return IGSMExprEngine.getInstance();
 	}
+
 }

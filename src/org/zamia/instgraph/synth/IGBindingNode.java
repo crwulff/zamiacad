@@ -41,4 +41,6 @@ public abstract class IGBindingNode {
 
 	public abstract RTLSignal synthesizeASyncData(IGSMExprNode aAE, RTLSignal aClk, IGSynth aSynth) throws ZamiaException;
 
+	public abstract RTLSignal synthesizeSyncData(IGSMExprNode aAEn, RTLSignal aClk, IGSynth aSynth) throws ZamiaException;
+
 }

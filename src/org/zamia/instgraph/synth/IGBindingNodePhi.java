@@ -130,4 +130,37 @@ public class IGBindingNodePhi extends IGBindingNode {
 		return fThenNode.synthesizeASyncData(aAE, aClk, aSynth);
 	}
 
+	@Override
+	public RTLSignal synthesizeSyncData(IGSMExprNode aAEn, RTLSignal aClk, IGSynth aSynth) throws ZamiaException {
+
+		if (fElseNode == null) {
+			return fThenNode.synthesizeSyncData(aAEn, aClk, aSynth);
+		} else if (fThenNode == null) {
+			return fElseNode.synthesizeSyncData(aAEn, aClk, aSynth);
+		}
+
+		IGSMExprNode s = fCond.replaceClockEdge(aClk, aSynth.getBitValue(BitValue.BV_1), aSynth);
+
+		logger.debug("IGBindingsNodePhi: Select signal for %s is %s", this, s);
+
+		IGSMExprEngine ee = aSynth.getEE();
+
+		s = ee.restrict(s, aAEn, aSynth, fLocation);
+
+		logger.debug("IGBindingsNodePhi: Restricted select signal for %s is %s", this, s);
+
+		RTLValue sv = s.getStaticValue();
+
+		if (sv == null) {
+
+			return aSynth.placeMUX(s.synthesize(aSynth), fThenNode.synthesizeSyncData(aAEn, aClk, aSynth), fElseNode.synthesizeSyncData(aAEn, aClk, aSynth), fLocation);
+
+		}
+
+		if (sv.getBit() == BitValue.BV_0) {
+			return fElseNode.synthesizeSyncData(aAEn, aClk, aSynth);
+		}
+		return fThenNode.synthesizeSyncData(aAEn, aClk, aSynth);
+	}
+
 }
