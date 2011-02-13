@@ -94,6 +94,11 @@ public class IGSMExprNodeClockEdge extends IGSMExprNode {
 		return true;
 	}
 
+	@Override
+	public RTLSignal synthesize(IGSynth aSynth) throws ZamiaException {
+		// FIXME: implement
+		throw new ZamiaException ("Sorry, not implemented.");
+	}
 
 
 }

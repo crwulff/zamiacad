@@ -697,6 +697,20 @@ public class IGSynth {
 		return s;
 	}
 
+	public RTLSignal placeMUX(RTLSignal aS, RTLSignal aA, RTLSignal aB, SourceLocation aLocation) throws ZamiaException {
+
+		String signature = "MUX" + aS.getId() + aA.getId() + aB.getId();
+
+		RTLSignal s = fLogicCache.get(signature);
+
+		if (s == null) {
+			s = fModule.createComponentMUX(aS, aA, aB, aLocation);
+			fLogicCache.put(signature, s);
+		}
+
+		return s;
+	}
+
 	public IGSMExprEngine getEE() {
 		return IGSMExprEngine.getInstance();
 	}

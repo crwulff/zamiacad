@@ -12,6 +12,7 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.synth.model.IGSMExprEngine;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
+import org.zamia.rtlng.RTLSignal;
 import org.zamia.rtlng.RTLValue.BitValue;
 
 /**
@@ -55,6 +56,11 @@ public class IGBindingNodeValue extends IGBindingNode {
 	public IGSMExprNode computeCombinedEnable(IGSynth aSynth) throws ZamiaException {
 		IGSMExprEngine ee = IGSMExprEngine.getInstance();
 		return ee.literal(aSynth.getBitValue(BitValue.BV_1), aSynth, fLocation);
+	}
+
+	@Override
+	public RTLSignal synthesizeASyncData(IGSMExprNode aAE, RTLSignal aClk, IGSynth aSynth) throws ZamiaException {
+		return fValue.synthesize(aSynth);
 	}
 
 

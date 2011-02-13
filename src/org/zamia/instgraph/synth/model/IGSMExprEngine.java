@@ -159,7 +159,7 @@ public class IGSMExprEngine {
 	public IGSMExprNode unary(UnaryOp aOp, IGSMExprNode aA, SourceLocation aLocation) throws ZamiaException {
 
 		RTLType typeA = aA.getType();
-		if (typeA.getCat() == TypeCat.BIT && aOp == UnaryOp.NOT) {
+		if (typeA.getCat() == TypeCat.BIT && (aOp == UnaryOp.NOT || aOp == UnaryOp.BUF)) {
 
 			return new IGSMExprNodeBDD(aOp, aA, aLocation, aA.getSynth());
 
@@ -191,12 +191,16 @@ public class IGSMExprEngine {
 		return fBDD;
 	}
 
-	public IGSMExprNode signal(RTLSignal aS, IGSynth aSynth, SourceLocation aLocation) {
+	public IGSMExprNode signal(RTLSignal aS, IGSynth aSynth, SourceLocation aLocation) throws ZamiaException {
 
 		IGSMExprNode node = fSignalMap.get(aS);
 
 		if (node == null) {
+
 			node = new IGSMExprNodeSignal(aS, aLocation, aSynth);
+			
+			node = convertToBDD(node, aSynth, aLocation);
+			
 			fSignalMap.put(aS, node);
 		}
 
@@ -204,16 +208,32 @@ public class IGSMExprEngine {
 	}
 
 	public IGSMExprNode restrict(IGSMExprNode aNode, IGSMExprNode aCareFun, IGSynth aSynth, SourceLocation aLocation) {
-		
+
 		if (aNode instanceof IGSMExprNodeBDD && aCareFun instanceof IGSMExprNodeBDD) {
-			
+
 			IGSMExprNodeBDD bdd = (IGSMExprNodeBDD) aNode;
 			IGSMExprNodeBDD careBDD = (IGSMExprNodeBDD) aCareFun;
-			
+
 			return new IGSMExprNodeBDD(bdd, careBDD, aLocation, aSynth);
 		}
-		
+
 		return aNode;
+	}
+
+	// helper method that turns single-bit nodes safely into a BDD node
+	public IGSMExprNode convertToBDD(IGSMExprNode aNode, IGSynth aSynth, SourceLocation aLocation) throws ZamiaException {
+
+		if (aNode instanceof IGSMExprNodeBDD) {
+			return aNode;
+		}
+
+		RTLType type = aNode.getType();
+		if (type.getCat() != TypeCat.BIT) {
+			return aNode;
+		}
+
+		return new IGSMExprNodeBDD(UnaryOp.BUF, aNode, aLocation, aSynth);
+
 	}
 
 }

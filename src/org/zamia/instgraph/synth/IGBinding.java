@@ -1,4 +1,5 @@
 /* 
+
  * Copyright 2010,2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
@@ -48,6 +49,10 @@ public class IGBinding {
 
 	public IGSMExprNode computeCombinedEnable(IGSynth aSynth) throws ZamiaException {
 		return fBindingNode.computeCombinedEnable(aSynth);
+	}
+
+	public RTLSignal synthesizeASyncData(IGSMExprNode aAE, RTLSignal aClk, IGSynth aSynth) throws ZamiaException {
+		return fBindingNode.synthesizeASyncData(aAE, aClk, aSynth);
 	}
 
 }

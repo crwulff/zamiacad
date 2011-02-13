@@ -14,6 +14,8 @@ import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGOperationUnary.UnaryOp;
 import org.zamia.instgraph.synth.model.IGSMExprEngine;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
+import org.zamia.rtlng.RTLSignal;
+import org.zamia.rtlng.RTLValue;
 import org.zamia.rtlng.RTLValue.BitValue;
 
 /**
@@ -82,18 +84,50 @@ public class IGBindingNodePhi extends IGBindingNode {
 		return new IGBindingNodePhi(fCond, thenNode, elseNode, fLocation);
 	}
 
-
 	@Override
 	public IGSMExprNode computeCombinedEnable(IGSynth aSynth) throws ZamiaException {
 
 		IGSMExprEngine ee = IGSMExprEngine.getInstance();
 
-		IGSMExprNode a = fThenNode != null ? ee.binary(BinOp.AND, fCond, fThenNode.computeCombinedEnable(aSynth), fLocation) : ee.literal(aSynth.getBitValue(BitValue.BV_0), aSynth,
-				fLocation);
+		IGSMExprNode a = fThenNode != null ? ee.binary(BinOp.AND, fCond, fThenNode.computeCombinedEnable(aSynth), fLocation) : ee.literal(aSynth.getBitValue(BitValue.BV_0),
+				aSynth, fLocation);
 		IGSMExprNode b = fElseNode != null ? ee.binary(BinOp.AND, ee.unary(UnaryOp.NOT, fCond, fLocation), fElseNode.computeCombinedEnable(aSynth), fLocation) : ee.literal(
 				aSynth.getBitValue(BitValue.BV_0), aSynth, fLocation);
 
 		return ee.binary(BinOp.OR, a, b, fLocation);
+	}
+
+	@Override
+	public RTLSignal synthesizeASyncData(IGSMExprNode aAE, RTLSignal aClk, IGSynth aSynth) throws ZamiaException {
+
+		if (fElseNode == null) {
+			return fThenNode.synthesizeASyncData(aAE, aClk, aSynth);
+		} else if (fThenNode == null) {
+			return fElseNode.synthesizeASyncData(aAE, aClk, aSynth);
+		}
+
+		IGSMExprNode s = fCond.replaceClockEdge(aClk, aSynth.getBitValue(BitValue.BV_0), aSynth);
+
+		logger.debug("IGBindingsNodePhi: Select signal for %s is %s", this, s);
+
+		IGSMExprEngine ee = aSynth.getEE();
+
+		s = ee.restrict(s, aAE, aSynth, fLocation);
+
+		logger.debug("IGBindingsNodePhi: Restricted select signal for %s is %s", this, s);
+
+		RTLValue sv = s.getStaticValue();
+
+		if (sv == null) {
+
+			return aSynth.placeMUX(s.synthesize(aSynth), fThenNode.synthesizeASyncData(aAE, aClk, aSynth), fElseNode.synthesizeASyncData(aAE, aClk, aSynth), fLocation);
+
+		}
+
+		if (sv.getBit() == BitValue.BV_0) {
+			return fElseNode.synthesizeASyncData(aAE, aClk, aSynth);
+		}
+		return fThenNode.synthesizeASyncData(aAE, aClk, aSynth);
 	}
 
 }

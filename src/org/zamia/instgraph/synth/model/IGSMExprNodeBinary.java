@@ -61,4 +61,9 @@ public class IGSMExprNodeBinary extends IGSMExprNode {
 		throw new ZamiaException ("Sorry, not implemented.");
 	}
 
+	@Override
+	public RTLSignal synthesize(IGSynth aSynth) throws ZamiaException {
+		// FIXME: implement
+		throw new ZamiaException ("Sorry, not implemented.");
+	}
 }

@@ -62,4 +62,6 @@ public abstract class IGSMExprNode {
 
 	public abstract void findClockEdges(Set<IGSMExprNodeClockEdge> aClockEdges) throws ZamiaException;
 
+	public abstract RTLSignal synthesize(IGSynth aSynth) throws ZamiaException;
+
 }

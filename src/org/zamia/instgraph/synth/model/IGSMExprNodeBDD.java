@@ -127,7 +127,6 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 		}
 	}
 
-	
 	// restrict
 	public IGSMExprNodeBDD(IGSMExprNodeBDD aBDD, IGSMExprNodeBDD aCareBDD, SourceLocation aLocation, IGSynth aSynth) {
 		super(aBDD.getType(), aLocation, aSynth);
@@ -139,10 +138,10 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 		for (Integer v : inputs) {
 			fInputVars.add(v);
 		}
-		
+
 		fResVar = bdd.restrict(aBDD.getResVar(), aCareBDD.getResVar());
 	}
-	
+
 	private HashSet<Integer> getInputVars() {
 		return fInputVars;
 	}
@@ -196,12 +195,14 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 		case NOT:
 			fResVar = bdd.not(a);
 			break;
+		case BUF:
+			fResVar = a;
+			break;
 		default:
 			throw new ZamiaException("Internal error: unsupported BDD operation");
 		}
 	}
 
-	
 	@Override
 	public RTLValue getStaticValue() {
 		BDD bdd = ee.getBDD();
@@ -326,25 +327,24 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 
 	@Override
 	public IGSMExprNode replaceClockEdge(RTLSignal aClockSignal, RTLValue aValue, IGSynth aSynth) throws ZamiaException {
-		
-		
+
 		BDD nt = ee.getBDD();
 		int max = nt.numberOfVariables();
 
 		int bdd = fResVar;
-		
+
 		if (bdd < 2) {
-			
+
 			return this;
-			
+
 		} else {
 
 			// FIXME: this is horribly inefficient
-			
+
 			IGSMExprNode res = null;
-			
+
 			SourceLocation l = getLocation();
-			
+
 			char cube[] = new char[max];
 
 			ArrayList<String> cubes = new ArrayList<String>();
@@ -356,7 +356,7 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 				String cb = cubes.get(i);
 
 				IGSMExprNode nc = null;
-				
+
 				for (int j = 0; j < max; j++) {
 					char c = cb.charAt(j);
 
@@ -366,17 +366,17 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 
 						IGSMExprNode e = ee.unary(UnaryOp.NOT, expr, l);
 						if (nc == null) {
-							nc = e;
+							nc = ee.convertToBDD(e, aSynth, l);
 						} else {
 							nc = ee.binary(BinOp.AND, nc, e, l);
 						}
 						break;
 					case '1':
-						
+
 						expr = ee.levelToExpr(j).replaceClockEdge(aClockSignal, aValue, aSynth);
 
 						if (nc == null) {
-							nc = expr;
+							nc = ee.convertToBDD(expr, aSynth, l);
 						} else {
 							nc = ee.binary(BinOp.AND, nc, expr, l);
 						}
@@ -385,34 +385,34 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 					}
 				}
 
-				if (i > 0) {
+				if (res != null) {
 					res = ee.binary(BinOp.OR, res, nc, l);
 				} else {
 					res = nc;
 				}
 			}
-			
+
 			return res;
 		}
 	}
 
 	@Override
 	public void findClockEdges(Set<IGSMExprNodeClockEdge> aClockEdges) throws ZamiaException {
-		
+
 		for (Integer v : fInputVars) {
 			IGSMExprNode node = ee.mapToExpr(v);
 			node.findClockEdges(aClockEdges);
 		}
-		
+
 	}
 
 	public void dumpBDD() {
-		
+
 		BDD nt = ee.getBDD();
-		
+
 		nt.printCubes(fResVar);
 		nt.printSet(fResVar);
-		
+
 		ArrayList<String> cubes = new ArrayList<String>();
 		int max = nt.numberOfVariables();
 		char cube[] = new char[max];
@@ -420,15 +420,20 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 		computeCubes(cubes, fResVar, 0, max, nt, cube);
 
 		int n = cubes.size();
-		for (int i = 0; i<n; i++) {
-			System.out.println ("CUBE: "+cubes.get(i));
+		for (int i = 0; i < n; i++) {
+			System.out.println("CUBE: " + cubes.get(i));
 		}
-		
-		for (int i = 0; i<max; i++) {
+
+		for (int i = 0; i < max; i++) {
 			System.out.printf("VAR %03d : %s\n", i, ee.levelToExpr(i));
 		}
-		
-		
+
+	}
+
+	@Override
+	public RTLSignal synthesize(IGSynth aSynth) throws ZamiaException {
+		// FIXME: implement
+		throw new ZamiaException("Sorry, not implemented.");
 	}
 
 }

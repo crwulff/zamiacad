@@ -23,6 +23,7 @@ import org.zamia.rtlng.nodes.RTLNBinaryOp;
 import org.zamia.rtlng.nodes.RTLNBinaryOp.BinaryOp;
 import org.zamia.rtlng.nodes.RTLNDecoder;
 import org.zamia.rtlng.nodes.RTLNLiteral;
+import org.zamia.rtlng.nodes.RTLNMUX;
 import org.zamia.rtlng.nodes.RTLNRegister;
 import org.zamia.rtlng.nodes.RTLNUnaryOp;
 import org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp;
@@ -276,6 +277,27 @@ public class RTLModule extends RTLNode {
 
 		RTLPort pa = node.getA();
 		pa.setSignal(aA.getCurrent());
+
+		RTLPort pz = node.getZ();
+		RTLSignal res = createUnnamedSignal(pz.getType(), aLocation);
+
+		pz.setSignal(res);
+
+		return res;
+	}
+
+	public RTLSignal createComponentMUX(RTLSignal aS, RTLSignal aA, RTLSignal aB, SourceLocation aLocation) throws ZamiaException {
+		RTLNMUX node = new RTLNMUX(aS.getType(), this, aLocation, getZDB());
+		add(node);
+
+		RTLPort pa = node.getA();
+		pa.setSignal(aA.getCurrent());
+
+		RTLPort pb = node.getB();
+		pb.setSignal(aB.getCurrent());
+
+		RTLPort ps = node.getS();
+		ps.setSignal(aS.getCurrent());
 
 		RTLPort pz = node.getZ();
 		RTLSignal res = createUnnamedSignal(pz.getType(), aLocation);

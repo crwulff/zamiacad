@@ -13,6 +13,7 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
+import org.zamia.rtlng.RTLSignal;
 
 /**
  * 
@@ -37,5 +38,7 @@ public abstract class IGBindingNode {
 	public abstract IGBindingNode replaceOmega(IGBindingNode aNode) throws ZamiaException;
 
 	public abstract IGSMExprNode computeCombinedEnable(IGSynth aSynth) throws ZamiaException;
+
+	public abstract RTLSignal synthesizeASyncData(IGSMExprNode aAE, RTLSignal aClk, IGSynth aSynth) throws ZamiaException;
 
 }

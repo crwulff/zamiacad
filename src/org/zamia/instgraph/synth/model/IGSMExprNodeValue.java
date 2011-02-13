@@ -55,6 +55,10 @@ public class IGSMExprNodeValue extends IGSMExprNode {
 		throw new ZamiaException ("Sorry, not implemented.");
 	}
 
+	@Override
+	public RTLSignal synthesize(IGSynth aSynth) throws ZamiaException {
+		return aSynth.placeLiteral(fValue, fLocation);
+	}
 
 
 }

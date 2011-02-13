@@ -17,7 +17,6 @@ import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGOperationUnary.UnaryOp;
 import org.zamia.instgraph.synth.model.IGSMExprEngine;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
-import org.zamia.instgraph.synth.model.IGSMExprNodeBDD;
 import org.zamia.instgraph.synth.model.IGSMExprNodeClockEdge;
 import org.zamia.rtlng.RTLSignal;
 import org.zamia.rtlng.RTLValue.BitValue;
@@ -108,7 +107,7 @@ public class IGBindings {
 			
 			logger.debug("IGBindings: Sync enable for %s is %s", b.getTarget(), e);
 			
-			
+			RTLSignal aD = b.synthesizeASyncData(aE, clk, aSynth);
 			
 			
 			//
