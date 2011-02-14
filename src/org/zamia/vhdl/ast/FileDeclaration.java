@@ -27,7 +27,6 @@ import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGType.TypeCat;
-import org.zamia.rtl.RTLPort.PortDir;
 
 
 /**
@@ -93,7 +92,7 @@ public class FileDeclaration extends BlockDeclarativeItem {
 		OIDir mode = OIDir.NONE;
 
 		if (foi != null) {
-			PortDir fmode = foi.getMode();
+			OIDir fmode = foi.getMode();
 			if (fmode != null) {
 				switch (foi.getMode()) {
 				case IN:

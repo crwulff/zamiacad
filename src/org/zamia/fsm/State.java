@@ -10,7 +10,7 @@
 package org.zamia.fsm;
 
 
-import org.zamia.rtl.RTLSignal;
+import org.zamia.rtlng.RTLSignal;
 import org.zamia.util.HashMapArray;
 import org.zamia.vhdl.ast.OperationLiteral;
 

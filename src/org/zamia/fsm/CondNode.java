@@ -11,8 +11,8 @@ package org.zamia.fsm;
 import java.util.HashMap;
 
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGStaticValue;
 import org.zamia.util.HashSetArray;
-import org.zamia.zil.ZILValue;
 
 
 /**
@@ -68,38 +68,38 @@ public class CondNode {
 			case OpAnd:
 				char va = a.calc(bindings_);
 				char vb = b.calc(bindings_);
-				if ((va == ZILValue.BIT_DC) || (vb == ZILValue.BIT_DC))
+				if ((va == IGStaticValue.BIT_DC) || (vb == IGStaticValue.BIT_DC))
 					throw new ZamiaException("Don't care detected in an operation");
 
-				if (va == ZILValue.BIT_1)
+				if (va == IGStaticValue.BIT_1)
 					return vb;
-				return ZILValue.BIT_0;
+				return IGStaticValue.BIT_0;
 			case OpOr:
 				va = a.calc(bindings_);
 				vb = b.calc(bindings_);
 
-				if ((va == ZILValue.BIT_DC) || (vb == ZILValue.BIT_DC))
+				if ((va == IGStaticValue.BIT_DC) || (vb == IGStaticValue.BIT_DC))
 					throw new ZamiaException("Don't care detected in an operation");
 
-				if (va == ZILValue.BIT_0)
+				if (va == IGStaticValue.BIT_0)
 					return vb;
-				return ZILValue.BIT_1;
+				return IGStaticValue.BIT_1;
 			case OpEq:
 				va = a.calc(bindings_);
 				vb = b.calc(bindings_);
 
 				if (va == vb)
-					return ZILValue.BIT_1;
-				return ZILValue.BIT_0;
+					return IGStaticValue.BIT_1;
+				return IGStaticValue.BIT_0;
 			case OpNot:
 				va = a.calc(bindings_);
 
-				if (va == ZILValue.BIT_DC)
+				if (va == IGStaticValue.BIT_DC)
 					throw new ZamiaException("Don't care detected in an operation");
 
-				if (va == ZILValue.BIT_1)
-					return ZILValue.BIT_0;
-				return ZILValue.BIT_1;
+				if (va == IGStaticValue.BIT_1)
+					return IGStaticValue.BIT_0;
+				return IGStaticValue.BIT_1;
 			}
 		case Variable:
 			return bindings_.get(var);

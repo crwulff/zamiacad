@@ -20,12 +20,13 @@ import org.zamia.vhdl.ast.OperationShift.ShiftOp;
 import org.zamia.vhdl.ast.OperationLiteral.LiteralCat;
 import org.zamia.vhdl.ast.InterfaceDeclaration.InterfaceKind;
 import org.zamia.vhdl.ast.EntityAspect.EntityAspectKind;
+import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.util.*;
 import java.util.*;
 import java.io.Reader;
 import java.io.IOException;
 import java.io.StringReader;
-import org.zamia.rtl.RTLPort.PortDir;
+
 
 /**
  * @author Guenter Bartsch
@@ -1198,14 +1199,14 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
         InterfaceList ports;
     jj_consume_token(PORT);
     jj_consume_token(LPAREN);
-    ports = interface_list(InterfaceContext.PORT, PortDir.LINKAGE);
+    ports = interface_list(InterfaceContext.PORT, OIDir.LINKAGE);
     jj_consume_token(RPAREN);
     jj_consume_token(SEMICOLON);
                 {if (true) return ports;}
     throw new Error("Missing return statement in function");
   }
 
-  final public InterfaceList interface_list(InterfaceContext ic_, PortDir defaultDir_) throws ParseException, ZamiaException {
+  final public InterfaceList interface_list(InterfaceContext ic_, OIDir defaultDir_) throws ParseException, ZamiaException {
         InterfaceList interfaces;
         ArrayList<InterfaceDeclaration> ids;
     ids = interface_declaration(ic_, defaultDir_);
@@ -1259,12 +1260,12 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, PortDir defaultDir_) throws ParseException, ZamiaException {
+  final public ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, OIDir defaultDir_) throws ParseException, ZamiaException {
         ArrayList<InterfaceDeclaration> idds;
         ArrayList<Identifier> ids;
         InterfaceKind kind = null;
         TypeDefinition td;
-        PortDir dir = defaultDir_;
+        OIDir dir = defaultDir_;
         Operation op = null;
     switch (jj_nt.kind) {
     case FILE:
@@ -1316,7 +1317,7 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
 
                         switch (ic_) {
                         case FUNCTION:
-                                if (dir != PortDir.IN) {
+                                if (dir != OIDir.IN) {
                                         erm.addError (new ZamiaException ("Function parameters must have mode IN.", ids.get(0).getLocation()));
                                 }
                                 if (kind == null) {
@@ -1329,7 +1330,7 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
                                 break;
                         case PROCEDURE:
                                 if (kind == null) {
-                                        if (dir == PortDir.IN) {
+                                        if (dir == OIDir.IN) {
                                                 kind = InterfaceKind.CONSTANT;
                                         } else {
                                                 kind = InterfaceKind.VARIABLE;
@@ -1383,28 +1384,28 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public PortDir mode() throws ParseException, ZamiaException {
-        PortDir m = PortDir.LINKAGE;
+  final public OIDir mode() throws ParseException, ZamiaException {
+        OIDir m = OIDir.LINKAGE;
     switch (jj_nt.kind) {
     case IN:
       jj_consume_token(IN);
-                  m = PortDir.IN;
+                  m = OIDir.IN;
       break;
     case OUT:
       jj_consume_token(OUT);
-                  m = PortDir.OUT;
+                  m = OIDir.OUT;
       break;
     case INOUT:
       jj_consume_token(INOUT);
-                    m = PortDir.INOUT;
+                    m = OIDir.INOUT;
       break;
     case BUFFER:
       jj_consume_token(BUFFER);
-                     m = PortDir.BUFFER;
+                     m = OIDir.BUFFER;
       break;
     case LINKAGE:
       jj_consume_token(LINKAGE);
-                      m = PortDir.LINKAGE;
+                      m = OIDir.LINKAGE;
       break;
     default:
       jj_la1[54] = jj_gen;
@@ -2942,7 +2943,7 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
         InterfaceList l;
     jj_consume_token(GENERIC);
     jj_consume_token(LPAREN);
-    l = interface_list(InterfaceContext.GENERIC, PortDir.IN);
+    l = interface_list(InterfaceContext.GENERIC, OIDir.IN);
     jj_consume_token(RPAREN);
     jj_consume_token(SEMICOLON);
           {if (true) return l;}
@@ -4809,7 +4810,7 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
 
   final public FileOpenInformation file_open_information() throws ParseException, ZamiaException {
         Operation exp=null, exp2;
-        PortDir m=null;
+        OIDir m=null;
         Token t=null, t2;
     switch (jj_nt.kind) {
     case OPEN:
@@ -5760,7 +5761,7 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
       switch (jj_nt.kind) {
       case LPAREN:
         jj_consume_token(LPAREN);
-        interfaces = interface_list(InterfaceContext.PROCEDURE, PortDir.IN);
+        interfaces = interface_list(InterfaceContext.PROCEDURE, OIDir.IN);
         jj_consume_token(RPAREN);
         break;
       default:
@@ -5798,7 +5799,7 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
       switch (jj_nt.kind) {
       case LPAREN:
         jj_consume_token(LPAREN);
-        interfaces = interface_list(InterfaceContext.FUNCTION, PortDir.IN);
+        interfaces = interface_list(InterfaceContext.FUNCTION, OIDir.IN);
         jj_consume_token(RPAREN);
         break;
       default:

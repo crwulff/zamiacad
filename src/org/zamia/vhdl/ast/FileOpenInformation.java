@@ -17,7 +17,7 @@ import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGElaborationEnv;
-import org.zamia.rtl.RTLPort.PortDir;
+import org.zamia.instgraph.IGObject.OIDir;
 
 
 /**
@@ -29,9 +29,9 @@ import org.zamia.rtl.RTLPort.PortDir;
 public class FileOpenInformation extends VHDLNode {
 
 	private Operation stringExpr; // other people would probably call this "fileName"...
-	private PortDir m;
+	private OIDir m;
 
-	public FileOpenInformation (Operation exp_, PortDir m_, Operation stringExpr_, VHDLNode parent_, long location_) {
+	public FileOpenInformation (Operation exp_, OIDir m_, Operation stringExpr_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		stringExpr = stringExpr_;
 		stringExpr.setParent(this);
@@ -42,7 +42,7 @@ public class FileOpenInformation extends VHDLNode {
 		return stringExpr;
 	}
 	
-	public PortDir getMode() {
+	public OIDir getMode() {
 		return m;
 	}
 	

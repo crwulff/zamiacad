@@ -16,18 +16,17 @@ import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite;
 import org.zamia.analysis.ReferenceSite.RefType;
-import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
+import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGContainerItem;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGObject.IGObjectCat;
+import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGType;
-import org.zamia.instgraph.IGObject.IGObjectCat;
-import org.zamia.instgraph.IGObject.OIDir;
-import org.zamia.rtl.RTLPort.PortDir;
 
 
 /**
@@ -49,9 +48,9 @@ public class InterfaceDeclaration extends DeclarativeItem {
 
 	private InterfaceKind kind;
 
-	private PortDir dir;
+	private OIDir dir;
 
-	public InterfaceDeclaration(String id_, TypeDefinition type_, PortDir dir_, Operation value_, InterfaceKind kind_, VHDLNode parent_, long location_) {
+	public InterfaceDeclaration(String id_, TypeDefinition type_, OIDir dir_, Operation value_, InterfaceKind kind_, VHDLNode parent_, long location_) {
 		super(id_, parent_, location_);
 		setType(type_);
 		setValue(value_);
@@ -82,7 +81,7 @@ public class InterfaceDeclaration extends DeclarativeItem {
 		return type;
 	}
 
-	public PortDir getDir() {
+	public OIDir getDir() {
 		return dir;
 	}
 

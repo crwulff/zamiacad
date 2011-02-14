@@ -13,10 +13,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import org.zamia.ZamiaException;
-import org.zamia.rtl.RTLSignal;
+import org.zamia.instgraph.IGStaticValue;
+import org.zamia.rtlng.RTLSignal;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.HashSetArray;
-import org.zamia.zil.ZILValue;
 
 
 /**
@@ -139,7 +139,7 @@ public class CondAssignmentsSet {
 		CondAssignments cas = assignments.get(output);
 		
 		if (cas == null)
-			return ZILValue.BIT_U;
+			return IGStaticValue.BIT_U;
 		
 		return cas.getOutput (bindings);
 	}

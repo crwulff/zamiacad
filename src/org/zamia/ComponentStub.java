@@ -1,5 +1,5 @@
 /* 
- * Copyright 2008 by the authors indicated in the @author tags. 
+ * Copyright 2008,2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -11,9 +11,9 @@ package org.zamia;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import org.zamia.instgraph.IGStaticValue;
 import org.zamia.util.ZHash;
 import org.zamia.vhdl.ast.DMUID;
-import org.zamia.zil.ZILValue;
 
 
 /**
@@ -31,14 +31,14 @@ import org.zamia.zil.ZILValue;
 public class ComponentStub implements Serializable {
 
 	private DMUID fDUUID; // the architecture we're referencing
-	private ArrayList <ZILValue> fActualGenerics;
+	private ArrayList <IGStaticValue> fActualGenerics;
 	private String fSignature;
 	
 	public ComponentStub(DMUID aDUUID) {
 		
 		fDUUID = aDUUID;
 		
-		fActualGenerics = new ArrayList<ZILValue>();
+		fActualGenerics = new ArrayList<IGStaticValue>();
 	}
 
 	public DMUID getDUUID() {
@@ -50,12 +50,12 @@ public class ComponentStub implements Serializable {
 		return fSignature;
 	}
 
-	public ArrayList<ZILValue> getActualGenerics() {
+	public ArrayList<IGStaticValue> getActualGenerics() {
 		
 		return fActualGenerics;
 	}
 
-	public void addActualGeneric(ZILValue aValue) {
+	public void addActualGeneric(IGStaticValue aValue) {
 		
 		fActualGenerics.add(aValue);
 		
@@ -68,7 +68,7 @@ public class ComponentStub implements Serializable {
 		int n = fActualGenerics.size();
 		for (int i = 0; i<n; i++) {
 			
-			ZILValue actual = fActualGenerics.get(i);
+			IGStaticValue actual = fActualGenerics.get(i);
 			
 			buf.append("###");
 			buf.append(actual);
@@ -105,7 +105,7 @@ public class ComponentStub implements Serializable {
 		int n = fActualGenerics.size();
 		for (int i = 0; i<n; i++) {
 			
-			ZILValue actual = fActualGenerics.get(i);
+			IGStaticValue actual = fActualGenerics.get(i);
 			
 			buf.append("###");
 			buf.append(actual);

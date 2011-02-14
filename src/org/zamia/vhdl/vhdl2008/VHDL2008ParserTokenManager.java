@@ -19,12 +19,12 @@ import org.zamia.vhdl.ast.OperationShift.ShiftOp;
 import org.zamia.vhdl.ast.OperationLiteral.LiteralCat;
 import org.zamia.vhdl.ast.InterfaceDeclaration.InterfaceKind;
 import org.zamia.vhdl.ast.EntityAspect.EntityAspectKind;
+import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.util.*;
 import java.util.*;
 import java.io.Reader;
 import java.io.IOException;
 import java.io.StringReader;
-import org.zamia.rtl.RTLPort.PortDir;
 
 /** Token Manager. */
 public class VHDL2008ParserTokenManager implements VHDL2008ParserConstants

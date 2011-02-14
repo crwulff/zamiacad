@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGStaticValue;
 import org.zamia.util.HashSetArray;
-import org.zamia.zil.ZILValue;
 
 
 
@@ -116,9 +116,9 @@ public class CondAssignments {
 		int n = ass.size();
 		for (int i = 0; i<n; i++) {
 			CondAssignment ca = ass.get(i);
-			if (ca.cn.calc(bindings) == ZILValue.BIT_1)
+			if (ca.cn.calc(bindings) == IGStaticValue.BIT_1)
 				return ca.l;
 		}
-		return ZILValue.BIT_U;
+		return IGStaticValue.BIT_U;
 	}
 }

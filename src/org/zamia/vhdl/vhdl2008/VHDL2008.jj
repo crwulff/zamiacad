@@ -34,12 +34,13 @@ import org.zamia.vhdl.ast.OperationShift.ShiftOp;
 import org.zamia.vhdl.ast.OperationLiteral.LiteralCat;
 import org.zamia.vhdl.ast.InterfaceDeclaration.InterfaceKind;
 import org.zamia.vhdl.ast.EntityAspect.EntityAspectKind;
+import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.util.*;
 import java.util.*;
 import java.io.Reader;
 import java.io.IOException;
 import java.io.StringReader;
-import org.zamia.rtl.RTLPort.PortDir;
+
 
 /**
  * @author Guenter Bartsch
@@ -1188,14 +1189,14 @@ InterfaceList port_clause()  throws ZamiaException :
 	InterfaceList ports;
 }
 {
-	<PORT> <LPAREN> ports = interface_list(InterfaceContext.PORT, PortDir.LINKAGE) <RPAREN> <SEMICOLON>
+	<PORT> <LPAREN> ports = interface_list(InterfaceContext.PORT, OIDir.LINKAGE) <RPAREN> <SEMICOLON>
   
 	{
 		return ports;
 	}
 }
 
-InterfaceList interface_list(InterfaceContext ic_, PortDir defaultDir_) throws ZamiaException:
+InterfaceList interface_list(InterfaceContext ic_, OIDir defaultDir_) throws ZamiaException:
 {
 	InterfaceList interfaces;
 	ArrayList<InterfaceDeclaration> ids;
@@ -1223,13 +1224,13 @@ InterfaceList interface_list(InterfaceContext ic_, PortDir defaultDir_) throws Z
   }
 }
 
-ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, PortDir defaultDir_) throws ZamiaException:
+ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, OIDir defaultDir_) throws ZamiaException:
 {
 	ArrayList<InterfaceDeclaration> idds;
 	ArrayList<Identifier> ids;
 	InterfaceKind kind = null;
 	TypeDefinition td;
-	PortDir dir = defaultDir_;
+	OIDir dir = defaultDir_;
 	Operation op = null;
 }
 {
@@ -1245,7 +1246,7 @@ ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, Port
 			
 			switch (ic_) {
 			case FUNCTION:
-				if (dir != PortDir.IN) {
+				if (dir != OIDir.IN) {
 					erm.addError (new ZamiaException ("Function parameters must have mode IN.", ids.get(0).getLocation()));
 				}
 				if (kind == null) {
@@ -1258,7 +1259,7 @@ ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, Port
 				break;
 			case PROCEDURE:
 				if (kind == null) {
-					if (dir == PortDir.IN) {
+					if (dir == OIDir.IN) {
 						kind = InterfaceKind.CONSTANT;
 					} else {
 						kind = InterfaceKind.VARIABLE;
@@ -1299,16 +1300,16 @@ ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, Port
 	}
 }
 
-PortDir mode() throws ZamiaException :
+OIDir mode() throws ZamiaException :
 { 
-	PortDir m = PortDir.LINKAGE;
+	OIDir m = OIDir.LINKAGE;
 }
 {
-	(  <IN> { m = PortDir.IN; }
-	| <OUT> { m = PortDir.OUT; }
-	| <INOUT> { m = PortDir.INOUT; }
-	| <BUFFER> { m = PortDir.BUFFER; }
-	| <LINKAGE> { m = PortDir.LINKAGE; }
+	(  <IN> { m = OIDir.IN; }
+	| <OUT> { m = OIDir.OUT; }
+	| <INOUT> { m = OIDir.INOUT; }
+	| <BUFFER> { m = OIDir.BUFFER; }
+	| <LINKAGE> { m = OIDir.LINKAGE; }
 	)
 	{ return m ; }
 }
@@ -2190,7 +2191,7 @@ InterfaceList generic_clause() throws ZamiaException :
 	InterfaceList l;
 }
 {
-	<GENERIC> <LPAREN> l = interface_list(InterfaceContext.GENERIC, PortDir.IN) <RPAREN> <SEMICOLON>
+	<GENERIC> <LPAREN> l = interface_list(InterfaceContext.GENERIC, OIDir.IN) <RPAREN> <SEMICOLON>
 	{ return l; }
 }
 
@@ -3352,7 +3353,7 @@ ArrayList<FileDeclaration> file_declaration() throws ZamiaException :
 FileOpenInformation file_open_information() throws ZamiaException :
 {
 	Operation exp=null, exp2;
-	PortDir m=null;
+	OIDir m=null;
 	Token t=null, t2;
 }
 {
@@ -3906,10 +3907,10 @@ SubProgram subprogram() throws ZamiaException :
 	boolean pure = true;
 }
 {
-	( t=<PROCEDURE> id=designator() [ <LPAREN> interfaces=interface_list(InterfaceContext.PROCEDURE, PortDir.IN) <RPAREN> ]
+	( t=<PROCEDURE> id=designator() [ <LPAREN> interfaces=interface_list(InterfaceContext.PROCEDURE, OIDir.IN) <RPAREN> ]
 		{ sub= new SubProgram (id.getImage(), interfaces	, null, false, null, getLocation(t)); }
 	| [ <PURE> | <IMPURE> { pure = false; } ] t=<FUNCTION> id=designator()
-		[ <LPAREN> interfaces = interface_list(InterfaceContext.FUNCTION, PortDir.IN) <RPAREN> ]
+		[ <LPAREN> interfaces = interface_list(InterfaceContext.FUNCTION, OIDir.IN) <RPAREN> ]
                 <RETURN> n = name()
 		{ sub = new SubProgram (id.getImage(), interfaces, n, pure, null, getLocation(t)); }
     )

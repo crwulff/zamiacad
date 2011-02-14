@@ -33,12 +33,12 @@ import org.zamia.instgraph.IGMapping;
 import org.zamia.instgraph.IGMappings;
 import org.zamia.instgraph.IGModule;
 import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
-import org.zamia.rtl.RTLPort.PortDir;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
@@ -177,7 +177,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 						MappedFormal mf = l.get(i);
 						InterfaceDeclaration intf = mf.fFormal;
 
-						if (intf.getDir() != PortDir.IN) {
+						if (intf.getDir() != OIDir.IN) {
 							aResult.add(new ReferenceSite(mf.fASTObject, RefType.Write));
 						} else {
 							aResult.add(new ReferenceSite(mf.fASTObject, RefType.Read));
