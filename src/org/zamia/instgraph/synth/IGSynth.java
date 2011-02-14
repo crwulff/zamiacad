@@ -790,8 +790,16 @@ public class IGSynth {
 		return s;
 	}
 
+	public RTLSignal placeReg(RTLSignal aAE, RTLSignal aAD, RTLSignal aE, RTLSignal aD, RTLSignal aClk, SourceLocation aLocation) throws ZamiaException {
+		return fModule.createComponentReg(aAE, aAD, aE, aD, aClk, aLocation);
+	}
+
 	public IGSMExprEngine getEE() {
 		return IGSMExprEngine.getInstance();
+	}
+
+	public void sigjoin(RTLSignal aDriving, RTLSignal aReceiving, SourceLocation aLocation) throws ZamiaException {
+		fModule.sigJoin(aDriving, aReceiving, aLocation);
 	}
 
 }

@@ -287,7 +287,7 @@ public class RTLModule extends RTLNode {
 	}
 
 	public RTLSignal createComponentMUX(RTLSignal aS, RTLSignal aA, RTLSignal aB, SourceLocation aLocation) throws ZamiaException {
-		RTLNMUX node = new RTLNMUX(aS.getType(), this, aLocation, getZDB());
+		RTLNMUX node = new RTLNMUX(aA.getType(), this, aLocation, getZDB());
 		add(node);
 
 		RTLPort pa = node.getA();
@@ -298,6 +298,43 @@ public class RTLModule extends RTLNode {
 
 		RTLPort ps = node.getS();
 		ps.setSignal(aS.getCurrent());
+
+		RTLPort pz = node.getZ();
+		RTLSignal res = createUnnamedSignal(pz.getType(), aLocation);
+
+		pz.setSignal(res);
+
+		return res;
+	}
+
+	public RTLSignal createComponentReg(RTLSignal aAE, RTLSignal aAD, RTLSignal aE, RTLSignal aD, RTLSignal aClk, SourceLocation aLocation) throws ZamiaException {
+		RTLNRegister node = new RTLNRegister(aAD.getType(), this, aLocation, getZDB());
+		add(node);
+
+		if (aAE != null) {
+			RTLPort pae = node.getASyncEnable();
+			pae.setSignal(aAE.getCurrent());
+		}
+
+		if (aAD != null) {
+			RTLPort pad = node.getASyncData();
+			pad.setSignal(aAD.getCurrent());
+		}
+
+		if (aE != null) {
+			RTLPort pe = node.getSyncEnable();
+			pe.setSignal(aE.getCurrent());
+		}
+
+		if (aD != null) {
+			RTLPort pd = node.getSyncData();
+			pd.setSignal(aD.getCurrent());
+		}
+
+		if (aClk != null) {
+			RTLPort pclk = node.getClk();
+			pclk.setSignal(aClk.getCurrent());
+		}
 
 		RTLPort pz = node.getZ();
 		RTLSignal res = createUnnamedSignal(pz.getType(), aLocation);
@@ -335,7 +372,7 @@ public class RTLModule extends RTLNode {
 		pb.setSignal(aB.getCurrent());
 
 		RTLPort pz = node.getZ();
-		
+
 		RTLSignal res = createUniqueSignal(aOp.name().toLowerCase(), pz.getType(), aLocation);
 
 		pz.setSignal(res);
@@ -349,7 +386,7 @@ public class RTLModule extends RTLNode {
 		add(node);
 
 		RTLPort pz = node.getZ();
-		RTLSignal res = createUniqueSignal("lit_"+aValue.toString(), pz.getType(), aLocation);
+		RTLSignal res = createUniqueSignal("lit_" + aValue.toString(), pz.getType(), aLocation);
 
 		pz.setSignal(res);
 
