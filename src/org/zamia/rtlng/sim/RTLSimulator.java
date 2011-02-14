@@ -32,10 +32,12 @@ import org.zamia.rtlng.nodes.RTLNBinaryOp;
 import org.zamia.rtlng.nodes.RTLNInstantiation;
 import org.zamia.rtlng.nodes.RTLNLiteral;
 import org.zamia.rtlng.nodes.RTLNRegister;
+import org.zamia.rtlng.nodes.RTLNUnaryOp;
 import org.zamia.rtlng.sim.behaviors.RTLBBinaryOp;
 import org.zamia.rtlng.sim.behaviors.RTLBLiteral;
 import org.zamia.rtlng.sim.behaviors.RTLBModule;
 import org.zamia.rtlng.sim.behaviors.RTLBRegister;
+import org.zamia.rtlng.sim.behaviors.RTLBUnaryOp;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
 import org.zamia.util.ZStack;
@@ -107,6 +109,7 @@ public class RTLSimulator {
 
 		fBehaviorMap = new HashMap<Class, RTLNodeBehavior>();
 
+		fBehaviorMap.put(RTLNUnaryOp.class, new RTLBUnaryOp());
 		fBehaviorMap.put(RTLNBinaryOp.class, new RTLBBinaryOp());
 		fBehaviorMap.put(RTLNRegister.class, new RTLBRegister());
 		fBehaviorMap.put(RTLNLiteral.class, new RTLBLiteral());

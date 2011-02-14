@@ -148,6 +148,72 @@ public class IGSynthTest {
 	}
 
 	@Test
+	public void testLatch() throws Exception {
+
+		RTLModule rtlm = runSynth("examples/synth/latchTest", "WORK.FOO(RTL)");
+
+		RTLSimulator sim = new RTLSimulator(fZPrj);
+
+		sim.open(rtlm);
+
+		sim.assign(new PathName("A"), "0");
+		sim.assign(new PathName("B"), "0");
+		sim.assign(new PathName("C1"), "0");
+		sim.assign(new PathName("C2"), "0");
+
+		sim.simulate();
+
+		assertEquals(BitValue.BV_0, sim.getCurrentValue(new PathName("Z")).getBit());
+
+		sim.assign(new PathName("A"), "1");
+		sim.assign(new PathName("B"), "1");
+		sim.assign(new PathName("C1"), "0");
+		sim.assign(new PathName("C2"), "0");
+
+		sim.simulate();
+
+		assertEquals(BitValue.BV_1, sim.getCurrentValue(new PathName("Z")).getBit());
+
+		sim.assign(new PathName("A"), "1");
+		sim.assign(new PathName("B"), "1");
+		sim.assign(new PathName("C1"), "1");
+		sim.assign(new PathName("C2"), "0");
+
+		sim.simulate();
+
+		assertEquals(BitValue.BV_1, sim.getCurrentValue(new PathName("Z")).getBit());
+
+		sim.assign(new PathName("A"), "1");
+		sim.assign(new PathName("B"), "0");
+		sim.assign(new PathName("C1"), "1");
+		sim.assign(new PathName("C2"), "0");
+
+		sim.simulate();
+
+		assertEquals(BitValue.BV_1, sim.getCurrentValue(new PathName("Z")).getBit());
+
+		sim.assign(new PathName("A"), "1");
+		sim.assign(new PathName("B"), "0");
+		sim.assign(new PathName("C1"), "1");
+		sim.assign(new PathName("C2"), "1");
+
+		sim.simulate();
+		sim.simulate();
+
+		assertEquals(BitValue.BV_1, sim.getCurrentValue(new PathName("Z")).getBit());
+
+		sim.assign(new PathName("A"), "1");
+		sim.assign(new PathName("B"), "1");
+		sim.assign(new PathName("C1"), "1");
+		sim.assign(new PathName("C2"), "1");
+
+		sim.simulate();
+
+		assertEquals(BitValue.BV_0, sim.getCurrentValue(new PathName("Z")).getBit());
+
+	}
+
+	@Test
 	public void testClock2() throws Exception {
 
 		RTLModule rtlm = runSynth("examples/synth/clock2Test", "WORK.FOO(RTL)");
@@ -209,28 +275,6 @@ public class IGSynthTest {
 		sim.simulate();
 
 		assertEquals(BitValue.BV_0, sim.getCurrentValue(new PathName("Z")).getBit());
-	}
-
-	@Test
-	public void testLatch() throws Exception {
-
-		RTLModule rtlm = runSynth("examples/synth/latchTest", "WORK.FOO(RTL)");
-
-		RTLSimulator sim = new RTLSimulator(fZPrj);
-
-		sim.open(rtlm);
-
-		sim.assign(new PathName("A"), "0");
-		sim.assign(new PathName("B"), "0");
-		sim.assign(new PathName("C1"), "0");
-		sim.assign(new PathName("C2"), "0");
-
-		sim.simulate();
-
-		RTLValue vz = sim.getCurrentValue(new PathName("Z"));
-
-		assertEquals(BitValue.BV_0, vz.getBit());
-
 	}
 
 	@Test

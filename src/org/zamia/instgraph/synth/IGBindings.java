@@ -126,7 +126,9 @@ public class IGBindings {
 
 				RTLSignal se = e != null ? e.synthesize(aSynth) : null;
 				
-				RTLSignal tmp = aSynth.placeReg(aE.synthesize(aSynth), aD, se, d, clk, l);
+				RTLSignal sae = aE.synthesize(aSynth);
+				
+				RTLSignal tmp = aSynth.placeReg(sae, aD, se, d, clk, l);
 
 				aSynth.sigjoin(tmp, b.getTarget(), l);
 

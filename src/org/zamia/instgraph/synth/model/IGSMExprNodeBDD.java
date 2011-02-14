@@ -139,7 +139,7 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 			fInputVars.add(v);
 		}
 
-		fResVar = bdd.restrict(aBDD.getResVar(), aCareBDD.getResVar());
+		fResVar = bdd.simplify(aCareBDD.getResVar(), aBDD.getResVar());
 	}
 
 	private HashSet<Integer> getInputVars() {
@@ -466,12 +466,14 @@ public class IGSMExprNodeBDD extends IGSMExprNode {
 					case '0':
 						IGSMExprNode expr = ee.levelToExpr(j);
 
-						IGSMExprNode e = ee.unary(UnaryOp.NOT, expr, l);
+						RTLSignal sexpr = expr.synthesize(aSynth);
+						
+						RTLSignal se = aSynth.placeUnary(UnaryOp.NOT, sexpr, l);
 						if (sc == null) {
-							sc = e.synthesize(aSynth);
+							sc = se;
 						} else {
 							
-							sc = aSynth.placeBinary(BinOp.AND, sc, e.synthesize(aSynth), l);
+							sc = aSynth.placeBinary(BinOp.AND, sc, se, l);
 						}
 						break;
 						

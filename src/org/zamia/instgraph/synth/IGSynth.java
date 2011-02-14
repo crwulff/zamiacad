@@ -34,6 +34,7 @@ import org.zamia.instgraph.IGOperationInvokeSubprogram;
 import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGOperationObject;
 import org.zamia.instgraph.IGOperationRange;
+import org.zamia.instgraph.IGOperationUnary.UnaryOp;
 import org.zamia.instgraph.IGProcess;
 import org.zamia.instgraph.IGRange;
 import org.zamia.instgraph.IGRecordField;
@@ -788,6 +789,33 @@ public class IGSynth {
 		}
 
 		return s;
+	}
+
+	public RTLSignal placeUnary(UnaryOp aOp, RTLSignal aA, SourceLocation aLocation) throws ZamiaException {
+		String signature = aOp.name() + aA.getId();
+
+		RTLSignal s = fLogicCache.get(signature);
+
+		if (s == null) {
+			s = fModule.createComponentUnary(mapUnaryOp(aOp), aA, aLocation);
+			fLogicCache.put(signature, s);
+		}
+
+		return s;
+	}
+
+	private org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp mapUnaryOp(UnaryOp aOp) {
+		switch (aOp) {
+		case ABS:
+			return org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp.ABS;
+		case BUF:
+			return org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp.BUF;
+		case NEG:
+			return org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp.NEG;
+		case NOT:
+			return org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp.NOT;
+		}
+		return null;
 	}
 
 	public RTLSignal placeReg(RTLSignal aAE, RTLSignal aAD, RTLSignal aE, RTLSignal aD, RTLSignal aClk, SourceLocation aLocation) throws ZamiaException {

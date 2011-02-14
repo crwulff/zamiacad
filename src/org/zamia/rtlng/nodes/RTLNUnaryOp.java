@@ -27,7 +27,7 @@ import org.zamia.zdb.ZDB;
 public class RTLNUnaryOp extends RTLNode {
 
 	public enum UnaryOp {
-		NOT, BUF, NEG
+		NOT, BUF, NEG, ABS
 	}
 
 	private final UnaryOp fOp;
