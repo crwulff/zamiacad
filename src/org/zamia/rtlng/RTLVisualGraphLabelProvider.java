@@ -11,9 +11,11 @@ package org.zamia.rtlng;
 import org.zamia.rtlng.RTLType.TypeCat;
 import org.zamia.rtlng.nodes.RTLNBinaryOp;
 import org.zamia.rtlng.nodes.RTLNLiteral;
+import org.zamia.rtlng.nodes.RTLNMUX;
 import org.zamia.rtlng.nodes.RTLNUnaryOp;
 import org.zamia.rtlng.symbols.RTLSymbolBinaryLogic;
 import org.zamia.rtlng.symbols.RTLSymbolLiteral;
+import org.zamia.rtlng.symbols.RTLSymbolMUX;
 import org.zamia.rtlng.symbols.RTLSymbolUnaryLogic;
 import org.zamia.vg.VGLabelProvider;
 import org.zamia.vg.VGLayout;
@@ -59,6 +61,9 @@ public class RTLVisualGraphLabelProvider implements VGLabelProvider<RTLNode, RTL
 			if (type.getCat() == TypeCat.BIT) {
 				return new RTLSymbolUnaryLogic(uop, aLayout.getGC());
 			}
+			
+		} else if (aNode instanceof RTLNMUX) {
+			return new RTLSymbolMUX(aLayout.getGC());
 			
 		}
 

@@ -8,11 +8,15 @@
  */
 package org.zamia.rtlng.symbols;
 
+import java.util.HashMap;
+import java.util.HashSet;
+
 import org.zamia.rtlng.RTLNode;
 import org.zamia.rtlng.RTLPort;
 import org.zamia.rtlng.RTLSignal;
 import org.zamia.rtlng.nodes.RTLNBinaryOp;
 import org.zamia.rtlng.nodes.RTLNBinaryOp.BinaryOp;
+import org.zamia.util.MutablePosition;
 import org.zamia.util.Position;
 import org.zamia.vg.VGGC;
 import org.zamia.vg.VGGC.VGColor;
@@ -34,7 +38,7 @@ public class RTLSymbolBinaryLogic implements VGSymbol<RTLNode, RTLPort, RTLSigna
 	private final static int PAY = 10;
 
 	private final static int PBY = 20;
-	
+
 	private final static int XMAR = 10;
 
 	private final String fLabel;
@@ -43,7 +47,17 @@ public class RTLSymbolBinaryLogic implements VGSymbol<RTLNode, RTLPort, RTLSigna
 
 	private final VGGC fGC;
 
+	private HashMap<RTLPort, MutablePosition> fPortPositions;
+	private HashSet<RTLPort> fTweakedPorts;
+
 	public RTLSymbolBinaryLogic(RTLNBinaryOp aOp, VGGC aGC) {
+
+		fTweakedPorts = new HashSet<RTLPort>(3);
+		fPortPositions = new HashMap<RTLPort, MutablePosition>(3);
+
+		fPortPositions.put(aOp.getA(), new MutablePosition(0, PAY));
+		fPortPositions.put(aOp.getB(), new MutablePosition(0, PBY));
+		fPortPositions.put(aOp.getZ(), new MutablePosition(WIDTH, HEIGHT/2));
 
 		BinaryOp op = aOp.getOp();
 
@@ -93,22 +107,35 @@ public class RTLSymbolBinaryLogic implements VGSymbol<RTLNode, RTLPort, RTLSigna
 	@Override
 	public Position getPortPosition(RTLPort aPort) {
 
-		String id = aPort.getId();
-		if (id.equals("A")) {
-			return new Position(0, PAY);
-		} else if (id.equals("B")) {
-			return new Position(0, PBY);
-		}
-
-		return new Position(getWidth(), getHeight() / 2);
+		MutablePosition mp = fPortPositions.get(aPort);
+		return new Position(mp.getX(), mp.getY());
 	}
 
 	@Override
 	public void tweakPortPosition(RTLPort aPort) {
+		if (fTweakedPorts.contains(aPort)) {
+			return;
+		}
+
+		fTweakedPorts.add(aPort);
+
+		MutablePosition pos = fPortPositions.get(aPort);
+
+		pos.setY(pos.getY() + 2);
 	}
 
 	@Override
 	public void unTweakPortPosition(RTLPort aPort) {
+
+		if (!fTweakedPorts.contains(aPort)) {
+			return;
+		}
+
+		fTweakedPorts.remove(aPort);
+
+		MutablePosition pos = fPortPositions.get(aPort);
+
+		pos.setY(pos.getY() - 2);
 	}
 
 	@Override
@@ -122,16 +149,20 @@ public class RTLSymbolBinaryLogic implements VGSymbol<RTLNode, RTLPort, RTLSigna
 
 		fGC.drawText(fLabel, aXPos + getWidth() / 2 - tw / 2, aYPos + getHeight() / 2 + th / 2, true);
 
-		fGC.drawLine(aXPos, aYPos + PAY, aXPos + XMAR, aYPos + PAY);
-		fGC.drawLine(aXPos, aYPos + PBY, aXPos + XMAR, aYPos + PBY);
+		MutablePosition pos = fPortPositions.get(aModule.findPort("A"));
+		fGC.drawLine(aXPos, aYPos + pos.getY(), aXPos + XMAR, aYPos + pos.getY());
+		
+		pos = fPortPositions.get(aModule.findPort("B"));
+		fGC.drawLine(aXPos, aYPos + pos.getY(), aXPos + XMAR, aYPos + pos.getY());
 
-		fGC.drawRectangle(aXPos + XMAR, aYPos + 1, getWidth() - 2*XMAR, getHeight() - 2);
+		fGC.drawRectangle(aXPos + XMAR, aYPos + 1, getWidth() - 2 * XMAR, getHeight() - 2);
 
+		pos = fPortPositions.get(aModule.findPort("Z"));
 		if (fNeg) {
-			fGC.drawOval(aXPos + getWidth() - XMAR + 3, aYPos + getHeight() / 2, 3, 3);
-			fGC.drawLine(aXPos + getWidth() - XMAR + 6, aYPos + getHeight() / 2, aXPos + getWidth(), aYPos + getHeight() / 2);
+			fGC.drawOval(aXPos + getWidth() - XMAR + 3, aYPos + pos.getY(), 3, 3);
+			fGC.drawLine(aXPos + getWidth() - XMAR + 6, aYPos + pos.getY(), aXPos + getWidth(), aYPos + pos.getY());
 		} else {
-			fGC.drawLine(aXPos + getWidth() - XMAR, aYPos + getHeight() / 2, aXPos + getWidth(), aYPos + getHeight() / 2);
+			fGC.drawLine(aXPos + getWidth() - XMAR, aYPos + pos.getY(), aXPos + getWidth(), aYPos + pos.getY());
 		}
 	}
 
