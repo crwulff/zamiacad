@@ -158,25 +158,57 @@ public class IGSynthTest {
 
 		sim.assign(new PathName("A"), "0");
 		sim.assign(new PathName("B"), "0");
-		sim.assign(new PathName("CLK"), "0");
+		sim.assign(new PathName("C"), "0");
+		sim.assign(new PathName("N"), "0");
+		sim.assign(new PathName("R"), "1");
 
 		sim.simulate();
 
-		sim.assign(new PathName("CLK"), "1");
+		sim.assign(new PathName("C"), "1");
 		sim.simulate();
-		sim.assign(new PathName("CLK"), "0");
+		sim.assign(new PathName("C"), "0");
 		sim.simulate();
 
 		RTLValue vz = sim.getCurrentValue(new PathName("Z"));
 		assertEquals(BitValue.BV_0, vz.getBit());
 
-		sim.assign(new PathName("CLK"), "1");
+		sim.assign(new PathName("R"), "0");
+		sim.simulate();
+		assertEquals(BitValue.BV_0, sim.getCurrentValue(new PathName("Z")).getBit());
 
+		sim.assign(new PathName("A"), "1");
+		sim.assign(new PathName("B"), "1");
+		sim.assign(new PathName("N"), "1");
+		sim.simulate();
+		assertEquals(BitValue.BV_0, sim.getCurrentValue(new PathName("Z")).getBit());
+		
+		sim.assign(new PathName("C"), "1");
+		sim.simulate();
+		sim.assign(new PathName("C"), "0");
 		sim.simulate();
 
-		vz = sim.getCurrentValue(new PathName("Z"));
-		assertEquals(BitValue.BV_0, vz.getBit());
+		assertEquals(BitValue.BV_1, sim.getCurrentValue(new PathName("Z")).getBit());
 
+		sim.assign(new PathName("A"), "0");
+		sim.simulate();
+		assertEquals(BitValue.BV_1, sim.getCurrentValue(new PathName("Z")).getBit());
+
+		sim.assign(new PathName("C"), "1");
+		sim.simulate();
+		sim.assign(new PathName("C"), "0");
+		sim.simulate();
+
+		assertEquals(BitValue.BV_0, sim.getCurrentValue(new PathName("Z")).getBit());
+
+		sim.assign(new PathName("N"), "0");
+		sim.assign(new PathName("A"), "1");
+
+		sim.assign(new PathName("C"), "1");
+		sim.simulate();
+		sim.assign(new PathName("C"), "0");
+		sim.simulate();
+
+		assertEquals(BitValue.BV_0, sim.getCurrentValue(new PathName("Z")).getBit());
 	}
 
 	@Test
