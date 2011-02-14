@@ -141,9 +141,9 @@ public class VGBox<NodeType, PortType, SignalType> {
 			VGPort<NodeType, PortType, SignalType> port = fPorts.get(i);
 
 			if (port.isOutput()) {
-				fInputs.add(port);
-			} else {
 				fOutputs.add(port);
+			} else {
+				fInputs.add(port);
 			}
 
 			VGSignal<NodeType, PortType, SignalType> signal = port.getSignal();
@@ -164,9 +164,13 @@ public class VGBox<NodeType, PortType, SignalType> {
 				}
 
 				if (port.isOutput()) {
-					fReceivers.add(box);
+					if (!conn.isOutput()) {
+						fReceivers.add(box);
+					}
 				} else {
-					fDrivers.add(box);
+					if (conn.isOutput()) {
+						fDrivers.add(box);
+					}
 				}
 			}
 		}
@@ -179,7 +183,6 @@ public class VGBox<NodeType, PortType, SignalType> {
 		return new Position(p1.getX() + getXPos(), p1.getY() + getYPos());
 	}
 
-	
 	Position getPortOffset(VGPort<NodeType, PortType, SignalType> aPort) {
 		return fSymbol.getPortPosition(aPort.getPort());
 	}
@@ -250,10 +253,9 @@ public class VGBox<NodeType, PortType, SignalType> {
 			fSymbol.paint(fNode, getXPos(), fYPos, aHighlight);
 		}
 	}
-	
+
 	VGSymbol<NodeType, PortType, SignalType> getSymbol() {
 		return fSymbol;
 	}
-	
-	
+
 }
