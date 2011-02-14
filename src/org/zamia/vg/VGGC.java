@@ -43,6 +43,8 @@ public interface VGGC {
 
 	public void drawLine(int aX1, int aY1, int aX2, int aY2);
 
+	public void drawOval(int aX, int aY, int aXR, int aYR);
+
 	public void fillOval(int aX, int aY, int aXR, int aYR);
 
 	public void drawText(String aLabel, int aX, int aY, boolean aTransparent);

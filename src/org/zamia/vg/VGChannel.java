@@ -376,7 +376,7 @@ public class VGChannel<NodeType, PortType, SignalType> {
 				dx = channel.getSignalXPos(signal);
 				gc.drawLine(sx, sy, dx, sy);
 				if (sy != maxConnY && sy != minConnY) {
-					gc.fillOval(sx - WIRE_WIDTH / 2, sy - WIRE_WIDTH / 2, WIRE_WIDTH, WIRE_WIDTH);
+					gc.fillOval(sx, sy, WIRE_WIDTH/3, WIRE_WIDTH/3);
 				}
 			}
 
@@ -397,7 +397,7 @@ public class VGChannel<NodeType, PortType, SignalType> {
 				if (sy == minConnY)
 					continue;
 
-				gc.fillOval(sx - WIRE_WIDTH / 2, sy - WIRE_WIDTH / 2, WIRE_WIDTH, WIRE_WIDTH);
+				gc.fillOval(sx, sy, WIRE_WIDTH/3, WIRE_WIDTH/3);
 
 			}
 		}

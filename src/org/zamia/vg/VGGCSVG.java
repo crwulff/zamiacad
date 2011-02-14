@@ -148,18 +148,61 @@ public class VGGCSVG implements VGGC {
 
 	@Override
 	public void fillOval(int aX, int aY, int aXr, int aYr) {
-		// TODO Auto-generated method stub
+		String style = "fill-opacity:1;" + "fill:" + getRGB(fBackground) + ";stroke:" + getRGB(fForeground) + ";stroke-width:" + fLineWidth + ";";
+		fOut.println("  <ellipse cx=\"" + aX + "\" cy=\"" + aY + "\" rx=\"" + aXr + "\" ry=\"" + aYr + "\" style=\"" + style + "\" />");
+	}
 
+	@Override
+	public void drawOval(int aX, int aY, int aXr, int aYr) {
+		String style = "fill-opacity:0;" + "fill:" + getRGB(fBackground) + ";stroke:" + getRGB(fForeground) + ";stroke-width:" + fLineWidth + ";";
+		fOut.println("  <ellipse cx=\"" + aX + "\" cy=\"" + aY + "\" rx=\"" + aXr + "\" ry=\"" + aYr + "\" style=\"" + style + "\" />");
+	}
+
+	private String encode(String aStr) {
+		StringBuilder buf = new StringBuilder();
+
+		int l = aStr.length();
+		for (int i = 0; i < l; i++) {
+
+			char c = aStr.charAt(i);
+
+			switch (c) {
+			case '<':
+				buf.append("&lt;");
+				break;
+			case '>':
+				buf.append("&gt;");
+				break;
+			case '"':
+				buf.append("&quot;");
+				break;
+			case '\'':
+				buf.append("&apos;");
+				break;
+			case '&':
+				buf.append("&amp;");
+				break;
+			default:
+				buf.append(c);
+			}
+
+		}
+		
+		return buf.toString();
 	}
 
 	@Override
 	public void drawText(String aLabel, int aX, int aY, boolean aTransparent) {
-		String style = "font-family:monospace;"+"font-size:" + getFontSize(fFont) + "px;fill-opacity:1;" + "fill:" + getRGB(fForeground) + ";stroke:" + getRGB(fForeground) + ";stroke-width:0;";
-		
+		String style = "font-family:monospace;" + "font-size:" + getFontSize(fFont) + "px;fill-opacity:1;" + "fill:" + getRGB(fForeground) + ";stroke:" + getRGB(fForeground)
+				+ ";stroke-width:0;";
+
 		int y = aY - getFontBaseline();
-		
+
 		fOut.println("  <text x=\"" + aX + "\" y=\"" + y + "\" style=\"" + style + "\" >");
-		fOut.println("    " + aLabel);
+
+		String encoded = encode(aLabel);
+
+		fOut.println("    " + encoded);
 		fOut.println("  </text>");
 
 		//drawRectangle(aX, aY-getFontHeight(), 200, getFontHeight());
