@@ -29,9 +29,9 @@ public class RTLSymbolMUX implements VGSymbol<RTLNode, RTLPort, RTLSignal> {
 
 	private final static int HEIGHT = 60;
 
-	private final static int PAY = 15;
+	private final static int PAY = 35;
 
-	private final static int PBY = 35;
+	private final static int PBY = 15;
 
 	private final static int PSY = 55;
 
@@ -78,7 +78,7 @@ public class RTLSymbolMUX implements VGSymbol<RTLNode, RTLPort, RTLSignal> {
 
 	@Override
 	public void paint(RTLNode aModule, int aXPos, int aYPos, boolean aHilight) {
-		fGC.setFont(VGFont.LARGE);
+		fGC.setFont(VGFont.NORMAL);
 		fGC.setForeground(VGColor.MODULE_LABEL);
 		fGC.setLineWidth(2);
 
@@ -89,11 +89,15 @@ public class RTLSymbolMUX implements VGSymbol<RTLNode, RTLPort, RTLSignal> {
 
 		// body
 		
-		fGC.drawLine(aXPos + XMAR, aYPos + PAY - 15, aXPos + XMAR, aYPos + PBY + 15);
-		fGC.drawLine(aXPos + XMAR + 20, aYPos + PAY - 2, aXPos + XMAR + 20, aYPos + PBY + 2);
-		fGC.drawLine(aXPos + XMAR, aYPos + PAY - 15, aXPos + XMAR + 20, aYPos + PAY - 2);
-		fGC.drawLine(aXPos + XMAR, aYPos + PBY + 15, aXPos + XMAR + 20, aYPos + PBY + 2);
+		fGC.drawLine(aXPos + XMAR, aYPos + PBY - 15, aXPos + XMAR, aYPos + PAY + 15);
+		fGC.drawLine(aXPos + XMAR + 20, aYPos + PBY - 2, aXPos + XMAR + 20, aYPos + PAY + 2);
+		fGC.drawLine(aXPos + XMAR, aYPos + PBY - 15, aXPos + XMAR + 20, aYPos + PBY - 2);
+		fGC.drawLine(aXPos + XMAR, aYPos + PAY + 15, aXPos + XMAR + 20, aYPos + PAY + 2);
 
+		fGC.drawText("1", aXPos + XMAR + 3, aYPos + PAY + 3, true);
+		fGC.drawText("0", aXPos + XMAR + 3, aYPos + PBY + 3, true);
+
+		
 		// select port
 		
 		fGC.drawLine(aXPos, aYPos + PSY, aXPos + XMAR + 10, aYPos + PSY);

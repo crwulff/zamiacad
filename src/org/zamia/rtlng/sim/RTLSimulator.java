@@ -31,10 +31,12 @@ import org.zamia.rtlng.RTLValueBuilder;
 import org.zamia.rtlng.nodes.RTLNBinaryOp;
 import org.zamia.rtlng.nodes.RTLNInstantiation;
 import org.zamia.rtlng.nodes.RTLNLiteral;
+import org.zamia.rtlng.nodes.RTLNMUX;
 import org.zamia.rtlng.nodes.RTLNRegister;
 import org.zamia.rtlng.nodes.RTLNUnaryOp;
 import org.zamia.rtlng.sim.behaviors.RTLBBinaryOp;
 import org.zamia.rtlng.sim.behaviors.RTLBLiteral;
+import org.zamia.rtlng.sim.behaviors.RTLBMUX;
 import org.zamia.rtlng.sim.behaviors.RTLBModule;
 import org.zamia.rtlng.sim.behaviors.RTLBRegister;
 import org.zamia.rtlng.sim.behaviors.RTLBUnaryOp;
@@ -114,6 +116,7 @@ public class RTLSimulator {
 		fBehaviorMap.put(RTLNRegister.class, new RTLBRegister());
 		fBehaviorMap.put(RTLNLiteral.class, new RTLBLiteral());
 		fBehaviorMap.put(RTLModule.class, new RTLBModule());
+		fBehaviorMap.put(RTLNMUX.class, new RTLBMUX());
 	}
 
 	/*
