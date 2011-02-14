@@ -277,106 +277,6 @@ public class IGSynthTest {
 	}
 
 	@Test
-	public void testArrayIdx() throws Exception {
-
-		RTLModule rtlm = runSynth("examples/synth/arrayIdxTest", "WORK.FOO(RTL)");
-
-		RTLSimulator sim = new RTLSimulator(fZPrj);
-
-		sim.open(rtlm);
-
-		sim.assign(new PathName("A"), "0");
-		sim.assign(new PathName("B"), "0");
-		sim.assign(new PathName("CLK"), "0");
-
-		sim.simulate();
-
-		sim.assign(new PathName("CLK"), "1");
-		sim.simulate();
-		sim.assign(new PathName("CLK"), "0");
-		sim.simulate();
-
-		RTLValue vz = sim.getCurrentValue(new PathName("Z"));
-		assertEquals(BitValue.BV_0, vz.getBit());
-
-		sim.assign(new PathName("CLK"), "1");
-
-		sim.simulate();
-
-		vz = sim.getCurrentValue(new PathName("Z"));
-		assertEquals(BitValue.BV_0, vz.getBit());
-
-		sim.assign(new PathName("A"), "1");
-		sim.assign(new PathName("B"), "0");
-		sim.assign(new PathName("CLK"), "0");
-
-		sim.simulate();
-
-		vz = sim.getCurrentValue(new PathName("Z"));
-
-		assertEquals(BitValue.BV_0, vz.getBit());
-
-		sim.assign(new PathName("CLK"), "1");
-
-		sim.simulate();
-
-		vz = sim.getCurrentValue(new PathName("Z"));
-
-		assertEquals(BitValue.BV_0, vz.getBit());
-
-		sim.assign(new PathName("A"), "1");
-		sim.assign(new PathName("B"), "1");
-		sim.assign(new PathName("CLK"), "0");
-
-		sim.simulate();
-
-		vz = sim.getCurrentValue(new PathName("Z"));
-
-		assertEquals(BitValue.BV_0, vz.getBit());
-
-		sim.assign(new PathName("CLK"), "1");
-
-		sim.simulate();
-
-		vz = sim.getCurrentValue(new PathName("Z"));
-
-		assertEquals(BitValue.BV_1, vz.getBit());
-
-		sim.assign(new PathName("CLK"), "0");
-
-		sim.simulate();
-
-		vz = sim.getCurrentValue(new PathName("Z"));
-
-		assertEquals(BitValue.BV_1, vz.getBit());
-
-		sim.assign(new PathName("B"), "0");
-
-		sim.simulate();
-
-		vz = sim.getCurrentValue(new PathName("Z"));
-
-		assertEquals(BitValue.BV_1, vz.getBit());
-
-		sim.assign(new PathName("CLK"), "1");
-
-		sim.simulate();
-
-		vz = sim.getCurrentValue(new PathName("Z"));
-
-		assertEquals(BitValue.BV_0, vz.getBit());
-
-		sim.assign(new PathName("CLK"), "0");
-
-		sim.simulate();
-
-		vz = sim.getCurrentValue(new PathName("Z"));
-
-		assertEquals(BitValue.BV_0, vz.getBit());
-
-	}
-
-	@Test
 	public void testClock1() throws Exception {
 
 		RTLModule rtlm = runSynth("examples/synth/clock1Test", "WORK.FOO(RTL)");
@@ -477,6 +377,108 @@ public class IGSynthTest {
 	}
 
 	@Test
+	@Ignore
+	public void testArrayIdx() throws Exception {
+
+		RTLModule rtlm = runSynth("examples/synth/arrayIdxTest", "WORK.FOO(RTL)");
+
+		RTLSimulator sim = new RTLSimulator(fZPrj);
+
+		sim.open(rtlm);
+
+		sim.assign(new PathName("A"), "0");
+		sim.assign(new PathName("B"), "0");
+		sim.assign(new PathName("CLK"), "0");
+
+		sim.simulate();
+
+		sim.assign(new PathName("CLK"), "1");
+		sim.simulate();
+		sim.assign(new PathName("CLK"), "0");
+		sim.simulate();
+
+		RTLValue vz = sim.getCurrentValue(new PathName("Z"));
+		assertEquals(BitValue.BV_0, vz.getBit());
+
+		sim.assign(new PathName("CLK"), "1");
+
+		sim.simulate();
+
+		vz = sim.getCurrentValue(new PathName("Z"));
+		assertEquals(BitValue.BV_0, vz.getBit());
+
+		sim.assign(new PathName("A"), "1");
+		sim.assign(new PathName("B"), "0");
+		sim.assign(new PathName("CLK"), "0");
+
+		sim.simulate();
+
+		vz = sim.getCurrentValue(new PathName("Z"));
+
+		assertEquals(BitValue.BV_0, vz.getBit());
+
+		sim.assign(new PathName("CLK"), "1");
+
+		sim.simulate();
+
+		vz = sim.getCurrentValue(new PathName("Z"));
+
+		assertEquals(BitValue.BV_0, vz.getBit());
+
+		sim.assign(new PathName("A"), "1");
+		sim.assign(new PathName("B"), "1");
+		sim.assign(new PathName("CLK"), "0");
+
+		sim.simulate();
+
+		vz = sim.getCurrentValue(new PathName("Z"));
+
+		assertEquals(BitValue.BV_0, vz.getBit());
+
+		sim.assign(new PathName("CLK"), "1");
+
+		sim.simulate();
+
+		vz = sim.getCurrentValue(new PathName("Z"));
+
+		assertEquals(BitValue.BV_1, vz.getBit());
+
+		sim.assign(new PathName("CLK"), "0");
+
+		sim.simulate();
+
+		vz = sim.getCurrentValue(new PathName("Z"));
+
+		assertEquals(BitValue.BV_1, vz.getBit());
+
+		sim.assign(new PathName("B"), "0");
+
+		sim.simulate();
+
+		vz = sim.getCurrentValue(new PathName("Z"));
+
+		assertEquals(BitValue.BV_1, vz.getBit());
+
+		sim.assign(new PathName("CLK"), "1");
+
+		sim.simulate();
+
+		vz = sim.getCurrentValue(new PathName("Z"));
+
+		assertEquals(BitValue.BV_0, vz.getBit());
+
+		sim.assign(new PathName("CLK"), "0");
+
+		sim.simulate();
+
+		vz = sim.getCurrentValue(new PathName("Z"));
+
+		assertEquals(BitValue.BV_0, vz.getBit());
+
+	}
+
+	@Test
+	@Ignore
 	public void testCombProc() throws Exception {
 
 		RTLModule rtlm = runSynth("examples/synth/combProcTest", "WORK.FOO(RTL)");
