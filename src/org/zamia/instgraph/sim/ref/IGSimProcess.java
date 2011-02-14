@@ -105,6 +105,10 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 
 	}
 
+	public IGStaticValue getObjectLastValue(PathName aSignalName) {
+		return fSim.getLastValue(aSignalName);
+	}
+
 	public BigInteger getCurrentTime(SourceLocation aLocation) throws ZamiaException {
 		return fSim.getEndTime();
 	}

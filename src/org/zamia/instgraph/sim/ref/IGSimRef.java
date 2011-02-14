@@ -161,7 +161,7 @@ public class IGSimRef implements IGISimulator {
 
 			fSimSchedule.removeFirst();
 
-			rl.execute(this);
+			rl.executeSignals(this);
 
 			// at this point signal delta values should already reside in SignalDrivers as next values.
 
@@ -170,6 +170,8 @@ public class IGSimRef implements IGISimulator {
 			propagateSignalChanges();
 
 			logChanges();
+
+			rl.executeWakeups(this);
 		}
 
 	}
@@ -617,5 +619,12 @@ public class IGSimRef implements IGISimulator {
 
 		return operation.computeStaticValue(runtimeEnv, ASTErrorMode.EXCEPTION, null);
 
+	}
+
+	public IGStaticValue getLastValue(PathName aSignalName) {
+
+		IGSignalDriver driver = fData.getDriver(aSignalName);
+
+		return driver.getLastValue();
 	}
 }

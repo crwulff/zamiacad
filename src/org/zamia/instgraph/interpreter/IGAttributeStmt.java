@@ -16,6 +16,8 @@ import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
+import org.zamia.instgraph.sim.ref.IGSignalDriver;
+import org.zamia.instgraph.sim.ref.IGSimProcess;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
@@ -296,6 +298,22 @@ public class IGAttributeStmt extends IGStmt {
 				}
 
 				resValue = rt.getEnumLiteral(driver.isEvent() ? 1 : 0, computeSourceLocation(), ASTErrorMode.EXCEPTION, null);
+
+				break;
+			case LAST_VALUE:
+
+				driver = sf.getObjectDriver().getTargetDriver();
+				if (!(driver instanceof IGSignalDriver)) {
+					throw new ZamiaException("Internal error: attribute " + fOp + " is only supported for signals.", computeSourceLocation());
+				}
+				IGSignalDriver signalDriver = (IGSignalDriver) driver;
+
+				if (!(aRuntime instanceof IGSimProcess)) {
+					throw new ZamiaException("Internal error: attribute " + fOp + " is only supported for runtime with signals' history.", computeSourceLocation());
+				}
+				IGSimProcess simProcess = (IGSimProcess) aRuntime;
+
+				resValue = simProcess.getObjectLastValue(signalDriver.getPath());
 
 				break;
 			default:

@@ -44,7 +44,7 @@ public class Zamia {
 
 	protected final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	public final static String VERSION = "0.9.7.alpha1";
+	public final static String VERSION = "0.10.0";
 
 	public final static String COPYRIGHT1 = "Copyright 2003-2010 by Guenter Bartsch.";
 

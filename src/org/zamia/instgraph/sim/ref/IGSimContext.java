@@ -44,6 +44,9 @@ public class IGSimContext extends IGInterpreterContext {
 		// For signals -- get delta
 		// For others -- current value
 		IGObjectDriver driver = getObjectDriver(aDBID);
+		if (driver == null) {
+			return null;
+		}
 
 		if (driver instanceof IGSignalDriver) {
 			return ((IGSignalDriver) driver).getNextValue();

@@ -45,12 +45,19 @@ public class IGRequestList {
 		fRequests.add(aRequest);
 	}
 
-	public void execute(IGSimRef aSimulator) throws ZamiaException {
-		int n = fRequests.size();
-		for (int i = 0; i < n; i++) {
-			IGSimRequest req = fRequests.get(i);
+	public void executeSignals(IGSimRef aSimulator) throws ZamiaException {
+		for (IGSimRequest req : fRequests) {
+			if (req instanceof IGSignalChangeRequest) {
+				req.execute(aSimulator);
+			}
+		}
+	}
 
-			req.execute(aSimulator);
+	public void executeWakeups(IGSimRef aSimulator) throws ZamiaException {
+		for (IGSimRequest req : fRequests) {
+			if (req instanceof IGWakeupRequest) {
+				req.execute(aSimulator);
+			}
 		}
 	}
 
@@ -59,9 +66,7 @@ public class IGRequestList {
 	}
 
 	public void cancelAllWakeups(IGSimProcess aProcess) {
-		int n = fRequests.size();
-		for (int i = 0; i < n; i++) {
-			IGSimRequest req = fRequests.get(i);
+		for (IGSimRequest req : fRequests) {
 			if (req.getProcess() == aProcess) {
 				req.setCanceled(true);
 			}
