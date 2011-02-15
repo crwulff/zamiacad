@@ -19,11 +19,11 @@ import org.zamia.instgraph.synth.IGSynth;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
 import org.zamia.instgraph.synth.model.IGSMExprNodeValue;
 import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
-import org.zamia.rtlng.RTLManager;
-import org.zamia.rtlng.RTLType;
-import org.zamia.rtlng.RTLValue;
-import org.zamia.rtlng.RTLValue.BitValue;
-import org.zamia.rtlng.RTLValueBuilder;
+import org.zamia.rtl.RTLManager;
+import org.zamia.rtl.RTLType;
+import org.zamia.rtl.RTLValue;
+import org.zamia.rtl.RTLValueBuilder;
+import org.zamia.rtl.RTLValue.BitValue;
 
 /**
  * 

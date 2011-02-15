@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.zamia.SourceLocation;
 import org.zamia.instgraph.synth.IGSynth;
-import org.zamia.rtlng.RTLType;
+import org.zamia.rtl.RTLType;
 
 /**
  * 

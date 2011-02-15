@@ -8,7 +8,7 @@
  */
 package org.zamia.instgraph.synth.model;
 
-import org.zamia.rtlng.RTLSignal;
+import org.zamia.rtl.RTLSignal;
 
 /**
  * Little helper class used in assignment bindings computation:

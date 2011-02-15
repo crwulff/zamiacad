@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import org.zamia.instgraph.IGManager;
-import org.zamia.rtlng.RTLManager;
+import org.zamia.rtl.RTLManager;
 import org.zamia.util.ZHash;
 import org.zamia.util.ZamiaTmpDir;
 import org.zamia.verilog.VerilogParser;

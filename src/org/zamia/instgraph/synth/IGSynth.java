@@ -67,17 +67,17 @@ import org.zamia.instgraph.synth.model.IGSMExprNode;
 import org.zamia.instgraph.synth.model.IGSMExprNodeClockEdge;
 import org.zamia.instgraph.synth.model.IGSMIf;
 import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
-import org.zamia.rtlng.RTLManager;
-import org.zamia.rtlng.RTLModule;
-import org.zamia.rtlng.RTLPort;
-import org.zamia.rtlng.RTLPort.PortDir;
-import org.zamia.rtlng.RTLSignal;
-import org.zamia.rtlng.RTLType;
-import org.zamia.rtlng.RTLType.TypeCat;
-import org.zamia.rtlng.RTLValue;
-import org.zamia.rtlng.RTLValue.BitValue;
-import org.zamia.rtlng.RTLValueBuilder;
-import org.zamia.rtlng.nodes.RTLNBinaryOp.BinaryOp;
+import org.zamia.rtl.RTLManager;
+import org.zamia.rtl.RTLModule;
+import org.zamia.rtl.RTLPort;
+import org.zamia.rtl.RTLSignal;
+import org.zamia.rtl.RTLType;
+import org.zamia.rtl.RTLValue;
+import org.zamia.rtl.RTLValueBuilder;
+import org.zamia.rtl.RTLPort.PortDir;
+import org.zamia.rtl.RTLType.TypeCat;
+import org.zamia.rtl.RTLValue.BitValue;
+import org.zamia.rtl.nodes.RTLNBinaryOp.BinaryOp;
 import org.zamia.util.Pair;
 import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zdb.ZDB;
@@ -804,16 +804,16 @@ public class IGSynth {
 		return s;
 	}
 
-	private org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp mapUnaryOp(UnaryOp aOp) {
+	private org.zamia.rtl.nodes.RTLNUnaryOp.UnaryOp mapUnaryOp(UnaryOp aOp) {
 		switch (aOp) {
 		case ABS:
-			return org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp.ABS;
+			return org.zamia.rtl.nodes.RTLNUnaryOp.UnaryOp.ABS;
 		case BUF:
-			return org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp.BUF;
+			return org.zamia.rtl.nodes.RTLNUnaryOp.UnaryOp.BUF;
 		case NEG:
-			return org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp.NEG;
+			return org.zamia.rtl.nodes.RTLNUnaryOp.UnaryOp.NEG;
 		case NOT:
-			return org.zamia.rtlng.nodes.RTLNUnaryOp.UnaryOp.NOT;
+			return org.zamia.rtl.nodes.RTLNUnaryOp.UnaryOp.NOT;
 		}
 		return null;
 	}

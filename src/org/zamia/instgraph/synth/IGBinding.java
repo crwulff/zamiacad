@@ -12,7 +12,7 @@ package org.zamia.instgraph.synth;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
-import org.zamia.rtlng.RTLSignal;
+import org.zamia.rtl.RTLSignal;
 
 /**
  * 

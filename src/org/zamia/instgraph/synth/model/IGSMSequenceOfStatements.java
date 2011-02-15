@@ -16,7 +16,7 @@ import org.zamia.instgraph.synth.IGBinding;
 import org.zamia.instgraph.synth.IGBindingNode;
 import org.zamia.instgraph.synth.IGBindings;
 import org.zamia.instgraph.synth.IGSynth;
-import org.zamia.rtlng.RTLSignal;
+import org.zamia.rtl.RTLSignal;
 
 /**
  * 

@@ -21,7 +21,7 @@ import org.zamia.instgraph.synth.model.IGSMExprNodeSignal;
 import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 import org.zamia.instgraph.synth.model.IGSMTarget;
 import org.zamia.instgraph.synth.model.IGSMTargetSignal;
-import org.zamia.rtlng.RTLSignal;
+import org.zamia.rtl.RTLSignal;
 
 /**
  * 

@@ -14,7 +14,7 @@ import java.util.Iterator;
 
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGStaticValue;
-import org.zamia.rtlng.RTLSignal;
+import org.zamia.rtl.RTLSignal;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.HashSetArray;
 

@@ -22,9 +22,9 @@ import org.zamia.ZamiaProject;
 import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGOperationUnary.UnaryOp;
 import org.zamia.instgraph.synth.IGSynth;
-import org.zamia.rtlng.RTLSignal;
-import org.zamia.rtlng.RTLValue;
-import org.zamia.rtlng.RTLValue.BitValue;
+import org.zamia.rtl.RTLSignal;
+import org.zamia.rtl.RTLValue;
+import org.zamia.rtl.RTLValue.BitValue;
 
 /**
  * @author Guenter Bartsch

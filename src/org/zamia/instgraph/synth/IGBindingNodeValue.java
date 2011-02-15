@@ -12,8 +12,8 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.synth.model.IGSMExprEngine;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
-import org.zamia.rtlng.RTLSignal;
-import org.zamia.rtlng.RTLValue.BitValue;
+import org.zamia.rtl.RTLSignal;
+import org.zamia.rtl.RTLValue.BitValue;
 
 /**
  * 
