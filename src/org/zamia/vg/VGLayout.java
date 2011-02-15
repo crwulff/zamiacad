@@ -43,6 +43,10 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 	private static final int PLACEMENT_OPT_NUM_ITERATIONS = 5;
 
+	private static final int TOP_MARGIN = 10;
+
+	private static final int LEFT_MARGIN = 10;
+
 	private int fMaxDepth;
 
 	private HashMapArray<PortType, VGBox<NodeType, PortType, SignalType>> fPrimaryPorts;
@@ -322,9 +326,9 @@ public class VGLayout<NodeType, PortType, SignalType> {
 		 * 
 		 */
 
-		fChannels = new ArrayList<VGChannel<NodeType, PortType, SignalType>>(fMaxDepth);
+		fChannels = new ArrayList<VGChannel<NodeType, PortType, SignalType>>(fMaxDepth + 1);
 
-		for (int i = 0; i < fMaxDepth + 2; i++) {
+		for (int i = 0; i < fMaxDepth + 1; i++) {
 			fChannels.add(new VGChannel<NodeType, PortType, SignalType>(this, i));
 		}
 
@@ -402,17 +406,16 @@ public class VGLayout<NodeType, PortType, SignalType> {
 	private int optimizeRouting() {
 
 		int score = Integer.MAX_VALUE;
-		
+
 		int n = fChannels.size();
-		for (int i = 0; i<n; i++) {
-			
+		for (int i = 0; i < n; i++) {
+
 			VGChannel<NodeType, PortType, SignalType> channel = fChannels.get(i);
-			
+
 			score -= channel.route();
-			
-			
+
 		}
-		
+
 		return score;
 	}
 
@@ -555,17 +558,17 @@ public class VGLayout<NodeType, PortType, SignalType> {
 		int bestYPos = aBox.getYPos();
 
 		int step = aBox.getHeight();
-		
+
 		while (step > 0) {
-			
+
 			int yp1 = bestYPos + step;
 			aBox.setYPos(yp1);
 			int score1 = calcBoxPlacementScore(aBox);
-			
+
 			int yp2 = bestYPos - step;
 			aBox.setYPos(yp2);
 			int score2 = calcBoxPlacementScore(aBox);
-			
+
 			if (score1 > score2) {
 
 				if (score1 > bestScore) {
@@ -574,7 +577,7 @@ public class VGLayout<NodeType, PortType, SignalType> {
 				} else {
 					step /= 2;
 				}
-				
+
 			} else {
 
 				if (score2 > bestScore) {
@@ -583,11 +586,11 @@ public class VGLayout<NodeType, PortType, SignalType> {
 				} else {
 					step /= 2;
 				}
-				
+
 			}
-			
+
 		}
-		
+
 		aBox.setYPos(bestYPos);
 	}
 
@@ -613,9 +616,100 @@ public class VGLayout<NodeType, PortType, SignalType> {
 		}
 	}
 
-	private void optimizeYPlacement() {
+	private void initialYPlacement() {
+
+		// find good start y position for each box
+
+		int n = fChannels.size();
+
+		ZStack<VGBox<NodeType, PortType, SignalType>> todo = new ZStack<VGBox<NodeType, PortType, SignalType>>();
+		HashSet<VGBox<NodeType, PortType, SignalType>> done = new HashSet<VGBox<NodeType, PortType, SignalType>>();
+
+		int maxY[] = new int[n];
+
+		for (int i = 0; i < n; i++) {
+			maxY[i] = 0;
+		}
+
+		VGChannel<NodeType, PortType, SignalType> c = fChannels.get(n - 1);
+
+		int m = c.getNumBoxes();
+		for (int j = 0; j < m; j++) {
+			VGBox<NodeType, PortType, SignalType> box = c.getBox(j);
+			if (box == null)
+				continue;
+
+			todo.push(box);
+		}
+
+		while (!todo.isEmpty()) {
+
+			VGBox<NodeType, PortType, SignalType> box = todo.pop();
+
+			if (done.contains(box)) {
+				continue;
+			}
+
+			done.add(box);
+
+			int ypos = Integer.MIN_VALUE;
+
+			int l = box.getNumPorts();
+
+			for (int k = 0; k < l; k++) {
+				VGPort<NodeType, PortType, SignalType> p = box.getPort(k);
+
+				if (!p.isOutput()) {
+					continue;
+				}
+
+				VGSignal<NodeType, PortType, SignalType> s = p.getSignal();
+				if (s == null)
+					continue;
+
+				Position offset = box.getPortOffset(p);
+
+				int nConns = s.getNumConnections();
+				for (int iConn = 0; iConn < nConns; iConn++) {
+
+					VGPort<NodeType, PortType, SignalType> p2 = s.getConnection(iConn);
+
+					if (p2 == p)
+						continue;
+
+					ypos = getPortPosition(p2).getY() - offset.getY();
+					break;
+				}
+
+				if (ypos > Integer.MIN_VALUE) {
+					break;
+				}
+			}
+
+			int ci = box.getCol();
+			if (ypos == Integer.MIN_VALUE) {
+				ypos = maxY[ci];
+			}
+			int ypos2 = ypos + box.getHeight() + 1;
+			if (ypos2 > maxY[ci]) {
+				maxY[ci] = ypos2;
+			}
+
+			box.setYPos(ypos);
+
+			m = box.getNumDrivers();
+			for (int i = 0; i < m; i++) {
+				VGBox<NodeType, PortType, SignalType> driver = box.getDriver(i);
+				todo.push(driver);
+			}
+		}
+	}
+
+	private void computeYPlacement() {
 
 		// find best non-colliding y position for each box
+
+		initialYPlacement();
 
 		int n = fChannels.size();
 		// always run this optimization several times
@@ -625,7 +719,7 @@ public class VGLayout<NodeType, PortType, SignalType> {
 		long startTime = System.currentTimeMillis();
 
 		int bestScore = Integer.MIN_VALUE;
-		
+
 		for (int r = 0; r < PLACEMENT_OPT_NUM_ITERATIONS; r++) {
 			logger.debug("VGLayout: ===================== optimize rtl module placement iter=%d ===========", r);
 
@@ -659,7 +753,7 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 			for (int i = 1; i < n; i++) {
 
-				logger.debug("VGLayout: VGChannel: %d", i);
+				logger.debug("VGLayout: PORTS VGChannel: %d", i);
 
 				VGChannel<NodeType, PortType, SignalType> c = fChannels.get(i);
 
@@ -675,9 +769,9 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 			// right to left
 
-			for (int i = n - 2; i >= 0; i--) {
+			for (int i = n - 1; i >= 0; i--) {
 
-				logger.debug("VGLayout: VGChannel: %d", i);
+				logger.debug("VGLayout: PORTS VGChannel: %d", i);
 
 				VGChannel<NodeType, PortType, SignalType> c = fChannels.get(i);
 
@@ -691,11 +785,48 @@ public class VGLayout<NodeType, PortType, SignalType> {
 				}
 			}
 
+			// gaps
+
+			for (int i = 0; i < n; i++) {
+
+				logger.debug("VGLayout: GAPS VGChannel: %d", i);
+
+				VGChannel<NodeType, PortType, SignalType> c = fChannels.get(i);
+
+				int m = c.getNumBoxes();
+				for (int j = 0; j < m; j++) {
+					VGBox<NodeType, PortType, SignalType> box = c.getBox(j);
+					if (box == null)
+						continue;
+
+					for (int k = 0; k < m; k++) {
+
+						VGBox<NodeType, PortType, SignalType> box2 = c.getBox(k);
+						if (box2 == null)
+							continue;
+						if (box2 == box)
+							continue;
+
+						int score1 = calcBoxPlacementScore(box);
+
+						int y1 = box.getYPos();
+
+						box.setYPos(box2.getYPos() + box2.getHeight() + 1);
+
+						int score2 = calcBoxPlacementScore(box);
+
+						if (score2 < score1) {
+							box.setYPos(y1);
+						}
+					}
+				}
+			}
+
 			// incr
 
 			for (int i = 0; i < n; i++) {
 
-				logger.debug("VGLayout: VGChannel: %d", i);
+				logger.debug("VGLayout: INCR VGChannel: %d", i);
 
 				VGChannel<NodeType, PortType, SignalType> c = fChannels.get(i);
 
@@ -710,12 +841,12 @@ public class VGLayout<NodeType, PortType, SignalType> {
 			}
 
 			int score = optimizeRouting();
-			logger.debug ("VGLayout: Overall score: %d, best score so far: %d", score, bestScore);
+			logger.debug("VGLayout: Overall score: %d, best score so far: %d", score, bestScore);
 
 			if (score <= bestScore) {
 				break;
 			}
-			
+
 			bestScore = score;
 
 			double time = (System.currentTimeMillis() - startTime) / 1000.0;
@@ -723,7 +854,49 @@ public class VGLayout<NodeType, PortType, SignalType> {
 				break;
 			}
 		}
-		
+
+		/*
+		 * finalize placement: shift whole circuit down so all Y positions >= TOP_MARGIN
+		 */
+
+		int minY = Integer.MAX_VALUE;
+
+		for (int i = 0; i < n; i++) {
+
+			VGChannel<NodeType, PortType, SignalType> c = fChannels.get(i);
+
+			int m = c.getNumBoxes();
+			for (int j = 0; j < m; j++) {
+				VGBox<NodeType, PortType, SignalType> box = c.getBox(j);
+				if (box == null)
+					continue;
+
+				int y = box.getYPos();
+				if (y < minY) {
+					minY = y;
+				}
+			}
+		}
+
+		int offset = TOP_MARGIN - minY;
+
+		for (int i = 0; i < n; i++) {
+
+			VGChannel<NodeType, PortType, SignalType> c = fChannels.get(i);
+
+			int m = c.getNumBoxes();
+			for (int j = 0; j < m; j++) {
+				VGBox<NodeType, PortType, SignalType> box = c.getBox(j);
+				if (box == null)
+					continue;
+
+				int y = box.getYPos();
+
+				box.setYPos(y + offset);
+			}
+		}
+
+		optimizeRouting();
 	}
 
 	private void routeSignal(VGSignal<NodeType, PortType, SignalType> s, VGPort<NodeType, PortType, SignalType> source, VGPort<NodeType, PortType, SignalType> dest) {
@@ -825,11 +998,11 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 	}
 
-	private void finalizePlacement() {
+	private void computeChannelXPositions() {
 
 		// compute ychannel positions and sizes
 
-		int w = 0;
+		int w = LEFT_MARGIN;
 		int h = 0;
 
 		int n = fChannels.size();
@@ -843,41 +1016,6 @@ public class VGLayout<NodeType, PortType, SignalType> {
 		}
 		fTotalSize = new Position(w + 100, h + 100);
 
-		// optimize output port ypos
-		VGChannel<NodeType, PortType, SignalType> c = fChannels.get(fChannels.size() - 1);
-		VGChannel<NodeType, PortType, SignalType> c2 = fChannels.get(fChannels.size() - 2);
-		n = c.getNumBoxes();
-		for (int i = 0; i < n; i++) {
-
-			VGBox<NodeType, PortType, SignalType> box = c.getBox(i);
-			if (box == null)
-				continue;
-
-			if (box.getNumReceivers() > 0) {
-				continue;
-			}
-
-			int m = box.getNumPorts();
-			if (m != 1) {
-				continue;
-			}
-
-			VGPort<NodeType, PortType, SignalType> p = box.getPort(0);
-			VGSignal<NodeType, PortType, SignalType> s = p.getSignal();
-			if (s == null)
-				continue;
-
-			int y = c2.getSignalYPos(s);
-			if (y == 0)
-				continue;
-
-			if (c.getCollidingBox(box, y) != null)
-				continue;
-
-			Position offset = box.getPortOffset(p);
-
-			box.setYPos(y - offset.getY());
-		}
 	}
 
 	private void placeAndRoute() {
@@ -922,18 +1060,17 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 		time = (System.currentTimeMillis() - startTime) / 1000.0;
 		logger.debug("VGLayout: time elapsed so far: " + time + "s.");
-		logger.debug("VGLayout: 4/5: optimizeYPlacement()");
-		optimizeYPlacement();
+		logger.debug("VGLayout: 4/5: computeYPlacement()");
+		computeYPlacement();
 
 		/*
-		 * finalize placement, VChannels get their final X positions, calculate
-		 * totalSize
+		 * compute VChannels X positions, calculate totalSize
 		 */
 
 		time = (System.currentTimeMillis() - startTime) / 1000.0;
 		logger.debug("VGLayout: time elapsed so far: " + time + "s.");
-		logger.debug("VGLayout: 5/5: finalizePlacement()");
-		finalizePlacement();
+		logger.debug("VGLayout: 5/5: computeChannelXPositions()");
+		computeChannelXPositions();
 
 		time = (System.currentTimeMillis() - startTime) / 1000.0;
 		logger.debug("VGLayout: done. total time elapsed: " + time + "s.\n");

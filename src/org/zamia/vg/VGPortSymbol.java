@@ -25,6 +25,8 @@ public class VGPortSymbol<NodeType, PortType, SignalType> implements VGSymbol<No
 
 	private static final int PIN_WIDTH = 15;
 
+	private static final int MARGIN = 2;
+
 	private final VGLayout<NodeType, PortType, SignalType> fLayout;
 
 	private final VGGC fGC;
@@ -82,23 +84,23 @@ public class VGPortSymbol<NodeType, PortType, SignalType> implements VGSymbol<No
 
 		if (fOutput) {
 
-			fGC.drawLine(aXPos + w, aYPos, PIN_WIDTH + ARROW_WIDTH + aXPos, aYPos);
-			fGC.drawLine(aXPos + w, aYPos, aXPos + w, h + aYPos);
-			fGC.drawLine(aXPos + w, h + aYPos, PIN_WIDTH + ARROW_WIDTH + aXPos, h + aYPos);
+			fGC.drawLine(aXPos + w, aYPos + MARGIN, PIN_WIDTH + ARROW_WIDTH + aXPos, aYPos + MARGIN);
+			fGC.drawLine(aXPos + w, aYPos + MARGIN, aXPos + w, h + aYPos - 2 * MARGIN);
+			fGC.drawLine(aXPos + w, h + aYPos - 2 * MARGIN, PIN_WIDTH + ARROW_WIDTH + aXPos, h + aYPos - 2 * MARGIN);
 
-			fGC.drawLine(PIN_WIDTH + ARROW_WIDTH + aXPos, aYPos, aXPos + PIN_WIDTH, h / 2 + aYPos);
-			fGC.drawLine(PIN_WIDTH + ARROW_WIDTH + aXPos, h + aYPos, aXPos + PIN_WIDTH, h / 2 + aYPos);
+			fGC.drawLine(PIN_WIDTH + ARROW_WIDTH + aXPos, aYPos + MARGIN, aXPos + PIN_WIDTH, h / 2 + aYPos);
+			fGC.drawLine(PIN_WIDTH + ARROW_WIDTH + aXPos, h + aYPos - 2 * MARGIN, aXPos + PIN_WIDTH, h / 2 + aYPos);
 
 			fGC.drawLine(aXPos, h / 2 + aYPos, aXPos + PIN_WIDTH, h / 2 + aYPos);
 
 		} else {
 
-			fGC.drawLine(aXPos, aYPos, w - ARROW_WIDTH - PIN_WIDTH + aXPos, aYPos);
-			fGC.drawLine(aXPos, aYPos, aXPos, h + aYPos);
-			fGC.drawLine(aXPos, h + aYPos, w - ARROW_WIDTH - PIN_WIDTH + aXPos, h + aYPos);
+			fGC.drawLine(aXPos, aYPos + MARGIN, w - ARROW_WIDTH - PIN_WIDTH + aXPos, aYPos + MARGIN);
+			fGC.drawLine(aXPos, aYPos + MARGIN, aXPos, h + aYPos - 2 * MARGIN);
+			fGC.drawLine(aXPos, h + aYPos - 2 * MARGIN, w - ARROW_WIDTH - PIN_WIDTH + aXPos, h + aYPos - 2 * MARGIN);
 
-			fGC.drawLine(w - ARROW_WIDTH - PIN_WIDTH + aXPos, aYPos, w - PIN_WIDTH + aXPos, h / 2 + aYPos);
-			fGC.drawLine(w - ARROW_WIDTH - PIN_WIDTH + aXPos, h + aYPos, w - PIN_WIDTH + aXPos, h / 2 + aYPos);
+			fGC.drawLine(w - ARROW_WIDTH - PIN_WIDTH + aXPos, aYPos + MARGIN, w - PIN_WIDTH + aXPos, h / 2 + aYPos);
+			fGC.drawLine(w - ARROW_WIDTH - PIN_WIDTH + aXPos, h + aYPos - 2 * MARGIN, w - PIN_WIDTH + aXPos, h / 2 + aYPos);
 
 			fGC.drawLine(aXPos + w - PIN_WIDTH, h / 2 + aYPos, aXPos + w, h / 2 + aYPos);
 		}
@@ -108,9 +110,9 @@ public class VGPortSymbol<NodeType, PortType, SignalType> implements VGSymbol<No
 		}
 
 		if (fOutput) {
-			fGC.drawText(fLabel, ARROW_WIDTH + BORDER_WIDTH + PIN_WIDTH + aXPos, aYPos + h / 2 + th / 2, true);
+			fGC.drawText(fLabel, ARROW_WIDTH + BORDER_WIDTH + PIN_WIDTH + aXPos, aYPos + h / 2 + th / 2 - 1, true);
 		} else {
-			fGC.drawText(fLabel, BORDER_WIDTH + aXPos, aYPos + h / 2 + th / 2, true);
+			fGC.drawText(fLabel, BORDER_WIDTH + aXPos, aYPos + h / 2 + th / 2 - 1, true);
 		}
 	}
 
@@ -123,7 +125,7 @@ public class VGPortSymbol<NodeType, PortType, SignalType> implements VGSymbol<No
 	@Override
 	public void unTweakPortPosition(PortType aPort) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

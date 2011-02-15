@@ -38,7 +38,7 @@ public class VGGenericSymbol<NodeType, PortType, SignalType> implements VGSymbol
 
 	private int fMinWidth = MIN_WIDTH;
 
-	public static final int PORT_DISTANCE = 60;
+	public static final int PORT_DISTANCE = 50;
 
 	private int fPortDistance = PORT_DISTANCE;
 
