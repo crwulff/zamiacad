@@ -19,6 +19,7 @@ import org.zamia.instgraph.synth.model.IGSMExprEngine;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
 import org.zamia.instgraph.synth.model.IGSMExprNodeClockEdge;
 import org.zamia.rtlng.RTLSignal;
+import org.zamia.rtlng.RTLValue;
 import org.zamia.rtlng.RTLValue.BitValue;
 import org.zamia.util.HashMapArray;
 
@@ -98,7 +99,12 @@ public class IGBindings {
 
 			// compute async data
 
-			RTLSignal aD = b.synthesizeASyncData(aE, clk, aSynth);
+			RTLValue aEsv = aE.getStaticValue();
+			RTLSignal aD = null;
+			
+			if ((aEsv == null) || (aEsv.getBit() != BitValue.BV_0)) {
+				aD = b.synthesizeASyncData(aE, clk, aSynth);
+			}
 
 			// compute sync enable
 

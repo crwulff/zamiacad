@@ -308,7 +308,7 @@ public class RTLModule extends RTLNode {
 	}
 
 	public RTLSignal createComponentReg(RTLSignal aAE, RTLSignal aAD, RTLSignal aE, RTLSignal aD, RTLSignal aClk, SourceLocation aLocation) throws ZamiaException {
-		RTLNRegister node = new RTLNRegister(aAD.getType(), this, aLocation, getZDB());
+		RTLNRegister node = new RTLNRegister(aAD != null ? aAD.getType() : aD.getType(), this, aLocation, getZDB());
 		add(node);
 
 		if (aAE != null) {
