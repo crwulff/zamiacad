@@ -17,9 +17,12 @@ import java.util.LinkedList;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaLogger;
+import org.zamia.rtl.RTLPort;
 import org.zamia.util.HashMapArray;
+import org.zamia.util.HashSetArray;
 import org.zamia.util.Position;
 import org.zamia.util.ZStack;
+import org.zamia.vg.VGGC.VGColor;
 
 /**
  * 
@@ -65,6 +68,9 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 	private final VGGC fGC;
 
+	// dynamic mode:
+	private HashSetArray<VGPort<NodeType, PortType, SignalType>> fExpandablePorts;
+
 	public VGLayout(VGContentProvider<NodeType, PortType, SignalType> aContentProvider, VGLabelProvider<NodeType, PortType, SignalType> aLabelProvider, VGGC aGC) {
 		fContentProvider = aContentProvider;
 		fLabelProvider = aLabelProvider;
@@ -97,6 +103,8 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 		fSignals = new HashMapArray<SignalType, VGSignal<NodeType, PortType, SignalType>>();
 
+		fExpandablePorts = new HashSetArray<VGPort<NodeType, PortType, SignalType>>();
+
 		NodeType root = fContentProvider.getRoot();
 
 		// create boxes for primary ports
@@ -108,20 +116,24 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 			PortType port = fContentProvider.getPort(root, i);
 
-			VGBox<NodeType, PortType, SignalType> box = new VGBox<NodeType, PortType, SignalType>(null, port, this);
+			VGBox<NodeType, PortType, SignalType> box = new VGBox<NodeType, PortType, SignalType>(null, port, this, fExpandablePorts);
 
 			fPrimaryPorts.put(port, box);
 			fBoxes.add(box);
 		}
 
-		// create boxes for all nodes
+		// create boxes for all visible nodes
 
 		n = fContentProvider.getNumChildren(root);
 		for (int i = 0; i < n; i++) {
 
 			NodeType node = fContentProvider.getChild(root, i);
 
-			VGBox<NodeType, PortType, SignalType> box = new VGBox<NodeType, PortType, SignalType>(node, null, this);
+			if (!fContentProvider.isNodeVisible(node)) {
+				continue;
+			}
+
+			VGBox<NodeType, PortType, SignalType> box = new VGBox<NodeType, PortType, SignalType>(node, null, this, fExpandablePorts);
 
 			fNodeBoxes.put(node, box);
 			fBoxes.add(box);
@@ -132,7 +144,7 @@ public class VGLayout<NodeType, PortType, SignalType> {
 		n = fBoxes.size();
 		for (int i = 0; i < n; i++) {
 			VGBox<NodeType, PortType, SignalType> box = fBoxes.get(i);
-			box.compute();
+			box.compute(fContentProvider);
 		}
 
 	}
@@ -1086,6 +1098,28 @@ public class VGLayout<NodeType, PortType, SignalType> {
 			c.paint();
 		}
 
+		if (fContentProvider.isDynamicMode()) {
+
+			fGC.setBackground(VGColor.BACKGROUND);
+			fGC.setForeground(VGColor.MODULE);
+			fGC.setLineWidth(1);
+
+			n = fExpandablePorts.size();
+			for (int i = 0; i < n; i++) {
+				VGPort<NodeType, PortType, SignalType> p = fExpandablePorts.get(i);
+
+				Position pos = getPortPosition(p);
+
+				logger.debug("Got position %s for expandable port %s", pos, p);
+
+				fGC.fillRectangle(pos.getX() - 5, pos.getY() - 5, 10, 10);
+
+				fGC.drawLine(pos.getX() - 3, pos.getY(), pos.getX() + 3, pos.getY());
+				fGC.drawLine(pos.getX(), pos.getY() - 3, pos.getX(), pos.getY() + 3);
+
+			}
+		}
+
 		fGC.finish();
 	}
 
@@ -1130,5 +1164,13 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 	public Position getTotalSize() {
 		return fTotalSize;
+	}
+
+	public int getNumExpandablePorts() {
+		return fExpandablePorts.size();
+	}
+
+	public PortType getExpandablePort(int aIdx) {
+		return fExpandablePorts.get(aIdx).getPort();
 	}
 }

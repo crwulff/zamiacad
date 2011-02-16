@@ -57,15 +57,15 @@ public class VGPort<NodeType, PortType, SignalType> {
 		fLabel = fLabelProvider.getPortLabel(fPort); 
 	}
 
-	public VGPort(int aWidth, String aLabel, boolean aOutput, VGBox<NodeType, PortType, SignalType> aBox, VGLayout<NodeType, PortType, SignalType> aLayout) {
+	public VGPort(int aWidth, PortType aPort, boolean aOutput, VGBox<NodeType, PortType, SignalType> aBox, VGLayout<NodeType, PortType, SignalType> aLayout) {
 		fWidth = aWidth;
-		fPort = null;
+		fPort = aPort;
 		fBox = aBox;
 		fLayout = aLayout;
 		fContentProvider = fLayout.getContentProvider();
 		fLabelProvider = fLayout.getLabelProvider();
 		fOutput = aOutput;
-		fLabel = aLabel;
+		fLabel = fLabelProvider.getPortLabel(fPort); 
 	}
 
 	public VGBox<NodeType, PortType, SignalType> getBox() {

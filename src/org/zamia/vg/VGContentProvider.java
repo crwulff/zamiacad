@@ -1,5 +1,5 @@
 /* 
- * Copyright 2010 by the authors indicated in the @author tags. 
+ * Copyright 2010, 2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -16,6 +16,8 @@ package org.zamia.vg;
 
 public interface VGContentProvider<NodeType, PortType, SignalType> {
 
+	public boolean isDynamicMode();
+	
 	/*
 	 * nodes
 	 */
@@ -25,6 +27,8 @@ public interface VGContentProvider<NodeType, PortType, SignalType> {
 	public int getNumChildren(NodeType aParent);
 
 	public NodeType getChild(NodeType aParent, int aIdx);
+	
+	public boolean isNodeVisible(NodeType aNode);
 
 	/*
 	 * ports
@@ -37,6 +41,8 @@ public interface VGContentProvider<NodeType, PortType, SignalType> {
 	public boolean isOutput(PortType aPort);
 
 	public NodeType getNode(PortType aPort);
+	
+	public boolean isPortExpanded(PortType aPort);
 
 	/*
 	 * signals

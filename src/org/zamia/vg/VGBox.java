@@ -10,6 +10,7 @@ package org.zamia.vg;
 
 import java.util.ArrayList;
 
+import org.zamia.util.HashSetArray;
 import org.zamia.util.Position;
 
 /**
@@ -57,7 +58,7 @@ public class VGBox<NodeType, PortType, SignalType> {
 	 * @param aNode
 	 * @param aPrimaryPort
 	 */
-	public VGBox(NodeType aNode, PortType aPrimaryPort, VGLayout<NodeType, PortType, SignalType> aLayout) {
+	public VGBox(NodeType aNode, PortType aPrimaryPort, VGLayout<NodeType, PortType, SignalType> aLayout, HashSetArray<VGPort<NodeType, PortType, SignalType>> aExpandablePorts) {
 
 		fLayout = aLayout;
 		fContentProvider = fLayout.getContentProvider();
@@ -79,17 +80,20 @@ public class VGBox<NodeType, PortType, SignalType> {
 			 * 
 			 */
 
-			String label = fLabelProvider.getPortLabel(fPrimaryPort);
 			int width = fLabelProvider.getPortWidth(fPrimaryPort);
-			VGPort<NodeType, PortType, SignalType> internalPort = new VGPort<NodeType, PortType, SignalType>(width, label, !fContentProvider.isOutput(fPrimaryPort), this, fLayout);
+			VGPort<NodeType, PortType, SignalType> internalPort = new VGPort<NodeType, PortType, SignalType>(width, fPrimaryPort, !fContentProvider.isOutput(fPrimaryPort), this, fLayout);
 
 			fPorts.add(internalPort);
 
 			SignalType signal = fContentProvider.getSignal(fPrimaryPort);
 
 			if (signal != null) {
-				VGSignal<NodeType, PortType, SignalType> s = fLayout.getOrCreateSignal(signal);
-				internalPort.connect(s);
+				if (fContentProvider.isPortExpanded(fPrimaryPort)) {
+					VGSignal<NodeType, PortType, SignalType> s = fLayout.getOrCreateSignal(signal);
+					internalPort.connect(s);
+				} else {
+					aExpandablePorts.add(internalPort);
+				}
 			}
 
 		} else {
@@ -106,8 +110,14 @@ public class VGBox<NodeType, PortType, SignalType> {
 				SignalType signal = fContentProvider.getSignal(port);
 
 				if (signal != null) {
-					VGSignal<NodeType, PortType, SignalType> s = fLayout.getOrCreateSignal(signal);
-					p.connect(s);
+
+					if (fContentProvider.isPortExpanded(port)) {
+						VGSignal<NodeType, PortType, SignalType> s = fLayout.getOrCreateSignal(signal);
+						p.connect(s);
+					} else {
+						aExpandablePorts.add(p);
+					}
+
 				}
 			}
 		}
@@ -127,7 +137,7 @@ public class VGBox<NodeType, PortType, SignalType> {
 	/**
 	 * precompute all available information about this boxes connections
 	 */
-	void compute() {
+	void compute(VGContentProvider<NodeType, PortType, SignalType> aContentProvider) {
 
 		fDrivers = new ArrayList<VGBox<NodeType, PortType, SignalType>>();
 		fReceivers = new ArrayList<VGBox<NodeType, PortType, SignalType>>();

@@ -140,6 +140,59 @@ public class IGSynthTest {
 			}
 		}
 
+		// test dynamic mode:
+
+		contentProvider.setDynamicMode(true);
+
+		out = null;
+
+		VGLayout<RTLNode, RTLPort, RTLSignal> layout = null;
+
+		try {
+			out = new PrintWriter(new BufferedWriter(new FileWriter(svgFileName)));
+
+			VGGCSVG gc = new VGGCSVG(out);
+
+			layout = new VGLayout<RTLNode, RTLPort, RTLSignal>(contentProvider, labelProvider, gc);
+
+			layout.paint();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (out != null) {
+				out.close();
+			}
+		}
+
+		// expand all initially expandable ports:
+
+		n = layout.getNumExpandablePorts();
+
+		for (int i = 0; i < n; i++) {
+			RTLPort p = layout.getExpandablePort(i);
+
+			contentProvider.expandPort(p);
+
+		}
+
+		try {
+			out = new PrintWriter(new BufferedWriter(new FileWriter(svgFileName)));
+
+			VGGCSVG gc = new VGGCSVG(out);
+
+			layout = new VGLayout<RTLNode, RTLPort, RTLSignal>(contentProvider, labelProvider, gc);
+
+			layout.paint();
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (out != null) {
+				out.close();
+			}
+		}
+
 		return rtlm;
 	}
 
@@ -246,7 +299,7 @@ public class IGSynthTest {
 		sim.assign(new PathName("N"), "1");
 		sim.simulate();
 		assertEquals(BitValue.BV_0, sim.getCurrentValue(new PathName("Z")).getBit());
-		
+
 		sim.assign(new PathName("C"), "1");
 		sim.simulate();
 		sim.assign(new PathName("C"), "0");
