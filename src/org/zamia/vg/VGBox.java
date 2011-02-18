@@ -81,7 +81,8 @@ public class VGBox<NodeType, PortType, SignalType> {
 			 */
 
 			int width = fLabelProvider.getPortWidth(fPrimaryPort);
-			VGPort<NodeType, PortType, SignalType> internalPort = new VGPort<NodeType, PortType, SignalType>(width, fPrimaryPort, !fContentProvider.isOutput(fPrimaryPort), this, fLayout);
+			VGPort<NodeType, PortType, SignalType> internalPort = new VGPort<NodeType, PortType, SignalType>(width, fPrimaryPort, !fContentProvider.isOutput(fPrimaryPort), this,
+					fLayout);
 
 			fPorts.add(internalPort);
 
@@ -266,6 +267,10 @@ public class VGBox<NodeType, PortType, SignalType> {
 
 	VGSymbol<NodeType, PortType, SignalType> getSymbol() {
 		return fSymbol;
+	}
+
+	NodeType getNode() {
+		return fNode;
 	}
 
 }

@@ -79,33 +79,47 @@ public class RTLSymbolMUX implements VGSymbol<RTLNode, RTLPort, RTLSignal> {
 	@Override
 	public void paint(RTLNode aModule, int aXPos, int aYPos, boolean aHilight) {
 		fGC.setFont(VGFont.NORMAL);
-		fGC.setForeground(VGColor.MODULE_LABEL);
+
+		if (aHilight) {
+			fGC.setForeground(VGColor.HIGHLIGHT);
+		} else {
+			fGC.setForeground(VGColor.MODULE);
+		}
+
 		fGC.setLineWidth(2);
 
 		// a and b ports
-		
+
 		fGC.drawLine(aXPos, aYPos + PAY, aXPos + XMAR, aYPos + PAY);
 		fGC.drawLine(aXPos, aYPos + PBY, aXPos + XMAR, aYPos + PBY);
 
 		// body
-		
+
 		fGC.drawLine(aXPos + XMAR, aYPos + PBY - 15, aXPos + XMAR, aYPos + PAY + 15);
 		fGC.drawLine(aXPos + XMAR + 20, aYPos + PBY - 2, aXPos + XMAR + 20, aYPos + PAY + 2);
 		fGC.drawLine(aXPos + XMAR, aYPos + PBY - 15, aXPos + XMAR + 20, aYPos + PBY - 2);
 		fGC.drawLine(aXPos + XMAR, aYPos + PAY + 15, aXPos + XMAR + 20, aYPos + PAY + 2);
 
-		fGC.drawText("1", aXPos + XMAR + 3, aYPos + PAY + 3, true);
-		fGC.drawText("0", aXPos + XMAR + 3, aYPos + PBY + 3, true);
-
-		
 		// select port
-		
+
 		fGC.drawLine(aXPos, aYPos + PSY, aXPos + XMAR + 10, aYPos + PSY);
 		fGC.drawLine(aXPos + XMAR + 10, aYPos + PSY, aXPos + XMAR + 10, aYPos + PSY - 12);
 
 		// Z port
-		
+
 		fGC.drawLine(aXPos + getWidth() - XMAR, aYPos + getHeight() / 2, aXPos + getWidth(), aYPos + getHeight() / 2);
+
+		// body labels
+
+		if (aHilight) {
+			fGC.setForeground(VGColor.HIGHLIGHT);
+		} else {
+			fGC.setForeground(VGColor.MODULE_LABEL);
+		}
+
+		fGC.drawText("1", aXPos + XMAR + 3, aYPos + PAY + 3, true);
+		fGC.drawText("0", aXPos + XMAR + 3, aYPos + PBY + 3, true);
+
 	}
 
 }

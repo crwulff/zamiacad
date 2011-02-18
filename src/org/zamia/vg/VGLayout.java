@@ -17,7 +17,6 @@ import java.util.LinkedList;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaLogger;
-import org.zamia.rtl.RTLPort;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.Position;
@@ -1088,14 +1087,14 @@ public class VGLayout<NodeType, PortType, SignalType> {
 		logger.debug("VGLayout: done. total time elapsed: " + time + "s.\n");
 	}
 
-	public void paint() {
+	public void paint(VGSelectionProvider<NodeType, SignalType> aSelectionProvider) {
 
 		fGC.start(fTotalSize.getX(), fTotalSize.getY());
 
 		int n = fChannels.size();
 		for (int i = 0; i < n; i++) {
 			VGChannel<NodeType, PortType, SignalType> c = fChannels.get(i);
-			c.paint();
+			c.paint(aSelectionProvider);
 		}
 
 		if (fContentProvider.isDynamicMode()) {
@@ -1108,6 +1107,13 @@ public class VGLayout<NodeType, PortType, SignalType> {
 			for (int i = 0; i < n; i++) {
 				VGPort<NodeType, PortType, SignalType> p = fExpandablePorts.get(i);
 
+				VGBox<NodeType, PortType, SignalType> box = p.getBox();
+				if (aSelectionProvider.isNodeSelected(box.getNode())) {
+					fGC.setForeground(VGColor.HIGHLIGHT);
+				} else {
+					fGC.setForeground(VGColor.MODULE);
+				}
+				
 				Position pos = getPortPosition(p);
 
 				logger.debug("Got position %s for expandable port %s", pos, p);

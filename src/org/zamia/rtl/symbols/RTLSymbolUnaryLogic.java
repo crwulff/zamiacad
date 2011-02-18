@@ -92,13 +92,25 @@ public class RTLSymbolUnaryLogic implements VGSymbol<RTLNode, RTLPort, RTLSignal
 	@Override
 	public void paint(RTLNode aModule, int aXPos, int aYPos, boolean aHilight) {
 		fGC.setFont(VGFont.LARGE);
-		fGC.setForeground(VGColor.MODULE_LABEL);
+
+		if (aHilight) {
+			fGC.setForeground(VGColor.HIGHLIGHT);
+		} else {
+			fGC.setForeground(VGColor.MODULE_LABEL);
+		}
+
 		fGC.setLineWidth(2);
 
 		int th = fGC.getFontHeight();
 		int tw = fGC.textWidth(fLabel);
 
 		fGC.drawText(fLabel, aXPos + getWidth() / 2 - tw / 2, aYPos + getHeight() / 2 + th / 2, true);
+
+		if (aHilight) {
+			fGC.setForeground(VGColor.HIGHLIGHT);
+		} else {
+			fGC.setForeground(VGColor.MODULE);
+		}
 
 		fGC.drawLine(aXPos, aYPos + getHeight() / 2, aXPos + XMAR, aYPos + getHeight() / 2);
 

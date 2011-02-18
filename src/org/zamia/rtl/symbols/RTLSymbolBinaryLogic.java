@@ -48,6 +48,7 @@ public class RTLSymbolBinaryLogic implements VGSymbol<RTLNode, RTLPort, RTLSigna
 	private final VGGC fGC;
 
 	private HashMap<RTLPort, MutablePosition> fPortPositions;
+
 	private HashSet<RTLPort> fTweakedPorts;
 
 	public RTLSymbolBinaryLogic(RTLNBinaryOp aOp, VGGC aGC) {
@@ -57,7 +58,7 @@ public class RTLSymbolBinaryLogic implements VGSymbol<RTLNode, RTLPort, RTLSigna
 
 		fPortPositions.put(aOp.getA(), new MutablePosition(0, PAY));
 		fPortPositions.put(aOp.getB(), new MutablePosition(0, PBY));
-		fPortPositions.put(aOp.getZ(), new MutablePosition(WIDTH, HEIGHT/2));
+		fPortPositions.put(aOp.getZ(), new MutablePosition(WIDTH, HEIGHT / 2));
 
 		BinaryOp op = aOp.getOp();
 
@@ -141,7 +142,13 @@ public class RTLSymbolBinaryLogic implements VGSymbol<RTLNode, RTLPort, RTLSigna
 	@Override
 	public void paint(RTLNode aModule, int aXPos, int aYPos, boolean aHilight) {
 		fGC.setFont(VGFont.LARGE);
-		fGC.setForeground(VGColor.MODULE_LABEL);
+
+		if (aHilight) {
+			fGC.setForeground(VGColor.HIGHLIGHT);
+		} else {
+			fGC.setForeground(VGColor.MODULE_LABEL);
+		}
+
 		fGC.setLineWidth(2);
 
 		int th = fGC.getFontHeight();
@@ -149,9 +156,15 @@ public class RTLSymbolBinaryLogic implements VGSymbol<RTLNode, RTLPort, RTLSigna
 
 		fGC.drawText(fLabel, aXPos + getWidth() / 2 - tw / 2, aYPos + getHeight() / 2 + th / 2, true);
 
+		if (aHilight) {
+			fGC.setForeground(VGColor.HIGHLIGHT);
+		} else {
+			fGC.setForeground(VGColor.MODULE);
+		}
+
 		MutablePosition pos = fPortPositions.get(aModule.findPort("A"));
 		fGC.drawLine(aXPos, aYPos + pos.getY(), aXPos + XMAR, aYPos + pos.getY());
-		
+
 		pos = fPortPositions.get(aModule.findPort("B"));
 		fGC.drawLine(aXPos, aYPos + pos.getY(), aXPos + XMAR, aYPos + pos.getY());
 

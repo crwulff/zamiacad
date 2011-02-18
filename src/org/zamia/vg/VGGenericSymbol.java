@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2010 by the authors indicated in the @author tags.
+ * Copyright 2004-2011 by the authors indicated in the @author tags.
  * All rights reserved.
  *
  * See the LICENSE file for details.

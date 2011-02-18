@@ -293,7 +293,7 @@ public class VGChannel<NodeType, PortType, SignalType> {
 		return fXPos;
 	}
 
-	public void paint() {
+	public void paint(VGSelectionProvider<NodeType, SignalType> aSelectionProvider) {
 
 		VGGC gc = fLayout.getGC();
 
@@ -301,15 +301,14 @@ public class VGChannel<NodeType, PortType, SignalType> {
 		for (int i = 0; i < nBoxes; i++) {
 			VGBox<NodeType, PortType, SignalType> box = fBoxes.get(i);
 
-			box.paint(false);
+			box.paint(aSelectionProvider.isNodeSelected(box.getNode()));
 		}
 
 		int nSignals = fSignals.size();
 		for (int i = 0; i < nSignals; i++) {
 			VGSignal<NodeType, PortType, SignalType> signal = fSignals.get(i).fSignal;
 
-			// FIXME
-			boolean selected = false;
+			boolean selected = aSelectionProvider.isSignalSelected(signal.getSignal());
 
 			VGChannelAllocation ca = fSignals.get(signal);
 

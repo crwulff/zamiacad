@@ -28,6 +28,7 @@ import org.zamia.rtl.RTLValue;
 import org.zamia.rtl.RTLVisualGraphContentProvider;
 import org.zamia.rtl.RTLVisualGraphLabelProvider;
 import org.zamia.rtl.RTLValue.BitValue;
+import org.zamia.rtl.RTLVisualGraphSelectionProvider;
 import org.zamia.rtl.sim.RTLSimulator;
 import org.zamia.util.PathName;
 import org.zamia.vg.VGGCSVG;
@@ -117,6 +118,8 @@ public class IGSynthTest {
 
 		RTLVisualGraphLabelProvider labelProvider = new RTLVisualGraphLabelProvider(rtlm);
 
+		RTLVisualGraphSelectionProvider selectionProvider = new RTLVisualGraphSelectionProvider();
+		
 		String svgFileName = fZPrj.getDataPath() + File.separator + aSynthUID + ".svg";
 
 		logger.info("IGSynthTest: SVG file name: %s", svgFileName);
@@ -130,7 +133,7 @@ public class IGSynthTest {
 
 			VGLayout<RTLNode, RTLPort, RTLSignal> layout = new VGLayout<RTLNode, RTLPort, RTLSignal>(contentProvider, labelProvider, gc);
 
-			layout.paint();
+			layout.paint(selectionProvider);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -155,7 +158,7 @@ public class IGSynthTest {
 
 			layout = new VGLayout<RTLNode, RTLPort, RTLSignal>(contentProvider, labelProvider, gc);
 
-			layout.paint();
+			layout.paint(selectionProvider);
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -165,7 +168,7 @@ public class IGSynthTest {
 			}
 		}
 
-		// expand all initially expandable ports:
+		// expand all initially expandable ports, select modules:
 
 		n = layout.getNumExpandablePorts();
 
@@ -173,7 +176,12 @@ public class IGSynthTest {
 			RTLPort p = layout.getExpandablePort(i);
 
 			contentProvider.expandPort(p);
-
+			
+			selectionProvider.setNodeSelection(p.getNode(), true);
+			RTLSignal s = p.getSignal();
+			if (s != null) {
+				selectionProvider.setSignalSelection(s, true);
+			}
 		}
 
 		try {
@@ -183,7 +191,42 @@ public class IGSynthTest {
 
 			layout = new VGLayout<RTLNode, RTLPort, RTLSignal>(contentProvider, labelProvider, gc);
 
-			layout.paint();
+			layout.paint(selectionProvider);
+
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (out != null) {
+				out.close();
+			}
+		}
+
+		// expand again, select modules:
+
+		selectionProvider.clear();
+		
+		n = layout.getNumExpandablePorts();
+
+		for (int i = 0; i < n; i++) {
+			RTLPort p = layout.getExpandablePort(i);
+
+			contentProvider.expandPort(p);
+			
+			selectionProvider.setNodeSelection(p.getNode(), true);
+			RTLSignal s = p.getSignal();
+			if (s != null) {
+				selectionProvider.setSignalSelection(s, true);
+			}
+		}
+
+		try {
+			out = new PrintWriter(new BufferedWriter(new FileWriter(svgFileName)));
+
+			VGGCSVG gc = new VGGCSVG(out);
+
+			layout = new VGLayout<RTLNode, RTLPort, RTLSignal>(contentProvider, labelProvider, gc);
+
+			layout.paint(selectionProvider);
 
 		} catch (IOException e) {
 			e.printStackTrace();
