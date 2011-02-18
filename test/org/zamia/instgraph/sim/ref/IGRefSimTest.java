@@ -178,4 +178,9 @@ public class IGRefSimTest {
 
 		runTest("examples/refsim/entityInst", 2, 152);
 	}
+	@Test
+	public void testUnconstrainedInterface() throws Exception {
+
+		runTest("examples/refsim/unconstrainedInterface", 2, 2);
+	}
 }

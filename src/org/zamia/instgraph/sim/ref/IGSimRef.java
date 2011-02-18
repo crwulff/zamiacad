@@ -418,7 +418,10 @@ public class IGSimRef implements IGISimulator {
 
 			if (driver.getValue(src) == null) {
 				IGStaticValue zValue = IGStaticValue.generateZ(obj.getType().computeStaticType(aEnv, ASTErrorMode.EXCEPTION, null), src);
-				driver.setValue(zValue, src);
+				IGTypeStatic zT = zValue.getStaticType();
+				if (!(zT.isArray() && zT.isUnconstrained())) {
+					driver.setValue(zValue, src);
+				}
 			}
 
 			if (driver instanceof IGSignalDriver) {
