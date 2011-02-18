@@ -532,7 +532,7 @@ end package body ${name};
 	-- decl
 begin
   ${cursor}
-end function ${designator} ; 
+end procedure ${designator} ; 
 </template>
 
 <template 
