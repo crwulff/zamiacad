@@ -375,7 +375,7 @@ public class VGChannel<NodeType, PortType, SignalType> {
 				dx = channel.getSignalXPos(signal);
 				gc.drawLine(sx, sy, dx, sy);
 				if (sy != maxConnY && sy != minConnY) {
-					gc.fillOval(sx, sy, WIRE_WIDTH/3, WIRE_WIDTH/3);
+					gc.fillOval(sx, sy, WIRE_WIDTH / 3, WIRE_WIDTH / 3);
 				}
 			}
 
@@ -396,7 +396,7 @@ public class VGChannel<NodeType, PortType, SignalType> {
 				if (sy == minConnY)
 					continue;
 
-				gc.fillOval(sx, sy, WIRE_WIDTH/3, WIRE_WIDTH/3);
+				gc.fillOval(sx, sy, WIRE_WIDTH / 3, WIRE_WIDTH / 3);
 
 			}
 		}
@@ -551,7 +551,7 @@ public class VGChannel<NodeType, PortType, SignalType> {
 
 				connections.put(pos, s);
 				ca.setChannelConnRightYPos(pos);
-				
+
 				if (pos < min)
 					min = pos;
 				if (pos > max)
@@ -563,5 +563,85 @@ public class VGChannel<NodeType, PortType, SignalType> {
 		}
 
 		return penalty;
+	}
+
+	public SignalType checkSignalHit(int aX, int aY, int aPointerSize) {
+
+		int w = WIRE_WIDTH / 2;
+
+		int nSignals = fSignals.size();
+		for (int iSignals1 = 0; iSignals1 < nSignals; iSignals1++) {
+			VGChannelAllocation ca = fSignals.get(iSignals1);
+			VGSignal<NodeType, PortType, SignalType> s = ca.fSignal;
+
+			int x2 = fXPos + ca.fSignalIdx * WIRE_WIDTH;
+
+			int min = Integer.MAX_VALUE;
+			int max = Integer.MIN_VALUE;
+
+			int nConnections1 = ca.fPortConnections.size();
+			for (int iConnections1 = 0; iConnections1 < nConnections1; iConnections1++) {
+
+				VGPort<NodeType, PortType, SignalType> conn1 = ca.fPortConnections.get(iConnections1);
+
+				Position pos = conn1.getBox().getPortPosition(conn1);
+
+				int px = pos.getX();
+				int py = pos.getY();
+
+				if (py < min)
+					min = py;
+				if (py > max)
+					max = py;
+
+				int y1 = py;
+				int x1 = px;
+
+				int x3 = x2;
+
+				if (x1 > x3) {
+					int h = x1;
+					x1 = x3;
+					x3 = h;
+					x3 += 20;
+				} else {
+					x1 -= 20;
+				}
+
+				if (aX >= x1 && aX <= x3 && aY >= y1 - w && aY <= y1 + w) {
+					return s.getSignal();
+				}
+			}
+
+			if (ca.fChannelConnRight != null) {
+				if (ca.fChannelConnRightYPos > max)
+					max = ca.fChannelConnRightYPos;
+				if (ca.fChannelConnRightYPos < min)
+					min = ca.fChannelConnRightYPos;
+
+				int y1 = ca.fChannelConnRightYPos;
+
+				int x1 = ca.fChannelConnRight.getSignalXPos(s);
+
+				int x3 = x2;
+
+				if (x1 > x3) {
+					int h = x1;
+					x1 = x3;
+					x3 = h;
+				}
+
+				if (aX >= x1 && aX <= x3 && aY >= y1 - w && aY <= y1 + w) {
+					return s.getSignal();
+				}
+			}
+
+			if (aX >= x2 - w && aX <= x2 + w && aY >= min && aY <= max) {
+				return s.getSignal();
+			}
+
+		}
+
+		return null;
 	}
 }

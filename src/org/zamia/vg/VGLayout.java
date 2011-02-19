@@ -1,6 +1,6 @@
 /*
 
- * Copyright 2006,2010 by the authors indicated in the @author tags.
+ * Copyright 2006,2010,2011 by the authors indicated in the @author tags.
  * All rights reserved.
  *
  * See the LICENSE file for details.
@@ -1141,7 +1141,7 @@ public class VGLayout<NodeType, PortType, SignalType> {
 		return fLabelProvider;
 	}
 
-	VGBox<NodeType, PortType, SignalType> getNodeBox(NodeType aNode) {
+	public VGBox<NodeType, PortType, SignalType> getNodeBox(NodeType aNode) {
 		return fNodeBoxes.get(aNode);
 	}
 
@@ -1178,5 +1178,49 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 	public PortType getExpandablePort(int aIdx) {
 		return fExpandablePorts.get(aIdx).getPort();
+	}
+
+	public PortType checkHitExpandablePort(int aX, int aY, int aPointerSize) {
+		int n = fExpandablePorts.size();
+		
+		for (int i = 0; i<n; i++) {
+			VGPort<NodeType, PortType, SignalType> port = fExpandablePorts.get(i);
+			
+			Position pos = getPortPosition(port);
+
+			if (pos.getX() - 5 <= aX + aPointerSize && pos.getY() - 5 <= aY + aPointerSize
+					&& pos.getX() + 5 >= aX - aPointerSize && pos.getY() <= aY - aPointerSize) {
+				return port.getPort();
+			}
+		}
+		
+		return null;
+	}
+
+	public SignalType checkHitSignal(int aX, int aY, int aPointerSize) {
+		int n = fChannels.size();
+		for (int i = 0; i < n; i++) {
+			VGChannel<NodeType, PortType, SignalType> c = fChannels.get(i);
+
+			SignalType s = c.checkSignalHit(aX, aY, aPointerSize);
+
+			if (s != null) {
+				return s;
+			}
+		}
+
+		return null;
+	}
+
+	public NodeType checkHitNode(int aX, int aY, int aPointerSize) {
+		int n = fBoxes.size();
+		for (int i = 0; i < n; i++) {
+			VGBox<NodeType, PortType, SignalType> box = fBoxes.get(i);
+
+			if (box.isHit(aX, aY, aPointerSize)) {
+				return box.getNode();
+			}
+		}
+		return null;
 	}
 }

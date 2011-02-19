@@ -153,4 +153,9 @@ public class RTLVisualGraphContentProvider implements VGContentProvider<RTLNode,
 		
 	}
 
+	public void clearVisibility() {
+		fExpandedPorts.clear();
+		fVisibleNodes.clear();
+	}
+
 }

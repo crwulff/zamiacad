@@ -238,11 +238,11 @@ public class VGBox<NodeType, PortType, SignalType> {
 		return fPorts.get(aIdx);
 	}
 
-	int getWidth() {
+	public int getWidth() {
 		return fSymbol.getWidth();
 	}
 
-	int getHeight() {
+	public int getHeight() {
 		return fSymbol.getHeight();
 	}
 
@@ -250,11 +250,11 @@ public class VGBox<NodeType, PortType, SignalType> {
 		fYPos = yPos;
 	}
 
-	int getYPos() {
+	public int getYPos() {
 		return fYPos;
 	}
 
-	int getXPos() {
+	public int getXPos() {
 		VGChannel<NodeType, PortType, SignalType> channel = fLayout.getChannel(fCol);
 		return channel.getModulesPos();
 	}
@@ -271,6 +271,11 @@ public class VGBox<NodeType, PortType, SignalType> {
 
 	NodeType getNode() {
 		return fNode;
+	}
+
+	public boolean isHit(int aX, int aY, int aPointerSize) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }
