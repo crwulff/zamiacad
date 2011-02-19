@@ -86,7 +86,6 @@ public class ZamiaProject {
 		fZDB = new ZDB(dbDir, this);
 
 		fERM = new ERManager(this);
-		fRTLM = new RTLManager(this);
 
 		fVHDLParser = new VHDL2008Parser();
 		fVHDLIndexer = new VHDLIndexer();
@@ -111,6 +110,7 @@ public class ZamiaProject {
 		fBuilder = new ZamiaProjectBuilder(this);
 
 		fIGM = new IGManager(this);
+		fRTLM = new RTLManager(this);
 
 		initTclInterpreter();
 	}

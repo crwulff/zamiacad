@@ -65,12 +65,12 @@ public class BuildPath implements Serializable {
 
 	private BuildPathEntry fDefaultEntry; // basically lib WORK, max priority
 
-	private ArrayList<Toplevel> fToplevels;
+	private ArrayList<Toplevel> fToplevels, fSynthTLs;
 
 	private ArrayList<String> fScripts;
 
 	public enum Symbol {
-		NOSYMBOL, IDENTIFIER, STRING, EOF, EXTERN, LOCAL, EQUALS, TOPLEVEL, PERIOD, LPAREN, RPAREN, READONLY, IGNORE, INCLUDE, OPTION, TRUE, FALSE, TOPDOWN, BOTTOMUP, LIST, DEFAULT, NONE, EXEC, RECURSIVE, NONRECURSIVE
+		NOSYMBOL, IDENTIFIER, STRING, EOF, EXTERN, LOCAL, EQUALS, TOPLEVEL, PERIOD, LPAREN, RPAREN, READONLY, IGNORE, INCLUDE, OPTION, TRUE, FALSE, TOPDOWN, BOTTOMUP, LIST, DEFAULT, NONE, EXEC, RECURSIVE, NONRECURSIVE, SYNTHESIZE
 	};
 
 	private transient Reader fSrc;
@@ -118,6 +118,7 @@ public class BuildPath implements Serializable {
 		fKeyWords.put("exec", Symbol.EXEC);
 		fKeyWords.put("recursive", Symbol.RECURSIVE);
 		fKeyWords.put("nonrecursive", Symbol.NONRECURSIVE);
+		fKeyWords.put("synthesize", Symbol.SYNTHESIZE);
 
 		fBuf = new StringBuilder();
 
@@ -130,6 +131,7 @@ public class BuildPath implements Serializable {
 		fEntries = new ArrayList<BuildPathEntry>();
 		fVars = new HashMapArray<String, BPVar>();
 		fToplevels = new ArrayList<Toplevel>();
+		fSynthTLs = new ArrayList<Toplevel>();
 		fIgnorePatterns = new HashSetArray<String>();
 		fIncludes = new HashSetArray<String>();
 		fScripts = new ArrayList<String>();
@@ -455,6 +457,57 @@ public class BuildPath implements Serializable {
 
 	}
 
+	// "synthesize" [libId "."] entityId [ "(" archId ")" ]
+
+	private void synthesizeDeclaration() throws ZamiaException, IOException {
+
+		int line = this.fLine;
+		int col = this.fCol;
+
+		String libId = "WORK";
+
+		nextSym();
+		if (fSym != Symbol.IDENTIFIER)
+			throw new ZamiaException("Library/Entity id expected.", getLocation());
+		String entityId = fBuf.toString();
+		nextSym();
+
+		if (fSym == Symbol.PERIOD) {
+			nextSym();
+			libId = entityId;
+
+			if (fSym != Symbol.IDENTIFIER)
+				throw new ZamiaException("Entity id expected.", getLocation());
+
+			entityId = fBuf.toString();
+			nextSym();
+		}
+
+		String archId = null;
+
+		if (fSym == Symbol.LPAREN) {
+			nextSym();
+			if (fSym != Symbol.IDENTIFIER)
+				throw new ZamiaException("Architecture id expected.", getLocation());
+			archId = fBuf.toString();
+			nextSym();
+
+			if (fSym != Symbol.RPAREN)
+				throw new ZamiaException(") id expected.", getLocation());
+
+			nextSym();
+		}
+
+		logger.debug("synthesize declaration: " + entityId + "(" + archId + ") from library " + libId);
+
+		LUType type = archId != null ? LUType.Architecture : LUType.Entity;
+
+		DMUID duuid = new DMUID(type, libId, entityId, archId);
+
+		fSynthTLs.add(new Toplevel(duuid, new SourceLocation(fSF, line, col)));
+
+	}
+
 	// "local" [ "topdown" | "bottomup" ] [ "list"] (libId | "none") pathPrefix
 
 	private void localDeclaration() throws ZamiaException, IOException {
@@ -662,6 +715,9 @@ public class BuildPath implements Serializable {
 				break;
 			case EXEC:
 				execDeclaration();
+				break;
+			case SYNTHESIZE:
+				synthesizeDeclaration();
 				break;
 			default:
 				throw new ZamiaException("Syntax error.", getLocation());
@@ -927,6 +983,14 @@ public class BuildPath implements Serializable {
 
 	public Toplevel getToplevel(int aIdx) {
 		return fToplevels.get(aIdx);
+	}
+
+	public int getNumSynthTLs() {
+		return fSynthTLs.size();
+	}
+
+	public Toplevel getSynthTL(int aIdx) {
+		return fSynthTLs.get(aIdx);
 	}
 
 	public void setSrc(SourceFile aSF) {

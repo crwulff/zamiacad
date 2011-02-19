@@ -14,21 +14,23 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import org.zamia.SourceLocation;
+import org.zamia.ToplevelPath;
 import org.zamia.ZamiaException;
 import org.zamia.rtl.RTLPort.PortDir;
 import org.zamia.rtl.RTLType.TypeCat;
 import org.zamia.rtl.RTLValue.BitValue;
 import org.zamia.rtl.nodes.RTLNArrayIdx;
 import org.zamia.rtl.nodes.RTLNBinaryOp;
+import org.zamia.rtl.nodes.RTLNBinaryOp.BinaryOp;
 import org.zamia.rtl.nodes.RTLNDecoder;
 import org.zamia.rtl.nodes.RTLNLiteral;
 import org.zamia.rtl.nodes.RTLNMUX;
 import org.zamia.rtl.nodes.RTLNRegister;
 import org.zamia.rtl.nodes.RTLNUnaryOp;
-import org.zamia.rtl.nodes.RTLNBinaryOp.BinaryOp;
 import org.zamia.rtl.nodes.RTLNUnaryOp.UnaryOp;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.PathName;
+import org.zamia.vhdl.ast.DMUID;
 import org.zamia.zdb.ZDB;
 
 /**
@@ -41,10 +43,6 @@ import org.zamia.zdb.ZDB;
 public class RTLModule extends RTLNode {
 
 	public final static boolean enableSanityChecks = false;
-
-	private final String fSignature;
-
-	private final String fUID;
 
 	private HashMapArray<String, RTLNode> fNodes;
 
@@ -60,10 +58,18 @@ public class RTLModule extends RTLNode {
 
 	private HashMap<BitValue, RTLSignal> fBitLiterals;
 
-	public RTLModule(String aSignature, String aUID, SourceLocation aLocation, ZDB aZDB) {
+	private boolean fSynthesized = false;
+
+	private final ToplevelPath fPath;
+
+	private final DMUID fDMUID;
+
+	public RTLModule(ToplevelPath aPath, DMUID aDMUID, SourceLocation aLocation, ZDB aZDB) {
 		super(null, null, aLocation, aZDB);
-		fSignature = aSignature;
-		fUID = aUID;
+		
+		fPath = aPath;
+		fDMUID = aDMUID;
+		
 		clear();
 	}
 
@@ -690,11 +696,19 @@ public class RTLModule extends RTLNode {
 
 	@Override
 	public String getClassName() {
-		return fUID;
+		return fDMUID.getUID();
 	}
 
-	public String getSignature() {
-		return fSignature;
+	public boolean isSynthesized() {
+		return fSynthesized;
+	}
+	
+	public void setSynthesized(boolean aSyntheszied) {
+		fSynthesized = aSyntheszied;
+	}
+
+	public ToplevelPath getPath() {
+		return fPath;
 	}
 
 }

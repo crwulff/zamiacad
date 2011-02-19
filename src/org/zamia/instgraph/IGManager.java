@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009,2010 by the authors indicated in the @author tags. 
+ * Copyright 2009,2010,2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -44,7 +44,7 @@ import org.zamia.zdb.ZDBListIndex;
 import org.zamia.zdb.ZDBMapIndex;
 
 /**
- * Hibernate-based IG persistence manager
+ * ZDB-based IG persistence manager
  * 
  * @author Guenter Bartsch
  * 

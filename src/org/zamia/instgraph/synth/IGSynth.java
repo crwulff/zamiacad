@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
+import org.zamia.ToplevelPath;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
@@ -127,6 +128,8 @@ public class IGSynth {
 
 	private final RTLValue fBitValueX;
 
+	private IGStructure fStructure;
+
 	public IGSynth(ZamiaProject aZPrj) throws ZamiaException {
 		fZPrj = aZPrj;
 		fZDB = fZPrj.getZDB();
@@ -173,19 +176,24 @@ public class IGSynth {
 		return fOperationSynthAdapters.get(c);
 	}
 
-	public RTLModule synthesize(IGModule aModule) throws ZamiaException {
+	public RTLModule synthesizePorts(IGModule aModule) throws ZamiaException {
 
 		DMUID dmuid = aModule.getDUUID();
+		ToplevelPath tlp = aModule.getStructure().getPath();
 
 		fSignals = new HashMap<Long, RTLSignal>();
 
-		fModule = new RTLModule(dmuid.getUID(), "", aModule.computeSourceLocation(), fZDB);
+		fModule = new RTLModule(tlp, dmuid, aModule.computeSourceLocation(), fZDB);
 
-		IGStructure igs = aModule.getStructure();
+		fStructure = aModule.getStructure();
 
-		synthesizeStructure(igs);
+		synthesizeStructure(fStructure, true, false);
 
 		return fModule;
+	}
+
+	public void synthesizeBody() throws ZamiaException {
+		synthesizeStructure(fStructure, false, true);
 	}
 
 	private PortDir mapPortDir(OIDir aDir) {
@@ -232,75 +240,80 @@ public class IGSynth {
 		return uid;
 	}
 
-	private void synthesizeStructure(IGStructure aIGS) throws ZamiaException {
+	private void synthesizeStructure(IGStructure aIGS, boolean aSynthPorts, boolean aSynthBody) throws ZamiaException {
 
 		IGContainer container = aIGS.getContainer();
 
-		int n = container.getNumLocalItems();
-		for (int i = 0; i < n; i++) {
+		if (aSynthPorts) {
+			int n = container.getNumLocalItems();
+			for (int i = 0; i < n; i++) {
 
-			IGContainerItem item = container.getLocalItem(i);
+				IGContainerItem item = container.getLocalItem(i);
 
-			if (!(item instanceof IGObject)) {
-				continue;
+				if (!(item instanceof IGObject)) {
+					continue;
+				}
+
+				IGObject igo = (IGObject) item;
+
+				IGType type = igo.getType();
+
+				RTLType t = synthesizeType(type);
+
+				String uid = findUID(item.getId());
+
+				OIDir direction = igo.getDirection();
+
+				RTLSignal s = null;
+
+				if (direction != OIDir.NONE) {
+					PortDir dir = mapPortDir(igo.getDirection());
+					RTLPort p = fModule.createPort(uid, t, dir, igo.computeSourceLocation());
+					s = p.getSignal();
+				} else {
+					s = fModule.createSignal(uid, t, igo.computeSourceLocation());
+				}
+				long dbid = item.store();
+				fSignals.put(dbid, s);
+
+				logger.info("IGSynth: Generated %s => %s", igo, s);
 			}
-
-			IGObject igo = (IGObject) item;
-
-			IGType type = igo.getType();
-
-			RTLType t = synthesizeType(type);
-
-			String uid = findUID(item.getId());
-
-			OIDir direction = igo.getDirection();
-
-			RTLSignal s = null;
-
-			if (direction != OIDir.NONE) {
-				PortDir dir = mapPortDir(igo.getDirection());
-				RTLPort p = fModule.createPort(uid, t, dir, igo.computeSourceLocation());
-				s = p.getSignal();
-			} else {
-				s = fModule.createSignal(uid, t, igo.computeSourceLocation());
-			}
-			long dbid = item.store();
-			fSignals.put(dbid, s);
-
-			logger.info("IGSynth: Generated %s => %s", igo, s);
 		}
 
-		n = aIGS.getNumStatements();
-		for (int i = 0; i < n; i++) {
+		if (aSynthBody) {
 
-			IGConcurrentStatement stmt = aIGS.getStatement(i);
+			int n = aIGS.getNumStatements();
+			for (int i = 0; i < n; i++) {
 
-			if (stmt instanceof IGProcess) {
+				IGConcurrentStatement stmt = aIGS.getStatement(i);
 
-				IGProcess proc = (IGProcess) stmt;
+				if (stmt instanceof IGProcess) {
 
-				logger.info("IGSynth: synthesizing process %s", proc);
+					IGProcess proc = (IGProcess) stmt;
 
-				synthesizeProcess(proc);
+					logger.info("IGSynth: synthesizing process %s", proc);
 
-			} else if (stmt instanceof IGInstantiation) {
+					synthesizeProcess(proc);
 
-				logger.info("IGSynth: synthesizing instantiation %s", stmt);
+				} else if (stmt instanceof IGInstantiation) {
 
-				// FIXME: implement
+					logger.info("IGSynth: synthesizing instantiation %s", stmt);
 
-				throw new ZamiaException("Sorry, not implemented.");
+					// FIXME: implement
 
-			} else if (stmt instanceof IGStructure) {
+					throw new ZamiaException("Sorry, not implemented.");
 
-				logger.info("IGSynth: synthesizing nested structure %s", stmt);
+				} else if (stmt instanceof IGStructure) {
 
-				// FIXME: implement
+					logger.info("IGSynth: synthesizing nested structure %s", stmt);
 
-				throw new ZamiaException("Sorry, not implemented.");
+					// FIXME: implement
 
-			} else {
-				throw new ZamiaException("IGSynth: Unknown statement: " + stmt, stmt.computeSourceLocation());
+					throw new ZamiaException("Sorry, not implemented.");
+
+				} else {
+					throw new ZamiaException("IGSynth: Unknown statement: " + stmt, stmt.computeSourceLocation());
+				}
 			}
 		}
 	}

@@ -1,5 +1,5 @@
 /* 
- * Copyright 2008-2009 by the authors indicated in the @author tags. 
+ * Copyright 2008-2009,2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.zamia.instgraph.IGManager;
+import org.zamia.rtl.RTLManager;
 import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.VHDLIndexer;
 import org.zamia.vhdl.ast.DMUID;
@@ -268,6 +269,8 @@ public class ZamiaProjectBuilder {
 		}
 
 		rebuildIGs();
+
+		synthesize();
 	}
 
 	/*
@@ -666,7 +669,7 @@ public class ZamiaProjectBuilder {
 		for (int i = 0; i < n; i++) {
 
 			if (isCanceled()) {
-				logger.info("ZamiaProjectBuilder: ZamiaProjectBuilder: Canceled.");
+				logger.info("ZamiaProjectBuilder: Canceled.");
 				break;
 			}
 
@@ -679,6 +682,39 @@ public class ZamiaProjectBuilder {
 
 		logger.info("ZamiaProjectBuilder: Finished building instantiation graph(s). Time elapsed: %fs", d / 1000.0);
 		ZamiaProfiler.getInstance().stopTimer("IG");
+
+	}
+
+	private void synthesize() throws ZamiaException {
+		logger.info("ZamiaProjectBuilder: Synthesizing:");
+		logger.info("ZamiaProjectBuilder: =============");
+		setTaskName("Synthesizing...");
+
+		long startTime = System.currentTimeMillis();
+		ZamiaProfiler.getInstance().startTimer("Synth");
+
+		BuildPath bp = fZPrj.getBuildPath();
+
+		RTLManager rtlm = fZPrj.getRTLM();
+
+		int n = bp.getNumSynthTLs();
+
+		for (int i = 0; i < n; i++) {
+
+			if (isCanceled()) {
+				logger.info("ZamiaProjectBuilder: Canceled.");
+				break;
+			}
+
+			Toplevel toplevel = bp.getSynthTL(i);
+
+			rtlm.buildRTL(toplevel, fMonitor, 1000 / n);
+		}
+
+		double d = System.currentTimeMillis() - startTime;
+
+		logger.info("ZamiaProjectBuilder: Finished synthesizing. Time elapsed: %fs", d / 1000.0);
+		ZamiaProfiler.getInstance().stopTimer("Synth");
 
 	}
 

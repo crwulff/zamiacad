@@ -1,4 +1,6 @@
 
 toplevel FOO
 
+synthesize FOO
+
 

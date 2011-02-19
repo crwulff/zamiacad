@@ -207,7 +207,7 @@ public class RTLSimulator {
 
 					RTLNInstantiation inst = (RTLNInstantiation) node;
 
-					RTLModule m = fRTLM.loadRTLModule(inst.getSignature());
+					RTLModule m = fRTLM.findModule(inst.getSignature());
 
 					if (m == null) {
 						throw new ZamiaException("Incomplete design: " + inst + " missing RTL module.");

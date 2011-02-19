@@ -7,6 +7,15 @@
 
 package org.zamia.instgraph.synth;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import org.apache.log4j.Level;
 import org.junit.After;
 import org.junit.Ignore;
@@ -19,30 +28,21 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
 import org.zamia.instgraph.IGManager;
-import org.zamia.instgraph.IGModule;
+import org.zamia.rtl.RTLManager;
 import org.zamia.rtl.RTLModule;
 import org.zamia.rtl.RTLNode;
 import org.zamia.rtl.RTLPort;
 import org.zamia.rtl.RTLSignal;
 import org.zamia.rtl.RTLValue;
+import org.zamia.rtl.RTLValue.BitValue;
 import org.zamia.rtl.RTLVisualGraphContentProvider;
 import org.zamia.rtl.RTLVisualGraphLabelProvider;
-import org.zamia.rtl.RTLValue.BitValue;
 import org.zamia.rtl.RTLVisualGraphSelectionProvider;
 import org.zamia.rtl.sim.RTLSimulator;
 import org.zamia.util.PathName;
 import org.zamia.vg.VGGCSVG;
 import org.zamia.vg.VGLayout;
 import org.zamia.vhdl.ast.DMUID;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Guenter Bartsch
@@ -102,11 +102,9 @@ public class IGSynthTest {
 
 		Toplevel tl = new Toplevel(dmuid, null);
 
-		IGModule igmodule = igm.findModule(tl);
+		RTLManager rtlmanager = fZPrj.getRTLM();
 
-		IGSynth synth = new IGSynth(fZPrj);
-
-		RTLModule rtlm = synth.synthesize(igmodule);
+		RTLModule rtlm = rtlmanager.findModule(tl);
 
 		n = rtlm.getNumNodes();
 
@@ -119,7 +117,7 @@ public class IGSynthTest {
 		RTLVisualGraphLabelProvider labelProvider = new RTLVisualGraphLabelProvider(rtlm);
 
 		RTLVisualGraphSelectionProvider selectionProvider = new RTLVisualGraphSelectionProvider();
-		
+
 		String svgFileName = fZPrj.getDataPath() + File.separator + aSynthUID + ".svg";
 
 		logger.info("IGSynthTest: SVG file name: %s", svgFileName);
@@ -176,7 +174,7 @@ public class IGSynthTest {
 			RTLPort p = layout.getExpandablePort(i);
 
 			contentProvider.expandPort(p);
-			
+
 			selectionProvider.setNodeSelection(p.getNode(), true);
 			RTLSignal s = p.getSignal();
 			if (s != null) {
@@ -204,14 +202,14 @@ public class IGSynthTest {
 		// expand again, select modules:
 
 		selectionProvider.clear();
-		
+
 		n = layout.getNumExpandablePorts();
 
 		for (int i = 0; i < n; i++) {
 			RTLPort p = layout.getExpandablePort(i);
 
 			contentProvider.expandPort(p);
-			
+
 			selectionProvider.setNodeSelection(p.getNode(), true);
 			RTLSignal s = p.getSignal();
 			if (s != null) {
