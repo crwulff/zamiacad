@@ -117,8 +117,12 @@ public class Assertion extends VHDLNode {
 
 		IGType stringType = aContainer.findStringType();
 
-		IGOperation zReport = report == null ? new IGOperationLiteral("ASSERTION FAILED", stringType, getLocation()) : report.computeIGOperation(stringType, aContainer, aEE,
-				aCache, ASTErrorMode.EXCEPTION, null);
+		if (report == null) {
+			report = new OperationLiteral("ASSERTION FAILED", OperationLiteral.LiteralCat.STRING, this, 0);
+			report.setStartLine(fStartLine);
+			report.setStartCol(fStartCol);
+		}
+		IGOperation zReport = report.computeIGOperation(stringType, aContainer, aEE, aCache, ASTErrorMode.EXCEPTION, null);
 
 		IGType severityLevel = aContainer.findSeverityLevelType();
 
@@ -130,10 +134,10 @@ public class Assertion extends VHDLNode {
 	public String toVHDL() {
 		StringBuilder buf = new StringBuilder("ASSERT " + op.toVHDL());
 		if (report != null) {
-			buf.append(" REPORT " + report.toVHDL());
+			buf.append(" REPORT ").append(report.toVHDL());
 		}
 		if (severity != null) {
-			buf.append(" SEVERITY " + report.toVHDL());
+			buf.append(" SEVERITY ").append(severity.toVHDL());
 		}
 		buf.append(";");
 		return buf.toString();

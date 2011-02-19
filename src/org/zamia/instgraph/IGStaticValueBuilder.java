@@ -167,7 +167,7 @@ public class IGStaticValueBuilder {
 		}
 
 		if (fArrayValues == null) {
-			throw new ZamiaException("IGActualConstantBuilder: getBuilder(): this is an unconstrained array.", aSrc);
+			throw new ZamiaException("IGActualConstantBuilder: set(): this is an unconstrained array.", aSrc);
 		}
 		
 		fArrayValues.set(aIdx - fArrayOffset, new BuilderEntry(aConstant));
@@ -179,7 +179,7 @@ public class IGStaticValueBuilder {
 		}
 		
 		if (fArrayValues == null) {
-			throw new ZamiaException("IGActualConstantBuilder: getBuilder(): this is an unconstrained array.", aSrc);
+			throw new ZamiaException("IGActualConstantBuilder: get(): this is an unconstrained array.", aSrc);
 		}
 		
 		// range check
