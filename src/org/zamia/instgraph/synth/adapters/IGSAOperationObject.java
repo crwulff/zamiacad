@@ -17,7 +17,6 @@ import org.zamia.instgraph.synth.IGOperationSynthAdapter;
 import org.zamia.instgraph.synth.IGSynth;
 import org.zamia.instgraph.synth.model.IGSMExprEngine;
 import org.zamia.instgraph.synth.model.IGSMExprNode;
-import org.zamia.instgraph.synth.model.IGSMExprNodeSignal;
 import org.zamia.instgraph.synth.model.IGSMSequenceOfStatements;
 import org.zamia.instgraph.synth.model.IGSMTarget;
 import org.zamia.instgraph.synth.model.IGSMTargetSignal;

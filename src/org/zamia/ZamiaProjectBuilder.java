@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import org.zamia.instgraph.IGManager;
+import org.zamia.instgraph.IGModule;
 import org.zamia.rtl.RTLManager;
 import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.VHDLIndexer;
@@ -103,6 +104,29 @@ public class ZamiaProjectBuilder {
 		if (isCanceled()) {
 			logger.info("ZamiaProjectBuilder: Canceled.");
 			return 0;
+		}
+
+		if (!fullBuild) {
+			// check whether all toplevels truly exist
+			// if some or all are missing, past builds have failed so we
+			// need to upgrade this build to a full one
+
+			BuildPath bp = fZPrj.getBuildPath();
+			if (bp == null) {
+				logger.error("ZamiaProjectBuilder: Build aborted, no BuildPath.txt found.");
+				return 0;
+			}
+			IGManager igm = fZPrj.getIGM();
+			int n = bp.getNumToplevels();
+			for (int i = 0; i < n; i++) {
+				Toplevel tl = bp.getToplevel(i);
+				IGModule m = igm.findModule(tl);
+				if (m == null) {
+					logger.info("ZamiaProjectBuilder: Toplevel %s is missing => upgrading to full build.", tl);
+					fullBuild = true;
+					break;
+				}
+			}
 		}
 
 		int numChanged = 0;
