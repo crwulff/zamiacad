@@ -13,4 +13,4 @@
 
 toplevel PLASMA
 toplevel CPU_TB
-
+toplevel TBENCH

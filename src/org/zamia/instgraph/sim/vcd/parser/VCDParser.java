@@ -44,18 +44,10 @@ public class VCDParser implements VCDParserConstants {
                 this (new SimpleCharStream(new StringReader("")));
         }
 
-    private long getLocation(Token aToken) {
+    private SourceLocation getLocation(Token aToken) {
 
-        return aToken == null ? 0 :  ((long) aToken.beginColumn) << 32 | (long) aToken.beginLine ;
+        return aToken == null ? null :  new SourceLocation(sf,aToken.beginLine, aToken.beginColumn);
     }
-
-    private long getLocation () {
-        Token t = getToken(0);
-        if (t.next != null)
-                t = t.next;
-        return getLocation (t);
-    }
-
 
     public VCDData parse(Reader aReader, SourceFile aSF, VCDData aData) throws IOException, ZamiaException {
 
@@ -73,7 +65,7 @@ public class VCDParser implements VCDParserConstants {
             value_change_dump_definitions ();
 
                 } catch (ParseException e) {
-          throw new ZamiaException(e.getMessage(), new SourceLocation(sf, getLocation(e.currentToken.next)));
+          throw new ZamiaException(e.getMessage(), getLocation(e.currentToken.next));
         } catch (TokenMgrError e) {
           throw new ZamiaException(e.getMessage(), new SourceLocation(sf,e.line,e.col));
                 }
@@ -185,17 +177,16 @@ public class VCDParser implements VCDParserConstants {
   }
 
   final public void vcd_declaration_vars() throws ParseException, ZamiaException {
-        Token tID, tWidth;
+        Token tID, tWidth, t1;
         int width;
-        PathName path;
-    jj_consume_token(VAR);
+        VCDReference ref;
+    t1 = jj_consume_token(VAR);
     var_type();
     tWidth = jj_consume_token(VAR_DECIMAL_NUMBER);
     tID = jj_consume_token(VAR_IDENTIFIER_CODE);
-    path = reference();
+    ref = reference();
     jj_consume_token(VAR_END);
-                //logger.info ("VCD: variable declaration: %s => %s, type is %s", si, tID.image, si.getType());
-                fData.newSignal(path, tID.image);
+                fData.newSignal(ref, tID.image, getLocation(t1));
   }
 
   final public void var_type() throws ParseException {
@@ -261,8 +252,9 @@ public class VCDParser implements VCDParserConstants {
     }
   }
 
-  final public PathName reference() throws ParseException {
+  final public VCDReference reference() throws ParseException {
         Token t, tIdx1 = null, tIdx2 = null;
+        VCDReference ref;
     t = jj_consume_token(VAR_ID);
     switch (jj_nt.kind) {
     case LBRACKET:
@@ -283,14 +275,14 @@ public class VCDParser implements VCDParserConstants {
       jj_la1[6] = jj_gen;
       ;
     }
-                {if (true) return fCurPath.append(t.image);}
-                //		if (tIdx1 != null) {
-                //			aSI.setIdx1(Integer.parseInt(tIdx1.image));
-                //		}
-                //		if (tIdx2 != null) {
-                //			aSI.setIdx2(Integer.parseInt(tIdx2.image));
-                //		}
-
+                ref = new VCDReference (fCurPath.append(t.image));
+                if (tIdx1 != null) {
+                        ref.setIdx1(Integer.parseInt(tIdx1.image));
+                }
+                if (tIdx2 != null) {
+                        ref.setIdx2(Integer.parseInt(tIdx2.image));
+                }
+                {if (true) return ref;}
     throw new Error("Missing return statement in function");
   }
 
@@ -425,7 +417,7 @@ public class VCDParser implements VCDParserConstants {
                 vc = t.image.charAt(0);
                 ic = t.image.substring(1);
 
-                fData.addBit(fCurTime, ic, vc);
+                fData.addBit(fCurTime, ic, vc, getLocation(t));
       break;
     case BINARY_NUMBER:
     case REAL_NUMBER:
@@ -449,14 +441,14 @@ public class VCDParser implements VCDParserConstants {
     case BINARY_NUMBER:
       tV = jj_consume_token(BINARY_NUMBER);
       tIC = jj_consume_token(IDENTIFIER_CODE);
-          fData.addBinaryVector(fCurTime, tIC.image, tV.image);
+          fData.addBinaryVector(fCurTime, tIC.image, tV.image, getLocation (tV));
       break;
     case REAL_NUMBER:
       tV = jj_consume_token(REAL_NUMBER);
       tIC = jj_consume_token(IDENTIFIER_CODE);
                         logger.error("VCD: vector_value_change real %s => %s", tIC, tV);
                         // FIXME: implement
-                        {if (true) throw new ZamiaException ("Sorry, real values in VCD files are not supported yet.");}
+                        {if (true) throw new ZamiaException ("Sorry, real values in VCD files are not supported yet.", getLocation(tV));}
       break;
     default:
       jj_la1[12] = jj_gen;

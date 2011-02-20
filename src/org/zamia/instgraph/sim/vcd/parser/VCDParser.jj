@@ -58,19 +58,11 @@ public class VCDParser {
 		this (new SimpleCharStream(new StringReader("")));
 	}
 	
-    private long getLocation(Token aToken) {
+    private SourceLocation getLocation(Token aToken) {
     	
-    	return aToken == null ? 0 :  ((long) aToken.beginColumn) << 32 | (long) aToken.beginLine ;
+    	return aToken == null ? null :  new SourceLocation(sf,aToken.beginLine, aToken.beginColumn);
     }
 
-    private long getLocation () {
-    	Token t = getToken(0);
-    	if (t.next != null)
-    		t = t.next;
-    	return getLocation (t);
-    }
-    
-    
     public VCDData parse(Reader aReader, SourceFile aSF, VCDData aData) throws IOException, ZamiaException {
 
 		try {
@@ -87,7 +79,7 @@ public class VCDParser {
             value_change_dump_definitions ();
             
 		} catch (ParseException e) {
-          throw new ZamiaException(e.getMessage(), new SourceLocation(sf, getLocation(e.currentToken.next)));
+          throw new ZamiaException(e.getMessage(), getLocation(e.currentToken.next));
         } catch (TokenMgrError e) {
           throw new ZamiaException(e.getMessage(), new SourceLocation(sf,e.line,e.col));
 		}
@@ -294,15 +286,14 @@ void vcd_declaration_upscope() :
 
 void vcd_declaration_vars() throws ZamiaException :
 {
-	Token tID, tWidth;
+	Token tID, tWidth, t1;
 	int width;
-	PathName path;
+	VCDReference ref;
 }
 {
-	<VAR> var_type() tWidth=<VAR_DECIMAL_NUMBER> tID=<VAR_IDENTIFIER_CODE> path=reference() <VAR_END>
+	t1=<VAR> var_type() tWidth=<VAR_DECIMAL_NUMBER> tID=<VAR_IDENTIFIER_CODE> ref=reference() <VAR_END>
 	{
-		//logger.info ("VCD: variable declaration: %s => %s, type is %s", si, tID.image, si.getType());
-		fData.newSignal(path, tID.image);
+		fData.newSignal(ref, tID.image, getLocation(t1));
 	}
 }
 
@@ -331,15 +322,17 @@ void var_type() :
 	)
 }
 
-PathName reference() :
+VCDReference reference() :
 {
 	Token t, tIdx1 = null, tIdx2 = null;
+	VCDReference ref;
 }
 {
 	t = <VAR_ID> [ <LBRACKET> tIdx1=<VARB_DECIMAL_NUMBER> [ <COLON> tIdx2=<VARB_DECIMAL_NUMBER> ] <RBRACKET> ]
 	{
-		return fCurPath.append(t.image);
-		//		if (tIdx1 != null) {		//			aSI.setIdx1(Integer.parseInt(tIdx1.image));		//		}		//		if (tIdx2 != null) {		//			aSI.setIdx2(Integer.parseInt(tIdx2.image));		//		}
+		ref = new VCDReference (fCurPath.append(t.image));
+		if (tIdx1 != null) {			ref.setIdx1(Integer.parseInt(tIdx1.image));		}		if (tIdx2 != null) {			ref.setIdx2(Integer.parseInt(tIdx2.image));		}
+		return ref;
 	}
 }
 
@@ -413,7 +406,7 @@ void value_change() throws ZamiaException :
 		vc = t.image.charAt(0);
 		ic = t.image.substring(1);
 		
-		fData.addBit(fCurTime, ic, vc);
+		fData.addBit(fCurTime, ic, vc, getLocation(t));
 		
 	}
 	| vector_value_change()
@@ -432,13 +425,13 @@ void vector_value_change() throws ZamiaException :
 {
 	( tV=<BINARY_NUMBER> tIC=<IDENTIFIER_CODE>
 		{
-          fData.addBinaryVector(fCurTime, tIC.image, tV.image);
+          fData.addBinaryVector(fCurTime, tIC.image, tV.image, getLocation (tV));
 		}
 	| tV=<REAL_NUMBER> tIC=<IDENTIFIER_CODE> 
 		{
 			logger.error("VCD: vector_value_change real %s => %s", tIC, tV);
 			// FIXME: implement
-			throw new ZamiaException ("Sorry, real values in VCD files are not supported yet.");
+			throw new ZamiaException ("Sorry, real values in VCD files are not supported yet.", getLocation(tV));
 		}
 	)
 }

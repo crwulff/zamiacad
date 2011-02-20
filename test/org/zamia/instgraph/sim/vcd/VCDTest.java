@@ -50,7 +50,7 @@ public class VCDTest {
 
 	private VCDImport fImport;
 
-	private void setupTest(String aTestDir, int aNumNodes, String aToplevel, String aVCDFile) throws Exception {
+	private void setupTest(String aTestDir, int aNumNodes, String aToplevel, String aVCDFile, PathName aPrefix) throws Exception {
 		ZamiaLogger.setup(Level.DEBUG);
 
 		File f = new File(aTestDir + "/BuildPath.txt");
@@ -98,12 +98,53 @@ public class VCDTest {
 
 		ToplevelPath tlp = new ToplevelPath(tl, new PathName(""));
 
-		fImport.open(tlp, new File(aVCDFile), null, fZPrj);
+		fImport.open(tlp, new File(aVCDFile), aPrefix, fZPrj);
+	}
+
+	@Test
+	public void testPlasmaModelsim() throws Exception {
+		setupTest("examples/plasma", 19, "TBENCH", "examples/vcd/four-state_tbench_ModelSim.vcd", new PathName("TBENCH"));
+
+		assertNotNull(fImport);
+
+		BigInteger endTime = fImport.getEndTime();
+		assertEquals(10000000000l, endTime.longValue());
+		BigInteger startTime = fImport.getStartTime();
+		assertEquals(0, startTime.longValue());
+
+		List<PathName> names = fImport.findSignalNamesRegexp("*", 1024);
+		int n = names.size();
+		assertEquals(200, n);
+		for (int i = 0; i < n; i++) {
+
+			PathName path = names.get(i);
+
+			logger.info("VCDTest: Signal #%4d/%4d: %s", i + 1, n, path);
+
+			IGISimCursor cursor = fImport.createCursor();
+
+			boolean b = cursor.gotoTransition(path, startTime);
+			assertTrue(b);
+
+			IGStaticValue v = cursor.getCurrentValue();
+			assertNotNull(v);
+
+			//logger.info("Got Value: %s", v);
+
+			BigInteger t = cursor.getCurrentTime();
+			assertNotNull(t);
+
+			t = cursor.gotoNextTransition(endTime);
+			assertNotNull(t);
+			assertTrue(t.compareTo(startTime) >= 0);
+		}
+
+		fZPrj.shutdown();
 	}
 
 	@Test
 	public void testCounter() throws Exception {
-		setupTest("examples/gcounter", 19, "COUNTER_TB", "examples/vcd/gcounter_tb.vcd");
+		setupTest("examples/gcounter", 19, "COUNTER_TB", "examples/vcd/gcounter_tb.vcd", null);
 
 		assertNotNull(fImport);
 
@@ -142,7 +183,7 @@ public class VCDTest {
 
 	@Test
 	public void testPlasma() throws Exception {
-		setupTest("examples/plasma", 11, "CPU_TB", "examples/vcd/plasma_tb.vcd");
+		setupTest("examples/plasma", 11, "CPU_TB", "examples/vcd/plasma_tb.vcd", null);
 
 		assertNotNull(fImport);
 

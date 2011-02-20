@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.zamia.SourceLocation;
 import org.zamia.Toplevel;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
@@ -28,7 +29,6 @@ import org.zamia.util.HashMapArray;
 import org.zamia.util.PathName;
 import org.zamia.util.SimpleRegexp;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
-
 
 /**
  * Holds all the information that was extracted from a VCD file in memory
@@ -46,7 +46,7 @@ public class VCDData {
 	private HashMapArray<String, SignalInfo> fIDCSignalMap;
 
 	private HashMapArray<PathName, SignalInfo> fPathSignalMap;
-	
+
 	private ArrayList<PathName> fAllSignalPaths;
 
 	private BigInteger fTimeScale;
@@ -58,7 +58,7 @@ public class VCDData {
 	private IGManager fIGM;
 
 	private Toplevel fToplevel;
-	
+
 	private PathName fPrefix;
 
 	public VCDData(ZamiaProject aZPrj, Toplevel aToplevel, PathName aPrefix) {
@@ -75,31 +75,29 @@ public class VCDData {
 		if (fPrefix == null) {
 			return aPath;
 		}
-		
+
 		String prefix = fPrefix.toString();
 		int l = prefix.length();
-		if (prefix != null && l==0) {
+		if (prefix != null && l == 0) {
 			return aPath;
 		}
 
-		String strPath=aPath.toString();
+		String strPath = aPath.toString();
 		if (strPath.length() <= l) {
 			return aPath;
 		}
-		
+
 		return new PathName(strPath.substring(l));
 	}
 
-	
-	public void newSignal(PathName aPath, String aIDC) throws ZamiaException {
+	public void newSignal(VCDReference aReference, String aIDC, SourceLocation aLocation) throws ZamiaException {
 
-		PathName path = removePrefix(aPath);
-		
+		PathName path = removePrefix(aReference.getPathName());
+
 		IGItem item = fIGM.findItem(fToplevel, path);
 
 		if (!(item instanceof IGObject)) {
-			logger.error("VCD: Error: Not a VHDL object: " + path);
-			return;
+			throw new ZamiaException("VCD: Error: Not a VHDL object: " + path, aLocation);
 		}
 
 		IGObject obj = (IGObject) item;
@@ -113,7 +111,7 @@ public class VCDData {
 		fIDCSignalMap.put(aIDC, si);
 
 		fPathSignalMap.put(path, si);
-		
+
 		fAllSignalPaths.add(path);
 	}
 
@@ -158,37 +156,31 @@ public class VCDData {
 		return fIDCSignalMap.get(aIDC);
 	}
 
-	private IGStaticValue getBit(IGTypeStatic aType, char aV) throws ZamiaException {
-		IGStaticValue sv = aType.findEnumLiteral(aV);
+	private IGStaticValue getBit(IGTypeStatic aType, char aV, SourceLocation aLocation) throws ZamiaException {
+		IGStaticValue sv = aType.findEnumLiteral(Character.toUpperCase(aV));
 		if (sv == null) {
-			logger.warn("VCD: Warning: failed to find enum literal %c", aV);
-			sv = aType.getEnumLiteral(0, null, ASTErrorMode.EXCEPTION, null);
-			if (sv == null) {
-				return null;
-			}
+			throw new ZamiaException("VCD: Error, failed to find enum literal " + aV, aLocation);
 		}
 		return sv;
 	}
 
-	public void addBit(BigInteger aTime, String aIDC, char aV) throws ZamiaException {
+	public void addBit(BigInteger aTime, String aIDC, char aV, SourceLocation aLocation) throws ZamiaException {
 		SignalInfo si = fIDCSignalMap.get(aIDC);
 
 		if (si == null) {
-			logger.error("VCD: Error, unknown symbol: '%s'", aIDC);
-			return;
+			throw new ZamiaException("VCD: Error, unknown symbol: " + aIDC, aLocation);
 		}
 
 		IGTypeStatic type = si.getType();
 		if (!type.isEnum()) {
-			logger.error("VCD: Expected bit type, but type is %s", type);
-			return;
+			throw new ZamiaException("VCD: Expected bit type, but type is " + type, aLocation);
 		}
 
 		if (dump) {
 			logger.info("VCD: Bit value change %s@%d => '%s' (type: %s)", si.getPath(), aTime, aV, type);
 		}
 
-		IGStaticValue sv = getBit(type, aV);
+		IGStaticValue sv = getBit(type, aV, aLocation);
 		if (sv == null) {
 			return;
 		}
@@ -209,12 +201,11 @@ public class VCDData {
 	 * @throws ZamiaException
 	 */
 
-	public void addBinaryVector(BigInteger aTime, String aIDC, String aValue) throws ZamiaException {
+	public void addBinaryVector(BigInteger aTime, String aIDC, String aValue, SourceLocation aLocation) throws ZamiaException {
 		SignalInfo si = fIDCSignalMap.get(aIDC);
 
 		if (si == null) {
-			logger.error("VCD: Error, unknown symbol: '%s'", aIDC);
-			return;
+			throw new ZamiaException("VCD: Error, unknown symbol: " + aIDC, aLocation);
 		}
 
 		IGTypeStatic type = si.getType();
@@ -224,14 +215,12 @@ public class VCDData {
 		}
 
 		if (!type.isArray()) {
-			logger.error("VCD: Expected bit vector type, found %s", type);
-			return;
+			throw new ZamiaException("VCD: Expected bit vector type, found " + type, aLocation);
 		}
 
 		IGTypeStatic et = type.getStaticElementType(null);
 		if (!et.isEnum()) {
-			logger.error("VCD: Expected bit vector type, but element type is %s", et);
-			return;
+			throw new ZamiaException("VCD: Expected bit vector type, but element type is " + et, aLocation);
 		}
 
 		String vs = aValue.substring(1);
@@ -266,8 +255,7 @@ public class VCDData {
 			expansionC = 'H';
 			break;
 		default:
-			expansionC = '0';
-			logger.error("VCD: unknown value : %c", vs.charAt(0));
+			throw new ZamiaException("VCD: unknown value :" + vs.charAt(0), aLocation);
 		}
 
 		for (int i = 0; i < w; i++) {
@@ -278,7 +266,7 @@ public class VCDData {
 
 			char c = vsIdx >= 0 ? vs.charAt(vsIdx) : expansionC;
 
-			IGStaticValue sv = getBit(et, c);
+			IGStaticValue sv = getBit(et, c, aLocation);
 			if (sv == null) {
 				return;
 			}
