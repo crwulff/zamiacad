@@ -721,6 +721,8 @@ public class ZamiaProjectBuilder {
 
 		RTLManager rtlm = fZPrj.getRTLM();
 
+		rtlm.clean();
+		
 		int n = bp.getNumSynthTLs();
 
 		for (int i = 0; i < n; i++) {
@@ -892,6 +894,12 @@ public class ZamiaProjectBuilder {
 		IGManager igm = fZPrj.getIGM();
 		n = igm.rebuildNodes(affectedDUUIDs, fMonitor);
 
+		/*
+		 * always re-synthesize all rtl modules
+		 */
+		
+		synthesize();
+		
 		return n;
 	}
 

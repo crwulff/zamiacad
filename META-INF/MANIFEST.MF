@@ -35,5 +35,6 @@ Bundle-ClassPath: bin/,
  share/jars/jline.jar,
  share/jars/junit.jar,
  share/jars/log4j-1.2.14.jar,
- share/jars/log5j-1.2.jar
+ share/jars/log5j-1.2.jar,
+ share/jars/minijdd_103.jar
 

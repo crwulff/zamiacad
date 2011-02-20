@@ -77,6 +77,11 @@ public class RTLManager {
 		fNumDone++;
 		logger.info("RTLManager: %d modules done (%d todo ATM): building %s", fNumDone, getNumTodo(), aPath);
 	}
+	
+	public void clean() {
+		fZDB.delAllIdx(MODULE_IDX);
+		fZDB.delAllIdx(SIGNATURES_IDX);
+	}
 
 	private class BuildNodeJob implements Runnable {
 
