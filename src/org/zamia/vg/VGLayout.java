@@ -70,6 +70,8 @@ public class VGLayout<NodeType, PortType, SignalType> {
 	// dynamic mode:
 	private HashSetArray<VGPort<NodeType, PortType, SignalType>> fExpandablePorts;
 
+	private HashMapArray<PortType, VGPort<NodeType, PortType, SignalType>> fPortMap;
+
 	public VGLayout(VGContentProvider<NodeType, PortType, SignalType> aContentProvider, VGLabelProvider<NodeType, PortType, SignalType> aLabelProvider, VGGC aGC) {
 		fContentProvider = aContentProvider;
 		fLabelProvider = aLabelProvider;
@@ -99,6 +101,7 @@ public class VGLayout<NodeType, PortType, SignalType> {
 		fBoxes = new ArrayList<VGBox<NodeType, PortType, SignalType>>();
 		fPrimaryPorts = new HashMapArray<PortType, VGBox<NodeType, PortType, SignalType>>();
 		fNodeBoxes = new HashMapArray<NodeType, VGBox<NodeType, PortType, SignalType>>();
+		fPortMap = new HashMapArray<PortType, VGPort<NodeType, PortType, SignalType>>();
 
 		fSignals = new HashMapArray<SignalType, VGSignal<NodeType, PortType, SignalType>>();
 
@@ -136,6 +139,15 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 			fNodeBoxes.put(node, box);
 			fBoxes.add(box);
+
+			int m = box.getNumPorts();
+			for (int j = 0; j < m; j++) {
+
+				VGPort<NodeType, PortType, SignalType> port = box.getPort(j);
+
+				fPortMap.put(port.getPort(), port);
+			}
+
 		}
 
 		// precompute node connection information
@@ -1113,7 +1125,7 @@ public class VGLayout<NodeType, PortType, SignalType> {
 				} else {
 					fGC.setForeground(VGColor.MODULE);
 				}
-				
+
 				Position pos = getPortPosition(p);
 
 				logger.debug("Got position %s for expandable port %s", pos, p);
@@ -1182,18 +1194,17 @@ public class VGLayout<NodeType, PortType, SignalType> {
 
 	public PortType checkHitExpandablePort(int aX, int aY, int aPointerSize) {
 		int n = fExpandablePorts.size();
-		
-		for (int i = 0; i<n; i++) {
+
+		for (int i = 0; i < n; i++) {
 			VGPort<NodeType, PortType, SignalType> port = fExpandablePorts.get(i);
-			
+
 			Position pos = getPortPosition(port);
 
-			if (pos.getX() - 5 <= aX + aPointerSize && pos.getY() - 5 <= aY + aPointerSize
-					&& pos.getX() + 5 >= aX - aPointerSize && pos.getY() <= aY - aPointerSize) {
+			if (pos.getX() - 5 <= aX + aPointerSize && pos.getY() - 5 <= aY + aPointerSize && pos.getX() + 5 >= aX - aPointerSize && pos.getY() <= aY - aPointerSize) {
 				return port.getPort();
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -1222,5 +1233,16 @@ public class VGLayout<NodeType, PortType, SignalType> {
 			}
 		}
 		return null;
+	}
+
+	public Position getPortPosition(PortType aPort) {
+
+		VGPort<NodeType, PortType, SignalType> p = fPortMap.get(aPort);
+
+		if (p == null) {
+			return null;
+		}
+
+		return getPortPosition(p);
 	}
 }
