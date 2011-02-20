@@ -51,7 +51,7 @@ public class VGPortSymbol<NodeType, PortType, SignalType> implements VGSymbol<No
 	@Override
 	public int getHeight() {
 		fGC.setFont(VGFont.NORMAL);
-		return fGC.getFontHeight() * 2;
+		return fGC.getFontHeight() * 2 + 2*MARGIN;
 	}
 
 	@Override

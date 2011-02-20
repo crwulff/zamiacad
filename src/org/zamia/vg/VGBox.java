@@ -274,8 +274,13 @@ public class VGBox<NodeType, PortType, SignalType> {
 	}
 
 	public boolean isHit(int aX, int aY, int aPointerSize) {
-		// TODO Auto-generated method stub
-		return false;
+
+		int x1 = getXPos();
+		int x2 = getXPos() + getWidth();
+		int y1 = getYPos();
+		int y2 = getYPos() + getHeight();
+
+		return aX + aPointerSize > x1 && aY + aPointerSize > y1 && aX - aPointerSize < x2 && aY - aPointerSize < y2;
 	}
 
 }
