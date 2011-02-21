@@ -1341,6 +1341,10 @@ public class IGStaticValue extends IGOperation {
 		return ret.toString();
 	}
 
+	public static int adjustIdx(int idx, boolean asc, int num, int offset) {
+		return asc ? (num - 1) - (idx - offset) + offset : idx;
+	}
+
 	public String getId() {
 		return fId;
 	}

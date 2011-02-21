@@ -56,7 +56,31 @@ public class IGRangeOpStmt extends IGOpStmt {
 			IGObjectDriver driver = opSF.getObjectDriver();
 			if (driver != null) {
 
-				IGObjectDriver rangeDriver = driver.createRangeDriver(r, rT, computeSourceLocation());
+				SourceLocation src = computeSourceLocation();
+
+				IGTypeStatic idxType = driver.getCurrentType().getStaticIndexType(src);
+				int n = (int) idxType.computeCardinality(src);
+				boolean asc = idxType.isAscending();
+
+				if (asc) {
+					IGStaticValue range = idxType.getStaticRange();
+					int offset = (int) (asc ? range.getLeft().getOrd() : range.getRight().getOrd());
+
+					int ll = r.getLeft().getInt();
+					int rr = r.getRight().getInt();
+					ll = IGStaticValue.adjustIdx(ll, asc, n, offset);
+					rr = IGStaticValue.adjustIdx(rr, asc, n, offset);
+
+					int tempL = ll;
+					ll = rr;
+					rr = tempL;
+
+					IGStaticValue nR = new IGStaticValueBuilder(r.getRight().getStaticType(), null, src).setNum(rr).buildConstant();
+					IGStaticValue nL = new IGStaticValueBuilder(r.getLeft().getStaticType(), null, src).setNum(ll).buildConstant();
+					r = new IGStaticValueBuilder(r, src).setLeft(nL).setRight(nR).buildConstant();
+				}
+
+				IGObjectDriver rangeDriver = driver.createRangeDriver(r, rT, src);
 
 				aRuntime.push(rangeDriver);
 

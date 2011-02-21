@@ -98,7 +98,7 @@ public class OperationLiteral extends Operation {
 	public void setImage(String image_, LiteralCat category_) throws ZamiaException {
 		cat = category_;
 		if (image_ != null) {
-			image = image_;
+			image = image_.replaceAll("\"\"", "\"");
 		} else
 			image = null;
 	}

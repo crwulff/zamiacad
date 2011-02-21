@@ -9,6 +9,7 @@
 package org.zamia.instgraph.interpreter;
 
 import java.io.BufferedReader;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -976,6 +977,14 @@ public class IGBuiltinOperations {
 
 		aRuntime.setObjectValue(intfF, valueL, aLocation);
 
+		IGObjectDriver driverF = aRuntime.getDriver(intfF, aErrorMode, aReport);
+		driverF = driverF.getTargetDriver();
+		if (driverF.getId().startsWith("OUTPUT@")) {
+			System.out.println(valueL);
+		}
+
+		aRuntime.setObjectValue(intfL, null, aLocation);
+
 		return ReturnStatus.CONTINUE;
 	}
 
@@ -1044,10 +1053,10 @@ public class IGBuiltinOperations {
 		readersByProject.remove(aZprj);
 	}
 
-	private static void close(LineNumberReader reader) {
+	private static void close(Closeable closeable) {
 		try {
-			if (reader != null) {
-				reader.close();
+			if (closeable != null) {
+				closeable.close();
 			}
 		} catch (IOException e) {}
 	}

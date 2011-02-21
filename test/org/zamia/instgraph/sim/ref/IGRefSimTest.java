@@ -183,4 +183,11 @@ public class IGRefSimTest {
 
 		runTest("examples/refsim/unconstrainedInterface", 2, 2);
 	}
+
+	@Test
+	public void testAscending() throws Exception {
+
+		runTest("examples/refsim/ascending", 1, 0);
+	}
+
 }
