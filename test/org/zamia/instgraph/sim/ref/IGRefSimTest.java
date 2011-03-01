@@ -190,4 +190,9 @@ public class IGRefSimTest {
 		runTest("examples/refsim/ascending", 1, 0);
 	}
 
+	@Test
+	public void testRead() throws Exception {
+
+		runTest("examples/refsim/textio.read", 1, 0);
+	}
 }

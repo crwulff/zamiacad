@@ -55,6 +55,8 @@ public class IGObjectDriver implements Serializable {
 
 	private OIDir fDir;
 
+	private IGStaticValue fLineNr;
+
 	private IGObjectDriver fMappedTo = null;
 
 	private IGTypeStatic fAliasedType = null;
@@ -425,7 +427,7 @@ public class IGObjectDriver implements Serializable {
 
 		IGObjectDriver mappedTo;
 
-		while ((mappedTo = targetDriver.fMappedTo) != null) {
+		while ((mappedTo = targetDriver.fMappedTo) != null && targetDriver.fRange == null && targetDriver.fAliasedType == null) {
 			targetDriver = mappedTo;
 		}
 
@@ -472,6 +474,21 @@ public class IGObjectDriver implements Serializable {
 		}
 
 		return fCat;
+	}
+
+	public IGStaticValue getLineNr() {
+		if (fMappedTo != null) {
+			return fMappedTo.getLineNr();
+		}
+		return fLineNr;
+	}
+
+	public void setLineNr(IGStaticValue aLineNr) {
+		if (fMappedTo != null) {
+			fMappedTo.setLineNr(aLineNr);
+			return;
+		}
+		fLineNr = aLineNr;
 	}
 
 	protected String getId() {

@@ -8,7 +8,6 @@
  */
 package org.zamia.instgraph.interpreter;
 
-import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -17,8 +16,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.LinkedList;
 
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
@@ -47,9 +44,7 @@ import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
  */
 
 public class IGBuiltinOperations {
-	private static HashMap<File, LineNumberReader> readerByFile =  new HashMap<File, LineNumberReader>();
-	private static HashMap<ZamiaProject, LinkedList<LineNumberReader>> readersByProject = new HashMap<ZamiaProject, LinkedList<LineNumberReader>>();
- 
+
 	private final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
 	public static ReturnStatus execBuiltin(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
@@ -886,15 +881,230 @@ public class IGBuiltinOperations {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfL = container.resolveObject("L");
-		IGStaticValue valueF = aRuntime.getObjectValue(intfL);
+		IGStaticValue valueL = aRuntime.getObjectValue(intfL);
 
 		IGObject intfV = container.resolveObject("VALUE");
 		IGObject intfG = container.resolveObject("GOOD");
 
-		aRuntime.setObjectValue(intfV, valueF, aLocation);
-		aRuntime.setObjectValue(intfG, valueF == null ? container.findFalseValue() : container.findTrueValue(), aLocation);
+		IGTypeStatic lT = valueL.getStaticType();
+		IGTypeStatic vCT = aRuntime.getDriver(intfV, aErrorMode, aReport).getTargetDriver().getCurrentType();
+		IGTypeStatic vT = intfV.getType().computeStaticType(aRuntime, aErrorMode, aReport);
+		if (valueL.toString().isEmpty()) {
+			String msg = "TEXTIO procedure READ(" + vT + ") : Parameter L designates an empty string.";
+			if (aErrorMode == ASTErrorMode.EXCEPTION) {
+				throw new ZamiaException(msg, aLocation);
+			} else {
+				if (aReport != null) {
+					aReport.append(msg, aLocation);
+				}
+				return ReturnStatus.ERROR;
+			}
+		}
+
+		IGTypeStatic idxType = lT.getStaticIndexType(aLocation);
+		IGStaticValue range = idxType.getStaticRange();
+		int l = (int) range.getLeft().getOrd();
+		int r = (int) range.getRight().getOrd();
+		int vL = -1, vR, vN = 1, offset = 0;
+		boolean asc = true;
+		IGTypeStatic vET = vCT;
+		if (vCT.isArray()) {
+			vET = vCT.getStaticElementType(aLocation);
+			IGTypeStatic vIdxType = vCT.getStaticIndexType(aLocation);
+			IGStaticValue vRange = vIdxType.getStaticRange();
+			asc = vRange.getAscending().isTrue();
+			vR = (int) vRange.getRight().getOrd();
+			vL = (int) vRange.getLeft().getOrd();
+			vN = asc ? vR - vL + 1 : vL - vR + 1;
+			offset = asc ? vL : vR;
+		}
+
+		int i = r;
+		int total = 0;
+		String typeId = vT.getId();
+
+		/* skip leading whitespace characters */
+		if (!(typeId.equals("CHARACTER") || typeId.equals("STRING"))) {
+			while (i >= l) {
+				IGStaticValue charV = valueL.getValue(i, aLocation);
+				char charLiteral = charV.getCharLiteral();
+				// a space, a non-breaking space, or a horizontal tabulation character (SP, NBSP, or HT)
+				if (charLiteral == ' ' || charLiteral == '\u00A0') {
+					i--;
+				} else {
+					break;
+				}
+			}
+		}
+
+		IGStaticValueBuilder retValueBuilder = new IGStaticValueBuilder(vCT, null, aLocation);
+		String intMsg = null;
+
+		if (typeId.equals("BOOLEAN")) {
+
+			if (i - l + 1 > 3) {
+				IGStaticValue literal = null;
+				StringBuilder literalB = new StringBuilder();
+				IGStaticValue c1 = valueL.getValue(i, aLocation);
+				IGStaticValue c2 = valueL.getValue(i - 1, aLocation);
+				IGStaticValue c3 = valueL.getValue(i - 2, aLocation);
+				IGStaticValue c4 = valueL.getValue(i - 3, aLocation);
+				literalB.append(c1).append(c2).append(c3).append(c4);
+				if (literalB.toString().equals("TRUE")) {
+
+					literal = vET.findEnumLiteral("TRUE");
+					i = i - 3 - 1;
+
+				} else {
+					IGStaticValue c5 = valueL.getValue(i - 4, aLocation);
+					literalB.append(c5);
+					if (literalB.toString().equals("FALSE")) {
+
+						literal = vET.findEnumLiteral("FALSE");
+						i = i - 4 - 1;
+
+					}
+				}
+				if (literal != null) {
+					retValueBuilder.setConstant(literal);
+					total = 1;
+				}
+			}
+
+		} else if (vET.isInteger()) {
+
+			StringBuilder intAsString = new StringBuilder();
+			for (; i >= l; i--) {
+
+				IGStaticValue charV = valueL.getValue(i, aLocation);
+				char charLiteral = charV.getCharLiteral();
+
+				if (Character.isDigit(charLiteral) || (charLiteral == '-' && intAsString.length() == 0)) {
+
+					intAsString.append(charLiteral);
+					total++;
+
+				} else {
+					break;
+				}
+			}
+
+			try {
+				long num = new BigInteger(intAsString.toString()).longValue();
+				if (num >= -2147483648 && num <= 2147483647) {
+
+					retValueBuilder.setNum(num);
+
+				} else {
+					intMsg = "Integer value exceeds INTEGER'high.";
+					total = 0;
+				}
+			} catch (NumberFormatException e) {
+				intMsg = "No digits found in abstract literal.";
+				total = 0;
+			}
+
+
+		} else if (vET.isCharEnum()) {
+
+			for (int j = vL; i >= l; i--) {
+
+				if (total >= vN) {
+					break;
+				}
+
+				IGStaticValue charV = valueL.getValue(i, aLocation);
+				IGStaticValue enumLiteral = vET.findEnumLiteral(charV.getId());
+				if (enumLiteral == null) {
+					if (typeId.equals("BIT_VECTOR")) {
+						if (charV.getId().equals("_")) {
+							if (total > 0 && !valueL.getValue(i + 1, aLocation).getId().equals("_")) {
+								continue;
+							}
+						}
+					}
+					break;
+				}
+
+				append(IGStaticValue.adjustIdx(j, asc, vN, offset), enumLiteral, retValueBuilder, aLocation);
+				total++;
+
+				if (asc) {
+					j++;
+				} else {
+					j--;
+				}
+			}
+
+		} else {
+			//todo: REAL
+			//todo: TIME
+			throw new ZamiaException("Internal interpreter error: don't know how to read " + typeId + " from file.", aLocation);
+		}
+
+		boolean isSmthRead = total > 0;
+		if (isSmthRead) {
+			try {
+				IGStaticValue value = retValueBuilder.buildConstant();
+				aRuntime.setObjectValue(intfV, value, aLocation);
+			} catch (ZamiaException e) {
+				isSmthRead = false;
+			}
+		}
+		IGStaticValue nValueL = valueL;
+		if (isSmthRead) {
+			IGStaticValue nR = new IGStaticValueBuilder(range.getRight().getStaticType(), null, aLocation).setNum(i).buildConstant();
+			IGStaticValue nRange = new IGStaticValueBuilder(range, aLocation).setRight(nR).buildConstant();
+			IGTypeStatic nType = lT.createSubtype(nRange, aLocation);
+
+			IGStaticValueBuilder nValueLB = new IGStaticValueBuilder(nType, null, aLocation);
+			for (; i >= l; i--) {
+				nValueLB.set(i, valueL.getValue(i, aLocation), aLocation);
+			}
+			nValueL = nValueLB.buildConstant();
+		}
+
+		if (intfG != null) {
+			aRuntime.setObjectValue(intfG, isSmthRead ? container.findTrueValue() : container.findFalseValue(), aLocation);
+		}
+
+		if (!isSmthRead && intfG == null) {
+			String msg;
+			if (typeId.equals("INTEGER")) {
+				msg = "TEXTIO procedure READ(INTEGER) : Cannot read value from " + valueL + ": " + intMsg;
+			} else {
+				msg = "TEXTIO procedure READ(" + vT + ") : Wrong " + vT + " length. Expected " + vN + ", found " + total + ".";
+			}
+			if (aErrorMode == ASTErrorMode.EXCEPTION) {
+				throw new ZamiaException(msg, aLocation);
+			} else {
+				if (aReport != null) {
+					aReport.append(msg, aLocation);
+				}
+				return ReturnStatus.ERROR;
+			}
+		}
+
+		aRuntime.setObjectValue(intfL, nValueL, aLocation);
 
 		return ReturnStatus.CONTINUE;
+	}
+
+	private static void append(int idx, IGStaticValue aEnumLiteral, IGStaticValueBuilder aRetValueBuilder, SourceLocation aLocation) throws ZamiaException {
+
+		IGTypeStatic type = aRetValueBuilder.getType();
+
+		if (type.isBit() || type.isCharEnum()) {
+
+			aRetValueBuilder.setConstant(aEnumLiteral);
+
+		} else if (type.isArray()) {
+
+			aRetValueBuilder.set(idx, aEnumLiteral, aLocation);
+
+		} else {
+			throw new ZamiaException("Internal interpreter error: execRead(): char appending is not implemented for type " + type, aLocation);
+		}
 	}
 
 	private static ReturnStatus execWrite(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
@@ -917,6 +1127,7 @@ public class IGBuiltinOperations {
 		IGContainer container = aSub.getContainer();
 		IGObject intfF = container.resolveObject("F");
 		IGStaticValue valueF = aRuntime.getObjectValue(intfF);
+		IGObjectDriver driverF = aRuntime.getDriver(intfF, aErrorMode, aReport);
 
 		IGObject intfL = container.resolveObject("L");
 
@@ -928,37 +1139,42 @@ public class IGBuiltinOperations {
 		LineNumberReader reader = null;
 		try {
 
-			reader = getReader(file, zprj);
+			reader = createReader(file, driverF);
 
 			line = reader.readLine();
 
-			logger.debug("Line # %d read from %s", reader.getLineNumber(), file.getAbsolutePath());
+			if (line != null) {
+				logger.debug("Line # %d read from %s", reader.getLineNumber(), file.getAbsolutePath());
+			}
 
 		} catch (FileNotFoundException e) {
 			throw new ZamiaException("File " + file.getAbsolutePath() + " not found while executing " + aSub, aLocation);
 		} catch (IOException e) {
 			throw new ZamiaException("Error while reading file " + file.getAbsolutePath() + ":\n" + e.getMessage(), aLocation);
 		} finally {
-			if (line == null) { // close reader only when tried to read after EOF was reached and ...
-				close(reader);
-			}
+			close(reader);
 		}
 
-		if (line == null) { // ... and throw exception
-			throw new ZamiaException("IGBuiltinOperations: execReadline(): trying to read " + file.getName() + " file after EOF was reached", aLocation);
+		if (line == null) {
+			throw new ZamiaException("TEXTIO : Read past end of file \"" + file.getName() + "\".", aLocation);
 		}
+
+		// store line nr to read next time
+		IGTypeStatic intType = container.findIntType().computeStaticType(aRuntime, aErrorMode, aReport);		
+		IGStaticValue lineToRead = new IGStaticValueBuilder(intType, null, aLocation).setNum(reader.getLineNumber()).buildConstant();
+		driverF.setLineNr(lineToRead);
 
 		IGType stringType = container.findStringType();
 
-		IGTypeStatic intTypeS = container.findUniversalIntType().computeStaticType(aRuntime, ASTErrorMode.EXCEPTION, aReport);
-		IGStaticValue left = new IGStaticValueBuilder(intTypeS, null, null).setNum(0).buildConstant();
-		IGStaticValue right = new IGStaticValueBuilder(intTypeS, null, null).setNum(line.length() - 1).buildConstant();
+		IGTypeStatic idxType = stringType.getIndexType().computeStaticType(aRuntime, aErrorMode, aReport);
+		IGStaticValue left = idxType.getStaticLeft(aLocation);
+		IGStaticValue right = new IGStaticValueBuilder(left, aLocation).setNum(new BigInteger("" + line.length())).buildConstant();
 		IGStaticValue ascending = container.findTrueValue();
 
 		IGRange range = new IGRange(left, right, ascending, aLocation, aSub.getZDB());
 		stringType = stringType.createSubtype(range, aRuntime, aLocation);
 
-		IGOperationLiteral lineOL = new IGOperationLiteral(line, stringType, aLocation);
+		IGOperationLiteral lineOL = new IGOperationLiteral(line.toUpperCase(), stringType, aLocation);
 		IGStaticValue ret = lineOL.computeStaticValue(aRuntime, aErrorMode, aReport);
 
 		aRuntime.setObjectValue(intfL, ret, aLocation);
@@ -994,63 +1210,50 @@ public class IGBuiltinOperations {
 		IGContainer container = aSub.getContainer();
 		IGObject intfF = container.resolveObject("F");
 		IGStaticValue valueF = aRuntime.getObjectValue(intfF);
+		IGObjectDriver driverF = aRuntime.getDriver(intfF, aErrorMode, aReport);
 
 		String filePath = valueF.getId();
 		ZamiaProject zprj = aSub.getZPrj();
 		File file = new File(zprj.getBasePath() + File.separator + filePath);
 
-		boolean ready;
+		boolean isEOF;
+		LineNumberReader reader = null;
 		try {
 
-			BufferedReader reader = getReader(file, zprj);
+			reader = createReader(file, driverF);
 
-			ready = reader.ready();
+			String line = reader.readLine();
+
+			isEOF = line == null;
 
 		} catch (FileNotFoundException e) {
 			throw new ZamiaException("File " + file.getAbsolutePath() + " not found while executing " + aSub, aLocation);
 		} catch (IOException e) {
-			throw new ZamiaException("Error while checking file " + file.getAbsolutePath() + " for readiness:\n" + e.getMessage(), aLocation);
+			throw new ZamiaException("Error while reading file " + file.getAbsolutePath() + ":\n" + e.getMessage(), aLocation);
+		} finally {
+			close(reader);
 		}
 
-		IGStaticValue ret = ready ? container.findFalseValue() : container.findTrueValue();
+		IGStaticValue ret = isEOF ? container.findTrueValue() : container.findFalseValue();
 
 		aRuntime.push(ret);
 
 		return ReturnStatus.CONTINUE;
 	}
 
-	private static LineNumberReader getReader(File file, ZamiaProject zprj) throws FileNotFoundException {
+	private static LineNumberReader createReader(File aFile, IGObjectDriver aFileDriver) throws IOException {
 
-		LineNumberReader reader = readerByFile.get(file);
+		LineNumberReader reader = new LineNumberReader(new FileReader(aFile));
 
-		if (reader != null) {
-			return reader;
+		IGStaticValue lineNr = aFileDriver.getLineNr();
+
+		int lineToRead = lineNr == null ? 0 : lineNr.getInt();
+
+		for (int i = 0; i < lineToRead; i++) {
+			reader.readLine();
 		}
-
-		reader = new LineNumberReader(new BufferedReader(new FileReader(file)));
-
-		readerByFile.put(file, reader);
-		getReadersFrom(zprj).add(reader);
 
 		return reader;
-	}
-
-	private static LinkedList<LineNumberReader> getReadersFrom(ZamiaProject zprj) {
-		LinkedList<LineNumberReader> readers = readersByProject.get(zprj);
-		if (readers == null) {
-			readers = new LinkedList<LineNumberReader>();
-			readersByProject.put(zprj, readers);
-		}
-		return readers;
-	}
-
-	public static void remove(ZamiaProject aZprj) {
-		//FOXME: todo: when deleting project from Navigator, call this method to release the potentially occupied resources
-		LinkedList<LineNumberReader> readers = getReadersFrom(aZprj);
-		for (LineNumberReader reader : readers) {
-			close(reader);
-		}
-		readersByProject.remove(aZprj);
 	}
 
 	private static void close(Closeable closeable) {
