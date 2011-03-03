@@ -423,6 +423,9 @@ public class IGSimRef implements IGISimulator {
 					driver.setValue(zValue, src);
 				}
 			}
+			if (driver instanceof IGFileDriver) {
+				((IGFileDriver) driver).setBasePath(aContainer.getZPrj().getBasePath());
+			}
 
 			if (driver instanceof IGSignalDriver) {
 

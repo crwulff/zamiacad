@@ -8,31 +8,22 @@
  */
 package org.zamia.instgraph.interpreter;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.LineNumberReader;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
-import org.zamia.ZamiaLogger;
-import org.zamia.ZamiaProject;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGObject;
-import org.zamia.instgraph.IGOperationLiteral;
-import org.zamia.instgraph.IGRange;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGSubProgram;
+import org.zamia.instgraph.IGSubProgram.IGBuiltin;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
-import org.zamia.instgraph.IGSubProgram.IGBuiltin;
 import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
+import org.zamia.instgraph.sim.ref.IGFileDriver;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 
 
@@ -44,8 +35,6 @@ import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
  */
 
 public class IGBuiltinOperations {
-
-	private final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
 	public static ReturnStatus execBuiltin(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
 			throws ZamiaException {
@@ -1126,56 +1115,11 @@ public class IGBuiltinOperations {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfF = container.resolveObject("F");
-		IGStaticValue valueF = aRuntime.getObjectValue(intfF);
-		IGObjectDriver driverF = aRuntime.getDriver(intfF, aErrorMode, aReport);
+		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF, aErrorMode, aReport).getTargetDriver();
 
 		IGObject intfL = container.resolveObject("L");
 
-		String filePath = valueF.getId();
-		ZamiaProject zprj = aSub.getZPrj();
-		File file = new File(zprj.getBasePath() + File.separator + filePath);
-
-		String line = null;
-		LineNumberReader reader = null;
-		try {
-
-			reader = createReader(file, driverF);
-
-			line = reader.readLine();
-
-			if (line != null) {
-				logger.debug("Line # %d read from %s", reader.getLineNumber(), file.getAbsolutePath());
-			}
-
-		} catch (FileNotFoundException e) {
-			throw new ZamiaException("File " + file.getAbsolutePath() + " not found while executing " + aSub, aLocation);
-		} catch (IOException e) {
-			throw new ZamiaException("Error while reading file " + file.getAbsolutePath() + ":\n" + e.getMessage(), aLocation);
-		} finally {
-			close(reader);
-		}
-
-		if (line == null) {
-			throw new ZamiaException("TEXTIO : Read past end of file \"" + file.getName() + "\".", aLocation);
-		}
-
-		// store line nr to read next time
-		IGTypeStatic intType = container.findIntType().computeStaticType(aRuntime, aErrorMode, aReport);		
-		IGStaticValue lineToRead = new IGStaticValueBuilder(intType, null, aLocation).setNum(reader.getLineNumber()).buildConstant();
-		driverF.setLineNr(lineToRead);
-
-		IGType stringType = container.findStringType();
-
-		IGTypeStatic idxType = stringType.getIndexType().computeStaticType(aRuntime, aErrorMode, aReport);
-		IGStaticValue left = idxType.getStaticLeft(aLocation);
-		IGStaticValue right = new IGStaticValueBuilder(left, aLocation).setNum(new BigInteger("" + line.length())).buildConstant();
-		IGStaticValue ascending = container.findTrueValue();
-
-		IGRange range = new IGRange(left, right, ascending, aLocation, aSub.getZDB());
-		stringType = stringType.createSubtype(range, aRuntime, aLocation);
-
-		IGOperationLiteral lineOL = new IGOperationLiteral(line.toUpperCase(), stringType, aLocation);
-		IGStaticValue ret = lineOL.computeStaticValue(aRuntime, aErrorMode, aReport);
+		IGStaticValue ret = driverF.readLine(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
 		aRuntime.setObjectValue(intfL, ret, aLocation);
 
@@ -1187,16 +1131,15 @@ public class IGBuiltinOperations {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfF = container.resolveObject("F");
+		IGObjectDriver driverF = aRuntime.getDriver(intfF, aErrorMode, aReport).getTargetDriver();
 
 		IGObject intfL = container.resolveObject("L");
 		IGStaticValue valueL = aRuntime.getObjectValue(intfL);
 
-		aRuntime.setObjectValue(intfF, valueL, aLocation);
-
-		IGObjectDriver driverF = aRuntime.getDriver(intfF, aErrorMode, aReport);
-		driverF = driverF.getTargetDriver();
-		if (driverF.getId().startsWith("OUTPUT@")) {
+		if (driverF.getValue(aLocation).getId().equals("STD_OUTPUT")) {
 			System.out.println(valueL);
+		} else {
+			((IGFileDriver) driverF).writeLine(valueL, aLocation);
 		}
 
 		aRuntime.setObjectValue(intfL, null, aLocation);
@@ -1209,59 +1152,15 @@ public class IGBuiltinOperations {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfF = container.resolveObject("F");
-		IGStaticValue valueF = aRuntime.getObjectValue(intfF);
-		IGObjectDriver driverF = aRuntime.getDriver(intfF, aErrorMode, aReport);
+		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF, aErrorMode, aReport).getTargetDriver();
 
-		String filePath = valueF.getId();
-		ZamiaProject zprj = aSub.getZPrj();
-		File file = new File(zprj.getBasePath() + File.separator + filePath);
-
-		boolean isEOF;
-		LineNumberReader reader = null;
-		try {
-
-			reader = createReader(file, driverF);
-
-			String line = reader.readLine();
-
-			isEOF = line == null;
-
-		} catch (FileNotFoundException e) {
-			throw new ZamiaException("File " + file.getAbsolutePath() + " not found while executing " + aSub, aLocation);
-		} catch (IOException e) {
-			throw new ZamiaException("Error while reading file " + file.getAbsolutePath() + ":\n" + e.getMessage(), aLocation);
-		} finally {
-			close(reader);
-		}
+		boolean isEOF = driverF.isEOF(aSub, aLocation);
 
 		IGStaticValue ret = isEOF ? container.findTrueValue() : container.findFalseValue();
 
 		aRuntime.push(ret);
 
 		return ReturnStatus.CONTINUE;
-	}
-
-	private static LineNumberReader createReader(File aFile, IGObjectDriver aFileDriver) throws IOException {
-
-		LineNumberReader reader = new LineNumberReader(new FileReader(aFile));
-
-		IGStaticValue lineNr = aFileDriver.getLineNr();
-
-		int lineToRead = lineNr == null ? 0 : lineNr.getInt();
-
-		for (int i = 0; i < lineToRead; i++) {
-			reader.readLine();
-		}
-
-		return reader;
-	}
-
-	private static void close(Closeable closeable) {
-		try {
-			if (closeable != null) {
-				closeable.close();
-			}
-		} catch (IOException e) {}
 	}
 
 }

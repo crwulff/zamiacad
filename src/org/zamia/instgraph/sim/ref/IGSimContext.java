@@ -32,10 +32,19 @@ public class IGSimContext extends IGInterpreterContext {
 
 	@Override
 	protected IGObjectDriver createDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
-		if (aCat == IGObject.IGObjectCat.SIGNAL) {
-			return new IGSignalDriver(aId, aDir, aCat, null, aType, aLocation);
-		} else {
-			return super.createDriver(aId, aDir, aCat, aType, aLocation);
+
+		switch (aCat) {
+			case SIGNAL:
+
+				return new IGSignalDriver(aId, aDir, aCat, null, aType, aLocation);
+
+			case FILE:
+
+				return new IGFileDriver(aId, aDir, aCat, null, aType, aLocation);
+
+			default:
+
+				return super.createDriver(aId, aDir, aCat, aType, aLocation);
 		}
 	}
 
