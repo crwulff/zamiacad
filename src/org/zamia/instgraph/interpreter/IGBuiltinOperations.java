@@ -26,6 +26,7 @@ import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.instgraph.sim.ref.IGFileDriver;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 
+import static org.zamia.instgraph.IGObject.OIDir.*;
 
 /**
  * Collection of builtin operation implementations
@@ -133,6 +134,12 @@ public class IGBuiltinOperations {
 
 		case ENDFILE:
 			return execEndfile(aSub, aRuntime, aLocation, aErrorMode, aReport);
+
+		case FILE_OPEN:
+			return execFileOpen(aSub, aRuntime, aLocation, aErrorMode, aReport);
+
+		case FILE_CLOSE:
+			return execFileClose(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
 		default:
 			throw new ZamiaException("Sorry, unimplemented builtin: " + builtin, aLocation);
@@ -1159,6 +1166,67 @@ public class IGBuiltinOperations {
 		IGStaticValue ret = isEOF ? container.findTrueValue() : container.findFalseValue();
 
 		aRuntime.push(ret);
+
+		return ReturnStatus.CONTINUE;
+	}
+
+	private static ReturnStatus execFileOpen(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
+
+		IGContainer container = aSub.getContainer();
+		IGObject intfF = container.resolveObject("F");
+		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF, aErrorMode, aReport).getTargetDriver();
+
+		IGObject intfN = container.resolveObject("EXTERNAL_NAME");
+		IGStaticValue valueN = aRuntime.getObjectValue(intfN);
+
+		IGObject intfK = container.resolveObject("FILE_OPEN_KIND");
+		IGStaticValue valueK = aRuntime.getObjectValue(intfK);
+
+		IGObject intfS = container.resolveObject("STATUS");
+		IGType fost = intfS != null ? intfS.getType() : container.findFileOpenStatusType();
+
+		String name = valueK.getId();
+		IGObject.OIDir mode = NONE;
+		if (name.equals("READ_MODE")) {
+			mode = IN;
+		} else if (name.equals("WRITE_MODE")) {
+			mode = OUT;
+		} else if (name.equals("APPEND_MODE")) {
+			mode = APPEND;
+		}
+
+		IGStaticValue status = driverF.openFile(valueN, mode, fost, aLocation);
+
+		if (intfS == null) {
+
+			IGStaticValue errorStatus = fost.findEnumLiteral("STATUS_ERROR");
+			IGStaticValue errorName = fost.findEnumLiteral("NAME_ERROR");
+			IGStaticValue openOK = fost.findEnumLiteral("OPEN_OK");
+
+			if (status.equalsValue(openOK)) {
+				/* OK, do nothing */
+			} else if (status.equalsValue(errorStatus)) {
+				throw new ZamiaException("Cannot open file \"" + valueN + "\"; it is already open.");
+			} else if (status.equalsValue(errorName)) {
+				throw new ZamiaException("Failed to open VHDL file \"" + valueN + "\" in " + name + "; no such file or directory.");
+			} else {
+				throw new ZamiaException("Cannot open file \"" + valueN + "\" in " + name + ".");
+			}
+		} else {
+			aRuntime.setObjectValue(intfS, status, aLocation);
+		}
+
+
+		return ReturnStatus.CONTINUE;
+	}
+
+	private static ReturnStatus execFileClose(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
+
+		IGContainer container = aSub.getContainer();
+		IGObject intfF = container.resolveObject("F");
+		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF, aErrorMode, aReport).getTargetDriver();
+
+		driverF.close();
 
 		return ReturnStatus.CONTINUE;
 	}

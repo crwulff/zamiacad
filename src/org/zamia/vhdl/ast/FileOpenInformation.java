@@ -30,12 +30,14 @@ public class FileOpenInformation extends VHDLNode {
 
 	private Operation stringExpr; // other people would probably call this "fileName"...
 	private PortDir m;
+	private Operation exp;
 
 	public FileOpenInformation (Operation exp_, PortDir m_, Operation stringExpr_, VHDLNode parent_, long location_) {
 		super(parent_, location_);
 		stringExpr = stringExpr_;
 		stringExpr.setParent(this);
 		m = m_;
+		exp = exp_;
 	}
 	
 	public Operation getStringExpr() {
@@ -45,7 +47,11 @@ public class FileOpenInformation extends VHDLNode {
 	public PortDir getMode() {
 		return m;
 	}
-	
+
+	public Operation getExp() {
+		return exp;
+	}
+
 	@Override
 	public VHDLNode getChild(int idx_) {
 		// TODO Auto-generated method stub

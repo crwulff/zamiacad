@@ -545,4 +545,11 @@ public class IGObjectDriver implements Serializable {
 		return aliasedDriver;
 	}
 
+	public OIDir getDir() {
+		return fDir;
+	}
+
+	public void setDir(OIDir aDir) {
+		fDir = aDir;
+	}
 }

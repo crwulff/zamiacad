@@ -4,11 +4,13 @@ import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.LineNumberReader;
 import java.math.BigInteger;
+import java.nio.channels.OverlappingFileLockException;
 
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
@@ -45,6 +47,15 @@ public class IGFileDriver extends IGObjectDriver {
 
 	public IGStaticValue readLine(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
+		switch (getDir()) {
+			case NONE:
+				throw new ZamiaException("Attempt to access a closed file.");
+			case OUT:
+			case APPEND:
+				String fileName = getFileName(aLocation);
+				throw new ZamiaException("Attempt to read from file \"" + fileName+ "\" which is opened only for writing or appending.");
+		}
+
 		File file = getFile(aLocation);
 
 		String line = readNextLine(file, aSub, aLocation);
@@ -76,6 +87,14 @@ public class IGFileDriver extends IGObjectDriver {
 
 	public boolean isEOF(IGSubProgram aSub, SourceLocation aLocation) throws ZamiaException {
 
+		switch (getDir()) {
+			case NONE:
+				throw new ZamiaException("Attempt to access a closed file.");
+			case OUT:
+			case APPEND:
+				return true;
+		}
+
 		File file = getFile(aLocation);
 
 		String line = readNextLine(file, aSub, aLocation);
@@ -84,6 +103,14 @@ public class IGFileDriver extends IGObjectDriver {
 	}
 
 	public void writeLine(IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
+
+		switch (getDir()) {
+			case NONE:
+				throw new ZamiaException("Attempt to access a closed file.");
+			case IN:
+				String fileName = getFileName(aLocation);
+				throw new ZamiaException("Attempt to write to or flush file \"" + fileName+ "\" which is opened only for reading.");
+		}
 
 		File file = getFile(aLocation);
 
@@ -100,13 +127,72 @@ public class IGFileDriver extends IGObjectDriver {
 		} catch (IOException e) {
 			throw new ZamiaException("Error while writing to file " + file.getAbsolutePath() + ":\n" + e.getMessage(), aLocation);
 		} finally {
-			try {
-				if (writer != null) { // always close the writer
-					writer.close();
-				}
-			} catch (IOException e) {/* do nothing */}
+			close(writer);
 		}
 
+	}
+
+	public void close() {
+		setDir(IGObject.OIDir.NONE);
+		fLineNr = null;
+	}
+
+	public IGStaticValue openFile(IGStaticValue aFileName, IGObject.OIDir aDir, IGType aFileOpenStatusType, SourceLocation aLocation) throws ZamiaException {
+
+		// validate action
+		if (getDir() != IGObject.OIDir.NONE) {
+			return aFileOpenStatusType.findEnumLiteral("STATUS_ERROR");
+		}
+
+		File file = createFile(aFileName.getId());
+		FileReader reader = null;
+		FileWriter writer = null;
+		FileOutputStream fos = null;
+		switch (aDir) {
+			case IN:
+				if (!file.exists()) {
+					return aFileOpenStatusType.findEnumLiteral("NAME_ERROR");
+				}
+				try {
+					reader = new FileReader(file);
+				} catch (FileNotFoundException e) {
+					return aFileOpenStatusType.findEnumLiteral("MODE_ERROR");
+				} finally {
+					close(reader);
+				}
+				break;
+			case OUT:
+			case APPEND:
+				try {
+					writer = new FileWriter(file); // test 1
+					fos = new FileOutputStream(file);
+					fos.getChannel().lock().release(); // test 2
+				} catch (OverlappingFileLockException e) {
+					return aFileOpenStatusType.findEnumLiteral("NAME_ERROR");
+				} catch (IOException e) {
+					return aFileOpenStatusType.findEnumLiteral("NAME_ERROR");
+				} finally {
+					close(writer);
+					close(fos);
+				}
+				if (aDir == IGObject.OIDir.APPEND) {
+					try {
+						writer = new FileWriter(file, true);
+					} catch (IOException e) {
+						return aFileOpenStatusType.findEnumLiteral("MODE_ERROR");
+					} finally {
+						close(writer);
+					}
+				}
+				break;
+		}
+
+		// everything is ok, open the file
+		setDir(aDir);
+
+		setValue(aFileName, aLocation);
+
+		return aFileOpenStatusType.findEnumLiteral("OPEN_OK");
 	}
 
 	private String readNextLine(File aFile, IGSubProgram aSub, SourceLocation aLocation) throws ZamiaException {
@@ -132,11 +218,18 @@ public class IGFileDriver extends IGObjectDriver {
 
 	private File getFile(SourceLocation aLocation) throws ZamiaException {
 
+		String fileName = getFileName(aLocation);
+
+		return createFile(fileName);
+	}
+
+	private String getFileName(SourceLocation aLocation) throws ZamiaException {
 		IGStaticValue v = getValue(aLocation);
+		return v.getId();
+	}
 
-		String filePath = v.getId();
-
-		return new File(fBasePath + File.separator + filePath);
+	private File createFile(String aFileName) {
+		return new File(fBasePath + File.separator + aFileName);
 	}
 
 	private LineNumberReader createReader(File aFile) throws IOException {

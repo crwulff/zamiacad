@@ -27,7 +27,7 @@ import org.zamia.zdb.ZDB;
 public final class IGObject extends IGContainerItem {
 
 	public enum OIDir {
-		NONE, IN, OUT, INOUT, BUFFER, LINKAGE
+		NONE, IN, OUT, INOUT, BUFFER, LINKAGE, APPEND
 	};
 
 	public enum IGObjectCat {
