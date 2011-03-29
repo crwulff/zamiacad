@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: ZamiaCAD
 Bundle-SymbolicName: org.zamia.cad;singleton:=true
-Bundle-Version: 0.10.0
+Bundle-Version: 0.10.1
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: ZamiaCAD Project
 Bundle-Localization: plugin
