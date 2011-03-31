@@ -11,17 +11,11 @@ package org.zamia.instgraph.sim.ref;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
-import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.util.PathName;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.math.BigInteger;
 
 
@@ -64,45 +58,6 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 
 	public void cancelAllWakeups(SourceLocation aLocation) throws ZamiaException {
 		fSim.cancelAllWakeups(this, aLocation);
-	}
-
-	@Override
-	public void setObjectValue(IGObject aObject, IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
-		if (aObject.getCat() == IGObject.IGObjectCat.FILE) {
-			writeToFile(aObject, aValue, aLocation);
-		} else {
-			super.setObjectValue(aObject, aValue, aLocation);
-		}
-	}
-
-	private void writeToFile(IGObject aObject, IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
-
-		IGStaticValue filePathValue = aObject.getInitialValue().computeStaticValue(this, null, null);
-		String filePath = filePathValue.getId();
-
-		File file = new File(getZPrj().getBasePath() + File.separator + filePath);
-
-		BufferedWriter writer = null;
-		try {
-
-			writer = new BufferedWriter(new FileWriter(file, true));
-
-			writer.append(aValue.toString()); // todo: toString() ???
-			writer.newLine();
-
-		} catch (FileNotFoundException e) {
-			throw new ZamiaException("File to write to is not found: " + file.getAbsolutePath(), aLocation);
-		} catch (IOException e) {
-			throw new ZamiaException("Error while writing to file " + file.getAbsolutePath() + ":\n" + e.getMessage(), aLocation);
-		} finally {
-			try {
-				if (writer != null) { // always close the writer
-					writer.close();
-				}
-			} catch (IOException e) {
-			}
-		}
-
 	}
 
 	public IGStaticValue getObjectLastValue(PathName aSignalName) {

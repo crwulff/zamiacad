@@ -94,7 +94,7 @@ public class FileDeclaration extends BlockDeclarativeItem {
 		if (foi != null) {
 			OIDir fmode = foi.getMode();
 			if (fmode != null) {
-				switch (foi.getMode()) {
+				switch (fmode) {
 				case IN:
 					mode = OIDir.IN;
 					break;
@@ -112,6 +112,19 @@ public class FileDeclaration extends BlockDeclarativeItem {
 					break;
 				}
 			}
+
+			Operation exp = foi.getExp();
+			if (exp != null) {
+				OperationName openKind = (OperationName) exp;
+				String name = openKind.getName().getId();
+				if (name.equals("READ_MODE")) {
+					mode = OIDir.IN;
+				} else if (name.equals("WRITE_MODE")) {
+					mode = OIDir.OUT;
+				} else if (name.equals("APPEND_MODE")) {
+					mode = OIDir.APPEND;
+				}
+			}
 		}
 
 		// figure out the element type
@@ -122,7 +135,10 @@ public class FileDeclaration extends BlockDeclarativeItem {
 			throw new ZamiaException("File type expected here.", getLocation());
 		}
 
-		IGOperation filePathOp = foi.getStringExpr().computeIGOperation(aContainer.findStringType(), aContainer, aCache, new IGOperationCache(), ASTErrorMode.EXCEPTION, null);
+		IGOperation filePathOp = null;
+		if (foi != null) {
+			filePathOp = foi.getStringExpr().computeIGOperation(aContainer.findStringType(), aContainer, aCache, new IGOperationCache(), ASTErrorMode.EXCEPTION, null);
+		}
 		IGObject fo = new IGObject(mode, filePathOp, IGObjectCat.FILE, t, getId(), getLocation(), aCache.getZDB());
 		aContainer.add(fo);
 

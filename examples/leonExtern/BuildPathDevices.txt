@@ -1,6 +1,6 @@
 #toplevel ETH.GRETH_TX(RTL)
 #
-# ZamiaCAD build configuration file
+# zamiaCAD build configuration file
 #
 # Format:
 #

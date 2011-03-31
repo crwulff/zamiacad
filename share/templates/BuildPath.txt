@@ -1,7 +1,7 @@
 #
-# ZamiaCAD build configuration file
+# zamiaCAD build configuration file
 #
-# This is basically ZamiaCAD's equivalent of a Makefile.
+# This is basically zamiaCAD's equivalent of a Makefile.
 
 #
 # Entry format (simplified):

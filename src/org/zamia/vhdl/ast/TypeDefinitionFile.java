@@ -134,7 +134,7 @@ public class TypeDefinitionFile extends TypeDefinition {
 
 			sub = new IGSubProgram(aContainer.store(), null, "FILE_CLOSE", getLocation(), aEE.getZDB());
 
-			sub.setBuiltin(IGBuiltin.WRITE);
+			sub.setBuiltin(IGBuiltin.FILE_CLOSE);
 
 			container = sub.getContainer();
 
@@ -153,7 +153,7 @@ public class TypeDefinitionFile extends TypeDefinition {
 
 			sub = new IGSubProgram(aContainer.store(), null, "FILE_OPEN", getLocation(), aEE.getZDB());
 
-			sub.setBuiltin(IGBuiltin.WRITE);
+			sub.setBuiltin(IGBuiltin.FILE_OPEN);
 
 			container = sub.getContainer();
 
@@ -164,6 +164,35 @@ public class TypeDefinitionFile extends TypeDefinition {
 
 			IGType okT = aContainer.findOpenKindType();
 			IGStaticValue iv = okT.findEnumLiteral("READ_MODE");
+
+			intf = new IGObject(OIDir.IN, iv, IGObjectCat.CONSTANT, okT, "FILE_OPEN_KIND", getLocation(), aEE.getZDB());
+			container.addInterface(intf);
+
+			sub.computeSignatures();
+
+			sub.storeOrUpdate();
+			container.storeOrUpdate();
+			aContainer.add(sub);
+
+			/*
+			 * procedure file_open( status: out file_open_status; file f : file_type; external_name: in string; open_kind: in file_open_kind := read_mode ) ;
+			 */
+
+			sub = new IGSubProgram(aContainer.store(), null, "FILE_OPEN", getLocation(), aEE.getZDB());
+
+			sub.setBuiltin(IGBuiltin.FILE_OPEN);
+
+			container = sub.getContainer();
+
+			intf = new IGObject(OIDir.OUT, null, IGObjectCat.CONSTANT, aContainer.findFileOpenStatusType(), "STATUS", getLocation(), aEE.getZDB());
+			container.addInterface(intf);
+			intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, type, "F", getLocation(), aEE.getZDB());
+			container.addInterface(intf);
+			intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, aContainer.findStringType(), "EXTERNAL_NAME", getLocation(), aEE.getZDB());
+			container.addInterface(intf);
+
+			okT = aContainer.findOpenKindType();
+			iv = okT.findEnumLiteral("READ_MODE");
 
 			intf = new IGObject(OIDir.IN, iv, IGObjectCat.CONSTANT, okT, "FILE_OPEN_KIND", getLocation(), aEE.getZDB());
 			container.addInterface(intf);

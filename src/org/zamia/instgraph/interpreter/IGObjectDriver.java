@@ -425,7 +425,7 @@ public class IGObjectDriver implements Serializable {
 
 		IGObjectDriver mappedTo;
 
-		while ((mappedTo = targetDriver.fMappedTo) != null) {
+		while ((mappedTo = targetDriver.fMappedTo) != null && targetDriver.fRange == null && targetDriver.fAliasedType == null) {
 			targetDriver = mappedTo;
 		}
 
@@ -545,4 +545,11 @@ public class IGObjectDriver implements Serializable {
 		return aliasedDriver;
 	}
 
+	public OIDir getDir() {
+		return fDir;
+	}
+
+	public void setDir(OIDir aDir) {
+		fDir = aDir;
+	}
 }

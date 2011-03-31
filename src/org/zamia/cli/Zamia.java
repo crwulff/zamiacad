@@ -44,7 +44,7 @@ public class Zamia {
 
 	protected final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	public final static String VERSION = "0.10.0";
+	public final static String VERSION = "0.10.1";
 
 	public final static String COPYRIGHT1 = "Copyright 2003-2010 by Guenter Bartsch.";
 
@@ -154,7 +154,7 @@ public class Zamia {
 		// performance evaluation code
 		startTime = System.currentTimeMillis();
 
-		logger.info("ZamiaCAD V%s http://www.zamiacad.com/", VERSION);
+		logger.info("zamiaCAD V%s http://www.zamiacad.com/", VERSION);
 		logger.info("");
 		logger.info("%s", COPYRIGHT1);
 		logger.info("%s", COPYRIGHT2);
@@ -187,7 +187,7 @@ public class Zamia {
 		fZPrj.shutdown();
 		logger.info("Shutting down...done.");
 		logger.info("");
-		logger.info("Thank you for using ZamiaCAD.");
+		logger.info("Thank you for using zamiaCAD.");
 	}
 
 	public static void printStats() {

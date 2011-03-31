@@ -175,7 +175,7 @@ public class IGArrayAggregateStmt extends IGOpStmt {
 		for (int i = 0; i < fPositionalEntries; i++) {
 			IGStaticValue v = aRuntime.pop().getValue();
 
-			int idx = ascending ? i + nArrayOffset : nArrayOffset + nArrayElements - i - 1;
+			int idx = ascending ? nArrayElements - 1 - i + nArrayOffset : i + nArrayOffset;
 
 			builder.set(idx, v, computeSourceLocation());
 		}
@@ -198,16 +198,16 @@ public class IGArrayAggregateStmt extends IGOpStmt {
 
 				if (asc) {
 					for (int idx = left; idx <= right; idx++) {
-						builder.set(idx, v, computeSourceLocation());
+						builder.set(IGStaticValue.adjustIdx(idx, ascending, nArrayElements, nArrayOffset), v, computeSourceLocation());
 					}
 				} else {
 					for (int idx = left; idx >= right; idx--) {
-						builder.set(idx, v, computeSourceLocation());
+						builder.set(IGStaticValue.adjustIdx(idx, ascending, nArrayElements, nArrayOffset), v, computeSourceLocation());
 					}
 				}
 			} else {
 				int idx = (int) pos.getOrd();
-				builder.set(idx, v, computeSourceLocation());
+				builder.set(IGStaticValue.adjustIdx(idx, ascending, nArrayElements, nArrayOffset), v, computeSourceLocation());
 			}
 		}
 

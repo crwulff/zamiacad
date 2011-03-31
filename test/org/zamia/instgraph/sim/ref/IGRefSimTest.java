@@ -21,7 +21,9 @@ import org.zamia.util.PathName;
 import org.zamia.vhdl.ast.DMUID;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.math.BigInteger;
+import java.nio.channels.FileLock;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -182,5 +184,128 @@ public class IGRefSimTest {
 	public void testUnconstrainedInterface() throws Exception {
 
 		runTest("examples/refsim/unconstrainedInterface", 2, 2);
+	}
+
+	@Test
+	public void testAscending() throws Exception {
+
+		runTest("examples/refsim/ascending", 1, 0);
+	}
+
+	@Test
+	public void testRead() throws Exception {
+
+		runTest("examples/refsim/textio.read", 1, 0);
+	}
+
+	@Test
+	public void testFileOpen() throws Exception {
+
+		runTest("examples/refsim/file_open", 1, 160);
+	}
+
+	@Test
+	public void testFileOpenErrors1() throws Exception {
+
+		// lock file artificially
+		File file = new File("examples/refsim/file_open/blocked.txt");
+		file.createNewFile();
+		FileOutputStream fos = new FileOutputStream(file);
+		FileLock lock = fos.getChannel().lock();
+
+
+		runTest("examples/refsim/file_open", "BuildPathErrors1.txt", 1, 160);
+
+
+		lock.release();
+		fos.close();
+		file.delete();
+	}
+
+	@Test (expected = MarkerException.class)
+	public void testFileOpenErrors2() throws Exception {
+
+		try {
+
+			runTest("examples/refsim/file_open", "BuildPathErrors2.txt", 1, 0);
+
+		} catch (ZamiaException e) {
+			if (e.getMessage().equals("Attempt to access a closed file.")) {
+				throw new MarkerException();
+			}
+		}
+	}
+
+	@Test (expected = MarkerException.class)
+	public void testFileOpenErrors3() throws Exception {
+
+		try {
+
+			runTest("examples/refsim/file_open", "BuildPathErrors3.txt", 1, 0);
+
+		} catch (ZamiaException e) {
+			String msg = e.getMessage();
+			if (msg.startsWith("Attempt to read from file \"") && msg.endsWith("\" which is opened only for writing or appending.")) {
+				throw new MarkerException();
+			}
+		}
+	}
+
+	@Test (expected = MarkerException.class)
+	public void testFileOpenErrors4() throws Exception {
+
+		try {
+
+			runTest("examples/refsim/file_open", "BuildPathErrors4.txt", 1, 0);
+
+		} catch (ZamiaException e) {
+			if (e.getMessage().equals("Attempt to access a closed file.")) {
+				throw new MarkerException();
+			}
+		} finally {
+			new File("examples/refsim/file_open/blabla_write.txt").delete();
+		}
+	}
+
+	@Test (expected = MarkerException.class)
+	public void testFileOpenErrors5() throws Exception {
+
+		try {
+
+			runTest("examples/refsim/file_open", "BuildPathErrors5.txt", 1, 0);
+
+		} catch (ZamiaException e) {
+			String msg = e.getMessage();
+			if (msg.startsWith("Attempt to write to or flush file \"") && msg.endsWith("\" which is opened only for reading.")) {
+				throw new MarkerException();
+			}
+		} finally {
+			new File("examples/refsim/file_open/blabla_read.txt").delete();
+		}
+	}
+
+	@Test (expected = MarkerException.class)
+	public void testFileOpenErrors6() throws Exception {
+
+		try {
+
+			runTest("examples/refsim/file_open", "BuildPathErrors6.txt", 1, 0);
+
+		} catch (ZamiaException e) {
+			if (e.getMessage().equals("Attempt to access a closed file.")) {
+				throw new MarkerException();
+			}
+		}
+	}
+
+	@Test
+	public void testFileOpenENDF() throws Exception {
+
+		runTest("examples/refsim/file_open", "BuildPathENDF.txt", 1, 0);
+
+		new File("examples/refsim/file_open/blabla_write.txt").delete();
+	}
+
+	private class MarkerException extends Exception {
 	}
 }

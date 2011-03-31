@@ -17,7 +17,7 @@ import org.zamia.vhdl.ast.DMUID;
 
 
 /**
- * Common interface of ZamiaCAD's HDL parsers
+ * Common interface of zamiaCAD's HDL parsers
  * 
  * @author Guenter Bartsch
  */
