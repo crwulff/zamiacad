@@ -23,7 +23,7 @@ import org.zamia.util.ZamiaTmpDir;
 import com.spinn3r.log5j.Logger;
 
 /**
- * Helper class to set up a Logger for use in ZamiaCAD.
+ * Helper class to set up a Logger for use in zamiaCAD.
  * 
  * @author Guenter Bartsch
  */
@@ -129,7 +129,7 @@ public class ZamiaLogger {
 
 	private void printHeader() {
 
-		logger.info("ZamiaCAD Log");
+		logger.info("zamiaCAD Log");
 		logger.info("============");
 		logger.info("");
 

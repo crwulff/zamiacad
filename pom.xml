@@ -5,7 +5,7 @@
   <artifactId>zamiacad</artifactId>
   <packaging>jar</packaging>
   <version>0.9-SNAPSHOT</version>
-  <name>Maven ZamiaCAD Archetype</name>
+  <name>Maven zamiaCAD Archetype</name>
   <url>http://www.zamiacad.com</url>
   <build>
     <sourceDirectory>${basedir}/src</sourceDirectory>

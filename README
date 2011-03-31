@@ -1,80 +1,79 @@
-ZamiaCAD
-========
+zamiaCAD - Open Source Platform for Advanced Hardware Design
 
-ZamiaCAD (or Zamia, for short) is an Eclipse-based development environment 
-for hardware designs in various hardware description languages, currently 
-the focus is on VHDL 93. 
+zamiaCAD is a modular and extensible platform for advanced hardware
+design, analysis, and research. Its core components are the language
+independent instantiation graph (IG) data structure, the language
+dependent frontends generating an IG, and applications working on the
+IG data structure. The frontends consist of a parser and an
+elaboration engine. Currently, VHDL has a complete frontend, Verilog
+only has a parser. Applications like a simulator and an eclipse GUI
+are built on top of the IG and potentially language dependent
+structures like the abstract syntax tree. Currently, the zamiaCAD
+platform consists of more than 200k lines of Java code.  For more
+details, see http://zamiacad.sourceforge.net/web/?q=about
 
-Zamia covers design entry, verification (simulation and testbench generation)
-and analysis of logic designs. Zamia always works directly on the HDL source
-code, thus not requiring any proprietary files to be generated and maintained.
-This makes Zamia especially well suited for analyzing and editing pre-existing, 
-large designs without forcing every engineer in the team to use it.
+There are three user categories of the zamiaCAD platform:
+1) developers writing EDA tools
+2) endusers using EDA tools coming with the platfrom
+3) researches prototyping research algorithms
 
-Main Features
--------------
+The most important zamiaCAD features are
 
- * Eclipse-based, integrated hardware design and analysis environment
- * Supported hardware description languages
-      + Aims to be VHDL93
-        (http://tech-www.informatik.uni-hamburg.de/vhdl/tools/grammar/vhdl93-bnf.html)
-        compliant, at the moment a (large) VHDL Subset is supported
-      + Verilog (very limited)
- * Source HDL editors 
-      + Syntax highlighting
-      + Outline view
-      + Goto declaration
- * RTL level event-based simulator and waveform viewer
- * RTL Graph Viewer 
-      + Source-code back-annotation
-      + Intuitive design navigation
-      + Fully integrated with simulator, displays signal values
-      + Dynamic mode for exploration of large designs
- * Navigator view
- * Full featured HDL compilers and build system completely built-in
- * Completely slef-contained, no external tools (simulators, compilers) required
-      + Simulator View
-      + FSM View
- * Written in Java (http://java.sun.com)
+  + IDE for VHDL: eclipse plugin, code is scalable and has handled
+    very large industrial designs, usable, if prepared to report
+    bugs. For details, see the tutorial for details
+    http://zamiacad.sourceforge.net/web/?q=tutorial
 
-Although because of the platform-independant nature of both Java and Eclipse
-Zamia should run on all platforms supported by these, at the moment limited
-resources only allow us to support the GNU/Linux platform officially.
+  + Simulator support: with external simulator and vcd files, usable
+    to display waveform and relate values to source code. A complete,
+    standards-compliant built-in simulator is under development. While
+    it is not complete yet and has not been tuned for performance, it
+    already offers very quick startup and turnaround times and is a
+    key tool providing for quick, interactive development of smaller
+    hardware designs and cores.
 
-Big thanks to the Eclipse Project (http://www.eclipse.org) for their excellent
-work on the best Java IDE out there!
+  + Synthesis: Code for generating RTL graph is currently under early
+    development
+
+For a more complete list of features see
+http://zamiacad.sourceforge.net/web/?q=features
+
+The zamiaCAD project currently aims for
+
+  + EDA developers and researchers participating in the development of
+    the project
+
+  + Testers working with the zamiaCAD IDE, thus testing zamia platform
+    and applications, and willing to write bugreports with small VHDL
+    testcases showing the problems
+
+  + Companies looking for commercial support and development for the
+    zamiaCAD platform or tools
+
+To test zamiaCAD go to http://zamiacad.sourceforge.net/web/?q=download
+and download the latest version for Linux or Windows. The tutorial
+http://zamiacad.sourceforge.net/web/?q=tutorial helps getting
+started. If you want to see the zamiaCAD code and get started
+developing see http://zamiacad.sourceforge.net/web/?q=getting_started
+
+To participate in the project please contact us through the mailing
+lists, through the forums, or through our support mail address, see
+http://zamiacad.sourceforge.net/web/?q=contact
+
+Feedback of any kind is very welcome.
+
 
 Copyright and Authors
 ---------------------
 
-Copyright 2003-2009 by Guenter Bartsch.
-All rights reserved.
-
-See the LICENSE file for details.
-
-ZamiaCAD uses parts of these projects: 
-
- * Jakarta Commons (http://jakarta.apache.org/commons/)
- * Eclipse (http://www.eclipse.org/platform/index.html)
-
-ZamiaCAD Web Site
------------------
-
-http://www.zamiacad.com
-
-Contact
--------
-
-Send comments, patches and bug reports to guenter@zamiacad.com
-
-For bug reports, please try to provide as much information about
-the problem as possible, e.g. 
-
- * Instructions on how to reproduce the problem
- * Operating system used
- * Java version used
- * Eclipse version used
- * Error messages and command line output, if any
+Copyright 2003-2011 by the zamiaCAD project and is covered by the GNU General
+Public License, Version 3 (see LICENSE file for details).
 
 
- 
+Authors
+
+    * Guenter Bartsch (main developer and project founder)
+    * Anton Chepurov from Tallinn University of Technology
+    * Dr. Rainer Dorsch from IBM
+    * Dr. Maksim Jenihhin from Tallinn University of Technology
+    * Dr. Jaan Raik from Tallinn University of Technology
