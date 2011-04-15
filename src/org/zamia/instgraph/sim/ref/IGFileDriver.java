@@ -35,14 +35,8 @@ public class IGFileDriver extends IGObjectDriver {
 
 	private IGStaticValue fLineNr;
 
-	private String fBasePath;
-
 	public IGFileDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
 		super(aId, aDir, aCat, aParent, aType, aLocation);
-	}
-
-	public void setBasePath(String aBasePath) {
-		fBasePath = aBasePath;
 	}
 
 	public IGStaticValue readLine(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
@@ -144,7 +138,7 @@ public class IGFileDriver extends IGObjectDriver {
 			return aFileOpenStatusType.findEnumLiteral("STATUS_ERROR");
 		}
 
-		File file = createFile(aFileName.getId());
+		File file = createFile(aFileName);
 		FileReader reader = null;
 		FileWriter writer = null;
 		FileOutputStream fos = null;
@@ -218,7 +212,7 @@ public class IGFileDriver extends IGObjectDriver {
 
 	private File getFile(SourceLocation aLocation) throws ZamiaException {
 
-		String fileName = getFileName(aLocation);
+		IGStaticValue fileName = getValue(aLocation);
 
 		return createFile(fileName);
 	}
@@ -228,8 +222,10 @@ public class IGFileDriver extends IGObjectDriver {
 		return v.getId();
 	}
 
-	private File createFile(String aFileName) {
-		return new File(fBasePath + File.separator + aFileName);
+	private File createFile(IGStaticValue aFileName) {
+		File parent = aFileName.computeSourceLocation().getDir();
+		String name = aFileName.getId();
+		return new File(parent, name);
 	}
 
 	private LineNumberReader createReader(File aFile) throws IOException {

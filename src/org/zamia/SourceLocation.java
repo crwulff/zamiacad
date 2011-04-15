@@ -55,6 +55,10 @@ public class SourceLocation implements Serializable {
 		return "unknown source";
 	}
 
+	public File getDir() {
+		return fSF.getFile().getParentFile();
+	}
+
 	@Override
 	public int hashCode() {
 		String str = toStringAbsolutePath();
