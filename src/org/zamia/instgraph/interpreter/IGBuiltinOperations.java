@@ -106,6 +106,10 @@ public class IGBuiltinOperations {
 		case ARRAY_NEQUALS:
 			return execArrayCompare(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
+		case ARRAY_GREATER:
+		case ARRAY_LESS:
+			return execArrayCompareRelative(aSub, aRuntime, aLocation, aErrorMode, aReport);
+
 		case ARRAY_AND:
 		case ARRAY_NAND:
 		case ARRAY_NOR:
@@ -630,6 +634,88 @@ public class IGBuiltinOperations {
 			if (!doEquals) {
 				bRes = !bRes;
 			}
+		}
+
+		IGTypeStatic rt = aSub.getReturnType().computeStaticType(aRuntime, aErrorMode, aReport);
+		if (rt == null) {
+			return ReturnStatus.ERROR;
+		}
+		IGStaticValue resValue = rt.getEnumLiteral(bRes ? 1 : 0, aLocation, ASTErrorMode.EXCEPTION, null);
+
+		aRuntime.push(resValue);
+		return ReturnStatus.CONTINUE;
+	}
+
+	private static ReturnStatus execArrayCompareRelative(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
+			throws ZamiaException {
+
+		IGContainer container = aSub.getContainer();
+		IGObject intfA = container.resolveObject("a");
+		IGStaticValue valueA = aRuntime.getObjectValue(intfA);
+		if (valueA == null) {
+			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
+				return ReturnStatus.ERROR;
+			}
+			throw new ZamiaException ("IGBuiltinOperations: execArrayCompareRelative(): vA==null", aLocation);
+		}
+
+		IGObject intfB = container.resolveObject("b");
+		IGStaticValue valueB = aRuntime.getObjectValue(intfB);
+		if (valueB == null) {
+			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
+				return ReturnStatus.ERROR;
+			}
+			throw new ZamiaException ("IGBuiltinOperations: execArrayCompareRelative(): vB==null", aLocation);
+		}
+
+		int offsetA = valueA.getArrayOffset();
+		int offsetB = valueB.getArrayOffset();
+		int nA = valueA.getNumArrayEntries(aLocation);
+		int nB = valueB.getNumArrayEntries(aLocation);
+
+		switch (aSub.getBuiltin()) {
+		case ARRAY_GREATER:
+
+			// swap everything
+			IGStaticValue tempV = valueA;
+			valueA = valueB;
+			valueB = tempV;
+			int tempO = offsetA;
+			offsetA = offsetB;
+			offsetB = tempO;
+			int tempN = nA;
+			nA = nB;
+			nB = tempN;
+			break;
+
+		case ARRAY_LESS:
+			break;
+		default:
+			throw new ZamiaException("Internal interpreter error: execArrayCompareRelative() called on non-compare op " + aSub.getBuiltin(), aLocation);
+		}
+
+		boolean bRes;
+
+		if (nA != nB) {
+			bRes = false;
+		} else {
+
+			bRes = false;
+			boolean bAis0, bBis1;
+			for (int i = 0; i < nA; i++) {
+
+				IGStaticValue vA = valueA.getValue(i + offsetA, aLocation);
+				IGStaticValue vB = valueB.getValue(i + offsetB, aLocation);
+
+				IGTypeStatic vAT = vA.getStaticType();
+				IGTypeStatic vBT = vB.getStaticType();
+
+				bAis0 = vA.equalsValue(vAT.findEnumLiteral('0'));
+				bBis1 = vB.equalsValue(vBT.findEnumLiteral('1'));
+
+				bRes = (bAis0 && bBis1) || (bAis0 && bRes) || (bBis1 && bRes); // see std_logic_arith.vhd:1332 (unsigned_is_less())
+			}
+
 		}
 
 		IGTypeStatic rt = aSub.getReturnType().computeStaticType(aRuntime, aErrorMode, aReport);

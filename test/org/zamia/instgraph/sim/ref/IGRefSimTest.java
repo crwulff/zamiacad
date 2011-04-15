@@ -306,6 +306,12 @@ public class IGRefSimTest {
 		new File("examples/refsim/file_open/blabla_write.txt").delete();
 	}
 
+	@Test
+	public void testArrayGreater() throws Exception {
+
+		runTest("examples/refsim/arrayGreater", 1, 0);
+	}
+
 	private class MarkerException extends Exception {
 	}
 }
