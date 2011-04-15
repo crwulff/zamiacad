@@ -35,15 +35,8 @@ public class IGSimContext extends IGInterpreterContext {
 
 		switch (aCat) {
 			case SIGNAL:
-
 				return new IGSignalDriver(aId, aDir, aCat, null, aType, aLocation);
-
-			case FILE:
-
-				return new IGFileDriver(aId, aDir, aCat, null, aType, aLocation);
-
 			default:
-
 				return super.createDriver(aId, aDir, aCat, aType, aLocation);
 		}
 	}

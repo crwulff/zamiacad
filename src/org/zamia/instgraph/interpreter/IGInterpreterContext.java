@@ -18,6 +18,7 @@ import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGTypeStatic;
+import org.zamia.instgraph.sim.ref.IGFileDriver;
 
 /*
 *
@@ -60,7 +61,12 @@ public class IGInterpreterContext implements Serializable {
 	}
 
 	protected IGObjectDriver createDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
-		return new IGObjectDriver(aId, aDir, aCat, null, aType, aLocation);
+		switch (aCat) {
+			case FILE:
+				return new IGFileDriver(aId, aDir, aCat, null, aType, aLocation);
+			default:
+				return new IGObjectDriver(aId, aDir, aCat, null, aType, aLocation);
+		}
 	}
 
 	public IGObjectDriver getObjectDriver(long aDBID) {
