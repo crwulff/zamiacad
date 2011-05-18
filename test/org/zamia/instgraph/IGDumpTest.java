@@ -108,7 +108,7 @@ public class IGDumpTest {
 	@Test
 	public void testLiterals2() throws Exception {
 
-		runTest("examples/semantic/literal2Test", 2);
+		runTest("examples/semantic/literal2Test", 1);
 	}
 
 }

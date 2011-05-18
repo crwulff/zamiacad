@@ -9,6 +9,13 @@
 package org.zamia.instgraph;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 
 import org.zamia.ErrorReport;
 import org.zamia.ExceptionLogger;
@@ -19,11 +26,11 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.util.HashSetArray;
+import org.zamia.util.ZStack;
 import org.zamia.vhdl.ast.VHDLNode;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 import org.zamia.zdb.ZDBIIDSaver;
-
 
 /**
  * 
@@ -221,6 +228,176 @@ public abstract class IGItem implements Serializable, ZDBIIDSaver {
 
 	protected void reportError(String aMsg, VHDLNode aObj, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 		reportError(aMsg, aObj.getLocation(), aErrorMode, aReport);
+	}
+
+	public void dump(int aMaxDepth) {
+
+		HashSet<Long> done = new HashSet<Long>();
+
+		ZStack<Long> todo = new ZStack<Long>();
+
+		todo.push(fDBID);
+
+		while (!todo.isEmpty()) {
+
+			long dbid = todo.pop();
+			if (done.contains(dbid)) {
+				continue;
+			}
+			done.add(dbid);
+
+			Object obj = fZDB.load(dbid);
+
+			System.out.println("*** Dumping ZDB Object id " + dbid + ":" + obj + " ***\n");
+
+			dump(obj, todo, 1, aMaxDepth);
+		}
+	}
+
+	@SuppressWarnings({ "rawtypes" })
+	private static void dump(Object o, ZStack<Long> todo, int depth, int aMaxDepth) {
+		if (o == null) {
+			printIndented(depth, "NULL");
+			return;
+		}
+
+		if (depth > aMaxDepth) {
+			printIndented(depth, "...");
+			return;
+		}
+
+		if (o instanceof Object[]) {
+			printIndented(depth, "[");
+			for (Object obj : (Object[]) o) {
+				dump(obj, todo, depth + 1, aMaxDepth);
+			}
+			printIndented(depth, "]");
+		} else if (o instanceof HashMap) {
+			printIndented(depth, "HashMap[");
+			HashMap hm = (HashMap) o;
+			for (Iterator it = hm.keySet().iterator(); it.hasNext();) {
+				Object key = it.next();
+				Object value = hm.get(key);
+				dump(value, todo, depth + 1, aMaxDepth);
+				dump(key, todo, depth + 1, aMaxDepth);
+			}
+			printIndented(depth, "]");
+		} else if (o instanceof Array) {
+			printIndented(depth, "[");
+			Array a = (Array) o;
+			int m = Array.getLength(a);
+			for (int j = 0; j < m; j++) {
+				Object o2 = Array.get(a, j);
+				dump(o2, todo, depth + 1, aMaxDepth);
+			}
+			printIndented(depth, "]");
+		} else if (o instanceof ArrayList) {
+			printIndented(depth, "[");
+			ArrayList al = (ArrayList) o;
+			int m = al.size();
+			for (int j = 0; j < m; j++) {
+				Object o2 = al.get(j);
+				dump(o2, todo, depth + 1, aMaxDepth);
+			}
+			printIndented(depth, "]");
+		} else if (o instanceof HashSetArray) {
+			HashSetArray hma = (HashSetArray) o;
+			printIndented(depth, "HashSetArray [");
+
+			int m = hma.size();
+			for (int j = 0; j < m; j++) {
+				Object o2 = hma.get(j);
+				dump(o2, todo, depth + 1, aMaxDepth);
+			}
+			printIndented(depth, "]");
+		} else {
+
+			Class cls = o.getClass();
+
+			while (!Object.class.equals(cls)) {
+				Field[] fields = cls.getDeclaredFields();
+
+				for (Field field : fields) {
+					field.setAccessible(true);
+
+					int modifiers = field.getModifiers();
+
+					if (Modifier.isStatic(modifiers))
+						continue;
+					else if (Modifier.isFinal(modifiers))
+						continue;
+					else if (Modifier.isTransient(modifiers))
+						continue;
+
+					Object obj;
+					try {
+						obj = field.get(o);
+					} catch (IllegalArgumentException e) {
+						throw new RuntimeException(e);
+					} catch (IllegalAccessException e) {
+						throw new RuntimeException(e);
+					}
+
+					if (isAPrimitiveType(field.getType())) {
+						printIndented(depth, field.getName() + ": " + obj);
+
+						if (field.getName().contains("DBID")) {
+							if (obj instanceof Long) {
+								long dbid = ((Long) obj).longValue();
+								todo.push(dbid);
+							}
+						}
+
+					} else {
+						printIndented(depth, field.getName() + " {");
+						dump(obj, todo, depth + 1, aMaxDepth);
+						printIndented(depth, "}");
+					}
+				}
+
+				cls = cls.getSuperclass();
+			}
+
+		}
+	}
+
+	private static void printIndented(int aDepth, String aStr) {
+		for (int i = 0; i < aDepth; i++) {
+			System.out.print("  ");
+		}
+		System.out.println(aStr);
+	}
+
+	@SuppressWarnings("rawtypes")
+	private static boolean isAPrimitiveType(Class clazz) {
+		if (clazz == java.lang.Boolean.TYPE)
+			return true;
+
+		if (clazz == java.lang.Character.TYPE)
+			return true;
+
+		if (clazz == java.lang.Byte.TYPE)
+			return true;
+
+		if (clazz == java.lang.Short.TYPE)
+			return true;
+
+		if (clazz == java.lang.Integer.TYPE)
+			return true;
+
+		if (clazz == java.lang.Long.TYPE)
+			return true;
+
+		if (clazz == java.lang.Float.TYPE)
+			return true;
+
+		if (clazz == java.lang.Double.TYPE)
+			return true;
+
+		if (clazz == java.lang.Void.TYPE)
+			return true;
+
+		return false;
 	}
 
 }
