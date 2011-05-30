@@ -19,7 +19,11 @@ import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
 import org.zamia.vhdl.ast.DMUID;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -50,7 +54,7 @@ public class IGDumpTest {
 		BuildPath bp = aZPrj.getBuildPath();
 		return bp.getToplevel(0);
 	}
-	
+
 	private DMUID getUID(ZamiaProject aZPrj) {
 		BuildPath bp = aZPrj.getBuildPath();
 
@@ -59,7 +63,7 @@ public class IGDumpTest {
 		return aZPrj.getDUM().getArchDUUID(tl.getDUUID());
 	}
 
-	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes) throws Exception {
+	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes, File aDotFile) throws Exception {
 		setupTest(aTestDir, aTestDir + File.separator + aBuildPathName);
 
 		ZamiaProjectBuilder builder = fZPrj.getBuilder();
@@ -81,20 +85,37 @@ public class IGDumpTest {
 		n = fZPrj.getIGM().countNodes(duuid);
 		logger.info("IGDumpTest: elaborated model for %s has %d unique modules.", duuid, n);
 		assertEquals(aNumNodes, n);
-		
-		
+
 		IGModule module = fZPrj.getIGM().findModule(getTL(fZPrj));
 		if (module != null) {
-			
-			module.dump(23);
-			
-		}
 
-		
+			if (aDotFile == null) {
+				module.dump(23);
+			} else {
+
+				IG2DOT dot = new IG2DOT(module);
+
+				PrintWriter out = null;
+				try {
+
+					out = new PrintWriter(new BufferedWriter(new FileWriter(aDotFile)));
+
+					dot.convert(out);
+
+				} catch (IOException e) {
+					e.printStackTrace();
+
+				} finally {
+					if (out != null) {
+						out.close();
+					}
+				}
+			}
+		}
 	}
 
-	private void runTest(String aTestDir, int aNumNodes) throws Exception {
-		runTest(aTestDir, "BuildPath.txt", aNumNodes);
+	private void runTest(String aTestDir, int aNumNodes, File aDotFile) throws Exception {
+		runTest(aTestDir, "BuildPath.txt", aNumNodes, aDotFile);
 	}
 
 	@After
@@ -106,9 +127,15 @@ public class IGDumpTest {
 	}
 
 	@Test
+	public void testDotLiterals2() throws Exception {
+
+		runTest("examples/semantic/literal2Test", 1, new File("/tmp/test.dot"));
+	}
+
+	@Test
 	public void testLiterals2() throws Exception {
 
-		runTest("examples/semantic/literal2Test", 1);
+		runTest("examples/semantic/literal2Test", 1, null);
 	}
 
 }
