@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009, 2010 by the authors indicated in the @author tags. 
+ * Copyright 2009, 2010, 2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -10,12 +10,10 @@ package org.zamia.analysis.ig;
 
 import java.io.PrintStream;
 
+import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
-import org.zamia.instgraph.IGObject.OIDir;
-import org.zamia.util.HashSetArray;
-import org.zamia.util.PathName;
+import org.zamia.ZamiaLogger;
 import org.zamia.vhdl.ast.VHDLNode;
-
 
 /**
  * IGObject signal counterpart
@@ -26,118 +24,132 @@ import org.zamia.vhdl.ast.VHDLNode;
 
 public class IGRSSignal {
 
-	private final IGRSBox fBox;
+	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
-	private final String fTitle;
+	public final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private final OIDir fDir;
+	private final boolean enableSanityChecks = false;
 
-	private final long fDBID;
+	private final String fID;
 
-	private final HashSetArray<IGRSSignal> fConns, fExternalConns;
+	private IGRSPort fPort; // if this signal represents a (primary) port
 
-	private final SourceLocation fLocation;
+	protected final IGRSNode fNode;
 
-	private final PathName fPath;
+	private IGRSPort fConns[];
 
-	public IGRSSignal(IGRSBox aBox, String aTitle, OIDir aDir, long aDBID, SourceLocation aLocation, PathName aPath) {
+	private int fNumConns;
 
-		fBox = aBox;
-		fTitle = aTitle;
-		fDir = aDir;
-		fDBID = aDBID;
-		fLocation = aLocation;
-		fPath = aPath;
+	public IGRSSignal(IGRSNode aNode, String aId, IGRSPort aPort /* may be null if this is not a port signal */, SourceLocation aLocation) {
 
-		fConns = new HashSetArray<IGRSSignal>();
-		fExternalConns = new HashSetArray<IGRSSignal>();
+		fID = aId;
+
+		fPort = aPort;
+		fNode = aNode;
+
+		fConns = new IGRSPort[2];
+		fNumConns = 0;
 	}
 
-	public void connect(IGRSSignal aSignal) {
-		fConns.add(aSignal);
+	public IGRSPort getPort() {
+		return fPort;
 	}
 
-	public void connectExternal(IGRSSignal aSignal) {
-		fExternalConns.add(aSignal);
-	}
-	public void dump(int aI, PrintStream aOut) {
-		VHDLNode.printlnIndented("SIGNAL " + fTitle, aI, aOut);
-		int n = fConns.size();
-		for (int i = 0; i < n; i++) {
-			IGRSSignal conn = fConns.get(i);
-			VHDLNode.printlnIndented("CONN " + conn, aI + 2, aOut);
-		}
+	void setPort(IGRSPort aPort) {
+		fPort = aPort;
 	}
 
-	@Override
+	public String getId() {
+		return fID;
+	}
+
 	public String toString() {
-		return fPath.toString();
-	}
 
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fPath == null) ? 0 : fPath.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		IGRSSignal other = (IGRSSignal) obj;
-		if (fPath == null) {
-			if (other.fPath != null)
-				return false;
-		} else if (!fPath.equals(other.fPath))
-			return false;
-		return true;
+		return "IGRSSignal (id=" + getId() + ")" + "@" + Integer.toHexString(hashCode());
 	}
 
 	public int getNumConns() {
-		return fConns.size();
+		return fNumConns;
 	}
 
-	public int getNumExternalConns() {
-		return fExternalConns.size();
+	public IGRSPort getConn(int aIdx) {
+		return fConns[aIdx];
 	}
 
-	public IGRSBox getBox() {
-		return fBox;
+	private int findPortConnIdx(IGRSPort aPort) {
+		for (int i = 0; i < fNumConns; i++) {
+			if (fConns[i] == aPort)
+				return i;
+		}
+		return -1;
 	}
 
-	public String getTitle() {
-		return fTitle;
+	void removePortConn(IGRSPort aPort) {
+
+		int idx = findPortConnIdx(aPort);
+
+		if (idx < 0) {
+			logger.error("Internal error: tried to remove port " + aPort + " from signal " + this + " but that port is not connected to this signal.");
+			return;
+		}
+
+		if (idx < fNumConns - 1) {
+			fConns[idx] = fConns[fNumConns - 1];
+		}
+		fNumConns--;
+
+		if (enableSanityChecks)
+			sanityCheck();
 	}
 
-	public OIDir getDir() {
-		return fDir;
+	private void sanityCheck() {
+		for (int i = 0; i < fNumConns; i++)
+			if (fConns[i] == null)
+				logger.error("ERROR: null connection!");
 	}
 
-	public long getDBID() {
-		return fDBID;
+	void addPortConn(IGRSPort aPort) {
+
+		if (aPort == null) {
+			logger.error("Internal error: addPortConn(): aPort==null");
+			return;
+		}
+
+		int idx = findPortConnIdx(aPort);
+
+		if (idx >= 0) {
+			//logger.error("Internal error: tried to add port " + aPort + " to signal " + this + " but that port is already connected to this signal.");
+			return;
+		}
+
+		if (fNumConns >= fConns.length) {
+			IGRSPort c[] = new IGRSPort[fNumConns + 5];
+			for (int i = 0; i < fNumConns; i++) {
+				c[i] = fConns[i];
+			}
+			fConns = c;
+		}
+
+		fConns[fNumConns] = aPort;
+		fNumConns++;
+		if (enableSanityChecks)
+			sanityCheck();
 	}
 
-	public SourceLocation getLocation() {
-		return fLocation;
+	public IGRSNode getNode() {
+		return fNode;
 	}
 
-	public PathName getPath() {
-		return fPath;
-	}
+	public void dump(int aIndent, PrintStream aOut) {
 
-	public IGRSSignal getConn(int aIdx) {
-		return fConns.get(aIdx);
-	}
+		VHDLNode.printlnIndented("signal " + fID + " {", aIndent, aOut);
 
-	public IGRSSignal getExternalConn(int aIdx) {
-		return fExternalConns.get(aIdx);
-	}
+		for (int i = 0; i < fNumConns; i++) {
+			IGRSPort port = fConns[i];
+			VHDLNode.printlnIndented("connected to: " + port, aIndent + 1, aOut);
+		}
 
+		VHDLNode.printlnIndented("}", aIndent, aOut);
+	}
 
 }

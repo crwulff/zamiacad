@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009, 2010 by the authors indicated in the @author tags. 
+ * Copyright 2009, 2010, 2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -28,15 +28,15 @@ import org.zamia.util.PathName;
  * 
  */
 
-public class IGRSGraph {
+public class IGRSResult {
 
 	public static final ZamiaLogger logger = ZamiaLogger.getInstance();
 
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private HashMapArray<PathName, IGRSBox> nodeMap;
+	private HashMapArray<PathName, IGRSNode> fNodeMap;
 
-	private final IGRSBox fRoot;
+	private final IGRSNode fRoot;
 
 	private final Toplevel fToplevel;
 
@@ -44,7 +44,7 @@ public class IGRSGraph {
 
 	private IGManager fIGM;
 
-	public IGRSGraph(Toplevel aToplevel, ZamiaProject aZPrj) throws ZamiaException {
+	public IGRSResult(Toplevel aToplevel, ZamiaProject aZPrj) throws ZamiaException {
 		fToplevel = aToplevel;
 		fZPrj = aZPrj;
 		fIGM = fZPrj.getIGM();
@@ -54,11 +54,11 @@ public class IGRSGraph {
 			throw new ZamiaException("Couldn't find toplevel " + aToplevel);
 		}
 
-		fRoot = new IGRSBox(aToplevel.getDUUID().getId(), module.getDBID(), null, module.computeSourceLocation(), new PathName(""));
-		nodeMap = new HashMapArray<PathName, IGRSBox>();
+		fRoot = new IGRSNode(aToplevel.getDUUID().getId(), null, module.computeSourceLocation(), new PathName(""));
+		fNodeMap = new HashMapArray<PathName, IGRSNode>();
 	}
 
-	public IGRSBox getOrCreateBox(PathName aPath, IGItem aItem) {
+	public IGRSNode getOrCreateNode(PathName aPath, IGItem aItem) {
 
 		PathName path = aPath;
 
@@ -66,9 +66,9 @@ public class IGRSGraph {
 			path = path.getParent();
 		}
 
-		IGRSBox box = nodeMap.get(path);
-		if (box != null) {
-			return box;
+		IGRSNode node = fNodeMap.get(path);
+		if (node != null) {
+			return node;
 		}
 
 		int n = path.getNumSegments();
@@ -77,9 +77,9 @@ public class IGRSGraph {
 			return fRoot;
 		}
 
-		box = getOrCreateBox(path.getParent(), null);
+		node = getOrCreateNode(path.getParent(), null);
 
-		if (box == null) {
+		if (node == null) {
 			return null;
 		}
 
@@ -93,24 +93,24 @@ public class IGRSGraph {
 		}
 		
 		String lastSegment = path.getSegment(n - 1);
-		box = box.createChild(lastSegment, item.getDBID(), item.computeSourceLocation(), path);
+		node = node.getOrCreateChild(lastSegment, item.getDBID(), item.computeSourceLocation(), path);
 
-		return box;
+		return node;
 	}
 
 	public void dump(int aI, PrintStream aOut) {
 		fRoot.dump(aI, aOut);
 	}
 
-	public int countBoxes() {
-		return fRoot.countBoxes();
+	public int countNodes() {
+		return fRoot.countNodes();
 	}
 
 	public int countConns() {
 		return fRoot.countConns();
 	}
 
-	public IGRSBox getRoot() {
+	public IGRSNode getRoot() {
 		return fRoot;
 	}
 

@@ -7,6 +7,16 @@
 
 package org.zamia.analysis.ig;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import org.junit.Test;
 import org.zamia.ERManager;
 import org.zamia.SourceFile;
@@ -17,20 +27,14 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
 import org.zamia.analysis.SourceLocation2IG;
-import org.zamia.analysis.ig.IGRSGraph;
 import org.zamia.instgraph.IGInstantiation;
 import org.zamia.instgraph.IGItem;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGOperationObject;
 import org.zamia.util.Pair;
-
-import java.io.File;
-import java.io.IOException;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import org.zamia.vg.VGGCSVG;
+import org.zamia.vg.VGLayout;
 
 
 /**
@@ -61,7 +65,7 @@ public class IGSATest {
 
 	}
 
-	private IGRSGraph runIGReferenceSearch(SourceFile aSF, String aTLPath, int aLine, int aCol, boolean aUpwards, boolean aDownwards) throws ZamiaException, IOException {
+	private IGRSResult runIGReferenceSearch(SourceFile aSF, String aTLPath, int aLine, int aCol, boolean aUpwards, boolean aDownwards) throws ZamiaException, IOException {
 		ToplevelPath tlp = new ToplevelPath(aTLPath);
 
 		SourceLocation location = new SourceLocation(aSF, aLine, aCol);
@@ -93,7 +97,61 @@ public class IGSATest {
 				fail("Unknown item class: " + item);
 			}
 
-			IGRSGraph result = rs.search(object, path, true, true);
+			IGRSResult result = rs.search(object, path, true, true);
+
+			/*
+			 * visualize result (i.e. generate SVG file)
+			 */
+			
+			IGRSVisualGraphContentProvider contentProvider = new IGRSVisualGraphContentProvider(result);
+
+			IGRSVisualGraphLabelProvider labelProvider = new IGRSVisualGraphLabelProvider(result);
+
+			IGRSVisualGraphSelectionProvider selectionProvider = new IGRSVisualGraphSelectionProvider();
+
+			String svgFileName = fZPrj.getDataPath() + File.separator + tlp.getToplevel().getDUUID().getUID() + ".svg";
+
+			logger.info("IGSynthTest: SVG file name: %s", svgFileName);
+
+			PrintWriter out = null;
+
+			try {
+				out = new PrintWriter(new BufferedWriter(new FileWriter(svgFileName)));
+
+				VGGCSVG gc = new VGGCSVG(out);
+
+				VGLayout<IGRSNode, IGRSPort, IGRSSignal> layout = new VGLayout<IGRSNode, IGRSPort, IGRSSignal>(contentProvider, labelProvider, gc);
+
+				layout.paint(selectionProvider);
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (out != null) {
+					out.close();
+				}
+			}
+
+			String dotFileName = fZPrj.getDataPath() + File.separator + tlp.getToplevel().getDUUID().getUID() + ".dot";
+
+			logger.info("IGSynthTest: DOT file name: %s", dotFileName);
+
+			out = null;
+
+			try {
+				out = new PrintWriter(new BufferedWriter(new FileWriter(dotFileName)));
+
+				IGRS2DOT gen = new IGRS2DOT(result);
+				gen.convert(out);
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				if (out != null) {
+					out.close();
+				}
+			}
+
 
 			return result;
 
@@ -110,24 +168,24 @@ public class IGSATest {
 
 		SourceFile sf = new SourceFile(new File("examples/gcounter/addg.vhdl"));
 
-		IGRSGraph result = runIGReferenceSearch(sf, "COUNTER_TB:COUNTER0.ADDG", 22, 35, true, true);
+		IGRSResult result = runIGReferenceSearch(sf, "COUNTER_TB:COUNTER0.ADDG", 22, 35, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
-		assertEquals(35, result.countBoxes());
-		assertEquals(19, result.countConns());
+		assertEquals(35, result.countNodes());
+		assertEquals(39, result.countConns());
 
 		SourceFile sf2 = new SourceFile(new File("examples/gcounter/ha.vhdl"));
 		result = runIGReferenceSearch(sf2, "COUNTER_TB:COUNTER0.ADDG.GEN1#3.VAI.HA2", 14, 3, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
-		assertEquals(10, result.countBoxes());
-		assertEquals(3, result.countConns());
+		assertEquals(10, result.countNodes());
+		assertEquals(7, result.countConns());
 
 		result = runIGReferenceSearch(sf, "WORK.COUNTER_TB:COUNTER0.ADDG.GEN1#0.VAI", 22, 64, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
-		assertEquals(43, result.countBoxes());
-		assertEquals(26, result.countConns());
+		assertEquals(43, result.countNodes());
+		assertEquals(53, result.countConns());
 
 		//		DUUID duuid = new DUUID(LUType.Architecture, "WORK", "COUNTER_TB", "RTL");
 		//		stressTestIGReferenceSearch(duuid, "COUNTER_TB:");

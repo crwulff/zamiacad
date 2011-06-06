@@ -214,7 +214,7 @@ public class IGReferencesSearchNG {
 		fIGM = fZPrj.getIGM();
 	}
 
-	public IGRSGraph search(IGObject aItem, ToplevelPath aPath, boolean aSearchUpward, boolean aSearchDownward) {
+	public IGRSResult search(IGObject aItem, ToplevelPath aPath, boolean aSearchUpward, boolean aSearchDownward) {
 
 		logger.debug("IGObjectReferenceSearch: search(): start. item=%s, path=%s, searchUpward=%b, searchDownward=%b", aItem, aPath, aSearchUpward, aSearchDownward);
 
@@ -361,9 +361,9 @@ public class IGReferencesSearchNG {
 		}
 	}
 
-	private IGRSGraph searchReferences(boolean aSearchDownward) throws ZamiaException {
+	private IGRSResult searchReferences(boolean aSearchDownward) throws ZamiaException {
 
-		IGRSGraph vg = new IGRSGraph(fToplevel, fZPrj);
+		IGRSResult result = new IGRSResult(fToplevel, fZPrj);
 
 		ZStack<VGSearchJob> stack = new ZStack<VGSearchJob>();
 
@@ -375,9 +375,9 @@ public class IGReferencesSearchNG {
 
 			PathName path = job.getPath();
 
-			IGRSBox box = vg.getOrCreateBox(path, null);
+			IGRSNode node = result.getOrCreateNode(path, null);
 
-			IGRSSignal s = box.getOrCreateSignal(obj);
+			IGRSSignal s = node.getOrCreateSignal(obj);
 
 			VGSearchJob vgj = new VGSearchJob(obj, path, job.getScope(), s);
 			stack.push(vgj);
@@ -457,14 +457,16 @@ public class IGReferencesSearchNG {
 
 							IGObject obj = objs.get(k);
 
-							IGRSBox box = vg.getOrCreateBox(path, null);
+							IGRSNode node = result.getOrCreateNode(path, null);
 
-							IGRSSignal s = box.getOrCreateSignal(obj);
+							IGRSSignal s = node.getOrCreateSignal(obj);
 
+							IGRSPort p = s.getPort();
+							
 							VGSearchJob vgj = new VGSearchJob(obj, path, module.getStructure(), s);
 
-							signal.connect(s);
-							s.connectExternal(signal);
+							signal.addPortConn(p);
+							//s.connectExternal(signal);
 
 							stack.push(vgj);
 						}
@@ -480,7 +482,7 @@ public class IGReferencesSearchNG {
 					path = path.append(id);
 				}
 
-				IGRSBox procBox = null; // created on demand
+				IGRSNode procNode = null; // created on demand
 
 				IGSequenceOfStatements sos = proc.getSequenceOfStatements();
 
@@ -497,11 +499,11 @@ public class IGReferencesSearchNG {
 
 					if (m > 0) {
 
-						if (procBox == null) {
-							procBox = vg.getOrCreateBox(path, proc);
+						if (procNode == null) {
+							procNode = result.getOrCreateNode(path, proc);
 						}
 						
-						IGRSBox box = procBox.createChild(stmt.toString(), stmt.getDBID(), stmt.computeSourceLocation(), path.append("stmt#"+i));
+						IGRSNode node = procNode.getOrCreateChild(stmt.toString(), stmt.getDBID(), stmt.computeSourceLocation(), path.append("stmt#"+i));
 
 						for (int j = 0; j < m; j++) {
 							IGItemAccess ai = accessedItems.get(j);
@@ -515,16 +517,18 @@ public class IGReferencesSearchNG {
 
 							IGObject obj = (IGObject) item;
 
-							IGRSSignal s = box.getOrCreateSignal(obj);
+							IGRSSignal s = node.getOrCreateSignal(obj);
+							
+							IGRSPort p = s.getPort();
 
-							signal.connect(s);
+							signal.addPortConn(p);
 						}
 					}
 				}
 			}
 		}
 
-		return vg;
+		return result;
 	}
 
 	private void findObjects(IGOperation aOperation, HashSetArray<IGObject> aObjs) {
