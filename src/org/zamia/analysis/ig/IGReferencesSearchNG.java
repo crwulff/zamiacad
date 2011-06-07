@@ -36,7 +36,6 @@ import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
 import org.zamia.util.ZStack;
 
-
 /**
  * 
  * @author aoun and guenter
@@ -462,7 +461,7 @@ public class IGReferencesSearchNG {
 							IGRSSignal s = node.getOrCreateSignal(obj);
 
 							IGRSPort p = s.getPort();
-							
+
 							VGSearchJob vgj = new VGSearchJob(obj, path, module.getStructure(), s);
 
 							signal.addPortConn(p);
@@ -491,7 +490,7 @@ public class IGReferencesSearchNG {
 				for (int i = 0; i < n; i++) {
 
 					IGSequentialStatement stmt = sos.getStatement(i);
-					
+
 					HashSetArray<IGItemAccess> accessedItems = new HashSetArray<IGItemAccess>();
 					stmt.computeAccessedItems(object, null, 0, accessedItems);
 
@@ -502,8 +501,8 @@ public class IGReferencesSearchNG {
 						if (procNode == null) {
 							procNode = result.getOrCreateNode(path, proc);
 						}
-						
-						IGRSNode node = procNode.getOrCreateChild(stmt.toString(), stmt.getDBID(), stmt.computeSourceLocation(), path.append("stmt#"+i));
+
+						IGRSNode node = procNode.getOrCreateChild(stmt.toHRString(), stmt.getDBID(), stmt.computeSourceLocation(), path.append("stmt#" + i));
 
 						for (int j = 0; j < m; j++) {
 							IGItemAccess ai = accessedItems.get(j);
@@ -518,8 +517,20 @@ public class IGReferencesSearchNG {
 							IGObject obj = (IGObject) item;
 
 							IGRSSignal s = node.getOrCreateSignal(obj);
-							
+
 							IGRSPort p = s.getPort();
+
+							switch (ai.getAccessType()) {
+							case Read:
+								p.setDir(OIDir.IN);
+								break;
+							case Write:
+								p.setDir(OIDir.OUT);
+								break;
+							case ReadWrite:
+								p.setDir(OIDir.INOUT);
+								break;
+							}
 
 							signal.addPortConn(p);
 						}

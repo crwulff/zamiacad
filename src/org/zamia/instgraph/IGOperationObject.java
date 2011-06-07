@@ -81,6 +81,15 @@ public class IGOperationObject extends IGOperation {
 	}
 
 	@Override
+	public String toHRString() {
+		
+		IGObject obj = getObject();
+		String id = obj != null ? obj.getId() : "?";
+		
+		return id;
+	}
+
+	@Override
 	public OIDir getDirection() throws ZamiaException {
 		return getObject().getDirection();
 	}

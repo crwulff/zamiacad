@@ -1,5 +1,5 @@
 /* 
- * Copyright 2009 by the authors indicated in the @author tags. 
+ * Copyright 2009,2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -200,5 +200,15 @@ public abstract class IGOperation extends IGContainerItem {
 		IGOperation ascending = getRangeAscending(aContainer, aSrc);
 
 		return new IGOperationPhi(ascending, right, left, t.getBaseType(), aSrc, getZDB());
+	}
+
+	/**
+	 * Generate human-readable string representation of this statement
+	 * to be overwritten by subclasses
+	 * 
+	 * @return
+	 */
+	public String toHRString() {
+		return toString();
 	}
 }

@@ -68,4 +68,8 @@ public class IGRSPort {
 		return "IGRSPort(id=" + fId + ", node=" + fNode + ")";
 	}
 
+	public void setDir(OIDir aDir) {
+		fDir = aDir;
+	}
+
 }

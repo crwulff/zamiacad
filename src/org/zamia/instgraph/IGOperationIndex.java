@@ -17,7 +17,6 @@ import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -76,6 +75,11 @@ public class IGOperationIndex extends IGOperation {
 	@Override
 	public String toString() {
 		return "IGOperationIndex(obj=" + fOp + ", idx=" + fIdx + ")";
+	}
+
+	@Override
+	public String toHRString() {
+		return fOp.toHRString() + "[" + fIdx.toHRString() + "]";
 	}
 
 	public IGOperation getIndex() {

@@ -141,6 +141,39 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 		return buf.toString();
 	}
 
+	@Override
+	public String toHRString() {
+
+		if (isBinaryOp()) {
+			return "(" + fMappings.getMapping(0).getActual().toHRString() + ")" + fSP.getId() + "(" + fMappings.getMapping(1).getActual().toHRString() + ")";
+		}
+
+		StringBuilder buf = new StringBuilder(fSP.getId() + "(");
+
+		int n = fMappings.getNumMappings();
+		for (int i = 0; i < n; i++) {
+			buf.append(fMappings.getMapping(i).toHRString());
+			if (i < n - 1)
+				buf.append(", ");
+		}
+
+		buf.append(")");
+
+		return buf.toString();
+	}
+
+	private boolean isBinaryOp() {
+
+		String id = fSP.getId();
+		if (id.charAt(0) != '"') {
+			return false;
+		}
+
+		int n = fMappings.getNumMappings();
+
+		return n == 2;
+	}
+
 	public IGSubProgram getSub() {
 		return fSP;
 	}
@@ -152,7 +185,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 	public int getNumMappings() {
 		return fMappings.getNumMappings();
 	}
-	
+
 	public IGMapping getMapping(int aIdx) {
 		return fMappings.getMapping(aIdx);
 	}

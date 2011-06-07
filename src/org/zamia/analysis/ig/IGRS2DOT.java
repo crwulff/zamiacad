@@ -22,6 +22,8 @@ import org.zamia.instgraph.IGObject.OIDir;
 
 public class IGRS2DOT {
 
+	private static final int MAX_LABEL_LENGTH = 80;
+
 	private final IGRSResult fResult;
 
 	private PrintWriter fOut;
@@ -134,8 +136,8 @@ public class IGRS2DOT {
 		StringBuilder buf = new StringBuilder();
 
 		int l = aId.length();
-		if (l > 10)
-			l = 10;
+		if (l > MAX_LABEL_LENGTH)
+			l = MAX_LABEL_LENGTH;
 
 		for (int i = 0; i < l; i++) {
 
@@ -144,8 +146,35 @@ public class IGRS2DOT {
 				buf.append(c);
 			} else if (Character.isDigit(c)) {
 				buf.append(c);
-			} else
-				buf.append('.');
+			} else {
+				switch (c) {
+				case ' ':
+				case '@':
+				case '#':
+				case '$':
+				case '%':
+				case '^':
+				case '*':
+				case '(':
+				case ')':
+				case '-':
+				case '_':
+				case '+':
+				case '=':
+				case ';':
+				case ':':
+				case '<':
+				case '>':
+				case '\'':
+				case ',':
+				case '[':
+				case ']':
+					buf.append(c);
+					break;
+				default:
+					buf.append('.');
+				}
+			}
 		}
 
 		return buf.toString();

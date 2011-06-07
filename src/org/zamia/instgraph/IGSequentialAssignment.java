@@ -16,7 +16,6 @@ import org.zamia.instgraph.interpreter.IGPopStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -31,7 +30,7 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 	private IGOperation fTarget;
 
 	private IGOperation fReject;
-	
+
 	private boolean fInertial;
 
 	private IGOperation fDelay;
@@ -100,7 +99,12 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 
 	@Override
 	public String toString() {
-		return fTarget.toString() + " := " + fValue;
+		return fTarget.toString() + " <= " + fValue;
+	}
+
+	@Override
+	public String toHRString() {
+		return fTarget.toHRString() + " <= " + fValue.toHRString();
 	}
 
 	public IGOperation getValue() {

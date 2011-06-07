@@ -8,7 +8,6 @@
  */
 package org.zamia.instgraph;
 
-
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
@@ -58,5 +57,9 @@ public class IGMapping extends IGItem {
 	@Override
 	public int getNumChildren() {
 		return 2;
+	}
+
+	public String toHRString() {
+		return fFormal.toHRString() + " => " + fActual.toHRString();
 	}
 }
