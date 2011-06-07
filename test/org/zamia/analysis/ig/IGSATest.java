@@ -171,20 +171,20 @@ public class IGSATest {
 		IGRSResult result = runIGReferenceSearch(sf, "COUNTER_TB:COUNTER0.ADDG", 22, 35, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
-		assertEquals(35, result.countNodes());
+		assertEquals(26, result.countNodes());
 		assertEquals(39, result.countConns());
 
 		SourceFile sf2 = new SourceFile(new File("examples/gcounter/ha.vhdl"));
 		result = runIGReferenceSearch(sf2, "COUNTER_TB:COUNTER0.ADDG.GEN1#3.VAI.HA2", 14, 3, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
-		assertEquals(10, result.countNodes());
+		assertEquals(8, result.countNodes());
 		assertEquals(7, result.countConns());
 
 		result = runIGReferenceSearch(sf, "WORK.COUNTER_TB:COUNTER0.ADDG.GEN1#0.VAI", 22, 64, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
-		assertEquals(43, result.countNodes());
+		assertEquals(29, result.countNodes());
 		assertEquals(53, result.countConns());
 
 		//		DUUID duuid = new DUUID(LUType.Architecture, "WORK", "COUNTER_TB", "RTL");

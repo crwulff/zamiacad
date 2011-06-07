@@ -29,9 +29,12 @@ import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationObject;
 import org.zamia.instgraph.IGProcess;
 import org.zamia.instgraph.IGSequenceOfStatements;
+import org.zamia.instgraph.IGSequentialRestart;
 import org.zamia.instgraph.IGSequentialStatement;
+import org.zamia.instgraph.IGSequentialWait;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.IGObject.OIDir;
+import org.zamia.instgraph.interpreter.IGWaitStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
 import org.zamia.util.ZStack;
@@ -499,7 +502,12 @@ public class IGReferencesSearchNG {
 					if (m > 0) {
 
 						if (procNode == null) {
-							procNode = result.getOrCreateNode(path, proc);
+
+							if (!isDummyProcess(proc)) {
+								procNode = result.getOrCreateNode(path, proc);
+							} else {
+								procNode = result.getOrCreateNode(path.getParent(), proc);
+							}
 						}
 
 						IGRSNode node = procNode.getOrCreateChild(stmt.toHRString(), stmt.getDBID(), stmt.computeSourceLocation(), path.append("stmt#" + i));
@@ -540,6 +548,33 @@ public class IGReferencesSearchNG {
 		}
 
 		return result;
+	}
+
+	/**
+	 * a 'dummy' process is an anonymous process that contains only
+	 * a single real sequential statement
+	 * 
+	 * @param aProc
+	 * @return
+	 */
+	private boolean isDummyProcess(IGProcess aProc) {
+		if (aProc.getLabel() != null)
+			return false;
+
+		IGSequenceOfStatements seq = aProc.getSequenceOfStatements();
+		int n = seq.getNumStatements();
+
+		while (n > 1) {
+
+			IGSequentialStatement stmt = seq.getStatement(n - 1);
+
+			if (!(stmt instanceof IGSequentialRestart) && !(stmt instanceof IGSequentialWait)) {
+				break;
+			}
+			n--;
+		}
+
+		return n == 1;
 	}
 
 	private void findObjects(IGOperation aOperation, HashSetArray<IGObject> aObjs) {
