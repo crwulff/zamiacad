@@ -18,7 +18,6 @@ import org.zamia.instgraph.interpreter.IGLabel;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -100,6 +99,11 @@ public class IGSequentialIf extends IGSequentialStatement {
 		return "IF " + fCond + " THEN " + fThenSOS + " ELSE " + fElseSOS;
 	}
 
+	@Override
+	public String toHRString() {
+		return "IF " + fCond.toHRString() + " THEN " + fThenSOS.toHRString() + " ELSE " + fElseSOS.toHRString();
+	}
+
 	public IGSequenceOfStatements getThenSOS() {
 		return fThenSOS;
 	}
@@ -115,10 +119,10 @@ public class IGSequentialIf extends IGSequentialStatement {
 	@Override
 	public void dump(int aIndent) {
 		logger.debug(aIndent, "if %s then", fCond);
-		fThenSOS.dump(aIndent+2);
+		fThenSOS.dump(aIndent + 2);
 		if (fElseSOS != null) {
 			logger.debug(aIndent, "else");
-			fElseSOS.dump(aIndent+2);
+			fElseSOS.dump(aIndent + 2);
 		}
 		logger.debug(aIndent, "end if");
 	}

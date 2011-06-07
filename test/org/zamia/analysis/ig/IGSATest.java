@@ -171,8 +171,8 @@ public class IGSATest {
 		IGRSResult result = runIGReferenceSearch(sf, "COUNTER_TB:COUNTER0.ADDG", 22, 35, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
-		assertEquals(26, result.countNodes());
-		assertEquals(39, result.countConns());
+		assertEquals(30, result.countNodes());
+		assertEquals(47, result.countConns());
 
 		SourceFile sf2 = new SourceFile(new File("examples/gcounter/ha.vhdl"));
 		result = runIGReferenceSearch(sf2, "COUNTER_TB:COUNTER0.ADDG.GEN1#3.VAI.HA2", 14, 3, true, true);
@@ -184,8 +184,8 @@ public class IGSATest {
 		result = runIGReferenceSearch(sf, "WORK.COUNTER_TB:COUNTER0.ADDG.GEN1#0.VAI", 22, 64, true, true);
 		assertNotNull(result);
 		result.dump(0, System.out);
-		assertEquals(29, result.countNodes());
-		assertEquals(53, result.countConns());
+		assertEquals(37, result.countNodes());
+		assertEquals(69, result.countConns());
 
 		//		DUUID duuid = new DUUID(LUType.Architecture, "WORK", "COUNTER_TB", "RTL");
 		//		stressTestIGReferenceSearch(duuid, "COUNTER_TB:");

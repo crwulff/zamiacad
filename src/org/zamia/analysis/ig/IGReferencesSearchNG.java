@@ -25,6 +25,7 @@ import org.zamia.instgraph.IGManager;
 import org.zamia.instgraph.IGMapping;
 import org.zamia.instgraph.IGModule;
 import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationObject;
 import org.zamia.instgraph.IGProcess;
@@ -33,8 +34,6 @@ import org.zamia.instgraph.IGSequentialRestart;
 import org.zamia.instgraph.IGSequentialStatement;
 import org.zamia.instgraph.IGSequentialWait;
 import org.zamia.instgraph.IGStructure;
-import org.zamia.instgraph.IGObject.OIDir;
-import org.zamia.instgraph.interpreter.IGWaitStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
 import org.zamia.util.ZStack;
@@ -449,6 +448,9 @@ public class IGReferencesSearchNG {
 					//						addResult(globalResult, path.getParent(), ai);
 					//					}
 
+					IGRSNode mappingNode = null; // created on demand
+					IGRSSignal mappedSignal = null;
+
 					if (m > 0 && aSearchDownward && module != null) {
 
 						HashSetArray<IGObject> objs = new HashSetArray<IGObject>();
@@ -467,8 +469,25 @@ public class IGReferencesSearchNG {
 
 							VGSearchJob vgj = new VGSearchJob(obj, path, module.getStructure(), s);
 
-							signal.addPortConn(p);
-							//s.connectExternal(signal);
+							if (mappedSignal == null) {
+
+								if (!trivialMapping(mapping)) {
+
+									mappingNode = result.getOrCreateNode(path.append(mapping.toHRString()), mapping);
+
+									mappedSignal = mappingNode.getOrCreateSignal(object);
+
+									IGRSPort mp = mappedSignal.getPort();
+
+									mp.setDir(p.getDirection());
+
+									signal.addPortConn(mp);
+								} else {
+									mappedSignal = signal;
+								}
+							}
+
+							mappedSignal.addPortConn(p);
 
 							stack.push(vgj);
 						}
@@ -548,6 +567,10 @@ public class IGReferencesSearchNG {
 		}
 
 		return result;
+	}
+
+	private boolean trivialMapping(IGMapping aMapping) {
+		return aMapping.getFormal() instanceof IGOperationObject && aMapping.getActual() instanceof IGOperationObject;
 	}
 
 	/**
