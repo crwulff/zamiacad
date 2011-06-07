@@ -38,13 +38,16 @@ public class IGRSNode {
 
 	private HashMapArray<String, IGRSPort> fPorts;
 
-	private String fId;
+	private final String fId;
 
-	public IGRSNode(String aId, IGRSNode aParent, SourceLocation aLocation, PathName aPath) {
+	private final IGRSResult fResult;
+
+	public IGRSNode(String aId, IGRSNode aParent, SourceLocation aLocation, PathName aPath, IGRSResult aResult) {
 		fId = aId;
 		fParent = aParent;
 		fLocation = aLocation;
 		fPath = aPath;
+		fResult = aResult;
 
 		fSignals = new HashMapArray<String, IGRSSignal>();
 		fNodes = new HashMapArray<String, IGRSNode>();
@@ -127,9 +130,12 @@ public class IGRSNode {
 		SourceLocation location = aObject.computeSourceLocation();
 
 		IGRSSignal signal = fSignals.get(id);
-
+		
 		if (signal == null) {
-			signal = new IGRSSignal(this, id, null, location);
+			
+			IGRSType type = fResult.synthesizeType(aObject.getType());
+			
+			signal = new IGRSSignal(this, id, type, null, location);
 			fSignals.put(id, signal);
 		}
 
@@ -158,7 +164,7 @@ public class IGRSNode {
 			return node;
 		}
 
-		node = new IGRSNode(aName, this, aLocation, aPath);
+		node = new IGRSNode(aName, this, aLocation, aPath, fResult);
 
 		fNodes.put(aName, node);
 		node.setParent(this);
@@ -177,10 +183,6 @@ public class IGRSNode {
 
 	public IGRSPort getPort(int aIdx) {
 		return fPorts.get(aIdx);
-	}
-
-	public void setId(String aId) {
-		fId = aId;
 	}
 
 	public String getInstanceName() {

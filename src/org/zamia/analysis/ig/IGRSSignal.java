@@ -40,9 +40,12 @@ public class IGRSSignal {
 
 	private int fNumConns;
 
-	public IGRSSignal(IGRSNode aNode, String aId, IGRSPort aPort /* may be null if this is not a port signal */, SourceLocation aLocation) {
+	private final IGRSType fType;
+
+	public IGRSSignal(IGRSNode aNode, String aId, IGRSType aType, IGRSPort aPort /* may be null if this is not a port signal */, SourceLocation aLocation) {
 
 		fID = aId;
+		fType = aType;
 
 		fPort = aPort;
 		fNode = aNode;
@@ -150,6 +153,10 @@ public class IGRSSignal {
 		}
 
 		VHDLNode.printlnIndented("}", aIndent, aOut);
+	}
+
+	public IGRSType getType() {
+		return fType;
 	}
 
 }

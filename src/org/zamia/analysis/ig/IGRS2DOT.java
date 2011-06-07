@@ -10,6 +10,7 @@ package org.zamia.analysis.ig;
 
 import java.io.PrintWriter;
 
+import org.zamia.analysis.ig.IGRSType.TypeCat;
 import org.zamia.instgraph.IGObject.OIDir;
 
 /**
@@ -62,7 +63,15 @@ public class IGRS2DOT {
 				shape = "ellipse";
 			}
 
-			printI(getPortUID(p) + " [label=\"" + getLabel(p.getId()) + "\", shape=" + shape + "];\n", aIndent + 1);
+			IGRSType t = p.getSignal().getType();
+
+			String label = getLabel(p.getId());
+
+			if (t.getCat() != TypeCat.BIT) {
+				label = label + " " + t.toString();
+			}
+
+			printI(getPortUID(p) + " [label=\"" + label + "\", shape=" + shape + "];\n", aIndent + 1);
 		}
 
 		n = aNode.getNumSubs();
