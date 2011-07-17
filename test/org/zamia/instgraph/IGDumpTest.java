@@ -7,6 +7,15 @@
 
 package org.zamia.instgraph;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+
 import org.apache.log4j.Level;
 import org.junit.After;
 import org.junit.Test;
@@ -17,16 +26,9 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
+import org.zamia.vhdl.ast.AST2DOT;
+import org.zamia.vhdl.ast.Architecture;
 import org.zamia.vhdl.ast.DMUID;
-
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Guenter Bartsch
@@ -63,7 +65,7 @@ public class IGDumpTest {
 		return aZPrj.getDUM().getArchDUUID(tl.getDUUID());
 	}
 
-	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes, File aDotFile) throws Exception {
+	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes, File aASTDotFile, File aIGDotFile) throws Exception {
 		setupTest(aTestDir, aTestDir + File.separator + aBuildPathName);
 
 		ZamiaProjectBuilder builder = fZPrj.getBuilder();
@@ -82,25 +84,76 @@ public class IGDumpTest {
 
 		assertEquals(0, n);
 
-		n = fZPrj.getIGM().countNodes(duuid);
-		logger.info("IGDumpTest: elaborated model for %s has %d unique modules.", duuid, n);
-		assertEquals(aNumNodes, n);
+		if (n > 0) {
+			n = fZPrj.getIGM().countNodes(duuid);
+			logger.info("IGDumpTest: elaborated model for %s has %d unique modules.", duuid, n);
+			assertEquals(aNumNodes, n);
+		}
 
-		IGModule module = fZPrj.getIGM().findModule(getTL(fZPrj));
+		Toplevel tl = getTL(fZPrj);
+
+		Architecture arch = fZPrj.getDUM().getArchitecture(tl.getDUUID().getLibId(), tl.getDUUID().getId());
+
+		if (arch != null && aASTDotFile != null) {
+			AST2DOT dot = new AST2DOT(arch);
+
+			dot.blacklistField("fParent");
+			dot.blacklistField("fSource");
+			dot.blacklistField("fStartCol");
+			dot.blacklistField("fStartLine");
+			dot.blacklistField("fEndCol");
+			dot.blacklistField("fEndLine");
+			dot.blacklistField("fDeclarationMap");
+
+			PrintWriter out = null;
+			try {
+
+				out = new PrintWriter(new BufferedWriter(new FileWriter(aASTDotFile)));
+
+				dot.convert(out);
+
+				logger.info("IGDumpTest: wrote dot file to %s", aASTDotFile);
+
+			} catch (IOException e) {
+				e.printStackTrace();
+
+			} finally {
+				if (out != null) {
+					out.close();
+				}
+			}
+
+		}
+
+		IGModule module = fZPrj.getIGM().findModule(tl);
 		if (module != null) {
 
-			if (aDotFile == null) {
+			if (aIGDotFile == null) {
 				module.dump(23);
 			} else {
 
 				IG2DOT dot = new IG2DOT(module);
 
+				dot.blacklistField("fImportedLibs");
+				dot.blacklistField("fImportedPackages");
+				dot.blacklistField("fZPrjID");
+				dot.blacklistField("fSFDBID");
+				dot.blacklistField("fLine");
+				dot.blacklistField("fCol");
+				dot.blacklistField("fScore");
+				dot.blacklistField("fFailed");
+				dot.blacklistField("fReject");
+				dot.blacklistField("fInertial");
+				dot.blacklistField("fDelay");
+
 				PrintWriter out = null;
 				try {
 
-					out = new PrintWriter(new BufferedWriter(new FileWriter(aDotFile)));
+					out = new PrintWriter(new BufferedWriter(new FileWriter(aIGDotFile)));
 
 					dot.convert(out);
+
+					logger.info("IGDumpTest: wrote dot file to %s", aIGDotFile);
 
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -114,8 +167,8 @@ public class IGDumpTest {
 		}
 	}
 
-	private void runTest(String aTestDir, int aNumNodes, File aDotFile) throws Exception {
-		runTest(aTestDir, "BuildPath.txt", aNumNodes, aDotFile);
+	private void runTest(String aTestDir, int aNumNodes, File aASTDotFile, File aIGDotFile) throws Exception {
+		runTest(aTestDir, "BuildPath.txt", aNumNodes, aASTDotFile, aIGDotFile);
 	}
 
 	@After
@@ -129,13 +182,37 @@ public class IGDumpTest {
 	@Test
 	public void testDotLiterals2() throws Exception {
 
-		runTest("examples/semantic/literal2Test", 1, new File("/tmp/test.dot"));
+		runTest("examples/semantic/literal2Test", 1, new File("/tmp/ast.dot"), new File("/tmp/ig.dot"));
 	}
 
 	@Test
 	public void testLiterals2() throws Exception {
 
-		runTest("examples/semantic/literal2Test", 1, null);
+		runTest("examples/semantic/literal2Test", 1, null, null);
+	}
+
+	public static void main(String args[]) {
+
+		if (args.length != 3) {
+			System.out.println("Args: " + args.length);
+
+			System.err.println("usage: ig2dot <projectdir> <ast.dot> <ig.dot>");
+			System.exit(1);
+		}
+
+		String prjDir = args[0];
+		File astDotFile = new File(args[1]);
+		File igDotFile = new File(args[2]);
+
+		IGDumpTest igt = new IGDumpTest();
+		try {
+
+			igt.runTest(prjDir, -1, astDotFile, igDotFile);
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }

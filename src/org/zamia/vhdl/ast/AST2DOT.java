@@ -4,9 +4,9 @@
  * 
  * See the LICENSE file for details.
  * 
- * Created by Guenter Bartsch on May 30, 2011
+ * Created by Guenter Bartsch on Jul 08, 2011
  */
-package org.zamia.instgraph;
+package org.zamia.vhdl.ast;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -18,28 +18,27 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.zamia.instgraph.interpreter.IGInterpreterContext;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.ZStack;
 import org.zamia.zdb.ZDB;
 
 /**
- * Convert an IG to GraphViz' dot language
+ * Convert an AST to GraphViz' dot language
  * @author Guenter Bartsch
  *
  */
 
-public class IG2DOT {
-
-	private IGModule fModule;
+public class AST2DOT {
 
 	private ZDB fZDB;
-	
+
 	private HashSet<String> fBlacklistedFields = new HashSet<String>();
 
-	public IG2DOT(IGModule aModule) {
-		fModule = aModule;
-		fZDB = fModule.getZDB();
+	private VHDLNode fNode;
+
+	public AST2DOT(VHDLNode aNode) {
+		fNode = aNode;
+		fZDB = fNode.getZDB();
 	}
 
 	static class DotJob {
@@ -64,9 +63,9 @@ public class IG2DOT {
 
 		HashMap<String, Integer> clazzCounter = new HashMap<String, Integer>();
 
-		aOut.printf("digraph IG {\n  rankdir = LR;\n");
+		aOut.printf("digraph AST {\n  rankdir = LR;\n");
 
-		todo.push(new DotJob("n" + fModule.store(), fModule));
+		todo.push(new DotJob("n" + fNode.getDBID(), fNode));
 
 		while (!todo.isEmpty()) {
 
@@ -217,11 +216,11 @@ public class IG2DOT {
 	public void blacklistField(String aFieldID) {
 		fBlacklistedFields.add(aFieldID);
 	}
-	
+
 	private boolean isBlacklisted(Object aObj) {
 		//return aObj instanceof IGSubProgram || aObj instanceof IGType || aObj instanceof IGStaticValue || aObj instanceof IGInterpreterContext || aObj instanceof IGOperation;
 		//return aObj instanceof IGSubProgram || aObj instanceof IGStaticValue || aObj instanceof IGInterpreterContext || aObj instanceof IGOperation;
-		return aObj instanceof IGSubProgram || aObj instanceof IGInterpreterContext ;
+		return false;
 	}
 
 	private void handleChild(String aNID, String aPortId, Object aO2, ZStack<DotJob> aTODO, StringBuilder aLinkBuffer) {
