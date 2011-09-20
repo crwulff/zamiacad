@@ -77,6 +77,8 @@ public class IGInterpreterRuntimeEnv {
 		reset();
 		fCode = aCode;
 		fZPrj = aZPrj;
+
+		pushContext(fZPrj.getDUM().getGlobalPackageContext());
 	}
 
 	public void reset() {

@@ -71,4 +71,10 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 	public PathName getPath() {
 		return fPath;
 	}
+
+	public IGSimContext pushContextFor(PathName aPath) {
+		IGSimContext simContext = new IGSimContext(aPath);
+		pushContext(simContext);
+		return simContext;
+	}
 }

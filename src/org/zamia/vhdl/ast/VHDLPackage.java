@@ -125,7 +125,6 @@ public class VHDLPackage extends PrimaryUnit {
 
 		IGInterpreterCode ic = new IGInterpreterCode("Package " + this, getLocation());
 		IGInterpreterRuntimeEnv env = new IGInterpreterRuntimeEnv(ic, zprj);
-		env.pushContext(zprj.getDUM().getGlobalPackageContext());
 
 		cache.setInterpreterEnv(env);
 

@@ -37,7 +37,6 @@ import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
-import org.zamia.instgraph.interpreter.IGInterpreterContext;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.sim.IGISimCursor;
 import org.zamia.instgraph.sim.IGISimulator;
@@ -83,8 +82,6 @@ public class IGSimAnnotator {
 
 	private DMManager fDMM;
 
-	private IGInterpreterContext fGlobalPackageContext;
-
 	private IGManager fIGM;
 
 	private IGInterpreterRuntimeEnv fAnnotationsEnv;
@@ -129,7 +126,6 @@ public class IGSimAnnotator {
 		fZDB = fZPrj.getZDB();
 		fDMM = fZPrj.getDUM();
 		fIGM = fZPrj.getIGM();
-		fGlobalPackageContext = fDMM.getGlobalPackageContext();
 	}
 
 	private void initValues(IGContainer aContainer, IGInterpreterRuntimeEnv aEnv, IGISimulator aSim, BigInteger aTimeOffset, PathName aPathPrefix) throws ZamiaException {
@@ -355,7 +351,6 @@ public class IGSimAnnotator {
 			n = path.getNumSegments();
 
 			fAnnotationsEnv = new IGInterpreterRuntimeEnv(null, fZPrj);
-			fAnnotationsEnv.pushContext(fGlobalPackageContext);
 
 			PathName cp = new PathName("");
 

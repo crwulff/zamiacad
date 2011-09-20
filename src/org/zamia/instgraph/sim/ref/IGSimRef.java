@@ -31,7 +31,6 @@ import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
-import org.zamia.instgraph.interpreter.IGInterpreterContext;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.instgraph.sim.IGISimCursor;
@@ -75,8 +74,6 @@ public class IGSimRef implements IGISimulator {
 
 	private IGModule fToplevel;
 
-	private IGInterpreterContext fGlobalPackageContext;
-
 	private IGSimSchedule fSimSchedule;
 
 	private BigInteger fSimulationTime;
@@ -113,8 +110,6 @@ public class IGSimRef implements IGISimulator {
 		}
 
 		fToplevel = (IGModule) item;
-
-		fGlobalPackageContext = fZPrj.getDUM().getGlobalPackageContext();
 
 		init(fToplevel);
 
@@ -213,10 +208,8 @@ public class IGSimRef implements IGISimulator {
 
 		PathName path = aToplevel.getStructure().getPath().getPath();
 
-		IGSimContext moduleContext = new IGSimContext(path);
 		IGSimProcess moduleEnv = new IGSimProcess(this, path/* todo: or null? */, fZPrj);
-		moduleEnv.pushContext(fGlobalPackageContext);
-		moduleEnv.pushContext(moduleContext);
+		IGSimContext moduleContext = moduleEnv.pushContextFor(path);
 
 		initObjects(aToplevel.getContainer(), moduleEnv, path);
 
@@ -236,11 +229,9 @@ public class IGSimRef implements IGISimulator {
 
 				IGProcess proc = (IGProcess) stmt;
 
-				IGSimContext processContext = new IGSimContext(aParentPath);
 				IGSimProcess processEnv = new IGSimProcess(this, aParentPath, fZPrj);
-				processEnv.pushContext(fGlobalPackageContext);
 				processEnv.pushContext(aParentContext);
-				processEnv.pushContext(processContext);
+				processEnv.pushContextFor(aParentPath);
 
 				IGContainer pContainer = proc.getContainer();
 
@@ -267,11 +258,9 @@ public class IGSimRef implements IGISimulator {
 				PathName instPath = aParentPath.clonePathName().append(inst.getLabel());
 
 				// prepare environment for inst. module
-				IGSimContext instContext = new IGSimContext(instPath);
 				IGSimProcess instEnv = new IGSimProcess(this, instPath, fZPrj);
-				instEnv.pushContext(fGlobalPackageContext);
 				instEnv.pushContext(aParentContext);
-				instEnv.pushContext(instContext);
+				IGSimContext instContext = instEnv.pushContextFor(instPath);
 
 				// init inst. module
 				initObjects(iContainer, instEnv, instEnv.getPath());
@@ -305,7 +294,6 @@ public class IGSimRef implements IGISimulator {
 
 				// prepare environment for generated module
 				IGSimProcess structEnv = new IGSimProcess(this, structPath, fZPrj);
-				structEnv.pushContext(fGlobalPackageContext);
 				structEnv.pushContext(aParentContext); // for-generate constant will be added to parent context
 				// FIXME: TODO: the constant added to aParentContext will be visible everywhere aParentContext is used! It shouldn't be so. Use a new dedicated context here.  
 
@@ -611,6 +599,7 @@ public class IGSimRef implements IGISimulator {
 		IGContainer container = fData.getContainer(aSignalPath);
 		IGElaborationEnv elabEnv = new IGElaborationEnv(fZPrj);
 		IGInterpreterRuntimeEnv runtimeEnv = new IGInterpreterRuntimeEnv(new IGInterpreterCode("UserInputParse", null), fZPrj);
+		runtimeEnv.exitContext(); // drop global package context
 		elabEnv.setInterpreterEnv(runtimeEnv);
 
 		ArrayList<IGOperation> igOpList = literal.computeIG(aType, container, elabEnv, null, ASTErrorMode.EXCEPTION, null);

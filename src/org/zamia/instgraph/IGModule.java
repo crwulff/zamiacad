@@ -170,7 +170,6 @@ public class IGModule extends IGDesignUnit {
 		
 		IGInterpreterCode ic = new IGInterpreterCode("IGModule " + this, computeSourceLocation());
 		IGInterpreterRuntimeEnv env = new IGInterpreterRuntimeEnv(ic, zprj);
-		env.pushContext(zprj.getDUM().getGlobalPackageContext());
 
 		IGElaborationEnv ee = new IGElaborationEnv(getZPrj());
 		ee.setInterpreterEnv(env);

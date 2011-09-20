@@ -137,6 +137,7 @@ public class IGSynth {
 		fRTLM = fZPrj.getRTLM();
 
 		fEnv = new IGInterpreterRuntimeEnv(null, fZPrj);
+		fEnv.exitContext(); // drop global package context
 		fEnv.enterContext();
 
 		fStmtSynthAdapters = new HashMap<Class, IGStmtSynthAdapter>();

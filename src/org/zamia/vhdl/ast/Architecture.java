@@ -334,7 +334,6 @@ public class Architecture extends SecondaryUnit {
 
 		IGInterpreterCode ic = new IGInterpreterCode("Architecture " + this, getLocation());
 		IGInterpreterRuntimeEnv env = new IGInterpreterRuntimeEnv(ic, zprj);
-		env.pushContext(zprj.getDUM().getGlobalPackageContext());
 		env.pushContextFor(structure);
 
 		ee.setInterpreterEnv(env);
@@ -396,7 +395,6 @@ public class Architecture extends SecondaryUnit {
 
 		IGInterpreterCode ic = new IGInterpreterCode("Architecture " + this, getLocation());
 		IGInterpreterRuntimeEnv env = new IGInterpreterRuntimeEnv(ic, zprj);
-		env.pushContext(zprj.getDUM().getGlobalPackageContext());
 		env.pushContextFor(structure);
 
 		cache.setInterpreterEnv(env);
