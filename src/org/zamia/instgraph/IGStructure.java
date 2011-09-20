@@ -10,18 +10,20 @@ package org.zamia.instgraph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import org.zamia.ASTNode;
 import org.zamia.ERManager;
 import org.zamia.SourceLocation;
 import org.zamia.ToplevelPath;
+import org.zamia.ZamiaException;
 import org.zamia.ZamiaException.ExCat;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.SourceLocation2AST;
-import org.zamia.instgraph.interpreter.IGInterpreterContext;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.ast.InstantiatedUnit;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
 /**
@@ -44,15 +46,12 @@ public class IGStructure extends IGConcurrentStatement {
 
 	private ToplevelPath fPath;
 
-	private IGInterpreterContext fInterpreterContext;
-
-	public IGStructure(IGInterpreterContext aContext, ToplevelPath aPath, long aParentContainerDBID, String aLabel, SourceLocation aLocation, ZDB aZDB) {
+	public IGStructure(ToplevelPath aPath, long aParentContainerDBID, String aLabel, SourceLocation aLocation, ZDB aZDB) {
 		super(aLabel, aLocation, aZDB);
 
 		fPath = aPath;
 		fContainer = new IGContainer(aParentContainerDBID, aLocation, aZDB);
 		fContainerDBID = aZDB.store(fContainer);
-		fInterpreterContext = aContext;
 	}
 
 	public IGContainer getContainer() {
@@ -173,13 +172,15 @@ public class IGStructure extends IGConcurrentStatement {
 		return label + "IGStructure (" + computeSourceLocation() + ")";
 	}
 
-	public void updateInstantiations(HashSetArray<String> aDeleteNodes, IGElaborationEnv aEE) {
+	public void updateInstantiations(HashSetArray<String> aDeleteNodes, IGElaborationEnv aEE, ArrayList<IGStaticValue> aActualGenerics) {
 
 		IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
 
-		IGInterpreterContext context = getInterpreterContext();
-		if (context != null) {
-			env.pushContext(context);
+		initEnv(getContainer(), env, aActualGenerics);
+
+		boolean hasLocalContext = env.hasContextFor(this);
+		if (hasLocalContext) { // FIXME: todo: never occurs, at least in IncrementalUpdateIGTest
+			env.pushContextFor(this);
 		}
 
 		ZamiaProject zprj = getZPrj();
@@ -192,7 +193,7 @@ public class IGStructure extends IGConcurrentStatement {
 
 			if (stmt instanceof IGStructure) {
 				IGStructure struct = (IGStructure) stmt;
-				struct.updateInstantiations(aDeleteNodes, aEE);
+				struct.updateInstantiations(aDeleteNodes, aEE, aActualGenerics);
 			} else if (stmt instanceof IGInstantiation) {
 				IGInstantiation inst = (IGInstantiation) stmt;
 
@@ -237,15 +238,91 @@ public class IGStructure extends IGConcurrentStatement {
 			}
 		}
 
-		if (context != null) {
+		if (hasLocalContext) {
 			env.exitContext();
 		}
 
 		storeOrUpdate();
 	}
 
-	public IGInterpreterContext getInterpreterContext() {
-		return fInterpreterContext;
+	private void initEnv(IGContainer aContainer, IGInterpreterRuntimeEnv aEnv, ArrayList<IGStaticValue> aActualGenerics) {
+
+		HashSet<Long> processedItems = new HashSet<Long>(aContainer.getNumLocalItems());
+
+		// generics
+
+		int nActualGenerics = aActualGenerics.size();
+		int n = aContainer.getNumGenerics();
+		for (int i = 0; i < n; i++) {
+
+			IGObject igg = aContainer.getGeneric(i);
+
+			try {
+
+				processedItems.add(igg.getDBID());
+
+				aEnv.newObject(igg, ASTErrorMode.EXCEPTION, null, igg.computeSourceLocation());
+
+				if (i < nActualGenerics) {
+					IGStaticValue actualGeneric = aActualGenerics.get(i);
+					aEnv.setObjectValue(igg, actualGeneric, actualGeneric.computeSourceLocation());
+				}
+
+			} catch (ZamiaException e) {
+				logger.error("IGStructure: ERROR: Failed to init environment with generic: %s", igg);
+			} catch (Throwable t) {
+				el.logException(t);
+			}
+		}
+
+		// ports
+
+		n = aContainer.getNumInterfaces();
+		for (int i = 0; i < n; i++) {
+
+			IGContainerItem igi = aContainer.getInterface(i);
+
+			try {
+
+				processedItems.add(igi.getDBID());
+
+				if (igi instanceof IGObject) {
+					aEnv.newObject((IGObject) igi, ASTErrorMode.EXCEPTION, null, igi.computeSourceLocation());
+				}
+
+			} catch (ZamiaException e) {
+				logger.error("IGStructure: ERROR: Failed to init environment with port: %s", igi);
+			} catch (Throwable t) {
+				el.logException(t);
+			}
+		}
+
+		// declarations:
+
+		n = aContainer.getNumLocalItems();
+		for (int i = 0; i < n; i++) {
+
+			IGContainerItem item = aContainer.getLocalItem(i);
+
+			if (processedItems.contains(item.getDBID())) {
+				continue;
+			}
+
+			try {
+
+				if (item instanceof IGObject) {
+					IGObject obj = (IGObject) item;
+					aEnv.newObject(obj, ASTErrorMode.EXCEPTION, null, item.computeSourceLocation());
+				}
+
+			} catch (ZamiaException e) {
+				logger.error("IGStructure: ERROR: Failed to init environment with declaration: %s", item);
+			} catch (Throwable t) {
+				el.logException(t);
+			}
+		}
+
+
 	}
 
 }

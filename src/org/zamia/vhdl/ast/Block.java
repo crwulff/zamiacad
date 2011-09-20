@@ -38,7 +38,6 @@ import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
-import org.zamia.instgraph.interpreter.IGInterpreterContext;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.util.HashSetArray;
 
@@ -208,9 +207,9 @@ public class Block extends ConcurrentStatement {
 		IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
 		blockEE.setInterpreterEnv(env);
 
-		IGInterpreterContext context = env.enterContext();
+		IGStructure blockStructure = new IGStructure(path, aContainer.getDBID(), getLabel(), getLocation(), aEE.getZDB());
 
-		IGStructure blockStructure = new IGStructure(context, path, aContainer.getDBID(), getLabel(), getLocation(), aEE.getZDB());
+		env.pushContextFor(blockStructure);
 
 		IGContainer blockContainer = blockStructure.getContainer();
 		/*

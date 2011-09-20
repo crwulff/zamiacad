@@ -34,7 +34,6 @@ import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGOperationAttribute.AttrOp;
-import org.zamia.instgraph.interpreter.IGInterpreterContext;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.util.HashSetArray;
 
@@ -236,7 +235,7 @@ public class GenerateStatement extends ConcurrentStatement {
 					path = path.append(label);
 				}
 
-				IGStructure structure = new IGStructure(null, path, aContainer.getDBID(), label, getLocation(), aEE.getZDB());
+				IGStructure structure = new IGStructure(path, aContainer.getDBID(), label, getLocation(), aEE.getZDB());
 
 				computeDeclarationsIG(structure.getContainer(), aEE);
 
@@ -283,9 +282,9 @@ public class GenerateStatement extends ConcurrentStatement {
 
 					// set loop constant value in interpreter environment
 
-					IGInterpreterContext context = env.enterContext();
+					IGStructure structure = new IGStructure(path, aContainer.getDBID(), label, getLocation(), aEE.getZDB());
 
-					IGStructure structure = new IGStructure(context, path, aContainer.getDBID(), label, getLocation(), aEE.getZDB());
+					env.pushContextFor(structure);
 
 					structure.getContainer().add(loopConst);
 					env.newObject(loopConst, ASTErrorMode.EXCEPTION, null, getLocation());
@@ -316,9 +315,9 @@ public class GenerateStatement extends ConcurrentStatement {
 
 					// set loop constant value in interpreter env
 
-					IGInterpreterContext context = env.enterContext();
+					IGStructure structure = new IGStructure(path, aContainer.getDBID(), label, getLocation(), aEE.getZDB());
 
-					IGStructure structure = new IGStructure(context, path, aContainer.getDBID(), label, getLocation(), aEE.getZDB());
+					env.pushContextFor(structure);
 
 					structure.getContainer().add(loopConst);
 					env.newObject(loopConst, ASTErrorMode.EXCEPTION, null, getLocation());

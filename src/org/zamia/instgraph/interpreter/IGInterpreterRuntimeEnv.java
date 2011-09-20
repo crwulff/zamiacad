@@ -9,6 +9,7 @@
 package org.zamia.instgraph.interpreter;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 
 import org.zamia.ErrorReport;
 import org.zamia.ExceptionLogger;
@@ -20,6 +21,7 @@ import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGStaticValue;
+import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.util.ZStack;
@@ -42,6 +44,8 @@ public class IGInterpreterRuntimeEnv {
 	public final static boolean dump = false;
 
 	protected ZStack<IGInterpreterContext> fContexts;
+
+	private HashMap<IGStructure, IGInterpreterContext> fStructureContexts;
 
 	private ZStack<IGStackFrame> fStack;
 
@@ -78,6 +82,7 @@ public class IGInterpreterRuntimeEnv {
 	public void reset() {
 		fPC = 0;
 		fContexts = new ZStack<IGInterpreterContext>();
+		fStructureContexts = new HashMap<IGStructure, IGInterpreterContext>();
 		fStack = new ZStack<IGStackFrame>();
 		fCallStack = new ZStack<CallStackEntry>();
 	}
@@ -221,6 +226,19 @@ public class IGInterpreterRuntimeEnv {
 		return fStack.get(n - 1 - aOffset);
 	}
 
+	public void pushContextFor(IGStructure aStructure) {
+
+		IGInterpreterContext context;
+		if (fStructureContexts.containsKey(aStructure)) {
+			context = fStructureContexts.get(aStructure);
+		} else {
+			context = new IGInterpreterContext();
+			fStructureContexts.put(aStructure, context);
+		}
+
+		pushContext(context);
+	}
+
 	public void pushContext(IGInterpreterContext aContext) {
 		fContexts.push(aContext);
 	}
@@ -233,6 +251,10 @@ public class IGInterpreterRuntimeEnv {
 
 	public void exitContext() {
 		fContexts.pop();
+	}
+
+	public boolean hasContextFor(IGStructure aStructure) {
+		return fStructureContexts.containsKey(aStructure);
 	}
 
 	public IGObjectDriver newObject(IGObject aObj, ASTErrorMode aErrorMode, ErrorReport aReport, SourceLocation aLocation) throws ZamiaException {

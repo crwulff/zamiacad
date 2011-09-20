@@ -15,7 +15,6 @@ import org.zamia.ToplevelPath;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
-import org.zamia.instgraph.interpreter.IGInterpreterContext;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.PathName;
@@ -40,7 +39,7 @@ public class IGModule extends IGDesignUnit {
 
 	public IGModule(ToplevelPath aPath, DMUID aDUUID, SourceLocation aLocation, ZDB aZDB) {
 		super(aDUUID, aLocation, aZDB);
-		fStructure = new IGStructure(new IGInterpreterContext(), aPath, 0, "", aLocation, aZDB);
+		fStructure = new IGStructure(aPath, 0, "", aLocation, aZDB);
 		fActualGenerics = new ArrayList<IGStaticValue>();
 	}
 
@@ -176,6 +175,6 @@ public class IGModule extends IGDesignUnit {
 		IGElaborationEnv ee = new IGElaborationEnv(getZPrj());
 		ee.setInterpreterEnv(env);
 		
-		fStructure.updateInstantiations(aDeleteNodes, ee);
+		fStructure.updateInstantiations(aDeleteNodes, ee, fActualGenerics);
 	}
 }

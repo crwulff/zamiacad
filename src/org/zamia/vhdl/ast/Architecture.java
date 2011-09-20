@@ -335,7 +335,7 @@ public class Architecture extends SecondaryUnit {
 		IGInterpreterCode ic = new IGInterpreterCode("Architecture " + this, getLocation());
 		IGInterpreterRuntimeEnv env = new IGInterpreterRuntimeEnv(ic, zprj);
 		env.pushContext(zprj.getDUM().getGlobalPackageContext());
-		env.pushContext(structure.getInterpreterContext());
+		env.pushContextFor(structure);
 
 		ee.setInterpreterEnv(env);
 
@@ -345,6 +345,13 @@ public class Architecture extends SecondaryUnit {
 
 		fContext.computeIG(container, ee);
 
+		if (!computeEntityIG(module, container, ee, true)) return;
+
+		container.storeOrUpdate();
+		aModule.storeOrUpdate();
+	}
+
+	private boolean computeEntityIG(IGModule module, IGContainer container, IGElaborationEnv ee, boolean computeIG) {
 		Entity entity = null;
 
 		try {
@@ -357,17 +364,20 @@ public class Architecture extends SecondaryUnit {
 
 			reportError("Entity " + fEntityName + " not found.");
 
-			return;
+			return false;
 		}
 
 		/*
 		 * entity ig
 		 */
 
-		entity.computeEntityIG(module, container, ee);
+		if (computeIG) {
+			entity.computeEntityIG(module, container, ee);
+		} else {
+			entity.initEnv(module, container, ee);
+		}
 
-		container.storeOrUpdate();
-		aModule.storeOrUpdate();
+		return true;
 	}
 
 	@Override
@@ -387,9 +397,11 @@ public class Architecture extends SecondaryUnit {
 		IGInterpreterCode ic = new IGInterpreterCode("Architecture " + this, getLocation());
 		IGInterpreterRuntimeEnv env = new IGInterpreterRuntimeEnv(ic, zprj);
 		env.pushContext(zprj.getDUM().getGlobalPackageContext());
-		env.pushContext(structure.getInterpreterContext());
+		env.pushContextFor(structure);
 
 		cache.setInterpreterEnv(env);
+
+		computeEntityIG(aModule, container, cache, false);
 
 		int n = getNumDeclarations();
 		for (int i = 0; i < n; i++) {

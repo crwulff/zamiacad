@@ -9,6 +9,7 @@
 package org.zamia.vhdl.ast;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import org.zamia.DMManager;
 import org.zamia.SourceFile;
@@ -325,6 +326,97 @@ public class Entity extends PrimaryUnit {
 		//			cs.computeIG(aContainer, aCache);
 		//		}
 
+	}
+
+	/**
+	 * Same as {@link #computeEntityIG(IGModule, IGContainer, IGElaborationEnv)}, but doesn't create new objects.
+	 * Takes them from within the specified aContainer instead.
+	 *
+	 * @param aModule
+	 * @param aContainer
+	 * @param aEE
+	 */
+	void initEnv(IGModule aModule, IGContainer aContainer, IGElaborationEnv aEE) {
+
+		IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
+
+		HashSet<Long> processedItems = new HashSet<Long>(aContainer.getNumLocalItems());
+
+		// generics
+
+		if (fGenerics != null) {
+
+			int nActualGenerics = aModule.getNumActualGenerics();
+			int n = fGenerics.getNumInterfaces();
+			for (int i = 0; i < n; i++) {
+				try {
+					InterfaceDeclaration interf = fGenerics.get(i);
+
+					IGObject igg = aContainer.getGeneric(i);
+
+					processedItems.add(igg.getDBID());
+
+					env.newObject(igg, ASTErrorMode.EXCEPTION, null, interf.getLocation());
+
+					if (i < nActualGenerics) {
+						IGStaticValue actualGeneric = aModule.getActualGeneric(i);
+						env.setObjectValue(igg, actualGeneric, actualGeneric.computeSourceLocation());
+					}
+
+				} catch (ZamiaException e) {
+					reportError(e);
+				} catch (Throwable t) {
+					el.logException(t);
+				}
+			}
+		}
+
+		// ports
+
+		if (fPorts != null) {
+			int n = fPorts.getNumInterfaces();
+			for (int i = 0; i < n; i++) {
+				try {
+					InterfaceDeclaration interf = (InterfaceDeclaration) fPorts.get(i);
+
+					IGContainerItem igi = aContainer.getInterface(i);
+
+					processedItems.add(igi.getDBID());
+
+					if (igi instanceof IGObject) {
+						env.newObject((IGObject) igi, ASTErrorMode.EXCEPTION, null, interf.getLocation());
+					}
+
+				} catch (ZamiaException e) {
+					reportError(e);
+				} catch (Throwable t) {
+					el.logException(t);
+				}
+			}
+		}
+
+		// declarations:
+
+		int n = aContainer.getNumLocalItems();
+		for (int i = 0; i < n; i++) {
+			try {
+				IGContainerItem item = aContainer.getLocalItem(i);
+
+				if (processedItems.contains(item.getDBID())) {
+					continue;
+				}
+
+				if (item instanceof IGObject) {
+					IGObject obj = (IGObject) item;
+					env.newObject(obj, ASTErrorMode.EXCEPTION, null, item.computeSourceLocation());
+				}
+
+			} catch (ZamiaException e) {
+				reportError(e);
+			} catch (Throwable t) {
+				el.logException(t);
+			}
+		}
 	}
 
 	@Override
