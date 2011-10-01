@@ -30,7 +30,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 
 	private IGMappings fMappings;
 
-	private IGSubProgram fSP;
+	private long fSPDBID;
 
 	public IGOperationInvokeSubprogram(IGMappings aMappings, IGSubProgram aSP, SourceLocation aSrc, ZDB aZDB) {
 		super(aSP.getReturnType(), aSrc, aZDB);
@@ -38,7 +38,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 		if (aMappings == null) {
 			logger.error("IGOperationInvokeSubprogram: foobar. Sanity check failed.");
 		}
-		fSP = aSP;
+		fSPDBID = save(aSP);
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 
 		aCode.add(new IGEnterNewContextStmt(computeSourceLocation(), getZDB()));
 
-		IGSubProgram sub = fSP;
+		IGSubProgram sub = getSub();
 
 		IGContainer subContainer = sub.getContainer();
 
@@ -104,7 +104,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 			mapping.generateCode(aCode, computeSourceLocation());
 		}
 
-		aCode.add(new IGCallStmt(fSP, computeSourceLocation(), getZDB()));
+		aCode.add(new IGCallStmt(getSub(), computeSourceLocation(), getZDB()));
 
 		aCode.add(new IGExitContextStmt(computeSourceLocation(), getZDB()));
 	}
@@ -127,7 +127,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 	@Override
 	public String toString() {
 
-		StringBuilder buf = new StringBuilder(fSP.getId() + "(");
+		StringBuilder buf = new StringBuilder(getSub().getId() + "(");
 
 		int n = fMappings.getNumMappings();
 		for (int i = 0; i < n; i++) {
@@ -145,10 +145,10 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 	public String toHRString() {
 
 		if (isBinaryOp()) {
-			return "(" + fMappings.getMapping(0).getActual().toHRString() + ")" + fSP.getId() + "(" + fMappings.getMapping(1).getActual().toHRString() + ")";
+			return "(" + fMappings.getMapping(0).getActual().toHRString() + ")" + getSub().getId() + "(" + fMappings.getMapping(1).getActual().toHRString() + ")";
 		}
 
-		StringBuilder buf = new StringBuilder(fSP.getId() + "(");
+		StringBuilder buf = new StringBuilder(getSub().getId() + "(");
 
 		int n = fMappings.getNumMappings();
 		for (int i = 0; i < n; i++) {
@@ -164,7 +164,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 
 	private boolean isBinaryOp() {
 
-		String id = fSP.getId();
+		String id = getSub().getId();
 		if (id.charAt(0) != '"') {
 			return false;
 		}
@@ -175,7 +175,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 	}
 
 	public IGSubProgram getSub() {
-		return fSP;
+		return (IGSubProgram) getZDB().load(fSPDBID);
 	}
 
 	public int getScore() {

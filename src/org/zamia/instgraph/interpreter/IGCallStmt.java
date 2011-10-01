@@ -16,7 +16,6 @@ import org.zamia.instgraph.IGSubProgram.IGBuiltin;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
-
 /**
  * 
  * @author Guenter Bartsch
@@ -25,18 +24,21 @@ import org.zamia.zdb.ZDB;
 @SuppressWarnings("serial")
 public class IGCallStmt extends IGStmt {
 
-	private IGSubProgram fSP;
+	private long fSPDBID;
 
 	public IGCallStmt(IGSubProgram aSP, SourceLocation aLocation, ZDB aZDB) {
 		super(aLocation, aZDB);
+		fSPDBID = save(aSP);
+	}
 
-		fSP = aSP;
+	public IGSubProgram getSub() {
+		return (IGSubProgram) getZDB().load(fSPDBID);
 	}
 
 	@Override
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
-		IGSubProgram sub = fSP;
+		IGSubProgram sub = getSub();
 
 		//		int n = fSPS.getNumSubPrograms();
 		//		ArrayList<IGObject> mappedInterfaces = fSPS.getSubProgram(n-1).getContainer().getInterfaces();
@@ -105,7 +107,7 @@ public class IGCallStmt extends IGStmt {
 
 	@Override
 	public String toString() {
-		return "CALL " + fSP;
+		return "CALL " + getSub();
 	}
 
 }
