@@ -19,10 +19,13 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.zip.Deflater;
+import java.util.zip.GZIPInputStream;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaLogger;
 import org.zamia.util.HashMapArray;
+import org.zamia.util.LevelGZIPOutputStream;
 
 
 /**
@@ -60,11 +63,16 @@ public class ZDBPersistentData {
 
 	}
 
-	void save(File aIdxFile) {
+	void save(File aPDFile) {
 
 		ObjectOutputStream oos = null;
 		try {
-			oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(aIdxFile)));
+			
+			if (ZDB.ENABLE_COMPRESSION) {
+				oos = new ObjectOutputStream(new BufferedOutputStream(new LevelGZIPOutputStream(new FileOutputStream(aPDFile, true), Deflater.BEST_SPEED)));
+			} else {
+				oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(aPDFile)));
+			}
 
 			oos.writeInt(CURRENT_VERSION);
 
@@ -128,12 +136,17 @@ public class ZDBPersistentData {
 
 	}
 
-	boolean load(File aIdxFile) {
+	boolean load(File aPDFile) {
 
-		if (aIdxFile.exists() && aIdxFile.canRead()) {
+		if (aPDFile.exists() && aPDFile.canRead()) {
 			ObjectInputStream ois = null;
 			try {
-				ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(aIdxFile)));
+				
+				if (ZDB.ENABLE_COMPRESSION) {
+					ois = new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(aPDFile))));
+				} else {
+					ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(aPDFile)));
+				}
 
 				int v = ois.readInt();
 				if (v != CURRENT_VERSION) {

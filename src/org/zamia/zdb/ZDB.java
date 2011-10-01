@@ -10,19 +10,16 @@ package org.zamia.zdb;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
@@ -32,11 +29,9 @@ import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
-import org.zamia.instgraph.IGSubProgram;
 import org.zamia.util.FileUtils;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.LevelGZIPOutputStream;
-import org.zamia.util.Object2Dot;
 import org.zamia.util.ObjectSize;
 import org.zamia.util.ZHash;
 import org.zamia.util.ehm.EHMIterator;
@@ -1076,7 +1071,7 @@ public class ZDB {
 		long count = 0;
 		long totalSize = 0;
 
-		int subCount = 0;
+		//int subCount = 0;
 
 		while (keys.hasNext()) {
 
