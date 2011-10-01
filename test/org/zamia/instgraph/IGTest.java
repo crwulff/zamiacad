@@ -85,6 +85,7 @@ public class IGTest {
 	@After
 	public void tearDown() {
 		if (fZPrj != null) {
+			// fZPrj.getZDB().dump();
 			fZPrj.shutdown();
 			fZPrj = null;
 		}

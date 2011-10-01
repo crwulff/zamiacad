@@ -10,6 +10,7 @@ package org.zamia.zdb;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaLogger;
@@ -230,6 +232,80 @@ public class ZDBPersistentData {
 
 	public int getVersion() {
 		return fVersion;
+	}
+
+	void dump() {
+
+		Iterator<String> keys = fNamedObjects.keySet().iterator();
+		
+		HashMap<String, Integer> numObjectsByClass = new HashMap<String, Integer>();
+
+		HashMap<String, Integer> sizeofObjectsByClass = new HashMap<String, Integer>();
+
+		long count = 0;
+		long totalSize = 0;
+
+		while (keys.hasNext()) {
+
+			String key = keys.next();
+
+			Object o = fNamedObjects.get(key);
+			
+			if (o == null) {
+				continue;
+			}
+
+			/*
+			 * serialize it to mem just to get the exact size
+			 * of the serialized representation of it
+			 */
+
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try {
+				ObjectOutputStream serializer = new ObjectOutputStream(baos);
+				serializer.writeObject(o);
+				serializer.flush();
+			} catch (IOException e) {
+				el.logException(e);
+			}
+
+			int size = baos.size();
+			totalSize += size;
+
+			/*
+			 * update stats
+			 */
+
+			String clsName = o.getClass().toString();
+
+			Integer cnt = numObjectsByClass.get(clsName);
+			int n = 0;
+			if (cnt != null) {
+				n = cnt.intValue();
+			}
+			n++;
+			numObjectsByClass.put(clsName, n);
+
+			Integer s = sizeofObjectsByClass.get(clsName);
+			int s2 = size;
+			if (s != null) {
+				s2 += s.intValue();
+			}
+			sizeofObjectsByClass.put(clsName, s2);
+
+			count++;
+		}
+
+		for (String clsName : numObjectsByClass.keySet()) {
+			Integer num = numObjectsByClass.get(clsName);
+			long n = num.intValue();
+			Integer size = sizeofObjectsByClass.get(clsName);
+			long s = size.intValue();
+			logger.info("ZDB: %6d, %9d KB, %9d avg bytes, %3d%% %s", n, s / 1024, s / n, s * 100 / totalSize, clsName);
+		}
+
+		logger.info("ZDB: Total size %s KB in %d objects", totalSize / 1024, count);
+
 	}
 
 }

@@ -10,16 +10,19 @@ package org.zamia.zdb;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
@@ -29,11 +32,14 @@ import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
+import org.zamia.instgraph.IGSubProgram;
 import org.zamia.util.FileUtils;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.LevelGZIPOutputStream;
+import org.zamia.util.Object2Dot;
 import org.zamia.util.ObjectSize;
 import org.zamia.util.ZHash;
+import org.zamia.util.ehm.EHMIterator;
 import org.zamia.util.ehm.EHMPageManager;
 import org.zamia.util.ehm.ExtendibleHashMap;
 
@@ -1036,6 +1042,130 @@ public class ZDB {
 			}
 		}
 		logger.info("ZDB: import(): finished.");
+	}
+
+	/*
+	 * Dump a statistical overview of all object stored inside this ZDB instance
+	 */
+
+	public void dump() {
+
+		logger.info("ZDB: Analyzing...");
+		logger.info("ZDB: ============");
+		logger.info("ZDB:");
+
+		logger.info("ZDB:");
+		logger.info("ZDB: 1/2: Persistent Objects");
+		logger.info("ZDB: -----------------------");
+		logger.info("ZDB:");
+		
+		fPD.dump();
+		
+		logger.info("ZDB:");
+		logger.info("ZDB: 2/2: Data Table");
+		logger.info("ZDB: ---------------");
+		logger.info("ZDB:");
+
+		
+		EHMIterator keys = fOffsets.keyIterator();
+
+		HashMap<String, Integer> numObjectsByClass = new HashMap<String, Integer>();
+
+		HashMap<String, Integer> sizeofObjectsByClass = new HashMap<String, Integer>();
+
+		long count = 0;
+		long totalSize = 0;
+
+		int subCount = 0;
+
+		while (keys.hasNext()) {
+
+			long key = keys.next();
+
+			/*
+			 * load the object
+			 */
+
+			Object o = load(key);
+			
+			if (o == null) {
+				continue;
+			}
+
+			//			if (o instanceof IGSubProgram) {
+			//				
+			//				Object2Dot o2d = new Object2Dot(o);
+			//				
+			//				PrintWriter out = null;
+			//				try {
+			//
+			//					out = new PrintWriter(new BufferedWriter(new FileWriter("/tmp/sub"+subCount+".dot")));
+			//
+			//					o2d.convert(out);
+			//
+			//				} catch (IOException e) {
+			//					e.printStackTrace();
+			//
+			//				} finally {
+			//					if (out != null) {
+			//						out.close();
+			//					}
+			//				}
+			//				
+			//				subCount++;
+			//			}
+
+			/*
+			 * serialize it to mem just to get the exact size
+			 * of the serialized representation of it
+			 */
+
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			try {
+				ObjectOutputStream serializer = new ObjectOutputStream(baos);
+				serializer.writeObject(o);
+				serializer.flush();
+			} catch (IOException e) {
+				el.logException(e);
+			}
+
+			int size = baos.size();
+			totalSize += size;
+
+			/*
+			 * update stats
+			 */
+
+			String clsName = o.getClass().toString();
+
+			Integer cnt = numObjectsByClass.get(clsName);
+			int n = 0;
+			if (cnt != null) {
+				n = cnt.intValue();
+			}
+			n++;
+			numObjectsByClass.put(clsName, n);
+
+			Integer s = sizeofObjectsByClass.get(clsName);
+			int s2 = size;
+			if (s != null) {
+				s2 += s.intValue();
+			}
+			sizeofObjectsByClass.put(clsName, s2);
+
+			count++;
+		}
+
+		for (String clsName : numObjectsByClass.keySet()) {
+			Integer num = numObjectsByClass.get(clsName);
+			long n = num.intValue();
+			Integer size = sizeofObjectsByClass.get(clsName);
+			long s = size.intValue();
+			logger.info("ZDB: %6d, %9d KB, %9d avg bytes, %3d%% %s", n, s / 1024, s / n, s * 100 / totalSize, clsName);
+		}
+
+		logger.info("ZDB: Total size %s KB in %d objects", totalSize / 1024, count);
+
 	}
 
 }
