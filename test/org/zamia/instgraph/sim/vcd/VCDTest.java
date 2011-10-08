@@ -155,7 +155,7 @@ public class VCDTest {
 
 		List<PathName> names = fImport.findSignalNamesRegexp("*", 1024);
 		int n = names.size();
-		assertEquals(77, n);
+		assertEquals(79, n);
 		for (int i = 0; i < n; i++) {
 
 			PathName path = names.get(i);
