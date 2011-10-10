@@ -5321,9 +5321,9 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
     case ELSE:
       jj_consume_token(ELSE);
       elseStmts = sequence_of_statements();
-                        SequenceOfStatements oldElse = stmt.getElseStmt();
+                        SequenceOfStatements oldElse = stmt2.getElseStmt();
                         if (oldElse == null)
-                                stmt.setElse (elseStmts);
+                                stmt2.setElse (elseStmts);
                         else
                                 oldElse.append (elseStmts);
       break;
