@@ -46,7 +46,7 @@ package standard is
     ns = 1000 ps;   -- nanosecond
     us = 1000 ns;   -- microsecond
     ms = 1000 us;   -- millisecond
-    sec = 1000 us;  -- second
+    sec = 1000 ms;  -- second
     min = 60 sec;   -- minute
     hr = 60 min;    -- hour
   end units;
