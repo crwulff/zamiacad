@@ -136,7 +136,7 @@ public class IGSimRef implements IGISimulator {
 			}
 			fSimulationTime = reqT;
 
-			int nanos = fSimulationTime.divide(MLN_FS).intValue();
+			BigInteger nanos = fSimulationTime.divide(MLN_FS);
 
 			logger.debug("IGSimRef: *************************************************");
 			logger.debug("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
