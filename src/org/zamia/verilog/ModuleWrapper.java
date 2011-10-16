@@ -85,5 +85,11 @@ public class ModuleWrapper implements IDesignModule, Serializable {
 		
 	}
 
+	@Override
+	public long getDBID() {
+		// FIXME
+		return hashCode();
+	}
+
 
 }

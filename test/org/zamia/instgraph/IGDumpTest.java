@@ -95,7 +95,7 @@ public class IGDumpTest {
 		Architecture arch = fZPrj.getDUM().getArchitecture(tl.getDUUID().getLibId(), tl.getDUUID().getId());
 
 		if (arch != null && aASTDotFile != null) {
-			AST2DOT dot = new AST2DOT(arch);
+			AST2DOT dot = new AST2DOT(arch, fZPrj.getZDB());
 
 			dot.blacklistField("fParent");
 			dot.blacklistField("fSource");

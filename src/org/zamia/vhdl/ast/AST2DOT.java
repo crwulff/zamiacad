@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import org.zamia.IDesignModule;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.ZStack;
 import org.zamia.zdb.ZDB;
@@ -34,11 +35,11 @@ public class AST2DOT {
 
 	private HashSet<String> fBlacklistedFields = new HashSet<String>();
 
-	private VHDLNode fNode;
+	private IDesignModule fNode;
 
-	public AST2DOT(VHDLNode aNode) {
+	public AST2DOT(IDesignModule aNode, ZDB aZDB) {
 		fNode = aNode;
-		fZDB = fNode.getZDB();
+		fZDB = aZDB;
 	}
 
 	static class DotJob {

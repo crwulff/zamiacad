@@ -32,4 +32,6 @@ public interface IDesignModule {
 
 	public void computeStatementsIG(IGManager aIGM, IGModule aModule);
 
+	public long getDBID();
+	
 }
