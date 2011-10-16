@@ -18,6 +18,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import org.zamia.cli.jython.ZCJInterpreter;
 import org.zamia.instgraph.IGManager;
 import org.zamia.instgraph.IGModule;
 import org.zamia.rtl.RTLManager;
@@ -40,7 +41,7 @@ public class ZamiaProjectBuilder {
 
 	public final static FSCache fsCache = FSCache.getInstance();
 
-	//private static final String TCL_BUILD_INIT_CMD = "zamiaBuildInit";
+	private static final String PYTHON_BUILD_INIT_CMD = "zamia_build_init";
 
 	public final static boolean dump = true;
 
@@ -242,7 +243,7 @@ public class ZamiaProjectBuilder {
 			if (fullBuild && !aSupressFullBuild) {
 				fZPrj.clean();
 				fZPrj.setBuildPath(newbp);
-				fZPrj.initTclInterpreter();
+				fZPrj.initJythonInterpreter();
 			} else {
 				fZPrj.setBuildPath(newbp);
 			}
@@ -512,18 +513,18 @@ public class ZamiaProjectBuilder {
 	}
 
 	public void tclBuildInit(boolean aIsFullBuild) {
-		//		ZamiaTclInterpreter zti = fZPrj.getZTI();
-		//
-		//		if (zti.hasCommand(TCL_BUILD_INIT_CMD)) {
-		//			try {
-		//
-		//				String tclBool = aIsFullBuild ? "1" : "0";
-		//
-		//				zti.eval(TCL_BUILD_INIT_CMD + " " + tclBool);
-		//			} catch (TclException e) {
-		//				el.logException(e);
-		//			}
-		//		}
+		ZCJInterpreter zti = fZPrj.getZCJ();
+
+		if (zti.hasCommand(PYTHON_BUILD_INIT_CMD)) {
+			try {
+
+				String tclBool = aIsFullBuild ? "1" : "0";
+
+				zti.eval(PYTHON_BUILD_INIT_CMD + " " + tclBool);
+			} catch (Throwable e) {
+				el.logException(e);
+			}
+		}
 	}
 
 	private void indexProject() {
@@ -722,7 +723,7 @@ public class ZamiaProjectBuilder {
 		RTLManager rtlm = fZPrj.getRTLM();
 
 		rtlm.clean();
-		
+
 		int n = bp.getNumSynthTLs();
 
 		for (int i = 0; i < n; i++) {
@@ -897,9 +898,9 @@ public class ZamiaProjectBuilder {
 		/*
 		 * always re-synthesize all rtl modules
 		 */
-		
+
 		synthesize();
-		
+
 		return n;
 	}
 

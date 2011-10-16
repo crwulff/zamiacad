@@ -32,6 +32,7 @@ import org.zamia.ZamiaException.ExCat;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProfiler;
 import org.zamia.ZamiaProject;
+import org.zamia.cli.jython.ZCJInterpreter;
 import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.Pair;
@@ -56,7 +57,9 @@ public final class IGManager {
 
 	protected final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private static final int NUM_THREADS = 1; // set to 1 to disable multithreading code
+    private static final String PYTHON_BUILD_ELABORATE_CMD = "zamia_build_elaborate";
+
+    private static final int NUM_THREADS = 1; // set to 1 to disable multithreading code
 
 	private static final boolean ENABLE_MULTITHREADING = NUM_THREADS > 1;
 
@@ -420,18 +423,18 @@ public final class IGManager {
 
 		runIGBuild();
 
-		//		ZamiaTclInterpreter zti = fZPrj.getZTI();
-		//
-		//		if (zti.hasCommand(TCL_BUILD_ELABORATE_CMD)) {
-		//
-		//			try {
-		//				String cmd = TCL_BUILD_ELABORATE_CMD + " " + duuid.getLibId() + " " + duuid.getId() + " " + duuid.getArchId();
-		//				logger.info("IGManager: tcl eval '%s'", cmd);
-		//				zti.eval(cmd);
-		//			} catch (TclException e) {
-		//				el.logException(e);
-		//			}
-		//		}
+		ZCJInterpreter zti = fZPrj.getZCJ();
+
+		if (zti.hasCommand(PYTHON_BUILD_ELABORATE_CMD)) {
+
+			try {
+				String cmd = PYTHON_BUILD_ELABORATE_CMD + " " + duuid.getLibId() + " " + duuid.getId() + " " + duuid.getArchId();
+				logger.info("IGManager: python eval '%s'", cmd);
+				zti.eval(cmd);
+			} catch (Throwable e) {
+				el.logException(e);
+			}
+		}
 
 		// too volatile to make sense
 		//		if (fLastWorked < fTotalUnits) {

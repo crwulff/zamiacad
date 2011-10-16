@@ -1,5 +1,5 @@
 /* 
- * Copyright 2005-2010 by the authors indicated in the @author tags. 
+ * Copyright 2005-2011 by the authors indicated in the @author tags. 
  * All rights reserved. 
  * 
  * See the LICENSE file for details.
@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import org.zamia.cli.jython.ZCJInterpreter;
 import org.zamia.instgraph.IGManager;
 import org.zamia.rtl.RTLManager;
 import org.zamia.util.ZHash;
@@ -39,7 +40,7 @@ public class ZamiaProject {
 
 	protected final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	//	private static final String TCL_CLEAN_CMD = "zamiaBuildClean";
+	private static final String ZCJ_CLEAN_CMD = "zamia_build_clean";
 
 	private String fId;
 
@@ -65,8 +66,8 @@ public class ZamiaProject {
 	private ERManager fERM;
 
 	private RTLManager fRTLM;
-	
-	//private ZamiaTclInterpreter fZTI;
+
+	private ZCJInterpreter fZCJ;
 
 	private static final String BUILDPATH_OBJ_NAME = "ZPRJ_BuildPath";
 
@@ -112,25 +113,22 @@ public class ZamiaProject {
 		fIGM = new IGManager(this);
 		fRTLM = new RTLManager(this);
 
-		initTclInterpreter();
+		initJythonInterpreter();
 	}
 
-	public void initTclInterpreter() {
-		//		try {
-		//			if (fZTI != null) {
-		//				fZTI.dispose();
-		//			}
-		//			fZTI = new ZamiaTclInterpreter(this);
-		//
-		//			int n = fBuildPath.getNumScripts();
-		//			for (int i = 0; i < n; i++) {
-		//				String script = fBuildPath.getScript(i);
-		//				fZTI.evalFile(script);
-		//			}
-		//
-		//		} catch (TclException e) {
-		//			el.logException(e);
-		//		}
+	public void initJythonInterpreter() {
+		try {
+			fZCJ = new ZCJInterpreter(this);
+
+			int n = fBuildPath.getNumScripts();
+			for (int i = 0; i < n; i++) {
+				String script = fBuildPath.getScript(i);
+				fZCJ.evalFile(script);
+			}
+
+		} catch (Throwable e) {
+			el.logException(e);
+		}
 	}
 
 	public ZamiaProject(String aId, String aBasePath, SourceFile aBuildPath) throws IOException, ZamiaException, ZDBException {
@@ -156,15 +154,15 @@ public class ZamiaProject {
 		fERM.clean();
 		fBuilder.clean();
 
-		//		if (fZTI.hasCommand(TCL_CLEAN_CMD)) {
-		//			try {
-		//				fZTI.eval(TCL_CLEAN_CMD);
-		//			} catch (Throwable e) {
-		//				el.logException(e);
-		//			}
-		//		}
+		if (fZCJ.hasCommand(ZCJ_CLEAN_CMD)) {
+			try {
+				fZCJ.eval(ZCJ_CLEAN_CMD);
+			} catch (Throwable e) {
+				el.logException(e);
+			}
+		}
 
-		initTclInterpreter();
+		initJythonInterpreter();
 
 		ZamiaProfiler.getInstance().stopTimer("Cleaning");
 	}
@@ -206,7 +204,7 @@ public class ZamiaProject {
 	public ERManager getERM() {
 		return fERM;
 	}
-	
+
 	public RTLManager getRTLM() {
 		return fRTLM;
 	}
@@ -241,9 +239,9 @@ public class ZamiaProject {
 		return fDataPath;
 	}
 
-	//	public ZamiaTclInterpreter getZTI() {
-	//		return fZTI;
-	//	}
+	public ZCJInterpreter getZCJ() {
+		return fZCJ;
+	}
 
 	/*
 	 * editor path storage
