@@ -120,6 +120,17 @@ public class ZamiaProject {
 		try {
 			fZCJ = new ZCJInterpreter(this);
 
+			// run init script
+
+			File initScript = new File(System.getProperty("user.home") + File.separator + ".zamia" + File.separator + "init.py");
+
+			if (initScript.exists()) {
+				logger.debug("Running init.py from %s", initScript.getAbsoluteFile());
+				fZCJ.evalFile(initScript.getAbsolutePath());
+			}
+
+			// run project specific init scripts
+
 			int n = fBuildPath.getNumScripts();
 			for (int i = 0; i < n; i++) {
 				String script = fBuildPath.getScript(i);

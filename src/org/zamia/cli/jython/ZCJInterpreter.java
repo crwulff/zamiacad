@@ -9,13 +9,11 @@
 package org.zamia.cli.jython;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.python.util.PythonInterpreter;
-import org.zamia.BuildPath;
 import org.zamia.ExceptionLogger;
 import org.zamia.FSCache;
 import org.zamia.ZamiaException;
@@ -54,25 +52,6 @@ public class ZCJInterpreter {
 
 		evalFile("builtin:/python/boot.py");
 
-		// run init script
-
-		File initScript = new File(System.getProperty("user.home") + File.separator + ".zamia" + File.separator + "init.py");
-
-		if (initScript.exists()) {
-			logger.debug("Running init.py from %s", initScript.getAbsoluteFile());
-			evalFile(initScript.getAbsolutePath());
-		}
-
-		// run project specific init scripts
-
-		BuildPath bp = fZPrj.getBuildPath();
-		if (bp != null) {
-			int n = bp.getNumScripts();
-			for (int i = 0; i < n; i++) {
-				String script = bp.getScript(i);
-				evalFile(script);
-			}
-		}
 	}
 
 	public synchronized void evalFile(String aPath) throws ZamiaException {
