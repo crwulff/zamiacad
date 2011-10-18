@@ -11,6 +11,8 @@ package org.zamia.instgraph.interpreter;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
@@ -82,7 +84,7 @@ public class IGInterpreterCode implements Serializable {
 		for (int i = 0; i < n; i++) {
 
 			IGStmt stmt = (IGStmt) program.get(i);
-			zl.debug("%5d %s", i, stmt.toString());
+			zl.debug("%5d %s", i, stmt.toStringStat());
 
 		}
 	}
@@ -92,7 +94,7 @@ public class IGInterpreterCode implements Serializable {
 		for (int i = 0; i < n; i++) {
 
 			IGStmt stmt = (IGStmt) program.get(i);
-			out.printf("%5d %s\n", i, stmt.toString());
+			out.printf("%5d %s\n", i, stmt.toStringStat());
 
 		}
 	}
@@ -202,4 +204,15 @@ public class IGInterpreterCode implements Serializable {
 		return "IGInterpreterCode(id=" + fId + " from " + fLocation + ")";
 	}
 
+	public void filterExecutedSource(Collection<SourceLocation> aExecuted) {
+		if (aExecuted == null) {
+			aExecuted = new LinkedList<SourceLocation>();
+		}
+		for (IGStmt stmt : program) {
+			int count = stmt.getExecCount();
+			if (count > 0) {
+				aExecuted.add(stmt.computeSourceLocation());
+			}
+		}
+	}
 }

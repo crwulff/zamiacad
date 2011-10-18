@@ -8,8 +8,12 @@
  */
 package org.zamia.instgraph.interpreter;
 
+import java.io.PrintStream;
 import java.math.BigInteger;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.zamia.ErrorReport;
 import org.zamia.ExceptionLogger;
@@ -71,6 +75,8 @@ public class IGInterpreterRuntimeEnv {
 
 	private ZStack<CallStackEntry> fCallStack;
 
+	private Set<IGInterpreterCode> fCodeSet;
+
 	private ZamiaProject fZPrj;
 
 	public IGInterpreterRuntimeEnv(IGInterpreterCode aCode, ZamiaProject aZPrj) {
@@ -79,6 +85,8 @@ public class IGInterpreterRuntimeEnv {
 		fZPrj = aZPrj;
 
 		pushContext(fZPrj.getDUM().getGlobalPackageContext());
+
+		fCodeSet.add(fCode);
 	}
 
 	public void reset() {
@@ -87,6 +95,7 @@ public class IGInterpreterRuntimeEnv {
 		fStructureContexts = new HashMap<IGStructure, IGInterpreterContext>();
 		fStack = new ZStack<IGStackFrame>();
 		fCallStack = new ZStack<CallStackEntry>();
+		fCodeSet = new HashSet<IGInterpreterCode>();
 	}
 
 	public ReturnStatus resume(ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
@@ -103,7 +112,7 @@ public class IGInterpreterRuntimeEnv {
 				logger.debug("Interpreter: executing %s:%3d %s (%s)", fCode.getId(), fPC - 1, stmt, stmt.computeSourceLocation());
 			}
 
-			status = stmt.execute(this, aErrorMode, aReport);
+			status = stmt.executeStmt(this, aErrorMode, aReport);
 
 			switch (status) {
 			case WAIT:
@@ -187,6 +196,8 @@ public class IGInterpreterRuntimeEnv {
 			}
 			throw new ZamiaException("Call to subprogram without a body");
 		}
+
+		fCodeSet.add(aCode);
 
 		//System.out.println("Calling a subprogram:");
 		//aCode.dump(System.out);
@@ -433,6 +444,23 @@ public class IGInterpreterRuntimeEnv {
 		}
 
 		return "IGInterpreterRuntime";
+	}
+
+	public void filterExecutedSource(Collection<SourceLocation> aExecuted) {
+		for (IGInterpreterCode code : fCodeSet) {
+			if (code != null) {
+				code.filterExecutedSource(aExecuted);
+			}
+		}
+	}
+
+	public void printStat(PrintStream out) {
+		for (IGInterpreterCode code : fCodeSet) {
+			if (code != null) {
+				out.println(code.toString());
+				code.dump(out);
+			}
+		}
 	}
 
 	public void scheduleWakeup(BigInteger aT, SourceLocation aLocation) throws ZamiaException {
