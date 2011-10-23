@@ -15,7 +15,7 @@ CP="$CP:${ZAMIA_HOME}/share"
 
 #echo "CLASSPATH is ${CP}"
 
-VMARGS="-Xmx768m -Xms256m -Xss4m -server"
+VMARGS="-Xmx1424m -Xms768m -Xss4m -server"
 
 java $VMARGS -cp $CP org.zamia.cli.Zamia $@
 

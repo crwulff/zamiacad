@@ -133,9 +133,9 @@ def dm_dump_dot(dmuid,filename):
     dot = AST2DOT(dm, project.getZDB())
 
     dot.blacklistField("fParent")
-    dot.blacklistField("fSource")
-    dot.blacklistField("fStartCol")
-    dot.blacklistField("fStartLine")
+#    dot.blacklistField("fSource")
+#    dot.blacklistField("fStartCol")
+#    dot.blacklistField("fStartLine")
     dot.blacklistField("fEndCol")
     dot.blacklistField("fEndLine")
     dot.blacklistField("fDeclarationMap")
