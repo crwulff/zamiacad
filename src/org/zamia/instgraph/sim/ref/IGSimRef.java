@@ -47,8 +47,10 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Built-in reference simulator engine
@@ -85,6 +87,8 @@ public class IGSimRef implements IGISimulator {
 	private EventListenerList fObservers = new EventListenerList();
 
 	private SimData fData;
+
+	private Set<IGSimProcess> fProcesses;
 
 	public IGSimRef() {
 
@@ -204,11 +208,13 @@ public class IGSimRef implements IGISimulator {
 
 	private void init(IGModule aToplevel) throws ZamiaException {
 
+		fProcesses = new HashSet<IGSimProcess>();
+
 		fSimSchedule = new IGSimSchedule();
 
 		PathName path = aToplevel.getStructure().getPath().getPath();
 
-		IGSimProcess moduleEnv = new IGSimProcess(this, path/* todo: or null? */, fZPrj);
+		IGSimProcess moduleEnv = newProcess(path/* todo: or null? */);
 		IGSimContext moduleContext = moduleEnv.pushContextFor(path);
 
 		initObjects(aToplevel.getContainer(), moduleEnv, path);
@@ -216,6 +222,12 @@ public class IGSimRef implements IGISimulator {
 		// FIXME: fill moduleContext
 
 		initStructure(aToplevel.getStructure(), moduleContext, path);
+	}
+
+	private IGSimProcess newProcess(PathName aPath) {
+		IGSimProcess process = new IGSimProcess(this, aPath, fZPrj);
+		fProcesses.add(process);
+		return process;
 	}
 
 	private void initStructure(IGStructure aStructure, IGSimContext aParentContext, PathName aParentPath) throws ZamiaException {
@@ -229,7 +241,7 @@ public class IGSimRef implements IGISimulator {
 
 				IGProcess proc = (IGProcess) stmt;
 
-				IGSimProcess processEnv = new IGSimProcess(this, aParentPath, fZPrj);
+				IGSimProcess processEnv = newProcess(aParentPath);
 				processEnv.pushContext(aParentContext);
 				processEnv.pushContextFor(aParentPath);
 
@@ -258,7 +270,7 @@ public class IGSimRef implements IGISimulator {
 				PathName instPath = aParentPath.clonePathName().append(inst.getLabel());
 
 				// prepare environment for inst. module
-				IGSimProcess instEnv = new IGSimProcess(this, instPath, fZPrj);
+				IGSimProcess instEnv = newProcess(instPath);
 				instEnv.pushContext(aParentContext);
 				IGSimContext instContext = instEnv.pushContextFor(instPath);
 
@@ -293,7 +305,7 @@ public class IGSimRef implements IGISimulator {
 				PathName structPath = aParentPath.clonePathName().append(struct.getLabel());
 
 				// prepare environment for generated module
-				IGSimProcess structEnv = new IGSimProcess(this, structPath, fZPrj);
+				IGSimProcess structEnv = newProcess(structPath);
 				structEnv.pushContext(aParentContext); // for-generate constant will be added to parent context
 				// FIXME: TODO: the constant added to aParentContext will be visible everywhere aParentContext is used! It shouldn't be so. Use a new dedicated context here.  
 
@@ -618,5 +630,11 @@ public class IGSimRef implements IGISimulator {
 		IGSignalDriver driver = fData.getDriver(aSignalName);
 
 		return driver.getLastValue();
+	}
+
+	public void filterExecutedSource(Collection<SourceLocation> aExecuted) {
+		for (IGSimProcess process : fProcesses) {
+			process.filterExecutedSource(aExecuted);
+		}
 	}
 }

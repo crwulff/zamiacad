@@ -27,9 +27,16 @@ public abstract class IGStmt extends IGItem {
 		CONTINUE, WAIT, RETURN, ERROR
 	};
 
+	private int fExecCount = 0;
+
 	public IGStmt(SourceLocation aLocation, ZDB aZDB) {
 		super (aLocation, aZDB);
 
+	}
+
+	public ReturnStatus executeStmt(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
+		fExecCount++;
+		return execute(aRuntime, aErrorMode, aReport);
 	}
 
 	public abstract ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException;
@@ -44,5 +51,11 @@ public abstract class IGStmt extends IGItem {
 		return 0;
 	}
 
-	
+	public int getExecCount() {
+		return fExecCount;
+	}
+
+	public String toStringStat() {
+		return toString() + " [execCount = " + fExecCount + "]";
+	}
 }
