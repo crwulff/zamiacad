@@ -45,7 +45,7 @@ public class SourceLocation implements Serializable {
 
 	public String toString() {
 		if (fSF != null)
-			return fSF.getFileName() + ":" + fLine + "," + fCol;
+			return fSF.getLocalPath() + ":" + fLine + "," + fCol;
 		return "unknown source";
 	}
 

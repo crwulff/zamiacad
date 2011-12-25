@@ -11,6 +11,7 @@ package org.zamia;
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -212,6 +213,7 @@ public class ZamiaProjectBuilder {
 
 		BuildPath oldbp = fZPrj.getBuildPath();
 		SourceFile sf = oldbp.getSourceFile();
+
 		if (sf == null) {
 			logger.info("ZamiaProjectBuilder: Not parsing build path because no source file given.");
 			fBuildPathErrs = true;
@@ -222,9 +224,7 @@ public class ZamiaProjectBuilder {
 		removeBPErrors(oldbp);
 
 		try {
-			BuildPath newbp = new BuildPath();
-			newbp.setSrc(sf);
-
+			BuildPath newbp = new BuildPath(sf);
 			newbp.parse(null, true, fZPrj);
 			fZPrj.setBuildPath(newbp);
 
@@ -628,17 +628,14 @@ public class ZamiaProjectBuilder {
 		return info;
 	}
 
-	private void compileDir(String aAbsPath, String aLocalPath) throws IOException, ZamiaException {
+	private void compileDir(File[] files) throws IOException, ZamiaException {
 
-		File dir = new File(aAbsPath);
-
-		String[] files = dir.list();
 		if (files == null)
 			return;
 		for (int i = 0; i < files.length; i++) {
-			String fn = files[i];
-
-			if (fn.equals("ZDB"))
+			File f = files[i];
+			
+			if (f.getName().equals("ZDB"))
 				continue;
 
 			if (isCanceled()) {
@@ -646,18 +643,10 @@ public class ZamiaProjectBuilder {
 				return;
 			}
 
-			String absPath = aAbsPath + File.separator + fn;
-			String localPath = aLocalPath.length() > 0 ? aLocalPath + File.separator + fn : fn;
-
-			File f = new File(absPath);
-
 			if (f.isDirectory()) {
-				compileDir(absPath, localPath);
+				compileDir(f.listFiles());
 			} else {
-				SourceFile sf = new SourceFile(f);
-				sf.setLocalPath(localPath);
-
-				compileFile(sf, true);
+				compileFile(this.fZPrj.fBasePath.toSF(f), true);
 			}
 		}
 	}
@@ -667,7 +656,7 @@ public class ZamiaProjectBuilder {
 		long startTime = System.currentTimeMillis();
 		ZamiaProfiler.getInstance().startTimer("Parsing");
 
-		compileDir(fZPrj.getBasePath(), "");
+		compileDir(fZPrj.fBasePath.getFiles());
 		worked(1000);
 
 		double time = (System.currentTimeMillis() - startTime) / 1000.0;

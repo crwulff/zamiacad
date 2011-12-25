@@ -28,9 +28,7 @@ public class BuildPathTest {
 	@Test
 	public void testBP() throws Exception {
 
-		BuildPath bp = new BuildPath();
-
-		bp.setSrc(new SourceFile(new File("examples/BuildPath.txt")));
+		BuildPath bp = new BuildPath(new SourceFile(new File("examples/BuildPath.txt")));
 		bp.parse(null, false, null);
 	}
 
