@@ -14,6 +14,25 @@ import org.zamia.zdb.ZDBTest;
 
 /**
  * @author Anton Chepurov
+ * 
+ * Some tests do not clean ZDB on exit. To work around, set env. 
+ *   var ZAMIA_LOCKING=disabled
+ *   
+ * To allocate enautgh VM memory: -Xmx1000m -Xms800m -Xss8m
+ * 
+ * Tests that currently fail:
+ *  org.zamia.analysis.SATest
+ *    testGCounterASTDeclarationSearch
+ *    testGCounterASTCompletion
+ *    testGCounterASTReferenceSearch
+ *    testPlasmaASTReferenceSearch
+ *  org.zamia.instgraph.sim.vcd.VCDTest - testPlasmaModelsim
+ *  instgraph.IGSynthTest
+ *    testPlasmaAlu
+ *    testArrayIdx
+ *    testCombProc
+ *  org.zamia.instgraph.IGTest 
+ *    testVestsChXX and testHapra - example files not found)
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
