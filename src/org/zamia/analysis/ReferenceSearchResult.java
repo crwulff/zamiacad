@@ -96,8 +96,8 @@ public class ReferenceSearchResult {
 		if (fTitle == null)
 			return "";
 		if (fPrefix != null)
-			return fPrefix + fTitle;
-		return fTitle;
+			return fPrefix + fTitle + " (" + fLocation + ")";
+		return fTitle + " (" + fLocation + ")";
 	}
 
 	public ReferenceSearchResult getParent() {

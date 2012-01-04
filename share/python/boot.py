@@ -1,8 +1,12 @@
 
-from java.io import File, PrintWriter, BufferedWriter, FileWriter
-from org.zamia import ERManager, FSCache, SourceFile, SourceLocation, ZamiaException, ZamiaProject, ZamiaLogger, ExceptionLogger, Toplevel
+from java.io import File, PrintWriter, BufferedWriter, FileWriter, PrintStream
+from java.lang import System
+from org.zamia import ERManager, FSCache, SourceFile, SourceLocation, ZamiaException, ZamiaProject, ZamiaLogger, ExceptionLogger, Toplevel, ToplevelPath
+from org.zamia.analysis import SourceLocation2IG, SourceLocation2AST
+from org.zamia.analysis.ig import IGReferencesSearch
+from org.zamia.analysis.ast import ASTDeclarationSearch, ASTReferencesSearch
 from org.zamia.vhdl.ast import DMUID,AST2DOT
-from org.zamia.instgraph import IG2DOT
+from org.zamia.instgraph import IG2DOT, IGOperationObject
 from org.zamia.rtl import RTLVisualGraphContentProvider,RTLVisualGraphLabelProvider,RTLVisualGraphSelectionProvider
 from org.zamia.vg import VGLayout, VGGCSVG
 import sys
@@ -35,12 +39,15 @@ def help():
   print "DM/AST:"
   print "-------"
   print "dm_list()"
+  print "dm_list_2file(filename)"
   print "dm_dump_dot(dmuid,filename)"
   print ""
   print "IG:"
   print "---"
   print "ig_list()"
   print "ig_dump_dot(dmuid,filename)"
+  print "ig_ref_search(filename, line, col, toplevelpath)"
+  print "ig_ref_search_2file(filename, line, col, toplevelpath, destinationfile)"
   print ""
   print "RTL (Synth):"
   print "------------"
@@ -116,6 +123,20 @@ def dm_list():
   n = dmm.getNumStubs()
   for i in range(n):
     printf('%s\n', dmm.getStub(i).getDUUID())
+
+def dm_list_2file(filename):
+
+  f = open(filename, 'a')
+  dmm = project.getDUM()
+
+  n = dmm.getNumStubs()
+  for i in range(n):
+    s = str(dmm.getStub(i).getDUUID())
+    f.write(s)
+    f.write('\n')
+
+  f.close()
+
 
 def dm_dump_dot(dmuid,filename):
 
@@ -193,6 +214,98 @@ def ig_dump_dot(dmuid,filename):
     out.close()
 
     printf("python: wrote dot file to %s\n", filename)
+
+
+# filename = examples/gcounter/addg.vhdl
+# toplevelpath = "COUNTER_TB:COUNTER0.ADDG"
+# 22, 35
+def ig_ref_search(filename, line, col, toplevelpath):
+
+  sf = SourceFile(File(filename))
+  location = SourceLocation(sf, line, col)
+
+  start = System.currentTimeMillis()
+
+  if not toplevelpath:
+
+    nearest = SourceLocation2AST.findNearestASTNode(location, True, project)
+
+    if not nearest:
+      printf('No AST item found at %s:%s,%s\n', filename, line, col)
+      return
+
+    declaration = ASTDeclarationSearch.search(nearest, project)
+
+    if not declaration:
+      printf('Failed to find declaration of %s\n', nearest)
+      return
+
+    result = ASTReferencesSearch.search(declaration, True, True, project)
+    item = nearest
+
+  else:
+    tlp = ToplevelPath(toplevelpath)
+
+    res = SourceLocation2IG.findNearestItem(location, tlp, project)
+
+    if not res:
+      printf('No IG item found at %s:%s,%s\n', filename, line, col)
+      return
+
+    item = res.getFirst()
+    if not item:
+      printf('No IG item found at %s:%s,%s\n', filename, line, col)
+      return
+    path = res.getSecond()
+
+    rs = IGReferencesSearch(project)
+
+    if isinstance(item, IGOperationObject):
+      item = item.getObject()
+
+    result = rs.search(item, path, True, True, False, False)
+
+  time = System.currentTimeMillis() - start
+
+  if not result or result.countRefs() == 0:
+    print('Search returned no result.\n')
+  else:
+    printf('Found %s references of %s in %s ms:\n', result.countRefs(), item, time)
+    result.dump(0, sys.stdout)
+
+def ig_ref_search_2file(filename, line, col, toplevelpath, destinationfile):
+
+  sf = SourceFile(File(filename))
+  tlp = ToplevelPath(toplevelpath)
+  location = SourceLocation(sf, line, col)
+
+  start = System.currentTimeMillis()
+
+  res = SourceLocation2IG.findNearestItem(location, tlp, project)
+
+  if res == None:
+    printf('No IG item found at %s:%s,%s\n', filename, line, col)
+    return
+
+  item = res.getFirst()
+  if item == None:
+    printf('Failed to find nearest IG Item\n')
+    return
+  path = res.getSecond()
+
+  rs = IGReferencesSearch(project)
+
+  if isinstance(item, IGOperationObject):
+    item = item.getObject()
+
+  result = rs.search(item, path, True, True, False, False)
+
+  time = System.currentTimeMillis() - start
+
+  out = PrintStream(File(destinationfile))
+  printf('Found %s references of %s in %s ms:\n', result.countRefs(), item, time)
+  out.printf('Found %s references of %s in %s ms:\n', result.countRefs(), item, time)
+  result.dump(0, out)
 
 #
 # RTL
