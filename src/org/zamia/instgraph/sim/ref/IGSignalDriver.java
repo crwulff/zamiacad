@@ -220,7 +220,9 @@ public class IGSignalDriver extends IGObjectDriver {
 
 			setValue(fNextValue, fNextValueLocation);
 
-			LOGGER.debug("IGSimRef: IGSignalDriver: drive(): setting %s to %s", getId(), fNextValue);
+			if (IGSimRef.DEBUG) {
+				LOGGER.debug("IGSimRef: IGSignalDriver: drive(): setting %s to %s", getId(), fNextValue);
+			}
 
 			fNextValue = null;
 			fNextValueLocation = null;
@@ -325,7 +327,9 @@ public class IGSignalDriver extends IGObjectDriver {
 
 		collectUniqueListeners(new HashSet<IGSignalDriver>(), uniqueListeners);
 
-		LOGGER.debug("IGSimRef: notifyChange(): collected %d unique listeners", uniqueListeners.size());
+		if (IGSimRef.DEBUG) {
+			LOGGER.debug("IGSimRef: notifyChange(): collected %d unique listeners", uniqueListeners.size());
+		}
 
 		for (IGSimProcess process : uniqueListeners) {
 			process.resume(ASTErrorMode.EXCEPTION, null);

@@ -13,6 +13,7 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGSubProgram;
 import org.zamia.instgraph.IGSubProgram.IGBuiltin;
+import org.zamia.instgraph.sim.ref.IGSimRef;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
@@ -98,7 +99,9 @@ public class IGCallStmt extends IGStmt {
 			}
 		} else {
 
-			logger.debug("IGCallStmt: calling " + code);
+			if (IGSimRef.DEBUG) {
+				logger.debug("IGCallStmt: calling " + code);
+			}
 			//code.dump(System.out);
 
 			return aRuntime.call(code, aErrorMode, aReport);

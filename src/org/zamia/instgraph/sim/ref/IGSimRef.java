@@ -62,6 +62,8 @@ public class IGSimRef implements IGISimulator {
 
 	protected final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
+	public final static boolean DEBUG = false;
+
 	protected final static ExceptionLogger el = ExceptionLogger.getInstance();
 
 	private static final BigInteger MLN_FS = new BigInteger("1000000");
@@ -142,9 +144,11 @@ public class IGSimRef implements IGISimulator {
 
 			BigInteger nanos = fSimulationTime.divide(MLN_FS);
 
-			logger.debug("IGSimRef: *************************************************");
-			logger.debug("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
-			logger.debug("IGSimRef: *************************************************");
+			if (DEBUG) {
+				logger.debug("IGSimRef: *************************************************");
+				logger.debug("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
+				logger.debug("IGSimRef: *************************************************");
+			}
 
 			// have we made progress in time?
 			if (lastSimulationTime.compareTo(fSimulationTime) < 0) {
@@ -573,7 +577,9 @@ public class IGSimRef implements IGISimulator {
 	public void scheduleSignalChange(IGSimProcess aProcess, boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGStaticValue aValue, IGSignalDriver aSignalDriver, SourceLocation aLocation)
 			throws ZamiaException {
 
-		logger.debug("IGSimRef: scheduling signal change for %s, value=%s, delay=%s, inertial=%b, reject=%s", aSignalDriver.toString(), aValue, aDelay, aInertial, aReject);
+		if (DEBUG) {
+			logger.debug("IGSimRef: scheduling signal change for %s, value=%s, delay=%s, inertial=%b, reject=%s", aSignalDriver.toString(), aValue, aDelay, aInertial, aReject);
+		}
 
 		BigInteger reqT = aDelay != null ? getEndTime().add(aDelay.getNum()) : getEndTime();
 
