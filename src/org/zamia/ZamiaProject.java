@@ -10,6 +10,8 @@ package org.zamia;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 import org.zamia.cli.jython.ZCJInterpreter;
@@ -44,10 +46,32 @@ public class ZamiaProject {
 
 	private String fId;
 
-	private String fBasePath;
+	public final FileIterator fBasePath;
+	
+	private final String fDataPath;
 
-	private String fDataPath;
-
+	/**This is a directory of project files. It can be virtual if you override the class (useful for linking files in IDE). */
+	public static class FileIterator { 
+		private final String dir;
+		public FileIterator (String aDataPath) {
+			dir = aDataPath;
+		}
+		public File[] getFiles() throws IOException, ZamiaException {
+			return new File(dir).listFiles();
+		}
+		
+		/** Computes local path, relative to the base dir, and calls new SourceFile(absolute, local) 
+		 * @throws IOException */
+		public SourceFile toSF(File absoluteLocation) throws ZamiaException, IOException {
+			String lp = new File(dir).toURI().relativize(absoluteLocation.toURI()).getPath();
+			lp = lp.replace("/", File.separator);
+			return new SourceFile(absoluteLocation, lp);
+		}
+		public String toString() { 
+			return dir;
+		}
+	}
+	
 	private ZDB fZDB;
 
 	private BuildPath fBuildPath;
@@ -72,6 +96,9 @@ public class ZamiaProject {
 	private static final String BUILDPATH_OBJ_NAME = "ZPRJ_BuildPath";
 
 	public ZamiaProject(String aId, String aBasePath, SourceFile aBuildPath, String aDataPath) throws IOException, ZamiaException, ZDBException {
+		this(aId, new FileIterator(aBasePath), aBuildPath, aDataPath);
+	}
+	public ZamiaProject(String aId, FileIterator aBasePath, SourceFile aBuildPath, String aDataPath) throws IOException, ZamiaException, ZDBException {
 		fId = aId;
 		fBasePath = aBasePath;
 		fDataPath = aDataPath != null ? aDataPath : ZamiaTmpDir.getTmpDir().getAbsolutePath();
@@ -94,15 +121,11 @@ public class ZamiaProject {
 
 		fBuildPath = (BuildPath) fZDB.getNamedObject(BUILDPATH_OBJ_NAME);
 		if (fBuildPath == null) {
-			BuildPath bp = new BuildPath();
-			bp.setSrc(aBuildPath);
-			setBuildPath(bp);
+			setBuildPath(new BuildPath(aBuildPath));
 		} else {
 			SourceFile sf1 = fBuildPath.getSourceFile();
 			if (sf1 == null && aBuildPath != null || sf1 != null && aBuildPath == null || sf1 != null && !sf1.equals(aBuildPath)) {
-				BuildPath bp = new BuildPath();
-				bp.setSrc(aBuildPath);
-				setBuildPath(bp);
+				setBuildPath(new BuildPath(aBuildPath));
 			}
 		}
 
@@ -158,9 +181,7 @@ public class ZamiaProject {
 		logger.info("Cleaning project '%s'", fBasePath);
 		ZamiaProfiler.getInstance().startTimer("Cleaning");
 		fZDB.clear();
-		BuildPath bp = new BuildPath();
-		bp.setSrc(fBuildPath.getSourceFile());
-		setBuildPath(bp);
+		setBuildPath(new BuildPath(fBuildPath.getSourceFile()));
 		fDUM.clean();
 		fERM.clean();
 		fBuilder.clean();
@@ -179,9 +200,7 @@ public class ZamiaProject {
 	}
 
 	public void zdbChanged() {
-		BuildPath bp = new BuildPath();
-		bp.setSrc(fBuildPath.getSourceFile());
-		setBuildPath(bp);
+		setBuildPath(new BuildPath(fBuildPath.getSourceFile()));
 
 		fDUM.zdbChanged();
 		fERM.zdbChanged();
@@ -198,10 +217,6 @@ public class ZamiaProject {
 
 	public ZamiaProjectBuilder getBuilder() {
 		return fBuilder;
-	}
-
-	public String getBasePath() {
-		return fBasePath;
 	}
 
 	public String getId() {
@@ -249,7 +264,7 @@ public class ZamiaProject {
 	public String getDataPath() {
 		return fDataPath;
 	}
-
+	
 	public ZCJInterpreter getZCJ() {
 		return fZCJ;
 	}

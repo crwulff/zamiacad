@@ -97,8 +97,8 @@ public class BuildPath implements Serializable {
 
 	private transient ZamiaProject fZPrj;
 
-	public BuildPath() {
-
+	public BuildPath(SourceFile sourceFile) {
+		setSrc(sourceFile);
 		fKeyWords = new HashMap<String, Symbol>();
 
 		fKeyWords.put("extern", Symbol.EXTERN);
@@ -167,8 +167,7 @@ public class BuildPath implements Serializable {
 
 		fIncludes.add(f.getAbsolutePath());
 
-		BuildPath bp2 = new BuildPath();
-		bp2.setSrc(new SourceFile(f));
+		BuildPath bp2 = new BuildPath(new SourceFile(f));
 		bp2.parse(fVars, fUseFSCache, fZPrj);
 
 		int n = bp2.getNumEntries();
@@ -564,6 +563,8 @@ public class BuildPath implements Serializable {
 		String pathPrefix = evalString(fBuf.toString()).replace('/', File.separatorChar).replace('\\', File.separatorChar);
 		nextSym();
 
+		//FIXME: check the case when resource is a file rather than dir. 
+		//It should not end with separator then. Get rid of new File() in the findEntry().
 		if (!pathPrefix.endsWith(File.separator)) {
 			pathPrefix = pathPrefix + File.separator;
 		}
@@ -575,7 +576,7 @@ public class BuildPath implements Serializable {
 			fEntries.add(new BuildPathEntry(pathPrefix, libId, false, Integer.MAX_VALUE, false, !topdown, true, true, location));
 
 		} else {
-			String absPath = fZPrj.getBasePath() + File.separator + pathPrefix;
+			String absPath = fZPrj.fBasePath + File.separator + pathPrefix;
 			readList(absPath, libId, false, false, topdown, location);
 		}
 	}
@@ -956,7 +957,9 @@ public class BuildPath implements Serializable {
 			for (int i = 0; i < n; i++) {
 				BuildPathEntry entry = getEntry(i);
 				if (!entry.fExtern) {
-					if (path.startsWith(entry.fPrefix))
+					String p1 =new File(path).getPath();
+					String p2 = new File(entry.fPrefix).getPath();
+					if (p1.startsWith(p2))
 						return entry;
 				}
 			}

@@ -52,6 +52,10 @@ public class SourceFile implements Comparable, Serializable {
 	public SourceFile() {
 	}
 
+	public SourceFile(File aFile, String localPath) {
+		this(aFile);
+		setLocalPath(localPath);
+	}
 	public SourceFile(File aFile) {
 
 		if (aFile == null) {
@@ -149,7 +153,9 @@ public class SourceFile implements Comparable, Serializable {
 	}
 
 	public String toString() {
-		return fFile != null ? fFile.getName() : fURI;
+		String a = getLocalPath() != null ? getLocalPath() : null;
+		String b = fFile != null ? fFile.toString() : fURI;
+		return "(" + a + ") " + b;
 	}
 
 	public int compareTo(Object aObject) {

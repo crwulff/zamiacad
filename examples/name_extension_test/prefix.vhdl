@@ -5,7 +5,11 @@ entity ALIAS_ENTITY is
 		O1, O2: out  bit := '0'
 	);
 end;
-	   
+
+architecture ARCH of ALIAS_ENTITY is
+begin
+end architecture;
+
 package P is 
 	constant PC: bit := '0';
 end P;

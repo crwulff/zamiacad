@@ -94,8 +94,7 @@ public class VHDLIndexerTest {
 	@Test
 	public void testIndexer() throws Exception {
 
-		BuildPath bp = new BuildPath();
-		bp.setSrc(new SourceFile(new File("examples/BuildPath.txt")));
+		BuildPath bp = new BuildPath(new SourceFile(new File("examples/BuildPath.txt")));
 		bp.parse(null, false, null);
 
 		fNumFiles = 0;
