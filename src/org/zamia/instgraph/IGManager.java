@@ -419,7 +419,7 @@ public final class IGManager {
 
 		initIGBuild();
 
-		module = getOrCreateIGModule(new ToplevelPath(aTL, new PathName("")), null, duuid, signature, null, true, null);
+		module = getOrCreateIGModule(new ToplevelPath(aTL, new PathName("")), null, duuid, signature, null, true, aTL.getLocation());
 
 		runIGBuild();
 
@@ -790,7 +790,7 @@ public final class IGManager {
 
 			String signature = IGInstantiation.computeSignature(duuid, null);
 
-			getOrCreateIGModule(new ToplevelPath(toplevel, new PathName("")), null, duuid, signature, null, true, null);
+			getOrCreateIGModule(new ToplevelPath(toplevel, new PathName("")), null, duuid, signature, null, true, toplevel.getLocation());
 
 			//			ZamiaTclInterpreter zti = fZPrj.getZTI();
 			//
