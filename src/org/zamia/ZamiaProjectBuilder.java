@@ -94,9 +94,14 @@ public class ZamiaProjectBuilder {
 	public int build(boolean aFullBuild, boolean aBPChanged, HashSetArray<SourceFile> aSFs) throws ZamiaException, IOException {
 
 		boolean fullBuild = aFullBuild;
-		if (fullBuild || aBPChanged) {
+		
+		// I have removed the condition to always parse the build path in order to clean "entity not found" 
+		// problem when entity name is fixed in VHDL. If you think that buildpath parsing wastes too much resources, 
+		// you are free to clean the error once it is resolved and return the condition.
+		//if (aFullBuild || aBPChanged)
+		
 			fullBuild = parseBuildPath(aFullBuild, false);
-		}
+		
 
 		if (fBuildPathErrs) {
 			logger.error("ZamiaProjectBuilder: Aborting build because BuildPath.txt contains errors.");
