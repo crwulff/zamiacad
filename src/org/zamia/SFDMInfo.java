@@ -9,7 +9,7 @@
 package org.zamia;
 
 import java.io.Serializable;
-
+import java.util.Iterator;
 import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.ast.DMUID;
 
@@ -51,6 +51,11 @@ public class SFDMInfo implements Serializable {
 		fDMUIDs.add(aDMUID);
 	}
 
+	//inspired by VHDL package import
+	public Iterator<DMUID> iterator() {
+		return fDMUIDs.iterator();
+	}
+	
 	public void touch() {
 		fTimestamp = System.currentTimeMillis();
 	}

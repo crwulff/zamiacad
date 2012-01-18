@@ -10,6 +10,7 @@ package org.zamia.vhdl.ast;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
@@ -68,6 +69,10 @@ public class InterfaceList extends VHDLNode {
 
 	public int getNumInterfaces() {
 		return interfaces.size();
+	}
+	
+	public Collection<InterfaceDeclaration> all() {
+		return this.interfaces.values();
 	}
 
 	@Override
