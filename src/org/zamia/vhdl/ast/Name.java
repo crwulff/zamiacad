@@ -27,6 +27,7 @@ import org.zamia.instgraph.IGItem;
 import org.zamia.instgraph.IGMappings;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperation;
+import org.zamia.instgraph.IGOperationAlias;
 import org.zamia.instgraph.IGOperationBinary;
 import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGOperationCache;
@@ -159,13 +160,26 @@ public class Name extends VHDLNode {
 		IGResolveResult res = new IGResolveResult();
 
 		int n = aRR.getNumResults();
+		
 		for (int i = 0; i < n; i++) {
 			IGItem item = aRR.getResult(i);
 
 			if (item instanceof IGObject) {
 				item = new IGOperationObject((IGObject) item, getLocation(), aZDB);
+				
+			} else if (item instanceof IGOperationAlias) {
+				
+				// Here, item is a declaration-specified alias and, by wrapping it, we produce a reference to the declaration.
+				// Without wrapping, any occurrence of alias in an expression, e.g. t <= add(alias, value), will tell that it 
+				// is located in the declaration area. And, IG search will return the parent expression even when user cursor 
+				// is right over the alias.
+				// I'm not aware if similar problems occur with other kinds of operations. 
+				// A small todo: the alias declaration seems redundant after we refer its fOp
+				// as declaration rather than alias itself
+				IGOperationAlias alias = (IGOperationAlias) item;
+				item = new IGOperationAlias(alias.getOperand(0), alias.getType(), ((IGOperationAlias) item).getId(), getLocation(), aZDB);
 			}
-
+			
 			res.addItem(item);
 		}
 
