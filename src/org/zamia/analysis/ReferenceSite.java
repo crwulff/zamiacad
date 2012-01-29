@@ -103,6 +103,7 @@ public class ReferenceSite extends ReferenceSearchResult {
 		VHDLNode.printlnIndented("ReferenceSite: " + toString(), aIndent, aOut);
 	}
 
+	public String toString() {return this.fRefType + " " + super.toString();}
 	@Override
 	public int countRefs() {
 		return 1;
