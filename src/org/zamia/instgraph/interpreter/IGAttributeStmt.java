@@ -16,6 +16,7 @@ import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
+import org.zamia.instgraph.sim.ref.IGFileDriver;
 import org.zamia.instgraph.sim.ref.IGSignalDriver;
 import org.zamia.instgraph.sim.ref.IGSimProcess;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
@@ -66,6 +67,11 @@ public class IGAttributeStmt extends IGStmt {
 
 				if (type.isDiscrete()) {
 
+					IGTypeStatic resType = getResType().computeStaticType(aRuntime, aErrorMode, aReport);
+					if (resType == null) {
+						return ReturnStatus.ERROR;
+					}
+
 					switch (fOp) {
 					case POS:
 
@@ -76,11 +82,35 @@ public class IGAttributeStmt extends IGStmt {
 							throw new ZamiaException("Enum literal not found :" + id, computeSourceLocation());
 						}
 
-						IGTypeStatic resType = getResType().computeStaticType(aRuntime, aErrorMode, aReport);
-						if (resType == null) {
-							return ReturnStatus.ERROR;
-						}
 						resValue = new IGStaticValueBuilder(resType, null, computeSourceLocation()).setNum(resValue.getOrd()).buildConstant();
+
+						break;
+
+					case IMAGE:
+
+						String val = null;
+
+						if (type.isInteger()) {
+
+							val = argument.toDecString();
+
+						} else if (type.isEnum()) {
+
+							val = argument.toString().toLowerCase();
+
+							if (val.startsWith("\\") && val.endsWith("\\")) {
+								// extended identifier => double backslashes
+								val = val.substring(1, val.length() - 1).replace("\\", "\\\\");
+								val = "\\" + val + "\\";
+							} else {
+								val = "'" + val + "'";
+							}
+						}
+
+						if (val == null) {
+							throw new ZamiaException("Sorry, not implemented yet: Attribute IMAGE is only supported for NUMERIC and ENUM types atm...", computeSourceLocation());
+						}
+						resValue = IGFileDriver.line2IG(val, resType, aRuntime, computeSourceLocation(), aErrorMode, aReport, aRuntime.getZDB());
 
 						break;
 

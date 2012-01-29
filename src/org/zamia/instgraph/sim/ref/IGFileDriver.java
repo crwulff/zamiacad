@@ -27,6 +27,7 @@ import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.vhdl.ast.VHDLNode;
+import org.zamia.zdb.ZDB;
 
 /**
  * @author Anton Chepurov
@@ -58,7 +59,7 @@ public class IGFileDriver extends IGObjectDriver {
 			throw new ZamiaException("TEXTIO : Read past end of file \"" + file.getName() + "\".", aLocation);
 		}
 
-		// store line nr to read next time
+		// store line nr to be read next time
 		IGContainer container = aSub.getContainer();
 		IGTypeStatic intType = container.findIntType().computeStaticType(aRuntime, aErrorMode, aReport);
 		BigInteger lineNr = fLineNr == null ? BigInteger.ONE : fLineNr.getNum().add(BigInteger.ONE);
@@ -66,15 +67,22 @@ public class IGFileDriver extends IGObjectDriver {
 
 		// construct OperationLiteral
 		IGType stringType = container.findStringType();
-		IGTypeStatic idxType = stringType.getIndexType().computeStaticType(aRuntime, aErrorMode, aReport);
+		return line2IG(line, stringType, aRuntime, aLocation, aErrorMode, aReport, aSub.getZDB());
+	}
+
+	public static IGStaticValue line2IG(String aLine, IGType aStringType, IGInterpreterRuntimeEnv aRuntime,
+										SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode,
+										ErrorReport aReport, ZDB aZDB) throws ZamiaException {
+		// construct OperationLiteral
+		IGTypeStatic idxType = aStringType.getIndexType().computeStaticType(aRuntime, aErrorMode, aReport);
 		IGStaticValue left = idxType.getStaticLeft(aLocation);
-		IGStaticValue right = new IGStaticValueBuilder(left, aLocation).setNum(new BigInteger("" + line.length())).buildConstant();
-		IGStaticValue ascending = container.findTrueValue();
+		IGStaticValue right = new IGStaticValueBuilder(left, aLocation).setNum(new BigInteger("" + aLine.length())).buildConstant();
+		IGStaticValue ascending = idxType.getStaticAscending();
 
-		IGRange range = new IGRange(left, right, ascending, aLocation, aSub.getZDB());
-		stringType = stringType.createSubtype(range, aRuntime, aLocation);
+		IGRange range = new IGRange(left, right, ascending, aLocation, aZDB);
+		aStringType = aStringType.createSubtype(range, aRuntime, aLocation);
 
-		IGOperationLiteral lineOL = new IGOperationLiteral(line.toUpperCase(), stringType, aLocation);
+		IGOperationLiteral lineOL = new IGOperationLiteral(aLine.toUpperCase(), aStringType, aLocation);
 
 		return lineOL.computeStaticValue(aRuntime, aErrorMode, aReport);
 	}
@@ -225,6 +233,10 @@ public class IGFileDriver extends IGObjectDriver {
 	private File createFile(IGStaticValue aFileName) {
 		File parent = aFileName.computeSourceLocation().getDir();
 		String name = aFileName.getId();
+		if (name == null) {
+			name = aFileName.toString();
+			aFileName.setId(name);
+		}
 		return new File(parent, name);
 	}
 
