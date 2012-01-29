@@ -245,4 +245,10 @@ public class SimData {
 			driver.removeListener(aProcess);
 		}
 	}
+
+	public void invalidateEvents() throws ZamiaException {
+		for (IGSignalDriver driver : fAllSignals.values()) {
+			driver.resetEvent();
+		}
+	}
 }

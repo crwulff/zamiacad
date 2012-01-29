@@ -192,7 +192,7 @@ public class IGSignalDriver extends IGObjectDriver {
 
 		super.setValueInternal(aValue, aLocation);
 
-		fIsEvent = hasValueChanged(oldValue, aValue);
+		updateEvent(oldValue, aValue);
 
 		if (fIsEvent) {
 			if (oldValue == null) {
@@ -211,7 +211,14 @@ public class IGSignalDriver extends IGObjectDriver {
 
 		IGStaticValue newValue = getValue(aLocation);
 
-		fIsEvent = hasValueChanged(oldValue, newValue);
+		updateEvent(oldValue, newValue);
+	}
+
+	private void updateEvent(IGStaticValue aOldValue, IGStaticValue aNewValue) throws ZamiaException {
+		/* logical 'OR' covers the case when the signal is updated multiple times during a single delta cycle,
+		* including the case when different bits of a signal are updated (the whole signal (fParent) gets then
+		* updated multiple times)*/
+		fIsEvent = fIsEvent || hasValueChanged(aOldValue, aNewValue);
 	}
 
 	public void drive() throws ZamiaException {
@@ -321,19 +328,17 @@ public class IGSignalDriver extends IGObjectDriver {
 	}
 
 
-	public void notifyChange() throws ZamiaException {
+	public HashSet<IGSimProcess> getListeningProcesses() throws ZamiaException {
 
 		HashSet<IGSimProcess> uniqueListeners = new HashSet<IGSimProcess>();
 
 		collectUniqueListeners(new HashSet<IGSignalDriver>(), uniqueListeners);
 
 		if (IGSimRef.DEBUG) {
-			LOGGER.debug("IGSimRef: notifyChange(): collected %d unique listeners", uniqueListeners.size());
+			LOGGER.debug("IGSimRef: getListeningProcesses(): collected %d unique listeners", uniqueListeners.size());
 		}
 
-		for (IGSimProcess process : uniqueListeners) {
-			process.resume(ASTErrorMode.EXCEPTION, null);
-		}
+		return uniqueListeners;
 	}
 
 	private void collectUniqueListeners(HashSet<IGSignalDriver> aVisitedDrivers, HashSet<IGSimProcess> aUniqueListeners) throws ZamiaException {
@@ -379,11 +384,27 @@ public class IGSignalDriver extends IGObjectDriver {
 
 	public void resetEvent() throws ZamiaException {
 
-		IGStaticValue currentValue = getValue(null);
+		if (!isEvent()) {
+			return;
+		}
+		if (IGSimRef.DEBUG) {
+			LOGGER.debug("Resetting event on driver %s.", this);
+		}
 
-		setValue(currentValue, null);
+		resetEventP();
 
-		// value preserved, fIsEvent reset
+	}
+
+	protected void resetEventInternal() throws ZamiaException {
+
+		super.resetEventInternal();
+
+		clearReset();
+	}
+
+	@Override
+	protected void clearReset() {
+		fIsEvent = false;
 	}
 
 //	private IGSignalDriver getMappedTo() throws ZamiaException {

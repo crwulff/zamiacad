@@ -281,6 +281,67 @@ public class IGObjectDriver implements Serializable {
 		}
 	}
 
+	protected void resetEventP() throws ZamiaException {
+
+		if (fMappedTo != null) {
+
+			if (fRangeType != null) {
+
+				int rangeL = (int) fRange.getLeft().getOrd();
+				int rangeR = (int) fRange.getRight().getOrd();
+				boolean rangeA = fRange.getAscending().isTrue();
+				int rangeMin = rangeA ? rangeL : rangeR;
+				int rangeMax = rangeA ? rangeR : rangeL;
+
+				for (int i = rangeMin; i <= rangeMax; i++) {
+
+					IGObjectDriver elementDriver = fMappedTo.getArrayElementDriver(i, null);
+
+					elementDriver.resetEventP();
+
+				}
+
+			} else {
+
+				fMappedTo.resetEventP();
+
+			}
+
+			return;
+		}
+
+
+		resetEventInternal();
+
+		if (fParent != null) {
+			fParent.clearReset();
+		}
+
+	}
+
+	protected void clearReset() {
+		/* do nothing */
+	}
+
+	protected void resetEventInternal() throws ZamiaException {
+
+		// update children
+
+		if (fDeclaredType.isArray()) {
+
+			for (IGObjectDriver arrayElement : fArrayElementDrivers) {
+				arrayElement.resetEventInternal();
+			}
+
+		} else if (fDeclaredType.isRecord()) {
+
+			for (IGObjectDriver recordField : fRecordFieldDrivers.values()) {
+				recordField.resetEventInternal();
+			}
+		}
+
+	}
+
 	public IGStaticValue getValue(SourceLocation aLocation) throws ZamiaException {
 		if (fMappedTo != null) {
 			IGStaticValue value = fMappedTo.getValue(aLocation);

@@ -188,19 +188,30 @@ public class IGSimRef implements IGISimulator {
 	private void propagateSignalChanges() throws ZamiaException {
 
 		Collection<IGSignalDriver> eventDrivers = new LinkedList<IGSignalDriver>();
+		HashSet<IGSimProcess> listeningProcesses = new HashSet<IGSimProcess>();
 
 		for (IGSignalChange signalChange : fChangeList) {
 			if (signalChange.isEvent()) {
 
 				IGSignalDriver driver = signalChange.getDriver();
 
-				driver.notifyChange();
+				listeningProcesses.addAll(driver.getListeningProcesses());
 
 				eventDrivers.add(driver);
 			}
 		}
 
+		// notify change
+		for (IGSimProcess process : listeningProcesses) {
+			process.resume(ASTErrorMode.EXCEPTION, null);
+		}
+
 		invalidateEvents(eventDrivers);
+
+		// clear events on ALL signals. covers the case when a signal has an initial value set
+		// and is never assigned any other value: isEvent() is then never cleared for this de-facto constant. (ERADOS: Path: UUT.PROC.CORE.PROC_ALU.SVZERO_RES)
+		// NB! influence may be deeper (try running IGRefSimTest and ERADOS with this line commented out).
+		fData.invalidateEvents();
 	}
 
 	private void invalidateEvents(Collection<IGSignalDriver> eventDrivers) throws ZamiaException {
