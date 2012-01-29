@@ -289,11 +289,14 @@ public class IGSimRef implements IGISimulator {
 				instEnv.pushContext(aParentContext);
 				IGSimContext instContext = instEnv.pushContextFor(instPath);
 
-				// init inst. module
-				initObjects(iContainer, instEnv, instEnv.getPath());
-
+				// init inst. module (GENERICS)
+				initObjects(LocalItemFilter.GENERICS, iContainer, instEnv, instEnv.getPath());
 				// pass generics
 				initGenerics(inst, iContainer, instEnv);
+
+				// init inst. module (PORTS, LOCALS)
+				initObjects(LocalItemFilter.PORTS, iContainer, instEnv, instEnv.getPath());
+				initObjects(LocalItemFilter.LOCALS, iContainer, instEnv, instEnv.getPath());
 
 				// mappings => processes
 				int numMappings = inst.getNumMappings();
@@ -413,6 +416,24 @@ public class IGSimRef implements IGISimulator {
 	}
 
 	private void initObjects(IGContainer aContainer, IGInterpreterRuntimeEnv aEnv, PathName aPath) throws ZamiaException {
+		initObjects(LocalItemFilter.ALL, aContainer, aEnv, aPath);
+	}
+
+	private enum LocalItemFilter {
+		GENERICS, PORTS, LOCALS, ALL;
+
+		public static boolean isGeneric(IGObject aObj) {
+			return aObj.getCat() == IGObject.IGObjectCat.CONSTANT && aObj.getDirection() == IGObject.OIDir.IN;
+		}
+
+		public static boolean isPort(IGObject aObj) {
+			IGObject.OIDir dir = aObj.getDirection();
+			return aObj.getCat() == IGObject.IGObjectCat.SIGNAL &&
+							dir != IGObject.OIDir.NONE && dir != IGObject.OIDir.APPEND;
+		}
+	}
+
+	private void initObjects(LocalItemFilter aFilter, IGContainer aContainer, IGInterpreterRuntimeEnv aEnv, PathName aPath) throws ZamiaException {
 		int n = aContainer.getNumLocalItems();
 		for (int i = 0; i < n; i++) {
 			IGContainerItem item = aContainer.getLocalItem(i);
@@ -423,6 +444,25 @@ public class IGSimRef implements IGISimulator {
 
 			IGObject obj = (IGObject) item;
 
+			switch (aFilter) {
+				case GENERICS:
+					if (!LocalItemFilter.isGeneric(obj)) {
+						continue;
+					}
+					break;
+				case PORTS:
+					if (!LocalItemFilter.isPort(obj)) {
+						continue;
+					}
+					break;
+				case LOCALS:
+					if (LocalItemFilter.isGeneric(obj) || LocalItemFilter.isPort(obj)) {
+						continue;
+					}
+					break;
+				case ALL:
+					break;
+			}
 			SourceLocation src = obj.computeSourceLocation();
 
 			IGObjectDriver driver = aEnv.newObject(obj, ASTErrorMode.EXCEPTION, null, src);
