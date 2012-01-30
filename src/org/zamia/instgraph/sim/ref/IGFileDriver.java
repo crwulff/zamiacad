@@ -231,7 +231,19 @@ public class IGFileDriver extends IGObjectDriver {
 	}
 
 	private File createFile(IGStaticValue aFileName) {
-		File parent = aFileName.computeSourceLocation().getDir();
+		File res = new File(aFileName.getId());
+		if (res.isAbsolute())
+			return res;
+		
+		// Modelsim opens files relatively to its work location, Active-HDL uses project location as base dir. 
+		// Modelsim considers /root as C:\root; Active-HDL is stuck to projects. Shouldn't we do something like that
+		// instead of opening files relatively to soruce file location? Our current behavour is very similar to 
+		// Linux (and HTTP), where file (or web page) is considered to be relative to the link (or current page) location. 
+		// But, in addition to absolute urls, that start with schema://, they have also "relatively absolute" references,
+		// like /root. The latter look like project location. 
+		// To know which of the options is right, on 25 Jan 2012 I created "Open file path specification" question in comp.lang.vhdl
+		// I propose using project as default base dir, which optionally can be changed (in Modelsim style).
+		File parent = aFileName.computeSourceLocation().getDir();  
 		String name = aFileName.getId();
 		if (name == null) {
 			name = aFileName.toString();

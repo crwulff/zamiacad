@@ -1271,13 +1271,13 @@ public class IGBuiltinOperations {
 		IGObject intfS = container.resolveObject("STATUS");
 		IGType fost = intfS != null ? intfS.getType() : container.findFileOpenStatusType();
 
-		String name = valueK.getId();
+		String openMode = valueK.getId();
 		IGObject.OIDir mode = NONE;
-		if (name.equals("READ_MODE")) {
+		if (openMode.equals("READ_MODE")) {
 			mode = IN;
-		} else if (name.equals("WRITE_MODE")) {
+		} else if (openMode.equals("WRITE_MODE")) {
 			mode = OUT;
-		} else if (name.equals("APPEND_MODE")) {
+		} else if (openMode.equals("APPEND_MODE")) {
 			mode = APPEND;
 		}
 
@@ -1292,11 +1292,11 @@ public class IGBuiltinOperations {
 			if (status.equalsValue(openOK)) {
 				/* OK, do nothing */
 			} else if (status.equalsValue(errorStatus)) {
-				throw new ZamiaException("Cannot open file \"" + valueN + "\"; it is already open.");
+				throw new ZamiaException("Cannot open file \"" + valueN + "\"; it is already open.", aLocation);
 			} else if (status.equalsValue(errorName)) {
-				throw new ZamiaException("Failed to open VHDL file \"" + valueN + "\" in " + name + "; no such file or directory.");
+				throw new ZamiaException("Failed to open VHDL file \"" + valueN + "\" in " + openMode + "; no such file or directory.", aLocation);
 			} else {
-				throw new ZamiaException("Cannot open file \"" + valueN + "\" in " + name + ".");
+				throw new ZamiaException("Cannot open file \"" + valueN + "\" in " + openMode + ".", aLocation);
 			}
 		} else {
 			aRuntime.setObjectValue(intfS, status, aLocation);
