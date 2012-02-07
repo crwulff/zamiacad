@@ -10,6 +10,7 @@ package org.zamia.instgraph.sim.ref;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
+import org.zamia.SourceRanges;
 import org.zamia.ToplevelPath;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
@@ -689,9 +690,11 @@ public class IGSimRef implements IGISimulator {
 		return driver.getLastValue();
 	}
 
-	public void filterExecutedSource(Collection<SourceLocation> aExecuted) {
+	public SourceRanges collectCoveredSources() {
+		SourceRanges sources = SourceRanges.createRanges();
 		for (IGSimProcess process : fProcesses) {
-			process.filterExecutedSource(aExecuted);
+			process.collectExecutedSources(sources);
 		}
+		return sources;
 	}
 }

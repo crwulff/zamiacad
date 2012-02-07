@@ -10,7 +10,6 @@ package org.zamia.instgraph.interpreter;
 
 import java.io.PrintStream;
 import java.math.BigInteger;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -18,6 +17,7 @@ import java.util.Set;
 import org.zamia.ErrorReport;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
+import org.zamia.SourceRanges;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
@@ -446,10 +446,10 @@ public class IGInterpreterRuntimeEnv {
 		return "IGInterpreterRuntime";
 	}
 
-	public void filterExecutedSource(Collection<SourceLocation> aExecuted) {
+	public void collectExecutedSources(SourceRanges aExecutedSources) {
 		for (IGInterpreterCode code : fCodeSet) {
 			if (code != null) {
-				code.filterExecutedSource(aExecuted);
+				code.collectExecutedSources(aExecutedSources);
 			}
 		}
 	}

@@ -11,12 +11,11 @@ package org.zamia.instgraph.interpreter;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
+import org.zamia.SourceRanges;
 import org.zamia.ZamiaLogger;
 import org.zamia.util.HashMapArray;
 
@@ -204,14 +203,11 @@ public class IGInterpreterCode implements Serializable {
 		return "IGInterpreterCode(id=" + fId + " from " + fLocation + ")";
 	}
 
-	public void filterExecutedSource(Collection<SourceLocation> aExecuted) {
-		if (aExecuted == null) {
-			aExecuted = new LinkedList<SourceLocation>();
-		}
+	public void collectExecutedSources(SourceRanges aExecutedSources) {
 		for (IGStmt stmt : program) {
 			int count = stmt.getExecCount();
 			if (count > 0) {
-				aExecuted.add(stmt.computeSourceLocation());
+				aExecutedSources.add(stmt.computeSourceLocation(), count);
 			}
 		}
 	}
