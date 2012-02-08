@@ -139,7 +139,7 @@ public class SourceLocation2IG {
 
 			logger.debug("IGItemSearch: findNearestItem(): supplied path corresponds to a matching instantiation, path: %s, item: %s", modulePath, moduleItem);
 
-			modulePath = modulePath.append((String) null);
+			modulePath = modulePath.descend();
 			moduleItem = igm.findItem(modulePath.getToplevel(), modulePath.getPath());
 
 			logger.debug("IGItemSearch: findNearestItem(): null segment appended, path: %s, item: %s", modulePath, moduleItem);

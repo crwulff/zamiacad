@@ -134,4 +134,8 @@ public class ToplevelPath implements Serializable {
 	public int getNumSegments() {
 		return fPath.getNumSegments();
 	}
+
+	public ToplevelPath descend() {
+		return append((String) null);
+	}
 }

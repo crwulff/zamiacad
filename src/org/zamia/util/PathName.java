@@ -20,10 +20,15 @@ import org.zamia.ZamiaLogger;
  * Represents an immutable hierarchical path, e.g. a path to a signal in a
  * design
  * 
- * /module1/module2/signal
+ * 
+ * /module1/module2/instance1
  * 
  * @author Guenter Bartsch
- * 
+ *
+ *  Reverse engineering by Valentin Tihhomirov:
+ *  In Guenter's example, we have module2 opened and 'instance' item is selected (cursor points to it).
+ *  Adding hierarchy separator, . or /, we enter the instance1. Its entity declaration is opened. In this 
+ *  case nothing is selected. This is signaled by 'null' in the leaf segment of the PathName. 
  */
 
 @SuppressWarnings("serial")
