@@ -51,10 +51,10 @@ public class SourceRanges {
 			fRangesByFile.put(loc.fSF, sourceRanges);
 		}
 
-		sourceRanges.add(loc.fLine, aCount);
+		sourceRanges.add(loc.fLine - 1, aCount); // -1 is an optimization for further queries (no need to +1 each time)
 	}
 
-	public void add(int aLine, Integer aCount) {
+	private void add(int aLine, Integer aCount) {
 
 		if (fCountByLine == null) {
 			throw new RuntimeException("Trying to add line to COMPOSITE SourceRanges");
