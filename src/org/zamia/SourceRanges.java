@@ -1,8 +1,8 @@
 package org.zamia;
 
 import java.util.HashMap;
-import java.util.TreeMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Anton Chepurov
@@ -13,15 +13,20 @@ public class SourceRanges {
 
 	private final Map<Integer, Integer> fCountByLine;
 
+	private int fMaxCount = 0;
+
 	/**
 	 * Public ranges factory
+	 *
 	 * @return composite ranges capable of mapping ranges by file
 	 */
 	public static SourceRanges createRanges() {
 		return new SourceRanges(new HashMap<SourceFile, SourceRanges>(), null);
 	}
+
 	/**
 	 * Private ranges factory
+	 *
 	 * @return leaf ranges capable of mapping counts by lines
 	 */
 	private static SourceRanges createRangesInternal() {
@@ -35,7 +40,7 @@ public class SourceRanges {
 
 	public void add(SourceLocation aSourceLocation, int aCount) {
 
-		if (fRangesByFile == null) {
+		if (isLeaf()) {
 			throw new RuntimeException("Trying to add file to LEAF SourceRanges");
 		}
 
@@ -44,7 +49,7 @@ public class SourceRanges {
 		if (loc == null) {
 			return;
 		}
-		
+
 		SourceRanges sourceRanges = fRangesByFile.get(loc.fSF);
 		if (sourceRanges == null) {
 			sourceRanges = createRangesInternal();
@@ -56,36 +61,60 @@ public class SourceRanges {
 
 	private void add(int aLine, Integer aCount) {
 
-		if (fCountByLine == null) {
-			throw new RuntimeException("Trying to add line to COMPOSITE SourceRanges");
-		}
-
 		Integer count = fCountByLine.get(aLine);
 		if (count == null) {
 			count = 0;
 		}
-		fCountByLine.put(aLine, count + aCount);
+
+		int total = count + aCount;
+
+		fCountByLine.put(aLine, total);
+
+		if (total > fMaxCount) {
+			fMaxCount = total;
+		}
 	}
 
 	public boolean hasFile(SourceFile aSourceFile) {
+		if (isLeaf()) {
+			throw new RuntimeException("Trying to poll for file from LEAF SourceRanges");
+		}
 		return fRangesByFile.containsKey(aSourceFile);
 	}
 
 	public SourceRanges getSourceRanges(SourceFile aSourceFile) {
+		if (isLeaf()) {
+			throw new RuntimeException("Trying to poll for file from LEAF SourceRanges");
+		}
 		return fRangesByFile.get(aSourceFile);
 	}
 
 	public boolean hasLine(int aLine) {
-		if (fCountByLine == null) {
+		if (isComposite()) {
 			throw new RuntimeException("Trying to poll for line from COMPOSITE SourceRanges");
 		}
 		return fCountByLine.containsKey(aLine);
 	}
 
 	public int getCount(int aLine) {
-		if (fCountByLine == null) {
+		if (isComposite()) {
 			throw new RuntimeException("Trying to poll for count from COMPOSITE SourceRanges");
 		}
 		return fCountByLine.containsKey(aLine) ? fCountByLine.get(aLine) : 0;
+	}
+
+	private boolean isLeaf() {
+		return fRangesByFile == null;
+	}
+
+	private boolean isComposite() {
+		return fCountByLine == null;
+	}
+
+	public int getMaxCount() {
+		if (isComposite()) {
+			throw new RuntimeException("Trying to poll for max count from COMPOSITE SourceRanges");
+		}
+		return fMaxCount;
 	}
 }
