@@ -231,9 +231,6 @@ public class IGFileDriver extends IGObjectDriver {
 	}
 
 	private File createFile(IGStaticValue aFileName) {
-		File res = new File(aFileName.getId());
-		if (res.isAbsolute())
-			return res;
 		
 		// Modelsim opens files relatively to its work location, Active-HDL uses project location as base dir. 
 		// Modelsim considers /root as C:\root; Active-HDL is stuck to projects. Shouldn't we do something like that
@@ -249,6 +246,9 @@ public class IGFileDriver extends IGObjectDriver {
 			name = aFileName.toString();
 			aFileName.setId(name);
 		}
+		File res = new File(aFileName.getId());
+		if (res.isAbsolute())
+			return res;
 		return new File(parent, name);
 	}
 
