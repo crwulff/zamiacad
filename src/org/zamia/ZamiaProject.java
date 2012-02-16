@@ -119,7 +119,6 @@ public class ZamiaProject {
 		fVHDLIndexer = new VHDLIndexer();
 		fVerilogParser = new VerilogParser();
 
-		// curiously, not null is returned ENABLE_COMPRESSION is false and null when zdb is compressed! 
 		fBuildPath = (BuildPath) fZDB.getNamedObject(BUILDPATH_OBJ_NAME);
 		if (fBuildPath == null) {
 			setBuildPath(new BuildPath(aBuildPath));
@@ -276,9 +275,7 @@ public class ZamiaProject {
 
 	public void storeEditorPath(String aFilename, String aPath) {
 
-		long id = fZDB.store(aPath);
-
-		fZDB.putIdx("EPIdx", aFilename, id);
+		fZDB.putIdxObj("EPIdx", aFilename, aPath);
 	}
 
 	public String lookupEditorPath(String aFilename) {

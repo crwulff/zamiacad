@@ -15,6 +15,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -448,39 +449,39 @@ public class ZDB {
 			ObjectOutputStream serializer = new ObjectOutputStream(baos);
 			serializer.writeObject(aEntry.getObject());
 			serializer.flush();
+			
+			//logger.info ("ZDB: File for %d is '%s'", id, dataFile);
+
+			long offset = fDataFile.length();
+
+			fOffsets.put(id, offset);
+
+			OutputStream out = openOutputFile(fDataFile, true);
+			try {
+				baos.writeTo(out);
+			} finally {
+				out.close();
+			}
 		} catch (IOException e) {
 			el.logException(e);
 		}
 
-		//logger.info ("ZDB: File for %d is '%s'", id, dataFile);
-
-		long offset = fDataFile.length();
-
-		fOffsets.put(id, offset);
-
-		OutputStream out = null;
-		try {
-
-			if (ENABLE_COMPRESSION) {
-				out = new LevelGZIPOutputStream(new FileOutputStream(fDataFile, true), Deflater.BEST_SPEED);
-			} else {
-				out = new FileOutputStream(fDataFile, true);
-			}
-
-			baos.writeTo(out);
-		} catch (IOException e1) {
-			el.logException(e1);
-		} finally {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException e) {
-					el.logException(e);
-				}
-			}
-		}
 	}
 
+	static OutputStream openOutputFile(File name, boolean append) throws FileNotFoundException, IOException {
+
+		FileOutputStream f = new FileOutputStream(name, append);
+		return ENABLE_COMPRESSION ? new LevelGZIPOutputStream(f, Deflater.BEST_SPEED) : f;  
+	}
+
+	static ObjectInputStream openInputFile(File name, long offset) throws IOException {
+		FileInputStream fis = new FileInputStream(name);
+		fis.skip(offset);
+
+		return new ObjectInputStream(new BufferedInputStream(
+				ENABLE_COMPRESSION ? new GZIPInputStream(fis) : fis));
+		
+	}
 	public synchronized Object load(long aId) {
 
 		if (aId == 0) {
@@ -533,41 +534,20 @@ public class ZDB {
 			return null;
 		}
 
-		ObjectInputStream in = null;
-		FileInputStream fis = null;
 		try {
-			fis = new FileInputStream(fDataFile);
-			fis.skip(offset);
-
-			if (ENABLE_COMPRESSION) {
-				in = new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(fis)));
-			} else {
-				in = new ObjectInputStream(new BufferedInputStream(fis));
+			ObjectInputStream in = openInputFile(fDataFile, offset);
+			try {
+				obj = in.readObject();
+			} finally {
+				in.close();
 			}
-			obj = in.readObject();
-			//logger.debug ("ZDB: loading %d, was on disk: %s", aId, obj);
 		} catch (IOException e) {
 			logger.error("ZDB: IOException while reading element %s (file: '%s')", aId, fDataFile.getAbsolutePath());
 			el.logException(e);
 		} catch (ClassNotFoundException e) {
 			el.logException(e);
-		} finally {
-			if (fis != null) {
-				try {
-					fis.close();
-				} catch (IOException e) {
-					el.logException(e);
-				}
-			}
-			if (in != null) {
-				try {
-					in.close();
-				} catch (IOException e) {
-					el.logException(e);
-				}
-			}
 		}
-
+		
 		if (obj != null) {
 
 			if (obj instanceof ZDBIIDSaver) {

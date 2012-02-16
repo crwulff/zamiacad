@@ -65,73 +65,65 @@ public class ZDBPersistentData {
 
 	void save(File aPDFile) {
 
-		ObjectOutputStream oos = null;
 		try {
+
+			ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(ZDB.openOutputFile(aPDFile, false)));
+			try {
 			
-			if (ZDB.ENABLE_COMPRESSION) {
-				oos = new ObjectOutputStream(new BufferedOutputStream(new LevelGZIPOutputStream(new FileOutputStream(aPDFile, true), Deflater.BEST_SPEED)));
-			} else {
-				oos = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(aPDFile)));
-			}
+				oos.writeInt(CURRENT_VERSION);
 
-			oos.writeInt(CURRENT_VERSION);
+				oos.writeLong(fCurId);
 
-			oos.writeLong(fCurId);
+				/*
+				 * save indices 
+				 */
 
-			/*
-			 * save indices 
-			 */
+				int n = fIndices.size();
 
-			int n = fIndices.size();
+				oos.writeInt(n);
 
-			oos.writeInt(n);
+				for (String id : fIndices.keySet()) {
 
-			for (String id : fIndices.keySet()) {
+					oos.writeUTF(id);
 
-				oos.writeUTF(id);
+					HashMapArray<String, Long> idx = fIndices.get(id);
 
-				HashMapArray<String, Long> idx = fIndices.get(id);
+					int m = idx.size();
 
-				int m = idx.size();
+					oos.writeInt(m);
 
-				oos.writeInt(m);
+					for (String key : idx.keySet()) {
 
-				for (String key : idx.keySet()) {
+						Long value = idx.get(key);
 
-					Long value = idx.get(key);
-
-					oos.writeUTF(key);
-					oos.writeLong(value.longValue());
+						oos.writeUTF(key);
+						oos.writeLong(value.longValue());
+					}
 				}
-			}
 
-			/*
-			 * save named objects 
-			 */
+				/*
+				 * save named objects 
+				 */
 
-			n = fNamedObjects.size();
+				n = fNamedObjects.size();
 
-			oos.writeInt(n);
+				oos.writeInt(n);
 
-			for (String id : fNamedObjects.keySet()) {
+				for (String id : fNamedObjects.keySet()) {
 
-				oos.writeUTF(id);
+					oos.writeUTF(id);
 
-				Object obj = fNamedObjects.get(id);
+					Object obj = fNamedObjects.get(id);
 
-				oos.writeObject(obj);
+					oos.writeObject(obj);
+				}
+				
+			} finally {
+				oos.close();
 			}
 
 		} catch (Throwable t) {
 			el.logException(t);
-		} finally {
-			if (oos != null) {
-				try {
-					oos.close();
-				} catch (IOException e) {
-					el.logException(e);
-				}
-			}
 		}
 
 	}
@@ -139,76 +131,66 @@ public class ZDBPersistentData {
 	boolean load(File aPDFile) {
 
 		if (aPDFile.exists() && aPDFile.canRead()) {
-			ObjectInputStream ois = null;
 			try {
 				
-				if (ZDB.ENABLE_COMPRESSION) {
-					ois = new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(new FileInputStream(aPDFile))));
-				} else {
-					ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(aPDFile)));
-				}
-
-				int v = ois.readInt();
-				if (v != CURRENT_VERSION) {
-					logger.error("ZDB: Wrong version: was expecting V %d, found V %d.", ZDBPersistentData.CURRENT_VERSION, v);
-					return false;
-				}
-
-				fCurId = ois.readLong();
-
-				/*
-				 * load indices
-				 */
-
-				int n = ois.readInt();
-
-				for (int i = 0; i < n; i++) {
-
-					String id = ois.readUTF();
-
-					int m = ois.readInt();
-
-					HashMapArray<String, Long> idx = new HashMapArray<String, Long>(m);
-
-					fIndices.put(id, idx);
-
-					for (int j = 0; j < m; j++) {
-
-						String key = ois.readUTF();
-
-						long value = ois.readLong();
-
-						idx.put(key, value);
+				ObjectInputStream ois = ZDB.openInputFile(aPDFile, 0);
+				try {
+				
+					int v = ois.readInt();
+					if (v != CURRENT_VERSION) {
+						logger.error("ZDB: Wrong version: was expecting V %d, found V %d.", ZDBPersistentData.CURRENT_VERSION, v);
+						return false;
 					}
+
+					fCurId = ois.readLong();
+
+					/*
+					 * load indices
+					 */
+
+					int n = ois.readInt();
+
+					for (int i = 0; i < n; i++) {
+
+						String id = ois.readUTF();
+
+						int m = ois.readInt();
+
+						HashMapArray<String, Long> idx = new HashMapArray<String, Long>(m);
+
+						fIndices.put(id, idx);
+
+						for (int j = 0; j < m; j++) {
+
+							String key = ois.readUTF();
+
+							long value = ois.readLong();
+
+							idx.put(key, value);
+						}
+					}
+
+					/*
+					 * load named objects
+					 */
+
+					n = ois.readInt();
+
+					for (int i = 0; i < n; i++) {
+
+						String id = ois.readUTF();
+
+						Object obj = ois.readObject();
+
+						fNamedObjects.put(id, obj);
+					}
+
+					return true;
+				} finally {
+					ois.close();
 				}
-
-				/*
-				 * load named objects
-				 */
-
-				n = ois.readInt();
-
-				for (int i = 0; i < n; i++) {
-
-					String id = ois.readUTF();
-
-					Object obj = ois.readObject();
-
-					fNamedObjects.put(id, obj);
-				}
-
-				return true;
 			} catch (Throwable e) {
-				// el.logException(e);
-			} finally {
-
-				if (ois != null) {
-					try {
-						ois.close();
-					} catch (IOException e) {
-						el.logException(e);
-					}
-				}
+				el.logException(e);
 			}
 		}
 
