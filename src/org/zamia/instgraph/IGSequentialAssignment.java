@@ -10,6 +10,7 @@ package org.zamia.instgraph;
 
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.analysis.ig.IGReferencesSearchThrough;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGPopStmt;
@@ -47,11 +48,26 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 		fDelay = aDelay;
 	}
 
+	
+	public void computeAccessedItems(boolean left, IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
+		int sizeBefore = aAccessedItems.size();
+		(left ? fTarget : fValue).computeAccessedItems(left, aFilterItem, aFilterType, aDepth, aAccessedItems);
+		int sizeAfter = aAccessedItems.size();
+		if (sizeAfter != sizeBefore && aAccessedItems instanceof IGReferencesSearchThrough.AccessedThroughItems ) {
+			
+			IGReferencesSearchThrough.AccessedThroughItems todoList = ((IGReferencesSearchThrough.AccessedThroughItems) aAccessedItems);
+
+			HashSetArray<IGItemAccess> list = new HashSetArray<IGItemAccess>();
+			(!left ? fTarget : fValue).computeAccessedItems(!left, null, null, aDepth, list);
+			todoList.schedule(list, computeSourceLocation());
+			
+		}
+	}
 	@Override
 	public void computeAccessedItems(IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
-
-		fValue.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, aAccessedItems);
-		fTarget.computeAccessedItems(true, aFilterItem, aFilterType, aDepth, aAccessedItems);
+		
+		computeAccessedItems(false, aFilterItem, aFilterType, aDepth, aAccessedItems);
+		computeAccessedItems(true, aFilterItem, aFilterType, aDepth, aAccessedItems);
 
 		if (fReject != null) {
 			fReject.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, aAccessedItems);

@@ -21,7 +21,7 @@ import java.util.Iterator;
  */
 
 @SuppressWarnings("serial")
-public class HashSetArray<V> implements Serializable, Cloneable {
+public class HashSetArray<V> implements Serializable, Cloneable, Iterable<V> {
 
 	private ArrayList<V> array;
 

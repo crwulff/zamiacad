@@ -12,6 +12,7 @@ import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite;
 import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.PathName;
 
@@ -26,11 +27,10 @@ public class IGSearchResultBuilder {
 	class RSRWrapper {
 		private ReferenceSearchResult fResult;
 
-		private HashMapArray<String, RSRWrapper> fChildren;
+		private HashMapArray<String, RSRWrapper> fChildren = new HashMapArray<String, RSRWrapper>();
 
 		public RSRWrapper(String aTitle) {
 			fResult = new ReferenceSearchResult(aTitle, null, 0, fZPrj);
-			fChildren = new HashMapArray<String, RSRWrapper>();
 		}
 
 		public RSRWrapper getOrCreateChild(String aLabel) {
@@ -82,16 +82,20 @@ public class IGSearchResultBuilder {
 
 	public void add(ToplevelPath aPath, ReferenceSite aSite, IGObject aObj) {
 
-		RSRWrapper wrapper = findResultHierachy(aPath.getPath());
-
-		ReferenceSearchResult res = wrapper.getResult();
-
+		ReferenceSearchResult res = add(aPath, aSite);
 		if (aObj != null) {
 			res.setDirection(aObj.getDirection());
 		}
 
-		res.add(aSite);
 	}
+	
+	public ReferenceSearchResult add(ToplevelPath aPath, ReferenceSearchResult aRSR) {
+		RSRWrapper wrapper = findResultHierachy(aPath.getPath());
+		ReferenceSearchResult res = wrapper.getResult();
+		res.add(aRSR);
+		return res;
+	}
+	
 
 	private ReferenceSearchResult getResult(RSRWrapper aWrapper) {
 
