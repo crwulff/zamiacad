@@ -40,8 +40,6 @@ public abstract class DesignUnit extends DeclarativeItem implements IDesignModul
 
 	protected final Context fContext;
 
-	protected final SourceFile fSF;
-
 	private final String fZPrjID;
 
 	// we need both because of subprogram overloading:
@@ -55,7 +53,7 @@ public abstract class DesignUnit extends DeclarativeItem implements IDesignModul
 	public DesignUnit(Context aContext, String aId, SourceFile aSF, long aLocation, String aLibId, ZDB aZDB) {
 		super(aId, null, aLocation);
 		fContext = aContext;
-		fSF = aSF;
+		setSource(aSF);
 		fContext.setParent(this);
 		fLibId = aLibId;
 
@@ -98,7 +96,7 @@ public abstract class DesignUnit extends DeclarativeItem implements IDesignModul
 	}
 
 	public SourceFile getSourceFile() {
-		return fSF;
+		return getSource();
 	}
 
 	@Override
