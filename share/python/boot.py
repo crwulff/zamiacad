@@ -1,13 +1,16 @@
 
 from java.io import File, PrintWriter, BufferedWriter, FileWriter, PrintStream
 from java.lang import System
+from java.math import BigInteger
 from org.zamia import ERManager, FSCache, SourceFile, SourceLocation, ZamiaException, ZamiaProject, ZamiaLogger, ExceptionLogger, Toplevel, ToplevelPath
 from org.zamia.analysis import SourceLocation2IG, SourceLocation2AST
 from org.zamia.analysis.ig import IGReferencesSearch
 from org.zamia.analysis.ast import ASTDeclarationSearch, ASTReferencesSearch
 from org.zamia.vhdl.ast import DMUID,AST2DOT
 from org.zamia.instgraph import IG2DOT, IGOperationObject
+from org.zamia.instgraph.sim.ref import IGSimRef
 from org.zamia.rtl import RTLVisualGraphContentProvider,RTLVisualGraphLabelProvider,RTLVisualGraphSelectionProvider
+from org.zamia.util import PathName, FileUtils
 from org.zamia.vg import VGLayout, VGGCSVG
 import sys
 
@@ -24,6 +27,7 @@ def help():
   print "Builtins:"
   print "---------"
   print "zamia_source(uri)"
+  print "copy(src, dest)"
   print ""
   print "Builder:"
   print "--------"
@@ -54,9 +58,19 @@ def help():
   print "rtl_list()"
   print "rtl_dump_svg(dmuid,filename)"
   print ""
+  print "Simulator:"
+  print "------------"
+  print "openSim()"
+  print "run(sim, ns)"
+  print ""
 
 def zamia_source(uri):
   project.getZCJ().evalFile(uri)
+
+def copy(src, dest):
+  ok = FileUtils.copy(File(src), File(dest))
+  if (not ok):
+    printf('Failed to copy %s\n', src)
 
 #
 # Builder
@@ -351,3 +365,31 @@ def rtl_dump_svg(dmuid,filename):
 
     printf("python: wrote svg file to %s\n", filename)
 
+#
+# Sim
+#
+
+def getUID():
+
+  bp = project.getBuildPath()
+
+  tl = bp.getToplevel(0)
+
+  return project.getDUM().getArchDUUID(tl.getDUUID())
+
+def openSim():
+
+  sim = IGSimRef()
+
+  tlDUUID = getUID()
+
+  tl = Toplevel(tlDUUID, None)
+  tlp = ToplevelPath(tl, PathName(""))
+
+  sim.open(tlp, None, None, project)
+
+  return sim
+
+def run(sim, ns):
+
+  sim.run(BigInteger(ns).multiply(BigInteger("1000000")))

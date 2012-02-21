@@ -117,4 +117,74 @@ public class SourceRanges {
 		}
 		return fMaxCount;
 	}
+
+	public SourceRanges subtract(SourceRanges... aOthers) {
+		SourceRanges result = this;
+		for (SourceRanges other : aOthers) {
+			result = result.subtractP(other);
+		}
+		return result;
+	}
+
+	private SourceRanges subtractP(SourceRanges aOthers) {
+
+		SourceRanges result;
+
+		if (isComposite() ^ aOthers.isComposite()) {
+			return this; // do nothing
+		}
+
+		if (isComposite()) {
+
+			result = createRanges();
+
+			for (Map.Entry<SourceFile, SourceRanges> entry : fRangesByFile.entrySet()) {
+				SourceFile file = entry.getKey();
+				SourceRanges ranges = entry.getValue();
+
+				SourceRanges resultInternal = ranges;
+
+				if (aOthers.hasFile(file)) {
+
+					resultInternal = ranges.subtract(aOthers.getSourceRanges(file));
+
+					if (resultInternal.isEmpty()) {
+						continue;
+					}
+				}
+
+				result.fRangesByFile.put(file, resultInternal);
+			}
+		} else {
+
+			result = createRangesInternal();
+
+			for (Map.Entry<Integer, Integer> entry : fCountByLine.entrySet()) {
+				Integer line = entry.getKey();
+				Integer count = entry.getValue();
+
+				if (aOthers.hasLine(line)) {
+					continue;
+				}
+
+				result.fCountByLine.put(line, count);
+			}
+		}
+
+		return result;
+	}
+
+	private boolean isEmpty() {
+		return isComposite() ? fRangesByFile.isEmpty() : fCountByLine.isEmpty();
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder();
+		sb.append("SourceRanges");
+		sb.append("{fRangesByFile=").append(fRangesByFile);
+		sb.append(", fCountByLine=").append(fCountByLine);
+		sb.append('}');
+		return sb.toString();
+	}
 }

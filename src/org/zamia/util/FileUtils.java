@@ -9,6 +9,7 @@
 package org.zamia.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 
 /**
@@ -68,5 +69,14 @@ public class FileUtils {
 		}
 
 		return size;
+	}
+
+	public static boolean copy(File aSrc, File aDest) {
+		try {
+			org.apache.commons.io.FileUtils.copyFile(aSrc, aDest);
+			return true;
+		} catch (IOException e) {
+			return false;
+		}
 	}
 }

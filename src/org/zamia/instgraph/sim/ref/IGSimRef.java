@@ -178,6 +178,11 @@ public class IGSimRef implements IGISimulator {
 			rl.executeWakeups(this);
 		}
 
+        BigInteger nanos = fSimulationTime.divide(MLN_FS);
+        logger.debug("IGSimRef: *************************************************");
+        logger.debug("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
+        logger.debug("IGSimRef: *************************************************");
+
 	}
 
 	private void logChanges() throws ZamiaException {
