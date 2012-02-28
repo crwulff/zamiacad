@@ -11,10 +11,12 @@ package org.zamia.instgraph;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.analysis.ig.IGReferencesSearchThrough;
+import org.zamia.analysis.ig.IGReferencesSearchThrough.AccessedThroughItems;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGPopStmt;
 import org.zamia.util.HashSetArray;
+import org.zamia.util.Pair;
 import org.zamia.zdb.ZDB;
 
 /**
@@ -49,18 +51,50 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 	}
 
 	
+	/**
+	 * 
+	 * The idea is that COND and DRV are never written while TARGET is never read in
+	 *  
+	 * 		if COND then TARGET <= DRV; 
+	 * 
+	 * If user captured a writing into TARGET, we he might be also interested in capturing the sources:
+	 * the right hand of the assignment, DRV, and COND. So, we propagate the search on them. On the other 
+	 * hand, when DRV or COND is recorded as a result, we might be interested in the targets. So, we 
+	 * schedule a new search on TARGET.
+	 * 
+	 * In short, this can be rewritten as 
+	 * 		TARGET <= DRV, COND 
+	 * */	
 	public void computeAccessedItems(boolean left, IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
 		int sizeBefore = aAccessedItems.size();
 		(left ? fTarget : fValue).computeAccessedItems(left, aFilterItem, aFilterType, aDepth, aAccessedItems);
-		int sizeAfter = aAccessedItems.size();
-		if (sizeAfter != sizeBefore && aAccessedItems instanceof IGReferencesSearchThrough.AccessedThroughItems ) {
+		if (aAccessedItems instanceof AccessedThroughItems) {
 			
-			IGReferencesSearchThrough.AccessedThroughItems todoList = ((IGReferencesSearchThrough.AccessedThroughItems) aAccessedItems);
-
-			HashSetArray<IGItemAccess> list = new HashSetArray<IGItemAccess>();
-			(!left ? fTarget : fValue).computeAccessedItems(!left, null, null, aDepth, list);
-			todoList.schedule(list, computeSourceLocation());
+			int s2debug = aAccessedItems.size();
 			
+			AccessedThroughItems todoList = ((AccessedThroughItems) aAccessedItems);
+			if (!left) // depending on conditions is the same as driving from the right 
+				for (Pair<IGSequentialIf, HashSetArray<IGItemAccess>> parent: todoList.ifStack) {
+					todoList.addAll(parent.getSecond());
+				}
+			
+			int sizeAfter = aAccessedItems.size();
+			if (sizeAfter != sizeBefore) {
+				
+				HashSetArray<IGItemAccess> list = new HashSetArray<IGItemAccess>();
+				(!left ? fTarget : fValue).computeAccessedItems(!left, null, null, aDepth, list);
+				
+				todoList.scheduleAssignments(list, true, computeSourceLocation());
+				
+				if (left) // append conditions to the right 
+					for (Pair<IGSequentialIf, HashSetArray<IGItemAccess>> parent: todoList.ifStack) {
+						list.clear();
+						parent.getFirst().getCond().computeAccessedItems(false, null, null, 0, list);
+						todoList.scheduleAssignments(list, true, parent.getFirst().computeSourceLocation());
+					}
+					
+				//schedule parent IF conditions
+			}
 		}
 	}
 	@Override

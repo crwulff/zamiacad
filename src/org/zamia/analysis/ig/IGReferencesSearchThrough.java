@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.zamia.SourceLocation;
 import org.zamia.ToplevelPath;
@@ -13,11 +15,16 @@ import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite;
 import org.zamia.instgraph.IGConcurrentStatement;
+import org.zamia.instgraph.IGItem;
 import org.zamia.instgraph.IGItemAccess;
 import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGOperationObject;
+import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGObject.IGObjectCat;
+import org.zamia.instgraph.IGSequentialIf;
 import org.zamia.Utils;
 import org.zamia.util.HashSetArray;
+import org.zamia.util.Pair;
 import org.zamia.util.PathName;
 
 public class IGReferencesSearchThrough extends IGReferencesSearch {
@@ -94,7 +101,11 @@ public class IGReferencesSearchThrough extends IGReferencesSearch {
 				
 			}
 			ReferenceSearchResult rsr = doingAssignment.run(); // this will produce both keyResult and rsr
-			if (doingAssignment.keyResult.restOfResults == null) // do not overrwrite results if they were generated previously
+			
+			if (doingAssignment.keyResult == null) {
+				logger.warn("Search on " + doingPath + " : " + doingObject + " has failed");
+				System.err.println("Search on " + doingPath + " : " + doingObject + " has failed");
+			}else if (doingAssignment.keyResult.restOfResults == null) // do not overrwrite results if they were generated previously
 				doingAssignment.keyResult.restOfResults = rsr;
 				
 		}
@@ -114,17 +125,28 @@ public class IGReferencesSearchThrough extends IGReferencesSearch {
 	
 	public class AccessedThroughItems extends AccessedItems {
 		IGConcurrentStatement scope;
+		public final Stack<Pair<IGSequentialIf, HashSetArray<IGItemAccess>>> ifStack = new Stack<Pair<IGSequentialIf, HashSetArray<IGItemAccess>>>();
 		
 		AccessedThroughItems(ToplevelPath path, IGConcurrentStatement scope) {
 			super(path);
 			this.scope = scope;
 		}
 		
-		/**Called from IGSequentialAssignement.*/
-		public void schedule(HashSetArray<IGItemAccess> list, SourceLocation assignmentLocation) {
+		/**@see org.zamia.instgraph.IGSequentialAssignment#computeAccessedItems*/
+		public void scheduleAssignments(HashSetArray<IGItemAccess> list, boolean useItemLocation, SourceLocation assignmentLocation) {
+			//useItemLocation = true;
 			
 			for (IGItemAccess ia : list) {
-				IGObject obj = (IGObject)ia.getItem();
+				IGObject obj = null;
+				if (ia.getItem() instanceof IGOperationObject) {
+					obj = ((IGOperationObject) ia.getItem()).getObject(); // cases like A'event
+				} else if (ia.getItem() instanceof IGObject) {
+					obj = (IGObject) ia.getItem();
+				}
+
+//				if (useItemLocation)
+//					assignmentLocation = obj.computeSourceLocation();  
+
 				SearchAssignment assignment = null;
 				
 				//TODO: add only in case of signal-through search
@@ -140,12 +162,12 @@ public class IGReferencesSearchThrough extends IGReferencesSearch {
 				
 				if (assignment != null) 
 					scheduleAssignment(assignment);
-				
 			}
 			
 			if (list.isEmpty()) {
 				scheduleAssignment(newSignalSearch(assignmentLocation, null, path)); // dummy location
 			}
+			
 		}
 		
 		private void scheduleAssignment(SearchAssignment assignment) {
