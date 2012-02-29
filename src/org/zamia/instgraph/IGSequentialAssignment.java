@@ -74,7 +74,7 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 			
 			AccessedThroughItems todoList = ((AccessedThroughItems) aAccessedItems);
 			if (!left) // depending on conditions is the same as driving from the right 
-				for (Pair<IGSequentialIf, HashSetArray<IGItemAccess>> parent: todoList.ifStack) {
+				for (Pair<IGSequentialStatement, HashSetArray<IGItemAccess>> parent: todoList.ifStack) {
 					todoList.addAll(parent.getSecond());
 				}
 			
@@ -87,9 +87,13 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 				todoList.scheduleAssignments(list, true, computeSourceLocation());
 				
 				if (left) // append conditions to the right 
-					for (Pair<IGSequentialIf, HashSetArray<IGItemAccess>> parent: todoList.ifStack) {
+					for (Pair<IGSequentialStatement, HashSetArray<IGItemAccess>> parent: todoList.ifStack) {
 						list.clear();
-						parent.getFirst().getCond().computeAccessedItems(false, null, null, 0, list);
+						IGSequentialStatement ifStatement = parent.getFirst(); 
+						IGOperation conditional = (IGOperation) (ifStatement instanceof IGSequentialLoop 
+								? ((IGSequentialLoop) ifStatement).getChild(2)
+								: ((IGSequentialIf) ifStatement).getCond());
+						conditional.computeAccessedItems(false, null, null, 0, list);
 						todoList.scheduleAssignments(list, true, parent.getFirst().computeSourceLocation());
 					}
 					

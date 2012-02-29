@@ -22,6 +22,7 @@ import org.zamia.instgraph.IGOperationObject;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGSequentialIf;
+import org.zamia.instgraph.IGSequentialStatement;
 import org.zamia.Utils;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.Pair;
@@ -125,7 +126,7 @@ public class IGReferencesSearchThrough extends IGReferencesSearch {
 	
 	public class AccessedThroughItems extends AccessedItems {
 		IGConcurrentStatement scope;
-		public final Stack<Pair<IGSequentialIf, HashSetArray<IGItemAccess>>> ifStack = new Stack<Pair<IGSequentialIf, HashSetArray<IGItemAccess>>>();
+		public final Stack<Pair<IGSequentialStatement, HashSetArray<IGItemAccess>>> ifStack = new Stack<Pair<IGSequentialStatement, HashSetArray<IGItemAccess>>>();
 		
 		AccessedThroughItems(ToplevelPath path, IGConcurrentStatement scope) {
 			super(path);

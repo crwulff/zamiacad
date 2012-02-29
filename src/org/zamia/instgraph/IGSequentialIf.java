@@ -55,7 +55,7 @@ public class IGSequentialIf extends IGSequentialStatement {
 		aAccessedItems.addAll(accessedConditions);
 		
 		if (aAccessedItems instanceof AccessedThroughItems) {
-			((AccessedThroughItems)aAccessedItems).ifStack.push(new Pair<IGSequentialIf, HashSetArray<IGItemAccess>>(this, accessedConditions));
+			((AccessedThroughItems)aAccessedItems).ifStack.push(new Pair<IGSequentialStatement, HashSetArray<IGItemAccess>>(this, accessedConditions));
 		}
 		fThenSOS.computeAccessedItems(aFilterItem, aFilterType, aDepth, aAccessedItems);
 		if (fElseSOS != null) {
