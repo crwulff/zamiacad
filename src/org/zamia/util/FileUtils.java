@@ -8,6 +8,8 @@
  */
 package org.zamia.util;
 
+import org.zamia.ExceptionLogger;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
@@ -20,6 +22,8 @@ import java.util.HashSet;
  */
 
 public class FileUtils {
+
+    private static ExceptionLogger el = ExceptionLogger.getInstance();
 
 	public static void deleteDirRecursive(File aDir) {
 		
@@ -76,6 +80,7 @@ public class FileUtils {
 			org.apache.commons.io.FileUtils.copyFile(aSrc, aDest);
 			return true;
 		} catch (IOException e) {
+            el.logException(e);
 			return false;
 		}
 	}

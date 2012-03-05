@@ -18,7 +18,8 @@ logger = ZamiaLogger.getInstance()
 el = ExceptionLogger.getInstance()
 
 def printf(format, *args):
-    sys.stdout.write(format % args)
+##    sys.stdout.write(format % args)
+    logger.info(format, args)
 
 def help():
   print "zamiaCAD builtin python functions:"
@@ -68,7 +69,8 @@ def zamia_source(uri):
   project.getZCJ().evalFile(uri)
 
 def copy(src, dest):
-  ok = FileUtils.copy(File(src), File(dest))
+  base = project.fBasePath.toString()
+  ok = FileUtils.copy(File(base + "/" + src), File(base + "/" + dest))
   if (not ok):
     printf('Failed to copy %s\n', src)
 
