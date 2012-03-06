@@ -14,42 +14,40 @@ import org.zamia.ToplevelPath;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite;
+import org.zamia.analysis.ReferenceSite.RefType;
 import org.zamia.instgraph.IGConcurrentStatement;
-import org.zamia.instgraph.IGItem;
 import org.zamia.instgraph.IGItemAccess;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperationObject;
-import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGObject.IGObjectCat;
-import org.zamia.instgraph.IGSequentialIf;
 import org.zamia.instgraph.IGSequentialStatement;
 import org.zamia.Utils;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.Pair;
-import org.zamia.util.PathName;
 
-public class IGReferencesSearchThrough extends IGReferencesSearch {
+public class IGAssignmentsSearch extends IGReferencesSearch {
 
-	public IGReferencesSearchThrough(ZamiaProject aPrj) {
+	/**We normally do not need titles for ReferenceSites. But, you may turn it on for debug.
+	 * NB! removing titles breaks the comparison (difference) between results!
+	 * */
+	static String debugTitle(IGObject aRefObj) {
+		return debug && aRefObj != null ? aRefObj.toString() : null;
+	}
+	public IGAssignmentsSearch(ZamiaProject aPrj) {
 		super(aPrj);
 	}
 
-	
 	/**Used to refer and jump to EntryReferenceSite items in the results page.
 	 * This default implementation runs search(path) for signals. Variables will have overloaded class that invokes searchReferences(igprocess)*/
-	public static abstract class SearchAssignment extends ReferenceSearchResult {
-		public final IGObject fObj;
-		public final ToplevelPath fPath;
+	public static abstract class SearchAssignment extends ReferenceSite {
 		
 		public SearchAssignment(Collection<SearchAssignment> assignments, SourceLocation assignmentLocation, IGObject aRefObj, ToplevelPath aRefPath) {
-			super("<= involves " + aRefObj, assignmentLocation, 0);
-			fObj = aRefObj;
-			fPath = aRefPath;
+			super(debugTitle(aRefObj), assignmentLocation, 0, RefType.Assignment, aRefPath, aRefObj);
 			if (aRefObj != null)
 				assignments.add(this);
 		}
 		abstract ReferenceSearchResult run();
-		public SearchResultEntrySite keyResult;
+		public ReferenceSite keyResult;
 	}
 	
 	SearchAssignment newSignalSearch(SourceLocation assignmentLocation, IGObject item, final ToplevelPath path) {
@@ -60,7 +58,7 @@ public class IGReferencesSearchThrough extends IGReferencesSearch {
 		};
 	}
 	ArrayList<SearchAssignment> assignments = new ArrayList<SearchAssignment>(); // signals and variables to be searched with context
-	Map<IGObject, SearchResultEntrySite> completed = new HashMap<IGObject, SearchResultEntrySite>(); // TODO: consider if the same object happens in another path. Should it be considered as different signal and searched ofver?
+	Map<Long, ReferenceSite> completed = new HashMap<Long, ReferenceSite>(); // TODO: consider if the same object happens in another path. Should it be considered as different signal and searched ofver?
 	
 	/**Object, currently being searched on*/
 	IGObject doingObject;
@@ -72,7 +70,7 @@ public class IGReferencesSearchThrough extends IGReferencesSearch {
 	 * to the assignment result to that we can jump to both assignment location in code and additional
 	 * search (results) it produced.  
 	 * */
-	public Map<IGObject, SearchResultEntrySite> assignmentThroughSearch(IGObject aItem, ToplevelPath path, 
+	public Map<Long, ReferenceSite> assignmentThroughSearch(IGObject aItem, ToplevelPath path, 
 			boolean aSearchUpward, boolean aSearchDownward, boolean aWritersOnly, boolean aReadersOnly) {
 		
 		fWritersOnly = aWritersOnly;
@@ -88,26 +86,17 @@ public class IGReferencesSearchThrough extends IGReferencesSearch {
 			
 			doingAssignment = Utils.removeLast(assignments);
 			
-			doingObject = doingAssignment.fObj;
+			doingObject = (IGObject) fZPrj.getZDB().load(doingAssignment.getDBID());
 
-			doingPath = doingAssignment.fPath.descend();
-			logger.info("rs.search(" + doingPath + " : " + doingObject + "), " + doingObject.computeSourceLocation());
+			doingPath = doingAssignment.getPath().descend();
+			if (debug) logger.info("rs.search(" + doingPath + " : " + doingObject + "), " + doingObject.computeSourceLocation());
 
-			{
-				String newPath = doingPath.getPath().toString();
-				//if (!newPath.endsWith(doingObject.getId()))
-					newPath += " : " + doingObject.getId();
-				char newSeparator = PathName.separator == '.' ? '/' : '.'; // use another separator for prefix. Otherwise, it interferes with path and search result presentation will be broken
-				prefix = new PathName((completed.size() == 0 ? "Entry " : "") + "search on " + newPath.replace(PathName.separator, newSeparator) + ""); 			
-				
-			}
-			ReferenceSearchResult rsr = doingAssignment.run(); // this will produce both keyResult and rsr
+			doingAssignment.run(); // this will produce keyResult with children
 			
 			if (doingAssignment.keyResult == null) {
-				logger.warn("Search on " + doingPath + " : " + doingObject + " has failed");
-				System.err.println("Search on " + doingPath + " : " + doingObject + " has failed");
-			}else if (doingAssignment.keyResult.restOfResults == null) // do not overrwrite results if they were generated previously
-				doingAssignment.keyResult.restOfResults = rsr;
+				logger.warn("Search " + (completed.size()+1) + " on " + doingPath + " : " + doingObject + " has failed");
+				System.err.println("Search " + (completed.size()+1) + " on " + doingPath + " : " + doingObject + " has failed");
+			}
 				
 		}
 		return completed;
@@ -116,12 +105,6 @@ public class IGReferencesSearchThrough extends IGReferencesSearch {
 	@Override
 	AccessedItems createAccessedItems(ToplevelPath path, IGConcurrentStatement scope) {
 		return new AccessedThroughItems(path, scope);
-	}
-	
-	PathName prefix; 
-	@Override
-	ToplevelPath prefixPathWithSearchName(ToplevelPath path) {
-		return new ToplevelPath(doingPath.getToplevel(), prefix.append(path.getPath()));
 	}
 	
 	public class AccessedThroughItems extends AccessedItems {
@@ -150,7 +133,6 @@ public class IGReferencesSearchThrough extends IGReferencesSearch {
 
 				SearchAssignment assignment = null;
 				
-				//TODO: add only in case of signal-through search
 				if (obj.getCat() == IGObjectCat.VARIABLE) { 
 					assignment = new SearchAssignment(assignments, assignmentLocation, obj, path) {
 						ReferenceSearchResult run() {
@@ -172,33 +154,48 @@ public class IGReferencesSearchThrough extends IGReferencesSearch {
 		}
 		
 		private void scheduleAssignment(SearchAssignment assignment) {
-			logger.info(" todo: " + assignment.getLocation() + " : " + assignment.fObj);
-			resultBuilder.add(prefixPathWithSearchName(path), assignment);							
+			if (debug) logger.info (" todo assignment: " + assignment + " : " + assignment.countRefs());
+			resultBuilder.add(path, assignment);							
 		}
 
 	}
 
-	public static class SearchResultEntrySite extends ReferenceSite {
-		public ReferenceSearchResult restOfResults = null;
-		public SearchResultEntrySite(IGObject aObject, ToplevelPath aPath) {
-			super(aObject.toString(), aObject.computeSourceLocation(), 0, RefType.Declaration, aPath, aObject);
-			logger.info("new search entry " + Integer.toHexString(System.identityHashCode(this)) + " for " + aObject.getDBID() + "=" + aObject);
-		}
-
-	}
-	
 	@Override 
-	boolean createEntryResult(IGObject obj, ToplevelPath aPath) {
+	protected boolean createEntryResult(IGObject obj, ToplevelPath aPath) {
 
-		if (completed.containsKey(obj)) {
-			logger.info("will not " + doingObject + " already has a result as " + obj);
-			doingAssignment.keyResult = completed.get(obj);
+		if (completed.containsKey(obj.getDBID())) {
+			if (debug) logger.info("will not " + doingObject + " already has a result as " + obj);
+			doingAssignment.keyResult = completed.get(obj.getDBID());
 			return false;
 		}
 
-		doingAssignment.keyResult = new SearchResultEntrySite(obj, aPath);
-		addResult(doingAssignment.keyResult, obj);
-		completed.put(obj, doingAssignment.keyResult);
+		ReferenceSite root = new RootResult(completed.size()+1, obj, aPath); // grandfa is not shown in results
+		doingAssignment.keyResult = new RootResult(completed.size()+1, obj, aPath);
+		root.add(doingAssignment.keyResult);
+		completed.put(obj.getDBID(), doingAssignment.keyResult);
 		return true;
 	}
+
+	public static class RootResult extends ReferenceSite {
+		public final int num_prefix;
+		public RootResult(int order, IGObject obj, ToplevelPath aPath) {
+			super(debugTitle(obj), obj.computeSourceLocation(), 0, RefType.Declaration, aPath, obj);
+			num_prefix  = order; 
+		}
+	}
+	
+	@Override
+	IGSearchResultBuilder createResultBuilder(ZamiaProject fZPrj) {
+		return new IGSearchResultBuilder(fZPrj) {
+			@Override
+			public ReferenceSearchResult add(ToplevelPath aPath, ReferenceSearchResult aRSR) {
+				if (aRSR instanceof ReferenceSite && ((ReferenceSite) aRSR).getRefType() == RefType.Assignment) {
+					doingAssignment.keyResult.add(aRSR);
+				}
+					
+				return aRSR;
+			}
+		};
+	}
+	
 }

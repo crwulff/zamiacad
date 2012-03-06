@@ -30,7 +30,7 @@ public class IGSearchResultBuilder {
 		private HashMapArray<String, RSRWrapper> fChildren = new HashMapArray<String, RSRWrapper>();
 
 		public RSRWrapper(String aTitle) {
-			fResult = new ReferenceSearchResult(aTitle, null, 0, fZPrj);
+			fResult = new ReferenceSearchResult(aTitle, null, 0);
 		}
 
 		public RSRWrapper getOrCreateChild(String aLabel) {
@@ -80,13 +80,13 @@ public class IGSearchResultBuilder {
 		return res;
 	}
 
-	public void add(ToplevelPath aPath, ReferenceSite aSite, IGObject aObj) {
+	public void add(ReferenceSite aSite, IGObject aObj) {
 
-		ReferenceSearchResult res = add(aPath, aSite);
+		ReferenceSearchResult res = add(aSite.getPath(), aSite);
 		if (aObj != null) {
 			res.setDirection(aObj.getDirection());
 		}
-
+		
 	}
 	
 	public ReferenceSearchResult add(ToplevelPath aPath, ReferenceSearchResult aRSR) {

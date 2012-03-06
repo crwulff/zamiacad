@@ -55,11 +55,15 @@ import org.zamia.util.ZStack;
  */
 public class IGReferencesSearch {
 
+	 /* NB! no debug removes tiles from search results and breaks their comparison (if different signals assigned in the
+	  * same place, second will overwrite the first)!*/
+	static boolean debug = true;
+
 	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
 	public final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private ZamiaProject fZPrj;
+	public final ZamiaProject fZPrj;
 
 	private IGManager fIGM;
 
@@ -301,10 +305,6 @@ public class IGReferencesSearch {
 		}
 	}
 
-	/**Assignment through will override this to combine multiple results.*/
-	ToplevelPath prefixPathWithSearchName(ToplevelPath path) {
-		return path;
-	}	
 	/**This is an extension to arguments, supplied to computeAccessedItems. 
 	 * Currently, only SequentialAssignment needs the extension, for signal through search.*/
 	public class AccessedItems extends HashSetArray<IGItemAccess> {
@@ -332,9 +332,14 @@ public class IGReferencesSearch {
 	}
 	
 	IGSearchResultBuilder resultBuilder;
+	
+	IGSearchResultBuilder createResultBuilder(ZamiaProject fZPrj) {
+		return new IGSearchResultBuilder(fZPrj);
+	}
+	
 	ReferenceSearchResult searchReferences() {
 
-		resultBuilder = new IGSearchResultBuilder(fZPrj);
+		resultBuilder = createResultBuilder(fZPrj);
 		
 		ZStack<SearchJob> stack = new ZStack<SearchJob>();
 
@@ -347,6 +352,7 @@ public class IGReferencesSearch {
 //			if (!fWritersOnly && !fReadersOnly) {
 //				addResult(obj.toString(), obj.computeSourceLocation(), RefType.Declaration, job.getPath(), obj);
 //			}
+			
 			if (createEntryResult(obj, job.getPath()))
 				stack.push(job);
 		}
@@ -359,7 +365,7 @@ public class IGReferencesSearch {
 			IGConcurrentStatement scope = job.getScope();
 			IGObject object = job.getObject();
 			ToplevelPath path = job.getPath();
-			logger.info(" Job: " + path + " " + object + " in " + scope.getClass().getName() );
+			if (debug) logger.info(" Job: " + path + " " + object + " in " + scope.getClass().getName() );
 
 			if (scope instanceof IGStructure) {
 
@@ -431,6 +437,11 @@ public class IGReferencesSearch {
 		}
 		
 		return resultBuilder.getResult();
+	}
+
+	protected boolean createEntryResult(IGObject obj, ToplevelPath path) {
+		addResult(obj.toString(), obj.computeSourceLocation(), RefType.Declaration, path, obj);
+		return true;
 	}
 
 	AccessedItems createAccessedItems(ToplevelPath path, IGConcurrentStatement scope) {
@@ -510,16 +521,8 @@ public class IGReferencesSearch {
 	}
 
 	void addResult(String title, SourceLocation location, RefType refType, ToplevelPath aPath, IGObject obj) {
-		addResult(new ReferenceSite(title, location, 0, refType, aPath, obj), obj);
-	}
-	
-	boolean createEntryResult(IGObject obj, ToplevelPath aPath) {
-		addResult(obj.toString(), obj.computeSourceLocation(), RefType.Declaration, aPath, obj);
-		return true;
-	}
-	
-	void addResult(ReferenceSite rs, IGObject obj) {
-		resultBuilder.add(prefixPathWithSearchName(rs.getPath()), rs, obj);
+		ReferenceSite rs = new ReferenceSite(title, location, 0, refType, aPath, obj);
+		resultBuilder.add(rs, obj);
 	}
 	
 	private SearchJob findLocalDeclarationScope(IGObject aObject, ToplevelPath aPath) {

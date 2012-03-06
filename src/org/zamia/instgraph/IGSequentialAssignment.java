@@ -10,8 +10,8 @@ package org.zamia.instgraph;
 
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
-import org.zamia.analysis.ig.IGReferencesSearchThrough;
-import org.zamia.analysis.ig.IGReferencesSearchThrough.AccessedThroughItems;
+import org.zamia.analysis.ig.IGAssignmentsSearch;
+import org.zamia.analysis.ig.IGAssignmentsSearch.AccessedThroughItems;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGPopStmt;

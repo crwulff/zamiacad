@@ -30,7 +30,7 @@ public class ReferenceSite extends ReferenceSearchResult {
 	public final static ExceptionLogger el = ExceptionLogger.getInstance();
 
 	public enum RefType {
-		Read, Write, Call, Declaration, ReadWrite, Unknown, Instantiation
+		Read, Write, Call, Declaration, ReadWrite, Unknown, Instantiation, Assignment
 	};
 
 	private final RefType fRefType;
@@ -62,6 +62,9 @@ public class ReferenceSite extends ReferenceSearchResult {
 			break;
 		case Instantiation:
 			prefix = "INSTANTIATION";
+			break;
+		case Assignment:
+			prefix = "ASSIGN";
 			break;
 		default:
 			prefix = "???";
@@ -103,7 +106,6 @@ public class ReferenceSite extends ReferenceSearchResult {
 		VHDLNode.printlnIndented("ReferenceSite: " + toString(), aIndent, aOut);
 	}
 
-	public String toString() {return this.fRefType + " " + super.toString();}
 	@Override
 	public int countRefs() {
 		return 1;

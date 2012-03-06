@@ -42,15 +42,10 @@ public class ReferenceSearchResult {
 
 	private OIDir fDirection = OIDir.NONE;
 
-	public ReferenceSearchResult(String aTitle, SourceLocation aLocation, int aLength, ZamiaProject aZprj) {
+	public ReferenceSearchResult(String aTitle, SourceLocation aLocation, int aLength) {
 		fTitle = aTitle;
 		fLocation = aLocation;
 		fLength = aLength;
-		fZPrj = aZprj;
-	}
-
-	public ReferenceSearchResult(String aTitle, SourceLocation aLocation, int aLength) {
-		this(aTitle, aLocation, aLength, null);
 	}
 
 	public void setParent(ReferenceSearchResult aParent) {
@@ -102,12 +97,6 @@ public class ReferenceSearchResult {
 
 	public ReferenceSearchResult getParent() {
 		return fParent;
-	}
-
-	public ZamiaProject getZamiaProject() {
-		if (fParent != null)
-			return fParent.getZamiaProject();
-		return fZPrj;
 	}
 
 	public void dump(int aIndent, PrintStream aOut) {
