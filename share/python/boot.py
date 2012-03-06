@@ -13,6 +13,10 @@ from org.zamia.rtl import RTLVisualGraphContentProvider,RTLVisualGraphLabelProvi
 from org.zamia.util import PathName, FileUtils
 from org.zamia.vg import VGLayout, VGGCSVG
 import sys
+sys.path.append(System.getProperty("python.path"))
+##print sys.path
+
+import os
 
 logger = ZamiaLogger.getInstance()
 el = ExceptionLogger.getInstance()
@@ -68,8 +72,11 @@ def help():
 def zamia_source(uri):
   project.getZCJ().evalFile(uri)
 
+def base():
+  return project.fBasePath.toString()
+
 def copy(src, dest):
-  base = project.fBasePath.toString()
+  base = base()
   ok = FileUtils.copy(File(base + "/" + src), File(base + "/" + dest))
   if (not ok):
     printf('Failed to copy %s\n', src)
@@ -99,7 +106,7 @@ def marker_add(path,line,column,msg,is_error):
   # make path absolute
   f = File(path)
   if not f.isAbsolute():
-    f = File(project.getBasePath()+File.separator+path)
+    f = File(base()+File.separator+path)
   
   sf = SourceFile(f)
 

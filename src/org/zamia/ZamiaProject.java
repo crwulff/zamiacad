@@ -10,8 +10,7 @@ package org.zamia;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.net.URL;
 import java.util.HashMap;
 
 import org.zamia.cli.jython.ZCJInterpreter;
@@ -49,6 +48,8 @@ public class ZamiaProject {
 	public final FileIterator fBasePath;
 	
 	private final String fDataPath;
+
+	private final ResourceLocator fLocator;
 
 	/**This is a directory of project files. It can be virtual if you override the class (useful for linking files in IDE). */
 	public static class FileIterator { 
@@ -96,11 +97,12 @@ public class ZamiaProject {
 	private static final String BUILDPATH_OBJ_NAME = "ZPRJ_BuildPath";
 
 	public ZamiaProject(String aId, String aBasePath, SourceFile aBuildPath, String aDataPath) throws IOException, ZamiaException, ZDBException {
-		this(aId, new FileIterator(aBasePath), aBuildPath, aDataPath);
+		this(aId, new FileIterator(aBasePath), ZamiaLocator.getInstance(), aBuildPath, aDataPath);
 	}
-	public ZamiaProject(String aId, FileIterator aBasePath, SourceFile aBuildPath, String aDataPath) throws IOException, ZamiaException, ZDBException {
+	public ZamiaProject(String aId, FileIterator aBasePath, ResourceLocator aLocator, SourceFile aBuildPath, String aDataPath) throws IOException, ZamiaException, ZDBException {
 		fId = aId;
 		fBasePath = aBasePath;
+		fLocator = aLocator;
 		fDataPath = aDataPath != null ? aDataPath : ZamiaTmpDir.getTmpDir().getAbsolutePath();
 
 		registerProject(this);
@@ -141,7 +143,7 @@ public class ZamiaProject {
 
 	public void initJythonInterpreter() {
 		try {
-			fZCJ = new ZCJInterpreter(this);
+			fZCJ = new ZCJInterpreter(this, fLocator);
 
 			// run init script
 
@@ -303,4 +305,17 @@ public class ZamiaProject {
 		return projectMap.get(aId);
 	}
 
+	private static class ZamiaLocator implements ResourceLocator {
+
+		private static ZamiaLocator fInstance = new ZamiaLocator();
+
+		public static ZamiaLocator getInstance() {
+			return fInstance;
+		}
+
+		@Override
+		public URL resolve(URL aUrl) throws IOException {
+			return aUrl;
+		}
+	}
 }

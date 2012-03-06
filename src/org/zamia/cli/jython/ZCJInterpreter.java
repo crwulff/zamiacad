@@ -9,13 +9,17 @@
 package org.zamia.cli.jython;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import org.python.util.PythonInterpreter;
 import org.zamia.ExceptionLogger;
 import org.zamia.FSCache;
+import org.zamia.ResourceLocator;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
@@ -38,7 +42,7 @@ public class ZCJInterpreter {
 
 	private ZamiaProject fZPrj;
 
-	public ZCJInterpreter(ZamiaProject aZPrj) throws ZamiaException {
+	public ZCJInterpreter(ZamiaProject aZPrj, ResourceLocator aLocator) throws ZamiaException {
 
 		fZPrj = aZPrj;
 
@@ -47,6 +51,19 @@ public class ZCJInterpreter {
 		fInterp = new PythonInterpreter();
 
 		fInterp.set("project", fZPrj);
+
+		if (System.getProperty("python.path") == null) {
+			try {
+				URL lib = ZCJInterpreter.class.getResource("/python/Lib/");
+				lib = aLocator.resolve(lib);
+				lib = new URL(lib.getProtocol(), lib.getHost(), lib.getFile().replaceAll(" ", "%20"));
+				System.setProperty("python.path", new File(lib.toURI()).getAbsolutePath());
+			} catch (IOException e) {
+				el.logException(e);
+			} catch (URISyntaxException e) {
+				el.logException(e);
+			}
+		}
 
 		// run boot.py to set up basic zamia-specific commands
 
@@ -110,5 +127,9 @@ public class ZCJInterpreter {
 	public synchronized boolean hasCommand(String aCmdName) {
 		// FIXME return fInterp.getCommand(aCmdName) != null;
 		return false;
+	}
+
+	public void setObject(String name, Object aObject) {
+		fInterp.set(name, aObject);
 	}
 }
