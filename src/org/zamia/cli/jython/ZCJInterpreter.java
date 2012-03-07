@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.python.core.PyException;
 import org.python.util.PythonInterpreter;
 import org.zamia.ExceptionLogger;
 import org.zamia.FSCache;
@@ -80,6 +81,8 @@ public class ZCJInterpreter {
 				fInterp.exec(buf.toString());
 
 			} catch (IOException e) {
+				el.logException(e);
+			} catch (PyException e) {
 				el.logException(e);
 			} finally {
 				if (in != null) {
