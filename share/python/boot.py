@@ -13,8 +13,7 @@ from org.zamia.rtl import RTLVisualGraphContentProvider,RTLVisualGraphLabelProvi
 from org.zamia.util import PathName, FileUtils
 from org.zamia.vg import VGLayout, VGGCSVG
 import sys
-sys.path.append(System.getProperty("python.path"))
-##print sys.path
+sys.path.append(System.getenv().get("PYTHONPATH"))
 
 import os
 
