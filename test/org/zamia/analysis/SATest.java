@@ -163,30 +163,6 @@ public class SATest {
 	}
 
 	@Test
-	public void testLeonIGReferenceSearch() throws Exception {
-		setupTest("examples/leonExtern", "examples/leonExtern/BuildPath.txt");
-
-		File f = new File("examples/leonSOC/lib/gaisler/greth/grethm.vhd").getCanonicalFile();
-
-		SourceFile sf = new SourceFile(f);
-
-		ReferenceSearchResult result = runIGReferenceSearch(sf, "WORK.LEON3MP(RTL):ETH0.E1.M100", 84, 22, true, true);
-		assertNotNull(result);
-		result.dump(0, System.out);
-		assertEquals(999, result.countRefs());
-
-		result = runIGReferenceSearch(sf, "WORK.LEON3MP(RTL):ETH0.E1.M100", 84, 17, true, true);
-		assertNotNull(result);
-		result.dump(0, System.out);
-		assertEquals(102, result.countRefs());
-
-		result = runIGReferenceSearch(sf, "WORK.LEON3MP(RTL):ETH0.E1.", 84, 55, true, true);
-		assertNotNull(result);
-		result.dump(0, System.out);
-		assertEquals(83, result.countRefs());
-	}
-
-	@Test
 	public void testPlasmaIGReferenceSearch() throws Exception {
 		setupTest("examples/plasma", "examples/plasma/BuildPath.txt");
 
@@ -371,6 +347,30 @@ public class SATest {
 
 		DMUID duuid = new DMUID(LUType.Architecture, "WORK", "MLITE_CPU", "LOGIC");
 		stressTestASTReferenceSearch(duuid);
+	}
+
+	@Test
+	public void testLeonIGReferenceSearch() throws Exception {
+		setupTest("examples/leonExtern", "examples/leonExtern/BuildPath.txt");
+
+		File f = new File("examples/leonSOC/lib/gaisler/greth/grethm.vhd").getCanonicalFile();
+
+		SourceFile sf = new SourceFile(f);
+
+		ReferenceSearchResult result = runIGReferenceSearch(sf, "WORK.LEON3MP(RTL):ETH0.E1.M100", 84, 22, true, true);
+		assertNotNull(result);
+		result.dump(0, System.out);
+		assertEquals(999, result.countRefs());
+
+		result = runIGReferenceSearch(sf, "WORK.LEON3MP(RTL):ETH0.E1.M100", 84, 17, true, true);
+		assertNotNull(result);
+		result.dump(0, System.out);
+		assertEquals(102, result.countRefs());
+
+		result = runIGReferenceSearch(sf, "WORK.LEON3MP(RTL):ETH0.E1.", 84, 55, true, true);
+		assertNotNull(result);
+		result.dump(0, System.out);
+		assertEquals(83, result.countRefs());
 	}
 
 	private void runIGItemSearch(SourceFile aSF, String aTLPath, int aLine, int aCol, String aExpectedPath) throws ZamiaException, IOException {

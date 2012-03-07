@@ -8,6 +8,11 @@
 package org.zamia.analysis.ig;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import org.zamia.ASTNode;
 import org.zamia.ExceptionLogger;
@@ -26,10 +31,12 @@ import org.zamia.instgraph.IGContainerItem;
 import org.zamia.instgraph.IGInstantiation;
 import org.zamia.instgraph.IGItem;
 import org.zamia.instgraph.IGItemAccess;
+import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGManager;
 import org.zamia.instgraph.IGMapping;
 import org.zamia.instgraph.IGModule;
 import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationObject;
@@ -37,6 +44,7 @@ import org.zamia.instgraph.IGProcess;
 import org.zamia.instgraph.IGSequenceOfStatements;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.util.HashSetArray;
+import org.zamia.util.Pair;
 import org.zamia.util.PathName;
 import org.zamia.util.ZStack;
 
@@ -47,19 +55,24 @@ import org.zamia.util.ZStack;
  */
 public class IGReferencesSearch {
 
+	 /* NB! no debug removes tiles from search results and breaks their comparison (if different signals assigned in the
+	  * same place, second will overwrite the first)!*/
+	static boolean debug = true;
+
 	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
 	public final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private ZamiaProject fZPrj;
+	public final ZamiaProject fZPrj;
 
 	private IGManager fIGM;
 
-	private HashSetArray<SearchJob> fJobs;
+	HashSetArray<SearchJob> fJobs;
 
-	private boolean fWritersOnly;
-
-	private boolean fReadersOnly;
+	protected boolean fWritersOnly;
+	protected boolean fReadersOnly;
+	protected boolean fSearchUpward;
+	protected boolean fSearchDownward;
 
 	static class SearchJob {
 
@@ -149,14 +162,12 @@ public class IGReferencesSearch {
 	public IGReferencesSearch(ZamiaProject aPrj) {
 		fZPrj = aPrj;
 		fIGM = fZPrj.getIGM();
+		
 	}
 
-	public ReferenceSearchResult search(IGObject aItem, ToplevelPath aPath, boolean aSearchUpward, boolean aSearchDownward, boolean aWritersOnly, boolean aReadersOnly) {
+	public ReferenceSearchResult search(IGObject aItem, ToplevelPath aPath) {
 
-		fWritersOnly = aWritersOnly;
-		fReadersOnly = aReadersOnly;
-
-		logger.debug("IGObjectReferenceSearch: search(): start. item=%s, path=%s, searchUpward=%b, searchDownward=%b", aItem, aPath, aSearchUpward, aSearchDownward);
+		logger.debug("IGObjectReferenceSearch: search(): start. item=%s, path=%s, searchUpward=%b, searchDownward=%b", aItem, aPath, fSearchUpward, fSearchDownward);
 
 		fJobs = new HashSetArray<SearchJob>();
 		SearchJob job = findLocalDeclarationScope(aItem, aPath);
@@ -169,11 +180,11 @@ public class IGReferencesSearch {
 
 		logger.debug("IGObjectReferenceSearch: search(): successfully created a search job for this request.");
 
-		if (aSearchUpward) {
+		if (fSearchUpward) {
 			findOriginalDeclarations();
 		}
 
-		return searchReferences(aSearchDownward);
+		return searchReferences();
 	}
 
 	private void findOriginalDeclarations() {
@@ -294,26 +305,58 @@ public class IGReferencesSearch {
 		}
 	}
 
-	private ReferenceSearchResult searchReferences(boolean aSearchDownward) {
+	/**This is an extension to arguments, supplied to computeAccessedItems. 
+	 * Currently, only SequentialAssignment needs the extension, for signal through search.*/
+	public class AccessedItems extends HashSetArray<IGItemAccess> {
+		
+		/**Collection of signals connected by assignment*/
+		final ToplevelPath path;
+		AccessedItems(ToplevelPath path) {
+			this.path = path;
+		}
+		public boolean add(IGItemAccess item) {
+			if (addResult(path, item)) {
+				size++;
+				return true;
+			}
+			return false;
+		}
+		
+		/**Used by AccesseItems user to see if items were added.
+		 * TODO: it seems that it would be more convenient if computeAccessedItems would return boolean instead.*/
+		public int size = 0;
+		public int size() {
+			return size;
+		}
+		
+	}
+	
+	IGSearchResultBuilder resultBuilder;
+	
+	IGSearchResultBuilder createResultBuilder(ZamiaProject fZPrj) {
+		return new IGSearchResultBuilder(fZPrj);
+	}
+	
+	ReferenceSearchResult searchReferences() {
 
-		IGSearchResultBuilder globalResult = new IGSearchResultBuilder(fZPrj);
-
+		resultBuilder = createResultBuilder(fZPrj);
+		
 		ZStack<SearchJob> stack = new ZStack<SearchJob>();
 
 		int nJobs = fJobs.size();
 		for (int i = 0; i < nJobs; i++) {
 			SearchJob job = fJobs.get(i);
-			stack.push(job);
 
 			IGObject obj = job.getObject();
 
-			SourceLocation location = obj.computeSourceLocation();
-			ReferenceSite site = new ReferenceSite(obj.toString(), location, 0, RefType.Declaration, job.getPath(), obj);
-
-			if (!fWritersOnly && !fReadersOnly) {
-				globalResult.add(job.getPath(), site, obj);
-			}
+//			if (!fWritersOnly && !fReadersOnly) {
+//				addResult(obj.toString(), obj.computeSourceLocation(), RefType.Declaration, job.getPath(), obj);
+//			}
+			
+			if (createEntryResult(obj, job.getPath()))
+				stack.push(job);
 		}
+		fJobs.clear();
 
 		while (!stack.isEmpty()) {
 
@@ -322,6 +365,7 @@ public class IGReferencesSearch {
 			IGConcurrentStatement scope = job.getScope();
 			IGObject object = job.getObject();
 			ToplevelPath path = job.getPath();
+			if (debug) logger.info(" Job: " + path + " " + object + " in " + scope.getClass().getName() );
 
 			if (scope instanceof IGStructure) {
 
@@ -365,16 +409,10 @@ public class IGReferencesSearch {
 
 					IGOperation actual = mapping.getActual();
 
-					HashSetArray<IGItemAccess> accessedItems = new HashSetArray<IGItemAccess>();
+					AccessedItems accessedItems = new AccessedItems(path.getParent());
 					actual.computeAccessedItems(leftSide, object, null, 0, accessedItems);
 
-					int m = accessedItems.size();
-					for (int j = 0; j < m; j++) {
-						IGItemAccess ai = accessedItems.get(j);
-						addResult(globalResult, path.getParent(), ai);
-					}
-
-					if (m > 0 && aSearchDownward && module != null) {
+					if (accessedItems.size() > 0 && fSearchDownward && module != null) {
 
 						HashSetArray<IGObject> objs = new HashSetArray<IGObject>();
 						findObjects(formal, objs);
@@ -394,20 +432,22 @@ public class IGReferencesSearch {
 
 				IGSequenceOfStatements sos = proc.getSequenceOfStatements();
 
-				HashSetArray<IGItemAccess> accessedItems = new HashSetArray<IGItemAccess>();
-				sos.computeAccessedItems(object, null, 0, accessedItems);
-
-				int m = accessedItems.size();
-				for (int j = 0; j < m; j++) {
-					IGItemAccess ai = accessedItems.get(j);
-					addResult(globalResult, path, ai);
-				}
+				sos.computeAccessedItems(object, null, 0, createAccessedItems(path, scope));
 			}
 		}
-
-		return globalResult.getResult();
+		
+		return resultBuilder.getResult();
 	}
 
+	protected boolean createEntryResult(IGObject obj, ToplevelPath path) {
+		addResult(obj.toString(), obj.computeSourceLocation(), RefType.Declaration, path, obj);
+		return true;
+	}
+
+	AccessedItems createAccessedItems(ToplevelPath path, IGConcurrentStatement scope) {
+		return new AccessedItems(path);
+	}
+	
 	private void findObjects(IGOperation aOperation, HashSetArray<IGObject> aObjs) {
 		if (aOperation == null)
 			return;
@@ -423,7 +463,7 @@ public class IGReferencesSearch {
 		}
 	}
 
-	private void addResult(IGSearchResultBuilder aResult, ToplevelPath aPath, IGItemAccess aAi) {
+	private boolean addResult(ToplevelPath aPath, IGItemAccess aAi) {
 
 		RefType refType = RefType.Unknown;
 		switch (aAi.getAccessType()) {
@@ -450,34 +490,41 @@ public class IGReferencesSearch {
 			break;
 		}
 
-		SourceLocation location = aAi.getLocation();
-
-		String title = location.toString();
-
-		IGObject obj = aAi.getItem() instanceof IGObject ? (IGObject) aAi.getItem() : null;
-
-		// let's see if we can come up with a better title
-		if (obj != null) {
-			title = obj.toString();
-		} else {
-			try {
-				ASTNode asto = SourceLocation2AST.findNearestASTNode(location, true, fZPrj);
-
-				if (asto != null) {
-
-					title = asto.toString();
-
-				}
-			} catch (Throwable e) {
-			}
-		}
-
 		if ((!fWritersOnly || refType == RefType.Write) && (!fReadersOnly || refType == RefType.Read)) {
-			ReferenceSite rs = new ReferenceSite(title, location, 0, refType, aPath, obj);
-			aResult.add(aPath, rs, obj);
+			SourceLocation location = aAi.getLocation();
+
+			String title = location.toString();
+
+			IGObject obj = aAi.getItem() instanceof IGObject ? (IGObject) aAi.getItem() : null;
+
+			// let's see if we can come up with a better title
+			if (obj != null) {
+				title = obj.toString();
+			} else {
+				try {
+					ASTNode asto = SourceLocation2AST.findNearestASTNode(location, true, fZPrj);
+
+					if (asto != null) {
+
+						title = asto.toString();
+
+					}
+				} catch (Throwable e) {
+				}
+			}
+
+			addResult(title, location, refType, aPath, obj);
+			return true;
 		}
+		
+		return false;
 	}
 
+	void addResult(String title, SourceLocation location, RefType refType, ToplevelPath aPath, IGObject obj) {
+		ReferenceSite rs = new ReferenceSite(title, location, 0, refType, aPath, obj);
+		resultBuilder.add(rs, obj);
+	}
+	
 	private SearchJob findLocalDeclarationScope(IGObject aObject, ToplevelPath aPath) {
 
 		logger.debug("IGObjectReferenceSearch: findLocalDeclarationScope(): start. object=%s, path=%s", aObject, aPath);
@@ -529,5 +576,15 @@ public class IGReferencesSearch {
 
 		logger.debug("IGObjectReferenceSearch: findLocalDeclarationScope(): return null.");
 		return null;
+	}
+
+	public ReferenceSearchResult search(IGObject aItem, ToplevelPath aPath,
+			boolean aSearchUpward, boolean aSearchDownward, boolean aWritersOnly, boolean aReadersOnly
+			) {
+		fWritersOnly = aWritersOnly;
+		fReadersOnly = aReadersOnly;
+		fSearchUpward = aSearchUpward;
+		fSearchDownward = aSearchDownward;
+		return search(aItem, aPath);
 	}
 }

@@ -10,12 +10,14 @@ package org.zamia.instgraph;
 
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.analysis.ig.IGAssignmentsSearch.AccessedThroughItems;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGJumpNCStmt;
 import org.zamia.instgraph.interpreter.IGJumpStmt;
 import org.zamia.instgraph.interpreter.IGLabel;
 import org.zamia.util.HashSetArray;
+import org.zamia.util.Pair;
 import org.zamia.zdb.ZDB;
 
 /**
@@ -47,10 +49,20 @@ public class IGSequentialIf extends IGSequentialStatement {
 	@Override
 	public void computeAccessedItems(IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
 
-		fCond.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, aAccessedItems);
+		HashSetArray<IGItemAccess> accessedConditions = new HashSetArray<IGItemAccess>();
+		
+		fCond.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, accessedConditions);
+		aAccessedItems.addAll(accessedConditions);
+		
+		if (aAccessedItems instanceof AccessedThroughItems) {
+			((AccessedThroughItems)aAccessedItems).ifStack.push(new Pair<IGSequentialStatement, HashSetArray<IGItemAccess>>(this, accessedConditions));
+		}
 		fThenSOS.computeAccessedItems(aFilterItem, aFilterType, aDepth, aAccessedItems);
 		if (fElseSOS != null) {
 			fElseSOS.computeAccessedItems(aFilterItem, aFilterType, aDepth, aAccessedItems);
+		}
+		if (aAccessedItems instanceof AccessedThroughItems) {
+			((AccessedThroughItems)aAccessedItems).ifStack.pop();
 		}
 
 	}

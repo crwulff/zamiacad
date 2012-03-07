@@ -490,7 +490,7 @@ public class ASTReferencesSearch {
 			}
 		}
 
-		ReferenceSearchResult result = new ReferenceSearchResult(title, null, 0, fZPrj);
+		ReferenceSearchResult result = new ReferenceSearchResult(title, null, 0);
 
 		if (aDeclaration instanceof Architecture) {
 

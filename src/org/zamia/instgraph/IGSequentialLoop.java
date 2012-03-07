@@ -9,6 +9,7 @@ package org.zamia.instgraph;
 
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.analysis.ig.IGAssignmentsSearch.AccessedThroughItems;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGOperationAttribute.AttrOp;
 import org.zamia.instgraph.IGOperationBinary.BinOp;
@@ -24,6 +25,7 @@ import org.zamia.instgraph.interpreter.IGNewObjectStmt;
 import org.zamia.instgraph.interpreter.IGPopStmt;
 import org.zamia.instgraph.interpreter.IGPushStmt;
 import org.zamia.util.HashSetArray;
+import org.zamia.util.Pair;
 import org.zamia.zdb.ZDB;
 
 
@@ -82,8 +84,21 @@ public class IGSequentialLoop extends IGSequentialStatement {
 
 	@Override
 	public void computeAccessedItems(IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
+//		fBody.computeAccessedItems(aFilterItem, aFilterType, aDepth, aAccessedItems);
+		HashSetArray<IGItemAccess> accessedConditions = new HashSetArray<IGItemAccess>();
+		
+		if (fSeqLoopType == SeqLoopType.WHILE) {
+			fCond.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, accessedConditions);
+			aAccessedItems.addAll(accessedConditions);
+			
+			if (aAccessedItems instanceof AccessedThroughItems) {
+				((AccessedThroughItems)aAccessedItems).ifStack.push(new Pair<IGSequentialStatement, HashSetArray<IGItemAccess>>(this, accessedConditions));
+			}
+		}
 		fBody.computeAccessedItems(aFilterItem, aFilterType, aDepth, aAccessedItems);
-
+		if (fSeqLoopType == SeqLoopType.WHILE && aAccessedItems instanceof AccessedThroughItems) {
+			((AccessedThroughItems)aAccessedItems).ifStack.pop();
+		}
 	}
 
 	public IGContainer getContainer() {

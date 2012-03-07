@@ -242,7 +242,7 @@ public class RTLManager {
 
 		fTodoStack = new ZStack<BuildNodeJob>();
 
-		module = getOrCreateRTLModule(new ToplevelPath(aTL, new PathName("")), null, duuid, signature, true, null);
+		module = getOrCreateRTLModule(new ToplevelPath(aTL, new PathName("")), null, duuid, signature, true, aTL.getLocation());
 
 		while (!fTodoStack.isEmpty()) {
 

@@ -154,7 +154,7 @@ public class SourceFile implements Comparable, Serializable {
 
 	public String toString() {
 		String a = getLocalPath() != null ? getLocalPath() : null;
-		String b = fFile != null ? fFile.toString() : fURI;
+		String b = fFile != null ? fFile.getName() : fURI;
 		return "(" + a + ") " + b;
 	}
 
