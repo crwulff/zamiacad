@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="lib" path="share/jars/log4j-1.2.14.jar"/>
-	<classpathentry kind="lib" path="share/jars/log5j-1.2.jar"/>
-	<classpathentry kind="lib" path="share/jars/commons-cli-1.0.jar"/>
-	<classpathentry kind="lib" path="share/jars/commons-io-2.1.jar"/>
-	<classpathentry kind="lib" path="share/jars/junit-4.7.jar"/>
-	<classpathentry kind="lib" path="share/jars/commons-logging-1.0.4.jar"/>
-	<classpathentry kind="lib" path="share"/>
-	<classpathentry kind="lib" path="share/jars/jakarta-oro-2.0.8.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry exported="true" kind="lib" path="bin" sourcepath="bin"/>
+	<classpathentry exported="true" kind="lib" path="share" sourcepath="share"/>
+	<classpathentry exported="true" kind="lib" path="share/jars/commons-cli-1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="share/jars/commons-io-2.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="share/jars/commons-logging-1.0.4.jar"/>
+	<classpathentry exported="true" kind="lib" path="share/jars/jakarta-oro-2.0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="share/jars/junit-4.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="share/jars/log4j-1.2.14.jar"/>
+	<classpathentry exported="true" kind="lib" path="share/jars/log5j-1.2.jar"/>
 	<classpathentry kind="lib" path="share/jars/minijdd_103.jar" sourcepath="/home/guenter/tmp/jdd/jdd/src"/>
-	<classpathentry kind="lib" path="share/jars/jython.jar"/>
+	<classpathentry exported="true" kind="lib" path="share/jars/jython.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
