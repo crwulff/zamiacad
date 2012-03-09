@@ -30,7 +30,7 @@ public class ReferenceSearchResult {
 
 	private ReferenceSearchResult fParent;
 
-	private HashSetArray<ReferenceSearchResult> fChildren = new HashSetArray<ReferenceSearchResult>();
+	public HashSetArray<ReferenceSearchResult> fChildren = new HashSetArray<ReferenceSearchResult>();
 
 	private SourceLocation fLocation;
 

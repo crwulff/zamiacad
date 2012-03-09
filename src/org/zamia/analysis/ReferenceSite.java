@@ -111,6 +111,20 @@ public class ReferenceSite extends ReferenceSearchResult {
 		return 1;
 	}
 
+	@Override
+	public int hashCode() {
+		return super.hashCode() + (int) getDBID();
+	}
+	
+	@Override
+	/**DBID but not Path is not taken into account in addition to all things of base class.
+	 * Comparison is particularly used in removing duplicate SearchAssignments made to the same object on the 
+	 * same line and RootResults preventing repeated search (circular dependencies) in assignment-through search.
+	 * */
+	public boolean equals(Object that) {
+		return that instanceof ReferenceSite && ((ReferenceSite) that).getDBID() == getDBID() && super.equals(that);
+	}
+	
 	public long getDBID() {
 		return fDBID;
 	}

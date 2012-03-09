@@ -43,6 +43,11 @@ public class HashSetArray<V> implements Serializable, Cloneable, Iterable<V> {
 		deletedElements = new HashSet<V>(1);
 	}
 
+	public HashSetArray(HashSetArray coll) {
+		this(coll.size());
+		addAll(coll);
+	}
+	
 	public HashSetArray(int loadFactor_) {
 		set = new HashSet<V>(loadFactor_);
 		array = new ArrayList<V>(loadFactor_);

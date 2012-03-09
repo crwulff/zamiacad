@@ -47,7 +47,7 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 				assignments.add(this);
 		}
 		abstract ReferenceSearchResult run();
-		public ReferenceSite keyResult;
+		public RootResult keyResult;
 	}
 	
 	SearchAssignment newSignalSearch(SourceLocation assignmentLocation, IGObject item, final ToplevelPath path) {
@@ -58,7 +58,7 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 		};
 	}
 	ArrayList<SearchAssignment> assignments = new ArrayList<SearchAssignment>(); // signals and variables to be searched with context
-	Map<Long, ReferenceSite> completed = new HashMap<Long, ReferenceSite>(); // TODO: consider if the same object happens in another path. Should it be considered as different signal and searched ofver?
+	Map<Long, RootResult> completed = new HashMap<Long, RootResult>(); // TODO: consider if the same object happens in another path. Should it be considered as different signal and searched ofver?
 	
 	/**Object, currently being searched on*/
 	IGObject doingObject;
@@ -70,7 +70,7 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 	 * to the assignment result to that we can jump to both assignment location in code and additional
 	 * search (results) it produced.  
 	 * */
-	public Map<Long, ReferenceSite> assignmentThroughSearch(IGObject aItem, ToplevelPath path, 
+	public Map<Long, RootResult> assignmentThroughSearch(IGObject aItem, ToplevelPath path, 
 			boolean aSearchUpward, boolean aSearchDownward, boolean aWritersOnly, boolean aReadersOnly) {
 		
 		fWritersOnly = aWritersOnly;
@@ -133,11 +133,14 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 
 				SearchAssignment assignment = null;
 				
-				if (obj.getCat() == IGObjectCat.VARIABLE) { 
+				if (obj.getCat() == IGObjectCat.VARIABLE) {
 					assignment = new SearchAssignment(assignments, assignmentLocation, obj, path) {
 						ReferenceSearchResult run() {
+							//TODO: decouple this search assignment from reference to scope, once 
+							// run is executed (e.g. scope = null)
 							fJobs.add(new SearchJob(doingObject, path, scope));
 							return searchReferences();
+							
 						}
 					};					
 				} else if (obj.getCat() == IGObjectCat.SIGNAL)  
