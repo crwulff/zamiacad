@@ -404,10 +404,10 @@ public class IGTypeStatic extends IGType {
 				// decide whether we want to append the range information
 				IGType bt = getBaseType();
 				boolean haveRange = false;
-				while (bt != null && bt.getId() == null) {
-					haveRange = bt.getRange() != null;
-					bt = bt.getBaseType();
-				}
+//				while (bt != null && bt.getId() == null) {
+//					haveRange = bt.getRange() != null;
+//					bt = bt.getBaseType();
+//				}
 
 				if (haveRange || !haveId) {
 					buf.append(" " + fRange);

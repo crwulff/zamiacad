@@ -10,6 +10,7 @@ package org.zamia.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.zamia.ExceptionLogger;
@@ -28,7 +29,11 @@ import org.zamia.ZamiaLogger;
  *  Reverse engineering by Valentin Tihhomirov:
  *  In Guenter's example, we have module2 opened and 'instance' item is selected (cursor points to it).
  *  Adding hierarchy separator, . or /, we enter the instance1. Its entity declaration is opened. In this 
- *  case nothing is selected. This is signaled by 'null' in the leaf segment of the PathName. 
+ *  case nothing is selected. This is signaled by 'null' in the leaf segment of the PathName.
+ *  
+ *   TODO: consider removing redundancies 
+ *   	1) computable goString(): fPath holds the string representation of the path. Do we need it? IMO, it is used rarely and can be computed from segments at any time
+ *   	2) sharing parent segments: Currently, PathName keeps all the segments up to the toplevel. This means that root segments are replicated many times. The path could consist only of a single reference to parent IGInstance.   
  */
 
 @SuppressWarnings("serial")
@@ -45,76 +50,57 @@ public class PathName implements Serializable {
 	private String fPath;
 
 	public PathName(List<String> aSegments) {
+		initialize(aSegments);
+	}
 
+	private void initialize(List<String> aSegments) {
+		StringBuilder buf = new StringBuilder(separator);
 		int n = aSegments.size();
 		fSegments = new String[n];
-		StringBuilder buf = new StringBuilder(separator);
-
+		
 		for (int i = 0; i < n; i++) {
 			String segment = aSegments.get(i);
-			if (segment != null) {
+			if (segment == null) {
+				if (i != n - 1)
+					logger.error("PathName: invalid null segment detected.");
+			} else {
 				segment = segment.toUpperCase();
 				buf.append(segment);
-				if (i < n - 1) {
-					buf.append(separator);
-				}
-			} else {
-				if (i != n - 1) {
-					logger.error("PathName: invalid null segment detected.");
-					buf.append(separator);
-				}
 			}
 
+			if (i != n-1)
+				buf.append(separator);
+			
 			fSegments[i] = segment;
 		}
 
 		fPath = buf.toString();
+		
 	}
-
+	
 	@Override
 	public String toString() {
 		return fPath;
 	}
 
 	public PathName(String aPath) {
-		String[] segs = aPath.toUpperCase().split("\\.");
+		String[] segs = aPath.split("\\.");
 
 		int n = segs.length;
-		ArrayList<String> segments = new ArrayList<String>(n);
-
+		List<String> segments = new ArrayList(n);
+		
 		for (int i = 0; i < n; i++) {
 			String segment = segs[i];
 			if (segment != null && segment.length() > 0)
 				segments.add(segment);
 		}
-
+		
 		if (aPath.endsWith(".")) {
 			segments.add(null);
 		}
+		
+		initialize(segments);
 
-		StringBuilder buf = new StringBuilder(separator);
-		n = segments.size();
-		fSegments = new String[n];
-		for (int i = 0; i < n; i++) {
-
-			String segment = segments.get(i);
-
-			if (segment != null) {
-				buf.append(segment);
-				if (i < n - 1) {
-					buf.append(separator);
-				}
-			} else {
-				if (i != n - 1) {
-					logger.error("PathName: invalid null segment detected.");
-					buf.append(separator);
-				}
-			}
-
-			fSegments[i] = segment;
-		}
-
-		fPath = buf.toString();
 	}
 
 	public PathName clonePathName() {
