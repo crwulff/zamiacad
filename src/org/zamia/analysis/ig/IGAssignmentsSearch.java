@@ -29,7 +29,6 @@ import org.zamia.util.Pair;
 public class IGAssignmentsSearch extends IGReferencesSearch {
 
 	/**We normally do not need titles for ReferenceSites. But, you may turn it on for debug.
-	 * NB! removing titles breaks the comparison (difference) between results!
 	 * */
 	static String debugTitle(IGObject aRefObj) {
 		return debug && aRefObj != null ? aRefObj.toString() : null;
@@ -43,7 +42,7 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 	/**Used to refer and jump to EntryReferenceSite items in the results page.
 	 * This default implementation runs search(path) for signals. Variables will have overloaded class that invokes searchReferences(igprocess)*/
 	public static abstract class SearchAssignment extends ReferenceSite {
-		int fDepth; //TODO: this field is not necessary, once we finished the search. 
+		int fDepth; //TODO: this field is not necessary, once we finished the search. Consider generation-first search instead of depth-first used currently. Then, single depth variable could be shared among all assignments/searches. 
 		public SearchAssignment(Collection<SearchAssignment> assignments, SourceLocation assignmentLocation, IGObject aRefObj, ToplevelPath aRefPath, int aDepth) {
 			super(debugTitle(aRefObj), assignmentLocation, 0, RefType.Assignment, aRefPath, aRefObj);
 			if (aRefObj != null)
@@ -57,17 +56,24 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 	SearchAssignment newSignalSearch(SourceLocation assignmentLocation, IGObject item, final ToplevelPath path, int depth) {
 		return new SearchAssignment(assignments, assignmentLocation, item, path, depth) {
 			void run() {
-				search(doingObject, doingPath);
+				search(currentObject, currentPath);
 			}
 		};
 	}
-	ArrayList<SearchAssignment> assignments = new ArrayList<SearchAssignment>(); // signals and variables to be searched with context
-	Map<Long, RootResult> completed = new HashMap<Long, RootResult>(); // TODO: consider if the same object happens in another path. Should it be considered as different signal and searched ofver?
+	
+	// signals and variables to be searched with search context
+	ArrayList<SearchAssignment> assignments = new ArrayList<SearchAssignment>();
+	
+	// TODO: HashSet should be used instead of map. Duplicating the key fields of the value in the key of the map is a waste of memory. 
+	// Consider KeyedHashSet from Eclipse core.
+	// Moreover, consider if the same object happens in another path. Should it be considered as different signal and searched over?
+	// Can/should we store results in ZDB?
+	Map<Long, RootResult> completed = new HashMap<Long, RootResult>(); 
 	
 	/**Object, currently being searched on*/
-	IGObject doingObject;
-	ToplevelPath doingPath;
-	SearchAssignment doingAssignment;
+	IGObject currentObject;
+	ToplevelPath currentPath;
+	SearchAssignment currentAssignment;
 	
 	/**
 	 * The search results in Assignments rather than Reads and Writes. Found    
@@ -91,18 +97,18 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 		
 		while(!assignments.isEmpty()) {
 			
-			doingAssignment = Utils.removeLast(assignments);
+			currentAssignment = Utils.removeLast(assignments);
 			
-			doingObject = (IGObject) fZPrj.getZDB().load(doingAssignment.getDBID());
+			currentObject = (IGObject) fZPrj.getZDB().load(currentAssignment.getDBID());
 
-			doingPath = doingAssignment.getPath().descend();
-			if (debug) logger.info("rs.search(" + doingPath + " : " + doingObject + "), " + doingObject.computeSourceLocation());
+			currentPath = currentAssignment.getPath().descend();
+			if (debug) logger.info("rs.search(" + currentPath + " : " + currentObject + "), " + currentObject.computeSourceLocation());
 
-			doingAssignment.run(); // this will produce keyResult with children
+			currentAssignment.run(); // this will produce keyResult with children
 
-			if (doingAssignment.keyResult == null) {
-				logger.warn("Search " + (completed.size()+1) + " on " + doingPath + " : " + doingObject + " has failed");
-				System.err.println("Search " + (completed.size()+1) + " on " + doingPath + " : " + doingObject + " has failed");
+			if (currentAssignment.keyResult == null) {
+				logger.warn("Search " + (completed.size()+1) + " on " + currentPath + " : " + currentObject + " has failed");
+				System.err.println("Search " + (completed.size()+1) + " on " + currentPath + " : " + currentObject + " has failed");
 			}
 				
 		}
@@ -127,7 +133,7 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 		public void scheduleAssignments(HashSetArray<IGItemAccess> list, boolean useItemLocation, SourceLocation assignmentLocation) {
 			//useItemLocation = true;
 			
-			int newDepth = doingAssignment.fDepth+1;
+			int newDepth = currentAssignment.fDepth+1;
 			
 			for (IGItemAccess ia : list) {
 				IGObject obj = null;
@@ -146,9 +152,10 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 					assignment = new SearchAssignment(assignments, assignmentLocation, obj, path, newDepth) {
 						void run() {
 							//TODO: decouple this search assignment from reference to scope, once 
-							// run is executed (e.g. scope = null). The null referenece is also unnecessary.
+							// run is executed (e.g. scope = null). The null reference is also unnecessary.
 							// remove altogether with fDepth.
-							fJobs.add(new SearchJob(doingObject, path, scope));
+							fJobs.add(new SearchJob(currentObject // doing object was supplied to us by caller
+									, path, scope));
 							searchReferences();
 							
 						}
@@ -176,26 +183,21 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 	@Override 
 	protected boolean createEntryResult(IGObject obj, ToplevelPath aPath) {
 
-		RootResult root = doingAssignment.keyResult = completed.get(obj.getDBID());
-		if (root != null) {
-			if (debug) logger.info("will not search assignments of " + doingObject + ". It already has a result, " + obj);
-			if (!root.skippedDueToDepth) 
+		currentAssignment.keyResult = completed.get(obj.getDBID());
+		if (currentAssignment.keyResult != null) {
+			if (debug) logger.info("will not search assignments of " + currentObject + ". It already has a result, " + obj);
+			if (!currentAssignment.keyResult.skippedDueToDepth) 
 				return false;
 		} else {
 
-			root = new RootResult(completed.size()+1, obj, aPath); 
-			
-			// grandfa is not shown in results - fix by one more level
-			doingAssignment.keyResult = new RootResult(completed.size()+1, obj, aPath);
-			root.add(doingAssignment.keyResult);
-			
-			completed.put(obj.getDBID(), doingAssignment.keyResult);
+			currentAssignment.keyResult = new RootResult(completed.size()+1, obj, aPath); 
+			completed.put(obj.getDBID(), currentAssignment.keyResult);
 		}
 		
-		root.skippedDueToDepth = doingAssignment.keyResult.skippedDueToDepth = 
-				doingAssignment.fDepth == maxDepth;
+		currentAssignment.keyResult.skippedDueToDepth = 
+				currentAssignment.fDepth == maxDepth;
 		
-		return !root.skippedDueToDepth;
+		return !currentAssignment.keyResult.skippedDueToDepth;
 	}
 
 	public static class RootResult extends ReferenceSite {
@@ -213,7 +215,7 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 			@Override
 			public ReferenceSearchResult add(ToplevelPath aPath, ReferenceSearchResult aRSR) {
 				if (aRSR instanceof ReferenceSite && ((ReferenceSite) aRSR).getRefType() == RefType.Assignment) {
-					doingAssignment.keyResult.add(aRSR);
+					currentAssignment.keyResult.add(aRSR);
 				}
 					
 				return aRSR;
