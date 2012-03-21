@@ -107,7 +107,9 @@ public class IGBuiltinOperations {
 			return execArrayCompare(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
 		case ARRAY_GREATER:
+		case ARRAY_GREATEREQ:
 		case ARRAY_LESS:
+		case ARRAY_LESSEQ:
 			return execArrayCompareRelative(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
 		case ARRAY_AND:
@@ -675,6 +677,7 @@ public class IGBuiltinOperations {
 
 		switch (aSub.getBuiltin()) {
 		case ARRAY_GREATER:
+		case ARRAY_GREATEREQ:
 
 			// swap everything
 			IGStaticValue tempV = valueA;
@@ -689,33 +692,36 @@ public class IGBuiltinOperations {
 			break;
 
 		case ARRAY_LESS:
+		case ARRAY_LESSEQ:
 			break;
 		default:
 			throw new ZamiaException("Internal interpreter error: execArrayCompareRelative() called on non-compare op " + aSub.getBuiltin(), aLocation);
 		}
 
-		boolean bRes;
+		boolean bRes; // true when with EQ, false otherwise. see std_logic_arith.vhd:1355 (unsigned_is_less_or_equal())
+		switch (aSub.getBuiltin()) {
+			case ARRAY_GREATEREQ:
+			case ARRAY_LESSEQ:
+				bRes = true;
+				break;
+			default:
+				bRes = false;
+		}
+		boolean bAis0, bBis1;
+		int nM = nA > nB ? nA : nB;
+		IGStaticValue zero = valueA.getStaticType().getStaticElementType(aLocation).findEnumLiteral('0');
+		IGStaticValue one = valueA.getStaticType().getStaticElementType(aLocation).findEnumLiteral('1');
+		for (int i = 0; i < nM; i++) {
 
-		if (nA != nB) {
-			bRes = false;
-		} else {
+			boolean beyondA = i + offsetA >= nA;
+			boolean beyondB = i + offsetB >= nB;
+			IGStaticValue vA = beyondA ? zero : valueA.getValue(i + offsetA, aLocation);
+			IGStaticValue vB = beyondB ? zero : valueB.getValue(i + offsetB, aLocation);
 
-			bRes = false;
-			boolean bAis0, bBis1;
-			for (int i = 0; i < nA; i++) {
+			bAis0 = vA.equalsValue(zero);
+			bBis1 = vB.equalsValue(one);
 
-				IGStaticValue vA = valueA.getValue(i + offsetA, aLocation);
-				IGStaticValue vB = valueB.getValue(i + offsetB, aLocation);
-
-				IGTypeStatic vAT = vA.getStaticType();
-				IGTypeStatic vBT = vB.getStaticType();
-
-				bAis0 = vA.equalsValue(vAT.findEnumLiteral('0'));
-				bBis1 = vB.equalsValue(vBT.findEnumLiteral('1'));
-
-				bRes = (bAis0 && bBis1) || (bAis0 && bRes) || (bBis1 && bRes); // see std_logic_arith.vhd:1332 (unsigned_is_less())
-			}
-
+			bRes = (bAis0 && bBis1) || (bAis0 && bRes) || (bBis1 && bRes); // see std_logic_arith.vhd:1332 (unsigned_is_less())
 		}
 
 		IGTypeStatic rt = aSub.getReturnType().computeStaticType(aRuntime, aErrorMode, aReport);
