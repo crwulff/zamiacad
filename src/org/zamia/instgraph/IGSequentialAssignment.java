@@ -10,6 +10,7 @@ package org.zamia.instgraph;
 
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.analysis.ReferenceSite.RefType;
 import org.zamia.analysis.ig.IGAssignmentsSearch;
 import org.zamia.analysis.ig.IGAssignmentsSearch.AccessedThroughItems;
 import org.zamia.instgraph.IGItemAccess.AccessType;
@@ -54,6 +55,7 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 	/**
 	 * 
 	 * The idea is that COND and DRV are never written while TARGET is never read in
+	 * (Correction: this is a wrong assumption with A(IDX) <= DRV as a counterexample.)
 	 *  
 	 * 		if COND then TARGET <= DRV; 
 	 * 
@@ -65,47 +67,77 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 	 * In short, this can be rewritten as 
 	 * 		TARGET <= DRV, COND 
 	 * */	
-	public void computeAccessedItems(boolean left, IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
-		int sizeBefore = aAccessedItems.size();
-		(left ? fTarget : fValue).computeAccessedItems(left, aFilterItem, aFilterType, aDepth, aAccessedItems);
-		if (aAccessedItems instanceof AccessedThroughItems) {
-			
-			int s2debug = aAccessedItems.size();
-			
-			AccessedThroughItems todoList = ((AccessedThroughItems) aAccessedItems);
-			if (!left) // depending on conditions is the same as driving from the right 
-				for (Pair<IGSequentialStatement, HashSetArray<IGItemAccess>> parent: todoList.ifStack) {
-					todoList.addAll(parent.getSecond());
-				}
-			
-			int sizeAfter = aAccessedItems.size();
-			if (sizeAfter != sizeBefore) {
-				
-				HashSetArray<IGItemAccess> list = new HashSetArray<IGItemAccess>();
-				(!left ? fTarget : fValue).computeAccessedItems(!left, null, null, aDepth, list);
-				
-				todoList.scheduleAssignments(list, true, computeSourceLocation());
-				
-				if (left) // append conditions to the right 
-					for (Pair<IGSequentialStatement, HashSetArray<IGItemAccess>> parent: todoList.ifStack) {
-						list.clear();
-						IGSequentialStatement ifStatement = parent.getFirst(); 
-						IGOperation conditional = (IGOperation) (ifStatement instanceof IGSequentialLoop 
-								? ((IGSequentialLoop) ifStatement).getChild(2)
-								: ((IGSequentialIf) ifStatement).getCond());
-						conditional.computeAccessedItems(false, null, null, 0, list);
-						todoList.scheduleAssignments(list, true, parent.getFirst().computeSourceLocation());
-					}
-					
-				//schedule parent IF conditions
-			}
-		}
+	public void propagateSearch(boolean left, int aDepth, HashSetArray<IGItemAccess> newItems, AccessedThroughItems todo) {
+		newItems.clear();
+		fTarget.computeAccessedItems(true, null, null, aDepth, newItems);
+		fValue.computeAccessedItems(false, null, null, aDepth, newItems);
+		
+		AccessType filterType = left ? AccessType.Write : AccessType.Read;
+		HashSetArray<IGItemAccess> filteredItems = new HashSetArray<IGItemAccess>();
+		int n = newItems.size();
+		for (IGItemAccess a : newItems)
+			if (a.getAccessType() == filterType) 
+				filteredItems.add(a);
+		
+		todo.scheduleAssignments(filteredItems, true, this.computeSourceLocation());
+		
 	}
+	
 	@Override
 	public void computeAccessedItems(IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
 		
-		computeAccessedItems(false, aFilterItem, aFilterType, aDepth, aAccessedItems);
-		computeAccessedItems(true, aFilterItem, aFilterType, aDepth, aAccessedItems);
+		HashSetArray<IGItemAccess> newItems = new HashSetArray<IGItemAccess>();
+		fValue.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, newItems);
+		fTarget.computeAccessedItems(true, aFilterItem, aFilterType, aDepth, newItems);
+		
+		if (aAccessedItems instanceof AccessedThroughItems) {
+			
+			HashSetArray<IGItemAccess> leftItems = new HashSetArray<IGItemAccess>();
+			HashSetArray<IGItemAccess> rightItems = new HashSetArray<IGItemAccess>();
+			
+			for (IGItemAccess a: newItems)
+				if (a.getAccessType() == AccessType.Read)
+					rightItems.add(a);
+				else 
+					leftItems.add(a);
+			
+			AccessedThroughItems todo = ((AccessedThroughItems) aAccessedItems);
+			
+			//see if left items are written
+			int sizeBefore = todo.size();
+			todo.addAll(leftItems);
+			if (todo.size() != sizeBefore) { 
+				
+				// then we depend on all right items - propagate search on them
+				propagateSearch(false, aDepth, newItems, todo);
+				
+				// treat IF conditions as right items
+				for (Pair<IGSequentialStatement, HashSetArray<IGItemAccess>> parent: todo.ifStack) {
+					newItems.clear();
+					IGSequentialStatement ifStatement = parent.getFirst(); 
+					IGOperation conditional = (IGOperation) (ifStatement instanceof IGSequentialLoop 
+							? ((IGSequentialLoop) ifStatement).getChild(2)
+							: ((IGSequentialIf) ifStatement).getCond());
+					conditional.computeAccessedItems(false, null, null, 0, newItems);
+					todo.scheduleAssignments(newItems, true, parent.getFirst().computeSourceLocation());
+				}
+			}
+			
+			//see if right items are read
+			sizeBefore = todo.size();
+			todo.addAll(rightItems);
+			for (Pair<IGSequentialStatement, HashSetArray<IGItemAccess>> parent: todo.ifStack) {// IF conditions 
+				// throughItems.addAll(parent.getSecond()); // addAll does not call overriden add()
+				for (IGItemAccess condItem: parent.getSecond())
+					todo.add(condItem);
+			}
+			if (todo.size() != sizeBefore) {
+				propagateSearch(true, aDepth, newItems, todo); // propagate search to the left
+			}
+			
+		} else {
+			aAccessedItems.addAll(newItems);
+		}
 
 		if (fReject != null) {
 			fReject.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, aAccessedItems);
