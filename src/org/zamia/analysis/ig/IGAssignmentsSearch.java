@@ -142,8 +142,7 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 		}
 		
 		/**@see org.zamia.instgraph.IGSequentialAssignment#computeAccessedItems*/
-		public void scheduleAssignments(HashSetArray<IGItemAccess> list, boolean useItemLocation, SourceLocation assignmentLocation) {
-			//useItemLocation = true;
+		public void scheduleAssignments(HashSetArray<IGItemAccess> list, SourceLocation assignmentLocation) {
 			
 			for (IGItemAccess ia : list) {
 				IGObject obj = null;

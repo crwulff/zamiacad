@@ -79,7 +79,7 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 			if (a.getAccessType() == filterType) 
 				filteredItems.add(a);
 		
-		todo.scheduleAssignments(filteredItems, true, this.computeSourceLocation());
+		todo.scheduleAssignments(filteredItems, this.computeSourceLocation());
 		
 	}
 	
@@ -119,7 +119,7 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 							? ((IGSequentialLoop) ifStatement).getChild(2)
 							: ((IGSequentialIf) ifStatement).getCond());
 					conditional.computeAccessedItems(false, null, null, 0, newItems);
-					todo.scheduleAssignments(newItems, true, parent.getFirst().computeSourceLocation());
+					todo.scheduleAssignments(newItems, parent.getFirst().computeSourceLocation());
 				}
 			}
 			
