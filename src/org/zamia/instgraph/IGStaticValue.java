@@ -1641,7 +1641,7 @@ public class IGStaticValue extends IGOperation {
 			int n = getNumArrayEntries(null);
 
 			for (int i = 0; i < n; i++) {
-				buf.append(getValue(ascending ? i : n - i - 1, null).toHRString());
+				buf.append(getValue(ascending ? i + fArrayOffset : n - i - 1 + fArrayOffset, null).toHRString());
 			}
 			buf.append("\"");
 
