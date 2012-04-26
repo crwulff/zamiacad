@@ -935,6 +935,70 @@ public final class IGManager {
 		return pkg;
 	}
 
+	static class ObjectCounter implements IGStructureVisitor {
+
+		public int fNumObjects = 0;
+
+		public void visit(IGStructure aStructure, PathName aPath) {
+//			int debugInitial = fNumObjects;
+
+			visit(aStructure.getContainer(), aPath.getNumSegments() == 0);
+
+			int n = aStructure.getNumStatements();
+			for (int i = 0; i < n; i++) {
+				IGConcurrentStatement stmt = aStructure.getStatement(i);
+				if (stmt instanceof IGProcess) {
+					IGProcess process = (IGProcess) stmt;
+
+					visit(process.getContainer(), false);
+				}
+			}
+
+//			logger.debug("IGManager: Counting objects. %4d objects contained in %s.", fNumObjects - debugInitial, aPath.toString().isEmpty() ? "'Toplevel'" : aPath);
+		}
+
+		private void visit(IGContainer container, boolean isToplevel) {
+			if (isToplevel) {
+				fNumObjects += container.getNumInterfaces();
+			}
+
+			int n = container.getNumLocalItems();
+			for (int i = 0; i < n; i++) {
+				IGContainerItem localItem = container.getLocalItem(i);
+				if (localItem instanceof IGObject) {
+					IGObject object = (IGObject) localItem;
+
+					if (object.getCat() == IGObjectCat.SIGNAL && object.getDirection() == IGObject.OIDir.NONE) {
+						fNumObjects++;
+					} else if (object.getCat() == IGObjectCat.VARIABLE) {
+						fNumObjects++;
+					}
+				}
+			}
+		}
+
+		public int getNumObjects() {
+			return fNumObjects;
+		}
+	}
+
+	public int countObjects(DMUID aDUUID) throws ZamiaException {
+
+		logger.info("IGManager: Counting objects in %s", aDUUID);
+
+		String signature = IGInstantiation.computeSignature(aDUUID, null);
+
+		IGModule module = findModule(signature);
+		if (module == null) {
+			return 0;
+		}
+
+		ObjectCounter counter = new ObjectCounter();
+		module.accept(counter, Integer.MAX_VALUE);
+
+		return counter.getNumObjects();
+	}
+
 	/*
 	 * access to indexed information
 	 */
