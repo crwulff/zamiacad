@@ -155,7 +155,7 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 //				if (useItemLocation)
 //					assignmentLocation = obj.computeSourceLocation();  
 
-				SearchAssignment assignment = null;
+				SearchAssignment assignment;
 				
 				if (obj.getCat() == IGObjectCat.VARIABLE) {
 					assignment = new SearchAssignment(IGAssignmentsSearch.this, assignmentLocation, obj, path) {
@@ -171,15 +171,21 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 					};					
 				} else if (obj.getCat() == IGObjectCat.SIGNAL)  
 					assignment = newSignalSearch(assignmentLocation, obj, path);
+				else
+					assignment = newConstAssignment(assignmentLocation, path);
 				
-				if (assignment != null) 
-					scheduleAssignment(assignment);
+				scheduleAssignment(assignment);
+				
 			}
 			
 			if (list.isEmpty()) {
-				scheduleAssignment(newSignalSearch(assignmentLocation, null, path)); // dummy location
+				scheduleAssignment(newConstAssignment(assignmentLocation, path)); // dummy location
 			}
 			
+		}
+		
+		private SearchAssignment newConstAssignment(SourceLocation assignmentLocation, final ToplevelPath path) {
+			return newSignalSearch(assignmentLocation, null, path);
 		}
 		
 		private void scheduleAssignment(SearchAssignment assignment) {
