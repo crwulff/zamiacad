@@ -10,9 +10,17 @@ package org.zamia.util;
 
 import org.zamia.ExceptionLogger;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * A collection of static methods for dealing with files
@@ -83,5 +91,52 @@ public class FileUtils {
             el.logException(e);
 			return false;
 		}
+	}
+
+	public static boolean unzip(File aZipFile) {
+		return unzip(aZipFile, null);
+	}
+
+	public static boolean unzip(File aZipFile, Map<String, String> aFilePathsToUnzip) {
+
+		boolean isOk = true;
+
+		if (aFilePathsToUnzip == null) {
+			aFilePathsToUnzip = Collections.emptyMap();
+		}
+
+		try {
+			final int BUFFER = 2048;
+			BufferedOutputStream dest;
+			FileInputStream fis = new FileInputStream(aZipFile);
+			ZipInputStream zis = new ZipInputStream(new BufferedInputStream(fis));
+			ZipEntry entry;
+			while ((entry = zis.getNextEntry()) != null) {
+				if (!aFilePathsToUnzip.isEmpty() && !aFilePathsToUnzip.containsKey(entry.getName())) {
+					continue;
+				}
+				System.out.println("Extracting: " + entry);
+				int count;
+				byte data[] = new byte[BUFFER];
+				// write the files to the disk
+				String name = entry.getName();
+				if (!aFilePathsToUnzip.isEmpty()) {
+					name = aFilePathsToUnzip.get(entry.getName());
+				}
+				FileOutputStream fos = new FileOutputStream(new File(aZipFile.getParent(), name));
+				dest = new BufferedOutputStream(fos, BUFFER);
+				while ((count = zis.read(data, 0, BUFFER)) != -1) {
+					dest.write(data, 0, count);
+				}
+				dest.flush();
+				dest.close();
+			}
+			zis.close();
+		} catch (Exception e) {
+			el.logException(e);
+			isOk = false;
+		}
+
+		return isOk;
 	}
 }

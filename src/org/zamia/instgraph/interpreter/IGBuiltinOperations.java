@@ -975,7 +975,7 @@ public class IGBuiltinOperations {
 		IGObject intfG = container.resolveObject("GOOD");
 
 		IGTypeStatic lT = valueL.getStaticType();
-		IGTypeStatic vCT = aRuntime.getDriver(intfV, aErrorMode, aReport).getTargetDriver().getCurrentType();
+		IGTypeStatic vCT = aRuntime.getDriver(intfV, aErrorMode, aReport).getCurrentType();
 		IGTypeStatic vT = intfV.getType().computeStaticType(aRuntime, aErrorMode, aReport);
 		if (valueL.toString().isEmpty()) {
 			String msg = "TEXTIO procedure READ(" + vT + ") : Parameter L designates an empty string.";

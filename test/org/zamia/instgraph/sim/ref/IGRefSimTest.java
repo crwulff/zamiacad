@@ -17,6 +17,7 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
+import org.zamia.instgraph.IGStaticValue;
 import org.zamia.util.PathName;
 import org.zamia.vhdl.ast.DMUID;
 
@@ -24,9 +25,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.nio.channels.FileLock;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.zamia.util.FileUtils.unzip;
 
 /**
  * @author Guenter Bartsch
@@ -37,7 +41,11 @@ public class IGRefSimTest {
 
 	private ZamiaProject fZPrj;
 
+	private IGSimRef fSim;
+
 	private final static BigInteger NANO_FACTOR = new BigInteger("1000000");
+
+	private final static boolean NO_ERADOS = !(new File("examples/erados/BuildPath.txt").exists());
 
 	public void setupTest(String aBasePath, String aBuildPath) throws Exception {
 		ZamiaLogger.setup(Level.DEBUG);
@@ -83,17 +91,17 @@ public class IGRefSimTest {
 		logger.info("IGTest: elaborated model for %s has %d unique modules.", duuid, n);
 		assertEquals(aNumNodes, n);
 
-		IGSimRef sim = new IGSimRef();
+		fSim = new IGSimRef();
 
 		Toplevel tl = new Toplevel(duuid, null);
 
 		ToplevelPath tlp = new ToplevelPath(tl, new PathName(""));
 
-		sim.open(tlp, null, null, fZPrj);
+		fSim.open(tlp, null, null, fZPrj);
 
-		sim.reset();
+		fSim.reset();
 
-		sim.run(new BigInteger("" + aNanos).multiply(NANO_FACTOR));
+		fSim.run(new BigInteger("" + aNanos).multiply(NANO_FACTOR));
 
 	}
 
@@ -310,6 +318,154 @@ public class IGRefSimTest {
 	public void testArrayGreater() throws Exception {
 
 		runTest("examples/refsim/arrayGreater", 1, 0);
+	}
+	@Test
+	public void testEradosBug1() throws Exception {
+
+		if (NO_ERADOS) {
+			return; // ok, this test is optional
+		}
+
+		cleanErados();
+
+		unzipBug(1);
+
+		runTest("examples/erados", 48, 4070);
+
+		checkSignalValue("LEDS_LD", "00001001");
+	}
+	@Test
+	public void testEradosBug2() throws Exception {
+
+		if (NO_ERADOS) {
+			return; // ok, this test is optional
+		}
+
+		cleanErados();
+
+		unzipBug(2);
+
+		runTest("examples/erados", 48, 1550);
+
+		checkSignalValue("LEDS_LD", "00000001");
+	}
+	@Test
+	public void testEradosBug3() throws Exception {
+
+		if (NO_ERADOS) {
+			return; // ok, this test is optional
+		}
+
+		cleanErados();
+
+		unzipBug(3);
+
+		runTest("examples/erados", 48, 13630);
+
+		checkSignalValue("LEDS_LD", "00010111");
+	}
+	@Test
+	public void testEradosBug4() throws Exception {
+
+		if (NO_ERADOS) {
+			return; // ok, this test is optional
+		}
+
+		cleanErados();
+
+		unzipBug(4);
+
+		runTest("examples/erados", 48, 20050);
+
+		checkSignalValue("LEDS_LD", "11111111");
+	}
+	@Test
+	public void testEradosBug5() throws Exception {
+
+		if (NO_ERADOS) {
+			return; // ok, this test is optional
+		}
+
+		cleanErados();
+
+		unzipBug(5);
+
+		runTest("examples/erados", 48, 18850);
+
+		checkSignalValue("LEDS_LD", "00011010");
+	}
+	@Test
+	public void testEradosBug6() throws Exception {
+
+		if (NO_ERADOS) {
+			return; // ok, this test is optional
+		}
+
+		cleanErados();
+
+		unzipBug(6);
+
+		runTest("examples/erados", 48, 4790);
+
+		checkSignalValue("LEDS_LD", "00001011");
+	}
+	@Test
+	public void testEradosBug7() throws Exception {
+
+		if (NO_ERADOS) {
+			return; // ok, this test is optional
+		}
+
+		cleanErados();
+
+		unzipBug(7);
+
+		runTest("examples/erados", 48, 12130);
+
+		checkSignalValue("LEDS_LD", "00010101");
+	}
+
+	private void checkSignalValue(String signalName, String valueAsString) {
+
+		IGStaticValue value = fSim.getValue(new PathName(signalName));
+
+		assertEquals("Signal " + signalName + " has wrong value.", valueAsString, value.toString());
+	}
+
+	private void unzipBug(int bugNr) {
+
+		Map<String, String> buggyFiles = new HashMap<String, String>();
+		switch (bugNr) {
+			case 1 :
+				buggyFiles.put("1case_alu_with_overflow_bug.vhd", "alu.vhd");
+				break;
+			case 2 :
+				buggyFiles.put("2case_alu_with_compare_instruction_bug.vhd", "alu.vhd");
+				break;
+			case 3 :
+				buggyFiles.put("3case_state_machine_with_operand_fetch_bug.vhd", "state_machine.vhd");
+				break;
+			case 4 :
+				buggyFiles.put("4case_interrupt_mod_irq_bug.vhd", "interrupt_mod.vhd");
+				break;
+			case 5 :
+				buggyFiles.put("5case_sfrs_mod_interrupt_mask_bug.vhd", "sfrs_mod.vhd");
+				break;
+			case 6 :
+				buggyFiles.put("6case_jump_target_return_bug.vhd", "jump_target.vhd");
+				break;
+			case 7 :
+				buggyFiles.put("7case_gprs_mod_reg_bug.vhd", "gprs_mod.vhd");
+				break;
+		}
+
+		if (!buggyFiles.isEmpty()) {
+			unzip(new File("examples/erados/src/processor/buggy_files.zip"), buggyFiles);
+		}
+	}
+
+	private void cleanErados() {
+		unzip(new File("examples/erados/src/processor/correct_files.zip"));
 	}
 
 	private class MarkerException extends Exception {

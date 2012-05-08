@@ -100,6 +100,9 @@ public class IGSimRef implements IGISimulator {
 	@Override
 	public void open(ToplevelPath aToplevel, File aFile, PathName aPrefix, ZamiaProject aZPrj) throws IOException, ZamiaException {
 
+		logger.info("IGSimRef: ** Starting simulator                          **");
+		logger.info("IGSimRef: *************************************************");
+
 		fZPrj = aZPrj;
 
 		fTLP = aToplevel;
@@ -129,6 +132,10 @@ public class IGSimRef implements IGISimulator {
 		int counter = 0;
 		BigInteger lastSimulationTime = fSimulationTime;
 
+		BigInteger nanos = aTimeLimit.divide(MLN_FS);
+		logger.info("IGSimRef: ** Simulating %5d ns                         **", nanos);
+		logger.info("IGSimRef: *************************************************");
+
 		while (true) {
 			if (fSimSchedule.isEmpty()) {
 				break;
@@ -143,7 +150,7 @@ public class IGSimRef implements IGISimulator {
 			}
 			fSimulationTime = reqT;
 
-			BigInteger nanos = fSimulationTime.divide(MLN_FS);
+			nanos = fSimulationTime.divide(MLN_FS);
 
 			if (DEBUG) {
 				logger.debug("IGSimRef: *************************************************");
@@ -178,10 +185,9 @@ public class IGSimRef implements IGISimulator {
 			rl.executeWakeups(this);
 		}
 
-        BigInteger nanos = fSimulationTime.divide(MLN_FS);
-        logger.debug("IGSimRef: *************************************************");
-        logger.debug("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
-        logger.debug("IGSimRef: *************************************************");
+        nanos = fSimulationTime.divide(MLN_FS);
+        logger.info("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
+		logger.info("IGSimRef: *************************************************");
 
 	}
 
@@ -583,6 +589,10 @@ public class IGSimRef implements IGISimulator {
 
 	@Override
 	public void reset() throws ZamiaException {
+
+		logger.info("IGSimRef: ** Resetting simulator                         **");
+		logger.info("IGSimRef: *************************************************");
+
 		// Clear simulation data
 		fData.reset();
 		// Reset time
@@ -693,6 +703,18 @@ public class IGSimRef implements IGISimulator {
 		IGSignalDriver driver = fData.getDriver(aSignalName);
 
 		return driver.getLastValue();
+	}
+
+	public IGStaticValue getValue(PathName aSignalName) {
+
+		IGSignalDriver driver = fData.getDriver(aSignalName);
+
+		try {
+			return driver.getValue(null);
+		} catch (ZamiaException e) {
+			el.logException(e);
+			return null;
+		}
 	}
 
 	public SourceRanges collectCoveredSources() {

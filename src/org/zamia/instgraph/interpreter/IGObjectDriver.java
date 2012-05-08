@@ -10,6 +10,7 @@ package org.zamia.instgraph.interpreter;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 
 import org.zamia.SourceLocation;
@@ -486,7 +487,7 @@ public class IGObjectDriver implements Serializable {
 
 		IGObjectDriver mappedTo;
 
-		while ((mappedTo = targetDriver.fMappedTo) != null && targetDriver.fRange == null && targetDriver.fAliasedType == null) {
+		while ((mappedTo = targetDriver.fMappedTo) != null) {
 			targetDriver = mappedTo;
 		}
 
@@ -612,5 +613,13 @@ public class IGObjectDriver implements Serializable {
 
 	public void setDir(OIDir aDir) {
 		fDir = aDir;
+	}
+
+	protected <D extends IGObjectDriver, R extends IGInterpreterRuntimeEnv>
+	void collectUniqueListeners(Collection<D> aVisitedDrivers, Collection<R> aUniqueListeners) throws ZamiaException {
+
+		if (fMappedTo != null) {
+			fMappedTo.collectUniqueListeners(aVisitedDrivers, aUniqueListeners);
+		}
 	}
 }

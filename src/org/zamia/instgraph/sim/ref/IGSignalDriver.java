@@ -6,12 +6,14 @@ import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGTypeStatic;
+import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.util.PathName;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +61,11 @@ public class IGSignalDriver extends IGObjectDriver {
 	private HashSet<IGSimProcess> fListeners = new HashSet<IGSimProcess>();
 
 	private HashSet<IGSignalDriver> fSignalListeners;
-
+	/**
+	 * Here we store the parts of the signal (may easily be the whole signal) to which an assignment is made
+	 * during a delta-cycle. These parts are further merged into a single {@link IGSignalChangeRequest} when processing
+	 * delta in {@link IGSimRef#processDelta(IGRequestList)}. <b>Must be cleared after each delta-cycle/merging!</b>
+	 */
 	private HashSet<IGSignalDriver> fToBeMerged = new HashSet<IGSignalDriver>();
 
 	public IGSignalDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
@@ -166,6 +172,8 @@ public class IGSignalDriver extends IGObjectDriver {
 
 			return targetDriver;
 		}
+		targetDriver.fToBeMerged = new HashSet<IGSignalDriver>();
+
 		return null;
 	}
 
@@ -341,15 +349,20 @@ public class IGSignalDriver extends IGObjectDriver {
 		return uniqueListeners;
 	}
 
-	private void collectUniqueListeners(HashSet<IGSignalDriver> aVisitedDrivers, HashSet<IGSimProcess> aUniqueListeners) throws ZamiaException {
+	@SuppressWarnings("unchecked")
+	@Override
+	protected <D extends IGObjectDriver, R extends IGInterpreterRuntimeEnv>
+	void collectUniqueListeners(Collection<D> aVisitedDrivers, Collection<R> aUniqueListeners) throws ZamiaException {
+
+		super.collectUniqueListeners(aVisitedDrivers, aUniqueListeners);
 
 		if (aVisitedDrivers.contains(this)) {
 			return;
 		}
 
-		aUniqueListeners.addAll(fListeners);
+		aUniqueListeners.addAll((Collection<? extends R>) fListeners);
 
-		aVisitedDrivers.add(this); // avoid notification mirroring
+		aVisitedDrivers.add((D) this); // avoid notification mirroring
 
 //		if (isTransmitter()) {
 //			IGSignalDriver mappedTo = getMappedTo();
