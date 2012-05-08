@@ -21,6 +21,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileLock;
 import java.util.HashMap;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
@@ -87,7 +91,8 @@ public class ZDB {
 
 	private ZDBPersistentData fPD;
 
-	private File fLockFile, fDataFile, fPDFile, fEHMPagesFile, fOffsetsFile;
+	private File fDataFile, fPDFile, fEHMPagesFile, fOffsetsFile;
+	private FileLock fLock = null;
 
 	private Object fOwner;
 
@@ -124,7 +129,6 @@ public class ZDB {
 		fDBDir = aDBDir;
 		fOwner = aOwner;
 		fPDFile = new File(fDBDir.getAbsolutePath() + File.separator + PD_FILENAME);
-		fLockFile = new File(fDBDir.getAbsolutePath() + File.separator + LOCK_FILENAME);
 		fDataFile = new File(fDBDir.getAbsolutePath() + File.separator + DATA_TABLE_FILENAME);
 		fEHMPagesFile = new File(fDBDir.getAbsolutePath() + File.separator + EHM_PAGES_FILENAME);
 		fOffsetsFile = new File(fDBDir.getAbsolutePath() + File.separator + OFFSETS_FILENAME);
@@ -183,11 +187,6 @@ public class ZDB {
 
 		FileUtils.deleteDirRecursive(fDBDir);
 		mkdirChecked(fDBDir);
-		try {
-			doLock();
-		} catch (ZDBException e) {
-			el.logException(e);
-		}
 	}
 
 	private void printStats() {
@@ -718,41 +717,21 @@ public class ZDB {
 			return;
 		}
 
-		if (fLockFile.exists()) {
-			logger.error("ZDB: Lockfile exists, another instance may be running.");
-			logger.error("ZDB: If you are sure no other instance is running, delete '%s'.", fLockFile.getAbsolutePath());
+		File lockFile = new File(fDBDir.getAbsolutePath() + File.separator + LOCK_FILENAME);
 
-			throw new ZDBException("ZDB: Lockfile " + fLockFile.getAbsolutePath() + " exists, another instance may be running.", fLockFile);
-		}
-
-		FileOutputStream fout = null;
 		try {
-			fout = new FileOutputStream(fLockFile);
-			fout.write(42);
-		} catch (IOException e) {
-			el.logException(e);
-			System.exit(1);
-		} finally {
-			if (fout != null) {
-				try {
-					fout.close();
-				} catch (IOException e) {
-					el.logException(e);
-				}
-			}
-		}
-		if (!fLockFile.exists()) {
-			logger.error("ZDB: Failed to create lockfile '%s'.", fLockFile.getAbsolutePath());
-			throw new ZDBException("ZDB: Failed to create lockfile " + fLockFile.getAbsolutePath(), fLockFile);
-		}
-		fLockFile.deleteOnExit();
+			fLock = new RandomAccessFile(lockFile, "rw").getChannel().tryLock();
+		} catch (IOException e) {el.logException(e);}
+		if (fLock == null)
+			throw new ZDBException("ZDB: failed to create a lock file, " + lockFile.getAbsolutePath() + ". Another instance may be running.", lockFile);
+		
 	}
 
 	private void doUnLock() {
 		if (fLockingEnabled) {
-			if (fLockFile.exists()) {
-				fLockFile.delete();
-			}
+			try {
+				fLock.release();
+			} catch (IOException e) {el.logException(e);}
 		}
 	}
 
