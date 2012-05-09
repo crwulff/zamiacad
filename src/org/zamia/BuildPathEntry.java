@@ -64,7 +64,7 @@ public class BuildPathEntry implements Serializable {
 		if (!fPrefix.equals(bpe.fPrefix)) {
 			return false;
 		}
-		if (!fLibId.equals(bpe.fLibId)) {
+		if ((fLibId == null && bpe.fLibId != null) || (fLibId != null && !fLibId.equals(bpe.fLibId))) {
 			return false;
 		}
 		// priority should be sufficient
