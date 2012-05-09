@@ -34,6 +34,7 @@ import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
+import org.zamia.instgraph.sim.IGAbstractProgressMonitor;
 import org.zamia.instgraph.sim.IGISimCursor;
 import org.zamia.instgraph.sim.IGISimObserver;
 import org.zamia.instgraph.sim.IGISimulator;
@@ -93,6 +94,8 @@ public class IGSimRef implements IGISimulator {
 
 	private Set<IGSimProcess> fProcesses;
 
+	private IGAbstractProgressMonitor fMonitor;
+
 	public IGSimRef() {
 
 	}
@@ -133,10 +136,15 @@ public class IGSimRef implements IGISimulator {
 		BigInteger lastSimulationTime = fSimulationTime;
 
 		BigInteger nanos = aTimeLimit.divide(MLN_FS);
-		logger.info("IGSimRef: ** Simulating %5d ns                         **", nanos);
+		logger.info("IGSimRef: ** Simulating till %5d ns                    **", nanos);
 		logger.info("IGSimRef: *************************************************");
 
 		while (true) {
+
+			if (isCanceled()) {
+				break;
+			}
+
 			if (fSimSchedule.isEmpty()) {
 				break;
 			}
@@ -162,6 +170,7 @@ public class IGSimRef implements IGISimulator {
 			if (lastSimulationTime.compareTo(fSimulationTime) < 0) {
 				lastSimulationTime = fSimulationTime;
 				counter = 0;
+				updateMonitor();
 			} else {
 				counter++;
 				if (counter >= SIM_MAX_ITERATIONS) {
@@ -189,6 +198,12 @@ public class IGSimRef implements IGISimulator {
         logger.info("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
 		logger.info("IGSimRef: *************************************************");
 
+	}
+
+	private void updateMonitor() {
+		if (fMonitor != null) {
+			fMonitor.setProgress(fSimulationTime);
+		}
 	}
 
 	private void logChanges() throws ZamiaException {
@@ -431,6 +446,14 @@ public class IGSimRef implements IGISimulator {
 		initObjects(LocalItemFilter.ALL, aContainer, aEnv, aPath);
 	}
 
+	public boolean isCanceled() {
+		return fMonitor != null && fMonitor.isCanceled();
+	}
+
+	public void setMonitor(IGAbstractProgressMonitor aProgressMonitor) {
+		fMonitor = aProgressMonitor;
+	}
+
 	private enum LocalItemFilter {
 		GENERICS, PORTS, LOCALS, ALL;
 
@@ -617,8 +640,6 @@ public class IGSimRef implements IGISimulator {
 			notifyChanges(fSimulationTime);
 			throw e;
 		}
-
-		fSimulationTime = timeLimit;
 
 		notifyChanges(fSimulationTime);
 	}
