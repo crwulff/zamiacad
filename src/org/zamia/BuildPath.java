@@ -563,11 +563,8 @@ public class BuildPath implements Serializable {
 		String pathPrefix = evalString(fBuf.toString()).replace('/', File.separatorChar).replace('\\', File.separatorChar);
 		nextSym();
 
-		//FIXME: check the case when resource is a file rather than dir. 
-		//It should not end with separator then. Get rid of new File() in the findEntry().
-		if (!pathPrefix.endsWith(File.separator)) {
-			pathPrefix = pathPrefix + File.separator;
-		}
+		if (!pathPrefix.endsWith(File.separator))
+			pathPrefix += File.separator;
 
 		if (!list) {
 
@@ -957,8 +954,8 @@ public class BuildPath implements Serializable {
 			for (int i = 0; i < n; i++) {
 				BuildPathEntry entry = getEntry(i);
 				if (!entry.fExtern) {
-					String p1 =new File(path).getPath();
-					String p2 = new File(entry.fPrefix).getPath();
+					String p1 = new File(path).getPath() + File.separator;
+					String p2 = entry.fPrefix;
 					if (p1.startsWith(p2))
 						return entry;
 				}
