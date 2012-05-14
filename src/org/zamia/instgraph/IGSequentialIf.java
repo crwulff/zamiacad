@@ -82,7 +82,7 @@ public class IGSequentialIf extends IGSequentialStatement {
 		fThenSOS.generateCode(aCode);
 
 		if (fElseSOS != null) {
-			aCode.add(new IGJumpStmt(endLabel, computeSourceLocation(), getZDB()));
+			aCode.add(new IGJumpStmt(endLabel, fThenSOS.computeSourceLocation(), getZDB()));
 			aCode.defineLabel(elseLabel);
 			fElseSOS.generateCode(aCode);
 		}

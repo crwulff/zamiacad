@@ -17,12 +17,20 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
+import org.zamia.instgraph.interpreter.IGInterpreterCode;
+import org.zamia.instgraph.interpreter.IGStmt;
 import org.zamia.vhdl.ast.DMUID;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.LinkedList;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.junit.matchers.JUnitMatchers.hasItem;
 
 /**
  * @author Guenter Bartsch
@@ -32,6 +40,8 @@ public class IGTest {
 	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
 	private ZamiaProject fZPrj;
+
+	private IGInterpreterCode fCode;
 
 	public void setupTest(String aBasePath, String aBuildPath) throws Exception {
 		ZamiaLogger.setup(Level.DEBUG);
@@ -591,6 +601,91 @@ public class IGTest {
 	public void testLeonExtern() throws Exception {
 
 		runTest("examples/leonExtern", 1933);
+	}
+
+	@Test
+	public void correctSourcesInGeneratedCodeOfConditionalSignalAssignment() throws Exception {
+
+		runTest("examples/semantic/conditionalSignalAssignment", 1);
+
+		generateCodeForFirstStmt();
+
+		checkRequirementsCriticalForCoverage();
+	}
+
+	private void checkRequirementsCriticalForCoverage() {
+
+		assertThat(fCode.size(), is(115));
+
+		fooStmtsWithin(0, 51).shouldComeFromLines(11, 12); // last 'JUMP NC 56' should be located on IF-condition's line
+
+		fooStmtsWithin(52, 55).shouldComeFromLines(10); // last 'JUMP 115' should be located on THEN's line
+
+		fooStmtsWithin(56, 107).shouldComeFromLines(14, 15, 16); // last 'JUMP NC 112' => on IF-condition's line
+
+		fooStmtsWithin(108).shouldComeFromLines(10);
+		fooStmtsWithin(110, 111).shouldComeFromLines(13); // 'JUMP 115' => on THEN's line
+
+		fooStmtsWithin(112).shouldComeFromLines(10);
+		fooStmtsWithin(114).shouldComeFromLines(17);
+
+	}
+
+	private class Matcher {
+
+		LinkedList<IGStmt> fooStmts;
+
+		private Matcher() {
+			fooStmts = new LinkedList<IGStmt>();
+		}
+
+		void shouldComeFromLines(Integer... lines) {
+
+			for (IGStmt fooStmt : fooStmts)
+
+				assertThat("'" + fooStmt + "'s line should be " + Arrays.toString(lines),
+						Arrays.<Integer>asList(lines), hasItem(fooStmt.getLine()));
+		}
+	}
+
+	private Matcher fooStmtsWithin(int PC) {
+		return fooStmtsWithin(PC, PC);
+	}
+
+	private Matcher fooStmtsWithin(int startPC, int endPC) {
+
+		Matcher matcher = new Matcher();
+
+		for (int pc = startPC; pc <= endPC; pc++) {
+			IGStmt stmt = fCode.get(pc);
+
+			File file = stmt.computeSourceLocation().fSF.getFile();
+			if (file != null && file.getName().equals("foo.vhdl")) {
+				matcher.fooStmts.add(stmt);
+			}
+		}
+
+		return matcher;
+	}
+
+	private void generateCodeForFirstStmt() throws ZamiaException {
+
+		BuildPath bp = fZPrj.getBuildPath();
+
+		Toplevel tl = bp.getToplevel(0);
+
+		IGModule module = fZPrj.getIGM().findModule(tl);
+
+		IGConcurrentStatement stmt = module.getStructure().getStatement(0);
+
+		assertThat(stmt, instanceOf(IGProcess.class));
+
+		IGProcess proc = (IGProcess) stmt;
+
+		IGSequentialStatement seq = proc.getSequenceOfStatements().getStatement(0);
+
+		fCode = new IGInterpreterCode("", null);
+		seq.generateCode(fCode);
 	}
 
 	public static void main (String args[]) {

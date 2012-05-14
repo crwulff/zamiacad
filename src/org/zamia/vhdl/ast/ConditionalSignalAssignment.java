@@ -225,6 +225,7 @@ public class ConditionalSignalAssignment extends ConcurrentSignalAssignment {
 			guardIf.setElse(elseSOS);
 		}
 
+		IGSequentialIf si = null;
 		int n = getNumConditionalWaveforms();
 		for (int i = 0; i < n; i++) {
 			ConditionalWaveform cw = getCW(i);
@@ -232,22 +233,24 @@ public class ConditionalSignalAssignment extends ConcurrentSignalAssignment {
 			Waveform wv = cw.getWaveform();
 			Operation cond = cw.getCond();
 
+			if (si != null) {
+				IGSequenceOfStatements elseStmt = new IGSequenceOfStatements(null, wv.getLocation(), aEE.getZDB());
+				si.setElse(elseStmt);
+				cur = elseStmt;
+			}
+
 			if (cond != null) {
 
 				IGType boolType = aContainer.findBoolType();
 
 				IGOperation zCond = cond.computeIGOperation(boolType, aContainer, aEE, new IGOperationCache(), ASTErrorMode.EXCEPTION, null);
 
-				IGSequenceOfStatements thenStmt = new IGSequenceOfStatements(null, getLocation(), aEE.getZDB());
+				IGSequenceOfStatements thenStmt = new IGSequenceOfStatements(null, wv.getLocation(), aEE.getZDB());
 
 				wv.generateIGSequence(fTarget, delayMechanism, thenStmt, aContainer, aEE);
 
-				IGSequentialIf si = new IGSequentialIf(zCond, thenStmt, null, getLocation(), aEE.getZDB());
+				si = new IGSequentialIf(zCond, thenStmt, null, cond.getLocation(), aEE.getZDB());
 				cur.add(si);
-
-				IGSequenceOfStatements elseStmt = new IGSequenceOfStatements(null, getLocation(), aEE.getZDB());
-				si.setElse(elseStmt);
-				cur = elseStmt;
 
 			} else {
 				wv.generateIGSequence(fTarget, delayMechanism, cur, aContainer, aEE);
