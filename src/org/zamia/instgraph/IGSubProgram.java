@@ -17,6 +17,7 @@ import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGNewObjectStmt;
+import org.zamia.instgraph.interpreter.IGReturnStmt;
 import org.zamia.vhdl.ast.AssociationList;
 import org.zamia.zdb.ZDB;
 
@@ -114,6 +115,8 @@ public class IGSubProgram extends IGContainerItem {
 		}
 
 		fCode.generateCode(fInterpreterCode);
+		
+		fInterpreterCode.add(new IGReturnStmt(computeSourceLocation(), getZDB()));
 
 	}
 
