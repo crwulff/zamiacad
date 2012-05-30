@@ -26,52 +26,82 @@ import org.zamia.zdb.ZDB;
 @SuppressWarnings("serial")
 public class IGSequentialAssert extends IGSequentialStatement {
 
-	private IGAssertion fAssertion;
+	private IGOperation fOp, fReport, fSeverity;
 
-	public IGSequentialAssert(IGAssertion aAssertion, String aLabel, SourceLocation aSrc, ZDB aZDB) {
+	public IGSequentialAssert(IGOperation aOp, IGOperation aReport, IGOperation aSeverity, String aLabel, SourceLocation aSrc, ZDB aZDB) {
 		super(aLabel, aSrc, aZDB);
-
-		fAssertion = aAssertion;
+		fOp = aOp;
+		fReport = aReport;
+		fSeverity = aSeverity;
 	}
 
-	@Override
+	public void dump(int indent) {
+		logger.debug(indent, "%s", toString());
+	}
+
+	public IGOperation getOp() {
+		return fOp;
+	}
+
+	public IGOperation getReport() {
+		return fReport;
+	}
+
+	public IGOperation getSeverity() {
+		return fSeverity;
+	}
+
 	public void computeAccessedItems(IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
-		fAssertion.computeAccessedItems(aFilterItem, aFilterType, aDepth, aAccessedItems);
+		if (fOp != null) {
+			fOp.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, aAccessedItems);
+		}
+		if (fReport != null) {
+			fReport.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, aAccessedItems);
+		}
+		if (fSeverity != null) {
+			fSeverity.computeAccessedItems(false, aFilterItem, aFilterType, aDepth, aAccessedItems);
+		}
 	}
+
 
 	@Override
 	public void generateCode(IGInterpreterCode aCode) throws ZamiaException {
 
-		IGOperation op = fAssertion.getOp();
-		op.generateCode(true, aCode);
+		fOp.generateCode(true, aCode);
 
-		IGOperation report = fAssertion.getReport();
-		if (report != null) {
-			report.generateCode(true, aCode);
+		if (fReport != null) {
+			fReport.generateCode(true, aCode);
 		}
 
-		IGOperation severity = fAssertion.getSeverity();
-		if (severity != null) {
-			severity.generateCode(true, aCode);
+		if (fSeverity != null) {
+			fSeverity.generateCode(true, aCode);
 		}
 
-		aCode.add(new IGAssertStmt(report != null, severity != null, computeSourceLocation(), getZDB()));
+		aCode.add(new IGAssertStmt(fReport != null, fSeverity != null, computeSourceLocation(), getZDB()));
 
-	}
-
-	@Override
-	public IGItem getChild(int aIdx) {
-		return fAssertion;
 	}
 
 	@Override
 	public int getNumChildren() {
-		return 1;
+		return 3;
 	}
-	
+
+	@Override
+	public IGItem getChild(int aIdx) {
+		switch (aIdx) {
+		case 0:
+			return fOp;
+		case 1:
+			return fReport;
+		case 2:
+			return fSeverity;
+		}
+		return null;
+	}
+
 	@Override
 	public String toString() {
-		return "ASSERT "+fAssertion;
+		return "Assertion (op=" + fOp + ", report=" + fReport + ", severity=" + fSeverity + ")";
 	}
 
 }

@@ -18,12 +18,12 @@ import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite.RefType;
 import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
-import org.zamia.instgraph.IGAssertion;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGOperationLiteral;
+import org.zamia.instgraph.IGSequentialAssert;
 import org.zamia.instgraph.IGType;
 
 
@@ -111,7 +111,7 @@ public class Assertion extends VHDLNode {
 		}
 	}
 
-	public IGAssertion computeIG(IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache) throws ZamiaException {
+	public IGSequentialAssert computeIG(String aLabel, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache) throws ZamiaException {
 
 		IGOperation zOp = op != null ? op.computeIGOperation(aContainer.findBoolType(), aContainer, aEE, aCache, ASTErrorMode.EXCEPTION, null) : null;
 
@@ -128,7 +128,7 @@ public class Assertion extends VHDLNode {
 
 		IGOperation zSeverity = severity != null ? severity.computeIGOperation(severityLevel, aContainer, aEE, aCache, ASTErrorMode.EXCEPTION, null) : null;
 
-		return new IGAssertion(zOp, zReport, zSeverity, getLocation(), aEE.getZDB());
+		return new IGSequentialAssert(zOp, zReport, zSeverity, aLabel, getLocation(), aEE.getZDB());
 	}
 
 	public String toVHDL() {

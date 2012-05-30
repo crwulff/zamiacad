@@ -18,7 +18,6 @@ import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite.RefType;
 import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
-import org.zamia.instgraph.IGAssertion;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGOperationCache;
@@ -87,9 +86,9 @@ public class ConcurrentAssertion extends ConcurrentStatement {
 		IGSequenceOfStatements sos = new IGSequenceOfStatements(fLabel, getLocation(), aEE.getZDB());
 		proc.setStatementSequence(sos);
 
-		IGAssertion zAssert = fAssertion.computeIG(aContainer, aEE, new IGOperationCache());
+		IGSequentialAssert zAssert = fAssertion.computeIG(fLabel, aContainer, aEE, new IGOperationCache());
 
-		sos.add(new IGSequentialAssert(zAssert, null, getLocation(), aEE.getZDB()));
+		sos.add(zAssert);
 
 		proc.appendFinalWait(null);
 

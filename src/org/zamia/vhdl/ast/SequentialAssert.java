@@ -64,7 +64,7 @@ public class SequentialAssert extends SequentialStatement {
 
 	@Override
 	public void generateIG(IGSequenceOfStatements aSeq, IGContainer aContainer, IGElaborationEnv aEE) throws ZamiaException {
-		aSeq.add(new IGSequentialAssert(assertion.computeIG(aContainer, aEE, new IGOperationCache()), getLabel(), getLocation(), aEE.getZDB()));
+		aSeq.add(assertion.computeIG(getLabel(), aContainer, aEE, new IGOperationCache()));
 	}
 
 	@Override
