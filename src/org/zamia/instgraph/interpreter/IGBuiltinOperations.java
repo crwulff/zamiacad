@@ -24,6 +24,7 @@ import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.instgraph.sim.ref.IGFileDriver;
+import org.zamia.instgraph.sim.ref.IGSimProcess;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 
 import static org.zamia.instgraph.IGObject.OIDir.*;
@@ -147,10 +148,28 @@ public class IGBuiltinOperations {
 		case FILE_CLOSE:
 			return execFileClose(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
+		case NOW:
+			return execNow(aSub, aRuntime, aLocation, aErrorMode, aReport);
+		
 		default:
 			throw new ZamiaException("Sorry, unimplemented builtin: " + builtin, aLocation);
 		}
 
+	}
+	
+	private static ReturnStatus execNow(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
+		
+		if (aRuntime instanceof IGSimProcess) {
+			
+			BigInteger now = ((IGSimProcess) aRuntime).getCurrentTime(aLocation);
+		
+			IGTypeStatic timeType = aSub.getReturnType().computeStaticType(aRuntime, aErrorMode, aReport);
+		
+			IGStaticValue nowTime = new IGStaticValueBuilder(timeType, "NOW", aLocation).setNum(now).buildConstant();
+		
+			aRuntime.push(nowTime);
+		}
+		return ReturnStatus.CONTINUE;
 	}
 
 	private static ReturnStatus execIntUnary(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)

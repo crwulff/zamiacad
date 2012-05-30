@@ -10,6 +10,9 @@ examples/n68
 examples/gooofy
 examples/erados
 
+*.class
+*.pyc
+
 bin
 share/jars/cachedir/packages
 *.bak
