@@ -111,6 +111,11 @@ public class IGRefSimTest {
 	}
 
 	@Test
+	public void testProcretReportAndNow() throws Exception {
+		runTest("examples/refsim/procret-report-now", 1, 60);
+	}
+	
+	@Test
 	public void testParamsEvent() throws Exception {
 		runTest("examples/refsim/params2", 1, 60);
 	}

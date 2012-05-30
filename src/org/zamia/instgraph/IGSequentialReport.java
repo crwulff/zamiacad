@@ -11,7 +11,9 @@ package org.zamia.instgraph;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGItemAccess.AccessType;
+import org.zamia.instgraph.interpreter.IGAssertStmt;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
+import org.zamia.instgraph.interpreter.IGReportStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
@@ -43,7 +45,14 @@ public class IGSequentialReport extends IGSequentialStatement {
 
 	@Override
 	public void generateCode(IGInterpreterCode aCode) throws ZamiaException {
-		// TODO Auto-generated method stub
+
+		fMsg.generateCode(true, aCode);
+
+		if (fSeverity != null) {
+			fSeverity.generateCode(true, aCode);
+		}
+
+		aCode.add(new IGReportStmt(fSeverity != null, computeSourceLocation(), getZDB()));
 
 	}
 

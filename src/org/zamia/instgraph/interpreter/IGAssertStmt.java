@@ -52,17 +52,12 @@ public class IGAssertStmt extends IGStmt {
 		IGStaticValue op = aRuntime.pop().getValue();
 		
 		if (!op.isTrue()) {
-			String reportStr = report != null ? report.toString() : "Assertion failed.";
-			reportStr += "\nSource Location: "+computeSourceLocation();
-			if (severity != null) {
-				reportStr += "\nSeverity: "+severity;
-			}
-			logger.error("Assertion failed: %s", reportStr);
-
-			int severityLevel = (int) (severity != null ? severity.getOrd() : 3);
-			if (severityLevel>1) {
-				throw new ZamiaException (reportStr, computeSourceLocation());
-			}
+			
+			// by VHDL LRM, error level = ERROR (0-note, 1-warn, 2-error, 3-failure)
+			String reportStr = ((severity != null) ? severity : "ERROR") + ": ";
+			int severityLevel = (severity != null) ? severity.getEnumOrd() : 2;
+			reportStr += report != null ? report.toString() : "Assertion failed.";
+			logger.log(severityLevel, reportStr, computeSourceLocation());
 		}
 		
 		return ReturnStatus.CONTINUE;

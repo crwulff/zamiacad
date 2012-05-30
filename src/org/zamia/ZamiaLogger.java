@@ -249,5 +249,25 @@ public class ZamiaLogger {
 	public String getLogFileName() {
 		return fFileName;
 	}
+	
+	/**Severity level 0-note, 1-warn, 2-err, 3-fatal corresponds to StaticValue severityLevel
+	 * This method is called from assertion and report and must continue if not fatal.
+	 * @throws ZamiaException */
+	public void log(int severityLevel, String reportMsg, SourceLocation sourceLocation) throws ZamiaException {
+		
+//		System.out.println("FATAL_INT = " + Level.FATAL_INT); // = 50000 
+//		System.out.println("ERROR_INT = " + Level.ERROR_INT); // = 40000
+//		System.out.println("WARN_INT = " + Level.WARN_INT); // = 30000
+//		System.out.println("INFO_INT = " + Level.INFO_INT); / = 20000 => VHDL note
+//		System.out.println("DEBUG_INT = " + Level.DEBUG_INT); // = 10000
+		
+		logger.log(Level.toLevel(20000 + severityLevel * 10000), reportMsg + " at " + sourceLocation);
+		
+		//0 -note, 1-warn, 2-err, 3-fatal. By spec, in case of 0, 1 and 2, we continue 
+		if (severityLevel == 3) {
+			throw new ZamiaException (reportMsg, sourceLocation); 
+		}
+		
+	}
 
 }
