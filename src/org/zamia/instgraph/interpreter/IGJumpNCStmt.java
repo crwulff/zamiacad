@@ -23,6 +23,8 @@ import org.zamia.zdb.ZDB;
 @SuppressWarnings("serial")
 public class IGJumpNCStmt extends IGJumpStmt {
 
+	private boolean fHasTrueOccurred, fHasFalseOccurred;
+
 	public IGJumpNCStmt(IGLabel aLabel, SourceLocation aLocation, ZDB aZDB) {
 		super(aLabel, aLocation, aZDB);
 	}
@@ -38,11 +40,28 @@ public class IGJumpNCStmt extends IGJumpStmt {
 			aRuntime.setPC(fAdr);
 		}
 
+		logLogicalValue(b);
+
 		return ReturnStatus.CONTINUE;
 	}
 
 	@Override
 	public String toString() {
 		return "JUMP NC " + fAdr;
+	}
+
+	private void logLogicalValue(boolean aResult) {
+		if (aResult)
+			fHasTrueOccurred = fHasTrueOccurred || true;
+		else
+			fHasFalseOccurred = fHasFalseOccurred || true;
+	}
+
+	public boolean hasTrueOccurred() {
+		return fHasTrueOccurred;
+	}
+
+	public boolean hasFalseOccurred() {
+		return fHasFalseOccurred;
 	}
 }

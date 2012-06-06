@@ -6,13 +6,15 @@ Bundle-Version: 0.10.3
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Vendor: zamiaCAD Project
 Bundle-Localization: plugin
-Export-Package: org.zamia,
+Export-Package: org.python.core,
+ org.zamia,
  org.zamia.analysis,
  org.zamia.analysis.ast,
  org.zamia.analysis.ig,
  org.zamia.cli.jython,
  org.zamia.fsm,
  org.zamia.instgraph,
+ org.zamia.instgraph.interpreter.logger,
  org.zamia.instgraph.sim,
  org.zamia.instgraph.sim.annotations,
  org.zamia.instgraph.sim.ref,
@@ -23,8 +25,8 @@ Export-Package: org.zamia,
  org.zamia.rtl.sim,
  org.zamia.rtl.symbols,
  org.zamia.util,
- org.zamia.vhdl.ast,
  org.zamia.vg,
+ org.zamia.vhdl.ast,
  org.zamia.zdb
 Bundle-ClassPath: bin/,
  .,

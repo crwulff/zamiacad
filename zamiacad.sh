@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [ x$ZAMIA_HOME == x ] ; then
+if [ $ZAMIA_HOME = x ] ; then
   SCRIPT=`readlink -f $0`
   ZAMIA_HOME=`dirname $SCRIPT`
 fi

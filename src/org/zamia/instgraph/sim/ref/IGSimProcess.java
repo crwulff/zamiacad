@@ -8,6 +8,8 @@
  */
 package org.zamia.instgraph.sim.ref;
 
+import java.math.BigInteger;
+
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
@@ -15,8 +17,6 @@ import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.util.PathName;
-
-import java.math.BigInteger;
 
 
 /**
@@ -64,7 +64,7 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 		return fSim.getLastValue(aSignalName);
 	}
 
-	public BigInteger getCurrentTime(SourceLocation aLocation) throws ZamiaException {
+	public BigInteger getCurrentTime(SourceLocation aLocation) {
 		return fSim.getEndTime();
 	}
 

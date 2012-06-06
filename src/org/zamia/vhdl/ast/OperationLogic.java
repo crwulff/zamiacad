@@ -16,8 +16,8 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite.RefType;
-import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
+import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGOperation;
@@ -43,8 +43,8 @@ public class OperationLogic extends Operation {
 
 	private Operation fA, fB;
 
-	public OperationLogic(LogicOp aOp, Operation aA, Operation aB, VHDLNode aParent, long aLocation) {
-		super(aParent, aLocation);
+	public OperationLogic(LogicOp aOp, Operation aA, Operation aB, VHDLNode aParent, long aLocation, long aOperatorLocation) {
+		super(aParent, aLocation, aOperatorLocation);
 		fOp = aOp;
 
 		fA = aA;

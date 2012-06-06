@@ -70,7 +70,56 @@ public class IGBinaryOpStmt extends IGOpStmt {
 		}
 		aRuntime.push(resValue);
 
+		logLogicalValue(resValue);
+
 		return ReturnStatus.CONTINUE;
+	}
+
+	private boolean fHasTrueOccurred, fHasFalseOccurred, fIsRelational;
+
+	void logLogicalValue(IGStaticValue logicalValue) throws ZamiaException {
+
+		fIsRelational = isRelational(fOp);
+		if (!fIsRelational) {
+			return;
+		}
+
+		if (logicalValue.isTrue())
+			fHasTrueOccurred = fHasTrueOccurred || true;
+		else
+			fHasFalseOccurred = fHasFalseOccurred || true;
+	}
+
+	private static boolean isRelational(BinOp binOp) {
+		switch (binOp) {
+			case EQUAL:
+			case LESSEQ:
+			case LESS:
+			case GREATER:
+			case GREATEREQ:
+			case NEQUAL:
+			case AND:
+			case NAND:
+			case OR:
+			case NOR:
+			case XOR:
+			case XNOR:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	public boolean isRelational() {
+		return fIsRelational;
+	}
+
+	public boolean hasTrueOccurred() {
+		return fHasTrueOccurred;
+	}
+
+	public boolean hasFalseOccurred() {
+		return fHasFalseOccurred;
 	}
 
 	@Override

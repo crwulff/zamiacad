@@ -12,6 +12,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 
 import org.zamia.ErrorReport;
+import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGElaborationEnv;
@@ -32,8 +33,25 @@ import org.zamia.instgraph.IGType;
 @SuppressWarnings("serial")
 public abstract class Operation extends VHDLNode {
 
+	private int fOpLine;
+
+	private int fOpCol;
+
 	public Operation(VHDLNode aParent, long aLocation) {
 		super(aParent, aLocation);
+	}
+
+	public Operation(VHDLNode aParent, long aLocation, long aOperatorLocation) {
+		super(aParent, aLocation);
+		fOpLine = extractLine(aOperatorLocation);
+		fOpCol = extractCol(aOperatorLocation);
+	}
+
+	public SourceLocation getOperatorLocation() {
+		SourceLocation loc = getLocation();
+		loc.fLine = fOpLine;
+		loc.fCol = fOpCol;
+		return loc;
 	}
 
 	public final ArrayList<IGOperation> computeIG(IGType aTypeHint, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, ASTErrorMode aErrorMode,
@@ -171,7 +189,7 @@ public abstract class Operation extends VHDLNode {
 				continue;
 			}
 
-			IGOperationInvokeSubprogram invocation = sp.generateInvocation(al, aContainer, aEE, aCache, getLocation(), report);
+			IGOperationInvokeSubprogram invocation = sp.generateInvocation(al, aContainer, aEE, aCache, getLocation(), getOperatorLocation(), report);
 			if (invocation != null) {
 				if (inv != null) {
 					int s1 = inv.getScore();

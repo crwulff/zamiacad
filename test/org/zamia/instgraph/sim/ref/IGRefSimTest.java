@@ -7,6 +7,13 @@
 
 package org.zamia.instgraph.sim.ref;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.math.BigInteger;
+import java.nio.channels.FileLock;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.log4j.Level;
 import org.junit.Test;
 import org.zamia.BuildPath;
@@ -20,13 +27,6 @@ import org.zamia.ZamiaProjectBuilder;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.util.PathName;
 import org.zamia.vhdl.ast.DMUID;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.math.BigInteger;
-import java.nio.channels.FileLock;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -60,12 +60,13 @@ public class IGRefSimTest {
 		fZPrj.clean();
 	}
 
-	private DMUID getUID(ZamiaProject aZPrj) {
-		BuildPath bp = aZPrj.getBuildPath();
+	private DMUID getUID() {
+
+		BuildPath bp = fZPrj.getBuildPath();
 
 		Toplevel tl = bp.getToplevel(0);
 
-		return aZPrj.getDUM().getArchDUUID(tl.getDUUID());
+		return fZPrj.getDUM().getArchDUUID(tl.getDUUID());
 	}
 
 	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes, int aNanos) throws Exception {
@@ -75,7 +76,7 @@ public class IGRefSimTest {
 
 		builder.build(true, true, null);
 
-		DMUID duuid = getUID(fZPrj);
+		DMUID duuid = getUID();
 
 		int n = fZPrj.getERM().getNumErrors();
 		logger.error("IGTest: Build finished. Found %d errors.", n);
@@ -333,6 +334,8 @@ public class IGRefSimTest {
 		runTest("examples/erados", 48, 4070);
 
 		checkSignalValue("LEDS_LD", "00001001");
+
+		cleanErados();
 	}
 	@Test
 	public void testEradosBug2() throws Exception {
@@ -348,6 +351,8 @@ public class IGRefSimTest {
 		runTest("examples/erados", 48, 1550);
 
 		checkSignalValue("LEDS_LD", "00000001");
+
+		cleanErados();
 	}
 	@Test
 	public void testEradosBug3() throws Exception {
@@ -363,6 +368,8 @@ public class IGRefSimTest {
 		runTest("examples/erados", 48, 13630);
 
 		checkSignalValue("LEDS_LD", "00010111");
+
+		cleanErados();
 	}
 	@Test
 	public void testEradosBug4() throws Exception {
@@ -378,6 +385,8 @@ public class IGRefSimTest {
 		runTest("examples/erados", 48, 20050);
 
 		checkSignalValue("LEDS_LD", "11111111");
+
+		cleanErados();
 	}
 	@Test
 	public void testEradosBug5() throws Exception {
@@ -393,6 +402,8 @@ public class IGRefSimTest {
 		runTest("examples/erados", 48, 18850);
 
 		checkSignalValue("LEDS_LD", "00011010");
+
+		cleanErados();
 	}
 	@Test
 	public void testEradosBug6() throws Exception {
@@ -408,6 +419,8 @@ public class IGRefSimTest {
 		runTest("examples/erados", 48, 4790);
 
 		checkSignalValue("LEDS_LD", "00001011");
+
+		cleanErados();
 	}
 	@Test
 	public void testEradosBug7() throws Exception {
@@ -423,6 +436,8 @@ public class IGRefSimTest {
 		runTest("examples/erados", 48, 12130);
 
 		checkSignalValue("LEDS_LD", "00010101");
+
+		cleanErados();
 	}
 
 	private void checkSignalValue(String signalName, String valueAsString) {

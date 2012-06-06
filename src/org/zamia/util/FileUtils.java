@@ -8,8 +8,6 @@
  */
 package org.zamia.util;
 
-import org.zamia.ExceptionLogger;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -22,6 +20,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.zamia.ExceptionLogger;
+import org.zamia.ZamiaLogger;
+
 /**
  * A collection of static methods for dealing with files
  * 
@@ -32,6 +33,8 @@ import java.util.zip.ZipInputStream;
 public class FileUtils {
 
     private static ExceptionLogger el = ExceptionLogger.getInstance();
+
+	protected final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
 	public static void deleteDirRecursive(File aDir) {
 		
@@ -85,10 +88,28 @@ public class FileUtils {
 
 	public static boolean copy(File aSrc, File aDest) {
 		try {
-			org.apache.commons.io.FileUtils.copyFile(aSrc, aDest);
+			if (aSrc.isDirectory()) {
+				if (aDest.isDirectory()) {
+					/* Copy all files to new directory */
+					for (File file : aSrc.listFiles()) {
+						File destFile = new File(aDest, file.getName());
+						org.apache.commons.io.FileUtils.copyFile(file, destFile);
+						logger.info("Copied %s to %s", file, destFile);
+					}
+				} else {
+					/* Copy last file in source directory to new destination */
+					File[] files = aSrc.listFiles();
+					File srcFile = files[files.length - 1];
+					org.apache.commons.io.FileUtils.copyFile(srcFile, aDest);
+					logger.info("Copied %s to %s", srcFile, aDest);
+				}
+			} else {
+				org.apache.commons.io.FileUtils.copyFile(aSrc, aDest);
+				logger.info("Copied %s to %s", aSrc, aDest);
+			}
 			return true;
 		} catch (IOException e) {
-            el.logException(e);
+			el.logException(e);
 			return false;
 		}
 	}
@@ -115,7 +136,6 @@ public class FileUtils {
 				if (!aFilePathsToUnzip.isEmpty() && !aFilePathsToUnzip.containsKey(entry.getName())) {
 					continue;
 				}
-				System.out.println("Extracting: " + entry);
 				int count;
 				byte data[] = new byte[BUFFER];
 				// write the files to the disk
@@ -123,13 +143,15 @@ public class FileUtils {
 				if (!aFilePathsToUnzip.isEmpty()) {
 					name = aFilePathsToUnzip.get(entry.getName());
 				}
-				FileOutputStream fos = new FileOutputStream(new File(aZipFile.getParent(), name));
+				File destFile = new File(aZipFile.getParent(), name);
+				FileOutputStream fos = new FileOutputStream(destFile);
 				dest = new BufferedOutputStream(fos, BUFFER);
 				while ((count = zis.read(data, 0, BUFFER)) != -1) {
 					dest.write(data, 0, count);
 				}
 				dest.flush();
 				dest.close();
+				logger.info("Unzipped %s to %s", aZipFile.getPath() + ":" + entry, destFile);
 			}
 			zis.close();
 		} catch (Exception e) {

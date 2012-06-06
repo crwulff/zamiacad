@@ -11,12 +11,15 @@ package org.zamia.instgraph.interpreter;
 import java.io.PrintStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
-import org.zamia.SourceRanges;
+import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
+import org.zamia.instgraph.interpreter.logger.IGHitCountLogger;
+import org.zamia.instgraph.interpreter.logger.IGLogicalExpressionLogger;
 import org.zamia.util.HashMapArray;
 
 
@@ -39,6 +42,10 @@ public class IGInterpreterCode implements Serializable {
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
 	private ArrayList<IGStmt> program = new ArrayList<IGStmt>();
+
+	private Tracer muted;
+
+	private Tracer assignmentTracer;
 
 	private String fId;
 
@@ -203,12 +210,133 @@ public class IGInterpreterCode implements Serializable {
 		return "IGInterpreterCode(id=" + fId + " from " + fLocation + ")";
 	}
 
-	public void collectExecutedSources(SourceRanges aExecutedSources) {
-		for (IGStmt stmt : program) {
+	public void collectExecutedLines(IGHitCountLogger aLineLogger) {
+		for (int i = 0, programSize = program.size(); i < programSize; i++) {
+			if (muted != null && muted.traced.contains(i)) {
+				continue;
+			}
+			IGStmt stmt = program.get(i);
 			int count = stmt.getExecCount();
 			if (count > 0) {
-				aExecutedSources.add(stmt.computeSourceLocation(), count);
+				aLineLogger.logHit(stmt.computeSourceLocation(), count);
 			}
+		}
+	}
+
+	public void collectExecutedAssignments(IGHitCountLogger aAssignmentLogger) {
+
+		if (assignmentTracer == null) {
+			return;
+		}
+		for (Integer ass : assignmentTracer.traced) {
+
+			IGStmt stmt = program.get(ass);
+
+			int count = stmt.getExecCount();
+
+			if (count > 0) {
+				aAssignmentLogger.logHit(stmt.computeSourceLocation(), count);
+			}
+		}
+	}
+
+	public void collectExecutedConditions(IGLogicalExpressionLogger aConditionLogger) {
+		for (IGStmt stmt : program) {
+			if (stmt instanceof IGCallStmt) {
+				IGCallStmt callStmt = (IGCallStmt) stmt;
+
+				if (!callStmt.isRelational()) {
+					continue;
+				}
+
+				aConditionLogger.logExpr(callStmt.getOpLocation(), callStmt.hasTrueOccurred(), callStmt.hasFalseOccurred());
+
+			} else if (stmt instanceof IGBinaryOpStmt) {
+				IGBinaryOpStmt binaryOpStmt = (IGBinaryOpStmt) stmt;
+
+				if (!binaryOpStmt.isRelational()) {
+					continue;
+				}
+
+				aConditionLogger.logExpr(binaryOpStmt.computeSourceLocation(), binaryOpStmt.hasTrueOccurred(), binaryOpStmt.hasFalseOccurred());
+			}
+		}
+	}
+
+	public void collectExecutedBranches(IGLogicalExpressionLogger aBranchLogger) {
+		for (IGStmt stmt : program) {
+			if (stmt instanceof IGJumpNCStmt) {
+				IGJumpNCStmt jmpNcStmt = (IGJumpNCStmt) stmt;
+
+				aBranchLogger.logExpr(jmpNcStmt.computeSourceLocation(), jmpNcStmt.hasTrueOccurred(), jmpNcStmt.hasFalseOccurred());
+			}
+		}
+	}
+
+	public void muteExecCount() throws ZamiaException {
+		getMuted().startTracing();
+	}
+
+	public void unmuteExecCount() throws ZamiaException {
+		getMuted().stopTracing();
+	}
+
+	private Tracer getMuted() {
+		if (muted == null) {
+			muted = new IGInterpreterCode.Tracer("Muted statements");
+		}
+		return muted;
+	}
+
+	public void startTracingAssignments() throws ZamiaException {
+		getAssignmentTracer().startTracing();
+	}
+
+	public void stopTracingAssignments() throws ZamiaException {
+		getAssignmentTracer().stopTracing();
+	}
+
+	private Tracer getAssignmentTracer() {
+		if (assignmentTracer == null) {
+			assignmentTracer = new IGInterpreterCode.Tracer("Assignment statements");
+		}
+		return assignmentTracer;
+	}
+
+	class Tracer implements Serializable {
+
+		boolean isBeingTraced;
+
+		TreeSet<Integer> traced;
+
+		String title;
+
+		Tracer(String title) {
+			this.title = title;
+		}
+
+		void startTracing() throws ZamiaException {
+
+			if (isBeingTraced) {
+				SourceLocation lastLoc = program.get(program.size() - 1).computeSourceLocation();
+				throw new ZamiaException("IGInterpreterCode: tracing of " + title + " is already started. Last statement source: " + lastLoc, fLocation);
+			}
+			if (traced == null) {
+				traced = new TreeSet<Integer>();
+			}
+			traced.add(program.size());
+			isBeingTraced = true;
+		}
+
+		void stopTracing() throws ZamiaException {
+			if (!isBeingTraced) {
+				SourceLocation lastLoc = program.get(program.size() - 1).computeSourceLocation();
+				throw new ZamiaException("IGInterpreterCode: tracing of " + title + " is not started yet. Last statement source: " + lastLoc, fLocation);
+			}
+			for (int i = traced.last() + 1; i < program.size(); i++) {
+				traced.add(i);
+			}
+			isBeingTraced = false;
 		}
 	}
 }

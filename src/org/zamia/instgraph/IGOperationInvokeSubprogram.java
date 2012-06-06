@@ -32,9 +32,17 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 
 	private long fSPDBID;
 
+	private int fOpLine, fOpCol;
+
 	public IGOperationInvokeSubprogram(IGMappings aMappings, IGSubProgram aSP, SourceLocation aSrc, ZDB aZDB) {
+		this(aMappings, aSP, aSrc, aSrc, aZDB);
+	}
+
+	public IGOperationInvokeSubprogram(IGMappings aMappings, IGSubProgram aSP, SourceLocation aSrc, SourceLocation aOpLocation, ZDB aZDB) {
 		super(aSP.getReturnType(), aSrc, aZDB);
 		fMappings = aMappings;
+		fOpLine = aOpLocation.fLine;
+		fOpCol = aOpLocation.fCol;
 		if (aMappings == null) {
 			logger.error("IGOperationInvokeSubprogram: foobar. Sanity check failed.");
 		}
@@ -104,9 +112,17 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 			mapping.generateCode(aCode, computeSourceLocation());
 		}
 
-		aCode.add(new IGCallStmt(getSub(), computeSourceLocation(), getZDB()));
+		aCode.add(new IGCallStmt(getSub(), computeSourceLocation(), computeOpSourceLocation(), getZDB()));
 
 		aCode.add(new IGExitContextStmt(computeSourceLocation(), getZDB()));
+	}
+
+	private SourceLocation computeOpSourceLocation() {
+
+		SourceLocation loc = computeSourceLocation();
+		loc.fLine = fOpLine;
+		loc.fCol = fOpCol;
+		return loc;
 	}
 
 	@Override

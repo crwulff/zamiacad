@@ -58,8 +58,16 @@ public abstract class VHDLNode extends ASTNode {
 
 		super(aParent);
 
-		setStartLine((int) (aLocation & 0xFFFFFFFF));
-		setStartCol((int) (aLocation >> 32));
+		setStartLine(extractLine(aLocation));
+		setStartCol(extractCol(aLocation));
+	}
+
+	protected int extractLine(long aLocation) {
+		return (int) (aLocation & 0xFFFFFFFF);
+	}
+
+	protected int extractCol(long aLocation) {
+		return (int) (aLocation >> 32);
 	}
 
 	public VHDLNode(long aLocation) {

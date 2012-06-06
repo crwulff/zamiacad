@@ -12,24 +12,24 @@ package org.zamia.vhdl.ast;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
+import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite.RefType;
-import org.zamia.analysis.ast.SearchJob;
 import org.zamia.analysis.ast.ASTReferencesSearch.ObjectCat;
+import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationBinary;
+import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGProcess;
 import org.zamia.instgraph.IGSequenceOfStatements;
 import org.zamia.instgraph.IGSequentialIf;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.IGType;
-import org.zamia.instgraph.IGOperationBinary.BinOp;
-
 
 /**
  * 
@@ -173,6 +173,7 @@ public class SelectedSignalAssignment extends ConcurrentSignalAssignment {
 				wv.generateIGSequence(fTarget, delayMechanism, thenStmt, proc.getContainer(), aEE);
 
 				IGOperation cond = null;
+				SourceLocation condLoc = null;
 
 				int m = choices.size();
 				for (int j = 0; j < m; j++) {
@@ -187,31 +188,32 @@ public class SelectedSignalAssignment extends ConcurrentSignalAssignment {
 					
 					IGOperation o;
 					if (!opT.isRange()) {
-						
-						o = new IGOperationBinary(expr, op, BinOp.EQUAL, bool, sw.getLocation(), aEE.getZDB());
+
+						o = new IGOperationBinary(expr, op, BinOp.EQUAL, bool, r.getLocation(), aEE.getZDB());
 
 					} else {
-						
-						IGOperation min = op.getRangeMin(proc.getContainer(), sw.getLocation());
-						IGOperation max = op.getRangeMax(proc.getContainer(), sw.getLocation());
-						
-						IGOperation o1 = new IGOperationBinary(expr, min, BinOp.GREATEREQ, bool, sw.getLocation(), aEE.getZDB());
-						IGOperation o2 = new IGOperationBinary(expr, max, BinOp.LESSEQ, bool, sw.getLocation(), aEE.getZDB());
-						
-						o = new IGOperationBinary(o1, o2, BinOp.AND, bool, sw.getLocation(), aEE.getZDB());
+
+						IGOperation min = op.getRangeMin(proc.getContainer(), r.getLocation());
+						IGOperation max = op.getRangeMax(proc.getContainer(), r.getLocation());
+
+						IGOperation o1 = new IGOperationBinary(expr, min, BinOp.GREATEREQ, bool, r.getLocation(), aEE.getZDB());
+						IGOperation o2 = new IGOperationBinary(expr, max, BinOp.LESSEQ, bool, r.getLocation(), aEE.getZDB());
+
+						o = new IGOperationBinary(o1, o2, BinOp.AND, bool, r.getLocation(), aEE.getZDB());
 					}
 
 					if (cond == null) {
 						cond = o;
+						condLoc = r.getLocation();
 					} else {
-						cond = new IGOperationBinary(cond, o, BinOp.OR, bool, sw.getLocation(), aEE.getZDB());
+						cond = new IGOperationBinary(cond, o, BinOp.OR, bool, r.getLocation(), aEE.getZDB());
 					}
 				}
 
-				IGSequentialIf si = new IGSequentialIf(cond, thenStmt, null, sw.getLocation(), aEE.getZDB());
+				IGSequentialIf si = new IGSequentialIf(cond, thenStmt, null, condLoc, aEE.getZDB());
 				cur.add(si);
 
-				IGSequenceOfStatements elseStmt = new IGSequenceOfStatements(null, sw.getLocation(), aEE.getZDB());
+				IGSequenceOfStatements elseStmt = new IGSequenceOfStatements(null, condLoc, aEE.getZDB());
 				si.setElse(elseStmt);
 				cur = elseStmt;
 

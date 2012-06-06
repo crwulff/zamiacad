@@ -10,7 +10,6 @@ package org.zamia.instgraph;
 
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
-import org.zamia.analysis.ig.IGAssignmentsSearch;
 import org.zamia.analysis.ig.IGAssignmentsSearch.AccessedThroughItems;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
@@ -119,7 +118,7 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 	@Override
 	public void generateCode(IGInterpreterCode aCode) throws ZamiaException {
 
-		fTarget.generateCode(true, aCode);
+		fTarget.generateCodeTransparentForLineCoverage(true, aCode);
 		fValue.generateCode(true, aCode);
 
 		if (fDelay != null) {
@@ -130,7 +129,9 @@ public class IGSequentialAssignment extends IGSequentialStatement {
 			fReject.generateCode(true, aCode);
 		}
 
+		aCode.startTracingAssignments();
 		aCode.add(new IGPopStmt(fInertial, fDelay != null, fReject != null, computeSourceLocation(), getZDB()));
+		aCode.stopTracingAssignments();
 	}
 
 	@Override

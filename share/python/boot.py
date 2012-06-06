@@ -32,6 +32,8 @@ def help():
   print "---------"
   print "zamia_source(uri)"
   print "copy(src, dest)"
+  print "unzipAll(zipFileName)"
+  print "unzip(zipFileName, filePathsToUnzip)"
   print ""
   print "Builder:"
   print "--------"
@@ -71,14 +73,26 @@ def help():
 def zamia_source(uri):
   project.getZCJ().evalFile(uri)
 
-def base():
+def getBase():
   return project.fBasePath.toString()
 
+def file(path):
+  return File( getBase() + File.separator + path )
+
 def copy(src, dest):
-  base = base()
-  ok = FileUtils.copy(File(base + "/" + src), File(base + "/" + dest))
+  ok = FileUtils.copy(file(src), file(dest))
   if (not ok):
-    printf('Failed to copy %s\n', src)
+    printf('Failed to copy %s', src)
+
+def unzipAll(zipFileName):
+  ok = FileUtils.unzip(File(zipFileName))
+  if (not ok):
+    printf('Failed to unzip %s cleanly', zipFileName)
+
+def unzip(zipFileName, filePathsToUnzip):
+  ok = FileUtils.unzip(File(zipFileName), filePathsToUnzip)
+  if (not ok):
+    printf('Failed to unzip %s cleanly', zipFileName)
 
 #
 # Builder
@@ -92,7 +106,7 @@ def rebuild():
   builder.build(True, True, None)
 
   n = project.getERM().getNumErrors()
-  printf ('python: Build finished. Found %d errors.\n', n)
+  printf ('python: Build finished. Found %d errors.', n)
 
 #
 # Markers
@@ -105,7 +119,7 @@ def marker_add(path,line,column,msg,is_error):
   # make path absolute
   f = File(path)
   if not f.isAbsolute():
-    f = File(base()+File.separator+path)
+    f = file(path)
   
   sf = SourceFile(f)
 
@@ -123,7 +137,7 @@ def marker_list():
 
   for i in range(n):
     em = erm.getError(i)
-    printf('%s\n', em.toString())
+    printf('%s', em.toString())
 
 
 def marker_clean(path):
@@ -144,7 +158,7 @@ def dm_list():
 
   n = dmm.getNumStubs()
   for i in range(n):
-    printf('%s\n', dmm.getStub(i).getDUUID())
+    printf('%s', dmm.getStub(i).getDUUID())
 
 def dm_list_2file(filename):
 
@@ -169,9 +183,9 @@ def dm_dump_dot(dmuid,filename):
   dm = dmm.getDM(uid)
 
   if dm == None:
-    printf('DM %s not found\n', dmuid)
+    printf('DM %s not found', dmuid)
   else:
-    printf('Dumping %s...\n', dm)
+    printf('Dumping %s...', dm)
 
     dot = AST2DOT(dm, project.getZDB())
 
@@ -188,7 +202,7 @@ def dm_dump_dot(dmuid,filename):
     dot.convert(out);
     out.close()
 
-    printf("python: wrote dot file to %s\n", filename)
+    printf("python: wrote dot file to %s", filename)
 
 #
 # IG
@@ -200,7 +214,7 @@ def ig_list():
   n = bp.getNumToplevels()
   for i in range(n):
     tl = bp.getToplevel(i)
-    printf ("%s\n", tl.getDUUID())
+    printf ("%s", tl.getDUUID())
 
 
 def ig_dump_dot(dmuid,filename):
@@ -212,9 +226,9 @@ def ig_dump_dot(dmuid,filename):
   module = igm.findModule(Toplevel(uid, None))
 
   if module == None:
-    printf('DM %s not found\n', dmuid)
+    printf('DM %s not found', dmuid)
   else:
-    printf('Dumping %s...\n', module)
+    printf('Dumping %s...', module)
 
     dot = IG2DOT(module);
 
@@ -235,7 +249,7 @@ def ig_dump_dot(dmuid,filename):
     dot.convert(out);
     out.close()
 
-    printf("python: wrote dot file to %s\n", filename)
+    printf("python: wrote dot file to %s", filename)
 
 
 # filename = examples/gcounter/addg.vhdl
@@ -253,13 +267,13 @@ def ig_ref_search(filename, line, col, toplevelpath):
     nearest = SourceLocation2AST.findNearestASTNode(location, True, project)
 
     if not nearest:
-      printf('No AST item found at %s:%s,%s\n', filename, line, col)
+      printf('No AST item found at %s:%s,%s', filename, line, col)
       return
 
     declaration = ASTDeclarationSearch.search(nearest, project)
 
     if not declaration:
-      printf('Failed to find declaration of %s\n', nearest)
+      printf('Failed to find declaration of %s', nearest)
       return
 
     result = ASTReferencesSearch.search(declaration, True, True, project)
@@ -271,12 +285,12 @@ def ig_ref_search(filename, line, col, toplevelpath):
     res = SourceLocation2IG.findNearestItem(location, tlp, project)
 
     if not res:
-      printf('No IG item found at %s:%s,%s\n', filename, line, col)
+      printf('No IG item found at %s:%s,%s', filename, line, col)
       return
 
     item = res.getFirst()
     if not item:
-      printf('No IG item found at %s:%s,%s\n', filename, line, col)
+      printf('No IG item found at %s:%s,%s', filename, line, col)
       return
     path = res.getSecond()
 
@@ -290,9 +304,9 @@ def ig_ref_search(filename, line, col, toplevelpath):
   time = System.currentTimeMillis() - start
 
   if not result or result.countRefs() == 0:
-    print('Search returned no result.\n')
+    print('Search returned no result.')
   else:
-    printf('Found %s references of %s in %s ms:\n', result.countRefs(), item, time)
+    printf('Found %s references of %s in %s ms:', result.countRefs(), item, time)
     result.dump(0, sys.stdout)
 
 def ig_ref_search_2file(filename, line, col, toplevelpath, destinationfile):
@@ -306,12 +320,12 @@ def ig_ref_search_2file(filename, line, col, toplevelpath, destinationfile):
   res = SourceLocation2IG.findNearestItem(location, tlp, project)
 
   if res == None:
-    printf('No IG item found at %s:%s,%s\n', filename, line, col)
+    printf('No IG item found at %s:%s,%s', filename, line, col)
     return
 
   item = res.getFirst()
   if item == None:
-    printf('Failed to find nearest IG Item\n')
+    printf('Failed to find nearest IG Item')
     return
   path = res.getSecond()
 
@@ -325,7 +339,7 @@ def ig_ref_search_2file(filename, line, col, toplevelpath, destinationfile):
   time = System.currentTimeMillis() - start
 
   out = PrintStream(File(destinationfile))
-  printf('Found %s references of %s in %s ms:\n', result.countRefs(), item, time)
+  printf('Found %s references of %s in %s ms.', result.countRefs(), item, time)
   out.printf('Found %s references of %s in %s ms:\n', result.countRefs(), item, time)
   result.dump(0, out)
 
@@ -339,7 +353,7 @@ def rtl_list():
   n = bp.getNumSynthTLs()
   for i in range(n):
     tl = bp.getSynthTL(i)
-    printf ("%s\n", tl.getDUUID())
+    printf ("%s", tl.getDUUID())
 
 
 def rtl_dump_svg(dmuid,filename):
@@ -351,9 +365,9 @@ def rtl_dump_svg(dmuid,filename):
   rtlm = rtlmanager.findModule(Toplevel(uid, None))
 
   if rtlm == None:
-    printf('RTLM %s not found\n', dmuid)
+    printf('RTLM %s not found', dmuid)
   else:
-    printf('Dumping %s...\n', rtlm)
+    printf('Dumping %s...', rtlm)
 
     out = PrintWriter(BufferedWriter(FileWriter(filename)))
 
@@ -371,7 +385,7 @@ def rtl_dump_svg(dmuid,filename):
 
     out.close()
 
-    printf("python: wrote svg file to %s\n", filename)
+    printf("python: wrote svg file to %s", filename)
 
 #
 # Sim

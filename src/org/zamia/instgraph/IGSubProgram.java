@@ -290,7 +290,12 @@ public class IGSubProgram extends IGContainerItem {
 	}
 
 	public IGOperationInvokeSubprogram generateInvocation(AssociationList aAL, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, SourceLocation aLocation,
-			ErrorReport aReport) throws ZamiaException {
+														  ErrorReport aReport) throws ZamiaException {
+		return generateInvocation(aAL, aContainer, aEE, aCache, aLocation, aLocation, aReport);
+	}
+
+	public IGOperationInvokeSubprogram generateInvocation(AssociationList aAL, IGContainer aContainer, IGElaborationEnv aEE, IGOperationCache aCache, SourceLocation aLocation, SourceLocation aOpLocation,
+														  ErrorReport aReport) throws ZamiaException {
 
 		IGContainer formalScope = getContainer();
 		IGElaborationEnv formalEE = new IGElaborationEnv(aEE.getZamiaProject());
@@ -301,7 +306,7 @@ public class IGSubProgram extends IGContainerItem {
 		IGMappings mappings = aAL.map(formalScope, formalEE, formalCache, aContainer, aEE, aCache, interfaces, false, aReport, false);
 
 		if (mappings != null && !mappings.isFailed()) {
-			return new IGOperationInvokeSubprogram(mappings, this, aLocation, aEE.getZDB());
+			return new IGOperationInvokeSubprogram(mappings, this, aLocation, aOpLocation, aEE.getZDB());
 		}
 
 		//aReport.append("Mapping failed for " + this + " from " + computeSourceLocation(), aLocation);

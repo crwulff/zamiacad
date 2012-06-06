@@ -17,7 +17,6 @@ import java.util.Set;
 import org.zamia.ErrorReport;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
-import org.zamia.SourceRanges;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
@@ -28,6 +27,8 @@ import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
+import org.zamia.instgraph.interpreter.logger.IGHitCountLogger;
+import org.zamia.instgraph.interpreter.logger.IGLogicalExpressionLogger;
 import org.zamia.util.ZStack;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
@@ -123,6 +124,7 @@ public class IGInterpreterRuntimeEnv {
 
 			case RETURN:
 				rts();
+				logLogicalValue();
 				break;
 
 			case CONTINUE:
@@ -131,6 +133,17 @@ public class IGInterpreterRuntimeEnv {
 		}
 
 		return status;
+	}
+
+	private void logLogicalValue() throws ZamiaException {
+
+		IGStmt lastStmt = fCode.get(fPC - 1);
+
+		if (!(lastStmt instanceof IGCallStmt)) {
+			return;
+		}
+
+		((IGCallStmt) lastStmt).logLogicalValue(this);
 	}
 
 	public void logInterpreterState() {
@@ -446,10 +459,34 @@ public class IGInterpreterRuntimeEnv {
 		return "IGInterpreterRuntime";
 	}
 
-	public void collectExecutedSources(SourceRanges aExecutedSources) {
+	public void collectExecutedLines(IGHitCountLogger aLineLogger) {
 		for (IGInterpreterCode code : fCodeSet) {
 			if (code != null) {
-				code.collectExecutedSources(aExecutedSources);
+				code.collectExecutedLines(aLineLogger);
+			}
+		}
+	}
+
+	public void collectExecutedAssignments(IGHitCountLogger aAssignmentLogger) {
+		for (IGInterpreterCode code : fCodeSet) {
+			if (code != null) {
+				code.collectExecutedAssignments(aAssignmentLogger);
+			}
+		}
+	}
+
+	public void collectExecutedConditions(IGLogicalExpressionLogger aConditionLogger) {
+		for (IGInterpreterCode code : fCodeSet) {
+			if (code != null) {
+				code.collectExecutedConditions(aConditionLogger);
+			}
+		}
+	}
+
+	public void collectExecutedBranches(IGLogicalExpressionLogger aBranchLogger) {
+		for (IGInterpreterCode code : fCodeSet) {
+			if (code != null) {
+				code.collectExecutedBranches(aBranchLogger);
 			}
 		}
 	}

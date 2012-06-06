@@ -8,9 +8,19 @@
  */
 package org.zamia.instgraph.sim.ref;
 
+import javax.swing.event.EventListenerList;
+import java.io.File;
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
-import org.zamia.SourceRanges;
 import org.zamia.ToplevelPath;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
@@ -34,6 +44,8 @@ import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
+import org.zamia.instgraph.interpreter.logger.IGHitCountLogger;
+import org.zamia.instgraph.interpreter.logger.IGLogicalExpressionLogger;
 import org.zamia.instgraph.sim.IGAbstractProgressMonitor;
 import org.zamia.instgraph.sim.IGISimCursor;
 import org.zamia.instgraph.sim.IGISimObserver;
@@ -42,17 +54,6 @@ import org.zamia.util.Pair;
 import org.zamia.util.PathName;
 import org.zamia.vhdl.ast.OperationLiteral;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
-
-import javax.swing.event.EventListenerList;
-import java.io.File;
-import java.io.IOException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Built-in reference simulator engine
@@ -738,11 +739,35 @@ public class IGSimRef implements IGISimulator {
 		}
 	}
 
-	public SourceRanges collectCoveredSources() {
-		SourceRanges sources = SourceRanges.createRanges();
+	public IGHitCountLogger collectExecutedLines(String aId) {
+		IGHitCountLogger lineLogger = new IGHitCountLogger(aId);
 		for (IGSimProcess process : fProcesses) {
-			process.collectExecutedSources(sources);
+			process.collectExecutedLines(lineLogger);
 		}
-		return sources;
+		return lineLogger;
+	}
+
+	public IGHitCountLogger collectExecutedAssignments(String aId) {
+		IGHitCountLogger assignmentLogger = new IGHitCountLogger(aId);
+		for (IGSimProcess process : fProcesses) {
+			process.collectExecutedAssignments(assignmentLogger);
+		}
+		return assignmentLogger;
+	}
+
+	public IGLogicalExpressionLogger collectExecutedConditions(String aId) {
+		IGLogicalExpressionLogger conditionsLogger = new IGLogicalExpressionLogger(aId);
+		for (IGSimProcess process : fProcesses) {
+			process.collectExecutedConditions(conditionsLogger);
+		}
+		return conditionsLogger;
+	}
+
+	public IGLogicalExpressionLogger collectExecutedBranches(String aId) {
+		IGLogicalExpressionLogger branchLogger = new IGLogicalExpressionLogger(aId);
+		for (IGSimProcess process : fProcesses) {
+			process.collectExecutedBranches(branchLogger);
+		}
+		return branchLogger;
 	}
 }

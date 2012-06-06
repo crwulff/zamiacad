@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.python.core.PyException;
+import org.python.core.PyObject;
 import org.python.util.PythonInterpreter;
 import org.zamia.ExceptionLogger;
 import org.zamia.FSCache;
@@ -117,5 +118,13 @@ public class ZCJInterpreter {
 
 	public void setObject(String name, Object aObject) {
 		fInterp.set(name, aObject);
+	}
+
+	public PyObject getObject(String name) {
+		return fInterp.get(name);
+	}
+
+	public ZamiaProject getZprj() {
+		return fZPrj;
 	}
 }
