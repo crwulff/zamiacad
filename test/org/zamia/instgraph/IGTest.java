@@ -9,6 +9,7 @@ package org.zamia.instgraph;
 
 import org.apache.log4j.Level;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zamia.BuildPath;
 import org.zamia.SourceFile;
@@ -574,6 +575,7 @@ public class IGTest {
 	}
 
 	@Test
+	@Ignore
 	public void testBP() throws Exception {
 
 		runTest("examples/semantic/bpTest", 1933);
@@ -592,12 +594,14 @@ public class IGTest {
 	}
 
 	@Test
+	@Ignore
 	public void testLeonDevices() throws Exception {
 
 		runTest("examples/leonExtern", "BuildPathDevices.txt", 1);
 	}
 
 	@Test
+	@Ignore
 	public void testLeonExtern() throws Exception {
 
 		runTest("examples/leonExtern", 1933);

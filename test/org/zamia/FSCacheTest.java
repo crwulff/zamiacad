@@ -10,6 +10,7 @@ package org.zamia;
 
 import org.apache.log4j.Level;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.zamia.instgraph.IGManager;
 import org.zamia.util.Native;
@@ -345,6 +346,7 @@ public class FSCacheTest {
 		fZPrj.shutdown();
 	}
 
+	@Ignore
 	@Test
 	public void testLeonOffline() throws Exception {
 
