@@ -21,7 +21,7 @@ import org.zamia.zdb.ZDB;
  * 
  */
 @SuppressWarnings("serial")
-public class IGProcess extends IGConcurrentStatement {
+public class IGProcess extends IGConcurrentStatement implements Scope {
 
 	private IGSequenceOfStatements fSOS;
 
@@ -49,6 +49,10 @@ public class IGProcess extends IGConcurrentStatement {
 
 		return fContainer;
 	}
+	
+	public IGProcess getStructure() {
+		return this;
+	}	
 
 	@Override
 	public String toString() {

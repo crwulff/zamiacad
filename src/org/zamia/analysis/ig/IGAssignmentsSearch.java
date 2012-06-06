@@ -145,13 +145,8 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 		public void scheduleAssignments(HashSetArray<IGItemAccess> list, SourceLocation assignmentLocation) {
 			
 			for (IGItemAccess ia : list) {
-				IGObject obj = null;
-				if (ia.getItem() instanceof IGOperationObject) {
-					obj = ((IGOperationObject) ia.getItem()).getObject(); // cases like A'event
-				} else if (ia.getItem() instanceof IGObject) {
-					obj = (IGObject) ia.getItem();
-				}
-
+				IGObject obj = asObject(ia.getItem());
+				
 //				if (useItemLocation)
 //					assignmentLocation = obj.computeSourceLocation();  
 
