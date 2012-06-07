@@ -11,6 +11,7 @@ package org.zamia.zdb;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -22,13 +23,7 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channel;
-import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +33,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 
-import org.python.modules.synchronize;
 import org.zamia.BuildPath;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
@@ -48,7 +42,6 @@ import org.zamia.util.FileUtils;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.LevelGZIPOutputStream;
 import org.zamia.util.ObjectSize;
-import org.zamia.util.Pair;
 import org.zamia.util.ZHash;
 import org.zamia.util.ehm.EHMIterator;
 import org.zamia.util.ehm.EHMPageManager;
@@ -1298,6 +1291,26 @@ public class ZDB {
 
 		logger.info("ZDB: Total size %s KB in %d objects", totalSize / 1024, count);
 
+	}
+
+	public static ObjectInputStream openObjectInputStream(File file) throws IOException {
+		InputStream fis = new BufferedInputStream(new FileInputStream(file));
+		return new ObjectInputStream(
+				ZDB.ENABLE_COMPRESSION ? new BufferedInputStream(new GZIPInputStream(fis)) : fis);
+	}
+
+	public static ObjectOutputStream openObjectOutputStream(File file) throws IOException {
+		OutputStream fs = new BufferedOutputStream(new FileOutputStream(file));
+		OutputStream os = ZDB.ENABLE_COMPRESSION ? new BufferedOutputStream(new LevelGZIPOutputStream(fs, Deflater.BEST_SPEED)) : fs;
+		return new ObjectOutputStream(os);
+	}
+
+	public static void safeClose(Closeable out) {
+		try {
+			out.close();
+		} catch (IOException e) {
+			el.logException(e);
+		}
 	}
 
 }

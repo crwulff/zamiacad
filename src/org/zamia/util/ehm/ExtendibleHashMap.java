@@ -9,18 +9,17 @@
 
 package org.zamia.util.ehm;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
+import java.io.DataInput;
+import java.io.DataOutput;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaLogger;
 import org.zamia.util.LLFSHashMap;
+import org.zamia.zdb.ZDB;
 
 
 /**
@@ -46,35 +45,26 @@ public class ExtendibleHashMap {
 		fManager = aManager;
 		fFile = aFile;
 
-		if (fFile.exists() && fFile.canRead()) {
-
-			DataInputStream in = null;
-
+		if (fFile.exists() && fFile.canRead())
 			try {
+				ObjectInputStream in = ZDB.openObjectInputStream(fFile);
 
-				in = new DataInputStream(new BufferedInputStream(new FileInputStream(fFile)));
-
-				fRoot = loadNodes(in, null);
-
+				try {
+					fRoot = loadNodes(in, null);
+				} finally {
+					ZDB.safeClose(in);
+				}
 			} catch (IOException e) {
 				el.logException(e);
-			} finally {
-				if (in != null) {
-					try {
-						in.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
 			}
-		}
+		
 
 		if (fRoot == null) {
 			clear();
 		}
 	}
 
-	private EHMNode loadNodes(DataInputStream aIn, EHMNode aParent) throws IOException {
+	private EHMNode loadNodes(DataInput aIn, EHMNode aParent) throws IOException {
 
 		long id = aIn.readLong();
 
@@ -208,27 +198,21 @@ public class ExtendibleHashMap {
 	}
 
 	public void flush() {
-		DataOutputStream out = null;
 		try {
-			out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(fFile)));
-
-			saveNodes(out, fRoot);
+			ObjectOutputStream out = ZDB.openObjectOutputStream(fFile);
+			try {
+				saveNodes(out, fRoot);
+			} finally {
+				ZDB.safeClose(out);
+			}
 
 		} catch (Throwable t) {
 			el.logException(t);
-		} finally {
-			if (out != null) {
-				try {
-					out.close();
-				} catch (IOException e) {
-					el.logException(e);
-				}
-			}
-		}
+		} 
 
 	}
 
-	private void saveNodes(DataOutputStream aOut, EHMNode aNode) throws IOException {
+	private void saveNodes(DataOutput aOut, EHMNode aNode) throws IOException {
 
 		long id = aNode.getId();
 

@@ -8,26 +8,17 @@
  */
 package org.zamia.zdb;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.zip.Deflater;
-import java.util.zip.GZIPInputStream;
 
 import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaLogger;
 import org.zamia.util.HashMapArray;
-import org.zamia.util.LevelGZIPOutputStream;
 
 
 /**
@@ -69,9 +60,7 @@ public class ZDBPersistentData {
 
 		try {
 
-			OutputStream fs = new BufferedOutputStream(new FileOutputStream(aPDFile, false));
-			OutputStream os = ZDB.ENABLE_COMPRESSION ? new BufferedOutputStream(new LevelGZIPOutputStream(fs, Deflater.BEST_SPEED)) : fs;
-			ObjectOutputStream oos = new ObjectOutputStream(os);
+			ObjectOutputStream oos = ZDB.openObjectOutputStream(aPDFile);
 			try {
 			
 				oos.writeInt(CURRENT_VERSION);
@@ -137,9 +126,7 @@ public class ZDBPersistentData {
 		if (aPDFile.exists() && aPDFile.canRead()) {
 			try {
 				
-				InputStream fis = new BufferedInputStream(new FileInputStream(aPDFile));
-				ObjectInputStream ois = new ObjectInputStream(
-						ZDB.ENABLE_COMPRESSION ? new BufferedInputStream(new GZIPInputStream(fis)) : fis);
+				ObjectInputStream ois = ZDB.openObjectInputStream(aPDFile);
 				
 				try {
 				
