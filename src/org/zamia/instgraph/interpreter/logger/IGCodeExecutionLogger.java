@@ -220,12 +220,12 @@ public abstract class IGCodeExecutionLogger {
 				return result;
 			}
 
-			result = Integer.compare(fLoc.fLine, o.fLoc.fLine);
+			result = Integer.valueOf(fLoc.fLine).compareTo(o.fLoc.fLine);
 			if (result != 0) {
 				return result;
 			}
 
-			return Integer.compare(fLoc.fCol, o.fLoc.fCol);
+			return Integer.valueOf(fLoc.fCol).compareTo(o.fLoc.fCol);
 		}
 
 		public String toString(int lastLine, int lastCol) {
