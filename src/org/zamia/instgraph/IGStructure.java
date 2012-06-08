@@ -32,7 +32,7 @@ import org.zamia.zdb.ZDB;
  * 
  */
 @SuppressWarnings("serial")
-public class IGStructure extends IGConcurrentStatement {
+public class IGStructure extends IGConcurrentStatement implements Scope {
 
 	private ArrayList<Long> fStatements = new ArrayList<Long>();
 
@@ -60,6 +60,10 @@ public class IGStructure extends IGConcurrentStatement {
 		}
 
 		return fContainer;
+	}
+	
+	public IGStructure getStructure() {
+		return this;
 	}
 
 	public void addStatement(IGConcurrentStatement aStmt) {

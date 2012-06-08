@@ -2,6 +2,7 @@ package org.zamia;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 
 public class Utils {
@@ -38,5 +39,13 @@ public class Utils {
 		return sb.toString();
 	}
 
-
+	public static class Counter<KeyT> extends HashMap<KeyT, Integer> {
+		public int inc(KeyT key) {
+			Integer cnt = get(key);
+			cnt = (cnt == null) ? 1 : cnt +1;
+			put(key, cnt);
+			return cnt;
+		}
+	}
 }
+

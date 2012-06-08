@@ -29,7 +29,7 @@ import org.zamia.zdb.ZDB;
  * 
  */
 @SuppressWarnings("serial")
-public class IGModule extends IGDesignUnit {
+public class IGModule extends IGDesignUnit implements Scope {
 
 	private IGStructure fStructure;
 

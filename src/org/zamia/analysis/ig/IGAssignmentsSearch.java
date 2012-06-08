@@ -15,6 +15,7 @@ import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite;
 import org.zamia.analysis.ReferenceSite.RefType;
+import org.zamia.analysis.ig.IGAssignmentsSearch.RootResult;
 import org.zamia.instgraph.IGConcurrentStatement;
 import org.zamia.instgraph.IGItemAccess;
 import org.zamia.instgraph.IGObject;
@@ -28,47 +29,60 @@ import org.zamia.util.Pair;
 public class IGAssignmentsSearch extends IGReferencesSearch {
 
 	/**We normally do not need titles for ReferenceSites. But, you may turn it on for debug.
-	 * NB! removing titles breaks the comparison (difference) between results!
 	 * */
 	static String debugTitle(IGObject aRefObj) {
 		return debug && aRefObj != null ? aRefObj.toString() : null;
 	}
-	public IGAssignmentsSearch(ZamiaProject aPrj) {
+	private int maxDepth;
+	public IGAssignmentsSearch(ZamiaProject aPrj, int maxDepth) {
 		super(aPrj);
+		this.maxDepth = maxDepth;
 	}
+
+	/**Search depth. Search stops as limits is encountered.*/
+	int generation = 0;   
 
 	/**Used to refer and jump to EntryReferenceSite items in the results page.
 	 * This default implementation runs search(path) for signals. Variables will have overloaded class that invokes searchReferences(igprocess)*/
 	public static abstract class SearchAssignment extends ReferenceSite {
-		
-		public SearchAssignment(Collection<SearchAssignment> assignments, SourceLocation assignmentLocation, IGObject aRefObj, ToplevelPath aRefPath) {
+		public SearchAssignment(IGAssignmentsSearch aSearch, SourceLocation assignmentLocation, IGObject aRefObj, ToplevelPath aRefPath) {
 			super(debugTitle(aRefObj), assignmentLocation, 0, RefType.Assignment, aRefPath, aRefObj);
 			if (aRefObj != null)
-				assignments.add(this);
+				aSearch.nextGeneration.add(this);
 		}
-		abstract ReferenceSearchResult run();
+		abstract void run();
 		public RootResult keyResult;
 	}
 	
 	SearchAssignment newSignalSearch(SourceLocation assignmentLocation, IGObject item, final ToplevelPath path) {
-		return new SearchAssignment(assignments, assignmentLocation, item, path) {
-			ReferenceSearchResult run() {
-				return search(doingObject, doingPath);
+		return new SearchAssignment(this, assignmentLocation, item, path) {
+			void run() {
+				search(currentObject, currentPath);
 			}
 		};
 	}
-	ArrayList<SearchAssignment> assignments = new ArrayList<SearchAssignment>(); // signals and variables to be searched with context
-	Map<Long, RootResult> completed = new HashMap<Long, RootResult>(); // TODO: consider if the same object happens in another path. Should it be considered as different signal and searched ofver?
+	
+	// signals and variables to be searched with search context
+	ArrayList<SearchAssignment> nextGeneration = new ArrayList<SearchAssignment>();
+	
+	// TODO: HashSet should be used instead of map. Duplicating the key fields of the value in the key of the map is a waste of memory. 
+	// Consider KeyedHashSet from Eclipse core.
+	// Moreover, consider if the same object happens in another path. Should it be considered as different signal and searched over?
+	// Can/should we store results in ZDB?
+	Map<Long, RootResult> completed = new HashMap<Long, RootResult>(); 
 	
 	/**Object, currently being searched on*/
-	IGObject doingObject;
-	ToplevelPath doingPath;
-	SearchAssignment doingAssignment;
+	IGObject currentObject;
+	ToplevelPath currentPath;
+	SearchAssignment currentAssignment;
+	
 	/**
-	 * During the course of execution, new assignments will be created in addition to Read/Write results.
-	 * Assignments will initiate new searches. Every search results in entry result. We assign this entry
-	 * to the assignment result to that we can jump to both assignment location in code and additional
-	 * search (results) it produced.  
+	 * The search results in Assignments rather than Reads and Writes. Found    
+	 * Assignments trigger further searches, one per assignment. Assignment keeps    
+	 * a ref to the initiated search so that we can navigate to both assignment    
+	 * location in the code and further searches it produced. If assigned signal 
+	 * was already searched for further assignments, result is just reused.  
+	 * This results in a graph.    
 	 * */
 	public Map<Long, RootResult> assignmentThroughSearch(IGObject aItem, ToplevelPath path, 
 			boolean aSearchUpward, boolean aSearchDownward, boolean aWritersOnly, boolean aReadersOnly) {
@@ -82,23 +96,34 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 			throw new IllegalArgumentException("Search through assignments in both directions is not supported. Check either Read Only or Write Only.");
 		newSignalSearch(aItem.computeSourceLocation(), aItem, path);
 		
-		while(!assignments.isEmpty()) {
-			
-			doingAssignment = Utils.removeLast(assignments);
-			
-			doingObject = (IGObject) fZPrj.getZDB().load(doingAssignment.getDBID());
-
-			doingPath = doingAssignment.getPath().descend();
-			if (debug) logger.info("rs.search(" + doingPath + " : " + doingObject + "), " + doingObject.computeSourceLocation());
-
-			doingAssignment.run(); // this will produce keyResult with children
-			
-			if (doingAssignment.keyResult == null) {
-				logger.warn("Search " + (completed.size()+1) + " on " + doingPath + " : " + doingObject + " has failed");
-				System.err.println("Search " + (completed.size()+1) + " on " + doingPath + " : " + doingObject + " has failed");
-			}
+		while (!nextGeneration.isEmpty()) {
+			ArrayList<SearchAssignment> assignments = nextGeneration;
+			nextGeneration = new ArrayList<SearchAssignment>();
+			while(!assignments.isEmpty()) {
 				
+				currentAssignment = Utils.removeLast(assignments);
+				
+				currentObject = (IGObject) fZPrj.getZDB().load(currentAssignment.getDBID());
+	
+				currentPath = currentAssignment.getPath().descend();
+				if (debug) logger.info("rs.search(" + currentPath + " : " + currentObject + "), " + currentObject.computeSourceLocation());
+	
+				currentAssignment.run(); // this will produce keyResult with children
+	
+				if (currentAssignment.keyResult == null) {
+					logger.warn("Search " + (completed.size()+1) + " on " + currentPath + " : " + currentObject + " has failed");
+					System.err.println("Search " + (completed.size()+1) + " on " + currentPath + " : " + currentObject + " has failed");
+				}
+					
+			}
+			
+			if (generation++ == maxDepth) {
+				for (SearchAssignment a : nextGeneration)
+					a.keyResult = new RootResult(completed, (IGObject) fZPrj.getZDB().load(a.getDBID()), a.getPath(), true);
+				break;
+			}
 		}
+		
 		return completed;
 	}
 	
@@ -117,43 +142,45 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 		}
 		
 		/**@see org.zamia.instgraph.IGSequentialAssignment#computeAccessedItems*/
-		public void scheduleAssignments(HashSetArray<IGItemAccess> list, boolean useItemLocation, SourceLocation assignmentLocation) {
-			//useItemLocation = true;
+		public void scheduleAssignments(HashSetArray<IGItemAccess> list, SourceLocation assignmentLocation) {
 			
 			for (IGItemAccess ia : list) {
-				IGObject obj = null;
-				if (ia.getItem() instanceof IGOperationObject) {
-					obj = ((IGOperationObject) ia.getItem()).getObject(); // cases like A'event
-				} else if (ia.getItem() instanceof IGObject) {
-					obj = (IGObject) ia.getItem();
-				}
-
+				IGObject obj = asObject(ia.getItem());
+				
 //				if (useItemLocation)
 //					assignmentLocation = obj.computeSourceLocation();  
 
-				SearchAssignment assignment = null;
+				SearchAssignment assignment;
 				
 				if (obj.getCat() == IGObjectCat.VARIABLE) {
-					assignment = new SearchAssignment(assignments, assignmentLocation, obj, path) {
-						ReferenceSearchResult run() {
+					assignment = new SearchAssignment(IGAssignmentsSearch.this, assignmentLocation, obj, path) {
+						void run() {
 							//TODO: decouple this search assignment from reference to scope, once 
-							// run is executed (e.g. scope = null)
-							fJobs.add(new SearchJob(doingObject, path, scope));
-							return searchReferences();
+							// run is executed (e.g. scope = null). The null reference is also unnecessary.
+							// remove altogether with fDepth.
+							fJobs.add(new SearchJob(currentObject // doing object was supplied to us by caller
+									, path, scope));
+							searchReferences();
 							
 						}
 					};					
 				} else if (obj.getCat() == IGObjectCat.SIGNAL)  
 					assignment = newSignalSearch(assignmentLocation, obj, path);
+				else
+					assignment = newConstAssignment(assignmentLocation, path);
 				
-				if (assignment != null) 
-					scheduleAssignment(assignment);
+				scheduleAssignment(assignment);
+				
 			}
 			
 			if (list.isEmpty()) {
-				scheduleAssignment(newSignalSearch(assignmentLocation, null, path)); // dummy location
+				scheduleAssignment(newConstAssignment(assignmentLocation, path)); // dummy location
 			}
 			
+		}
+		
+		private SearchAssignment newConstAssignment(SourceLocation assignmentLocation, final ToplevelPath path) {
+			return newSignalSearch(assignmentLocation, null, path);
 		}
 		
 		private void scheduleAssignment(SearchAssignment assignment) {
@@ -165,25 +192,26 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 
 	@Override 
 	protected boolean createEntryResult(IGObject obj, ToplevelPath aPath) {
-
-		if (completed.containsKey(obj.getDBID())) {
-			if (debug) logger.info("will not " + doingObject + " already has a result as " + obj);
-			doingAssignment.keyResult = completed.get(obj.getDBID());
+		
+		currentAssignment.keyResult = completed.get(obj.getDBID());
+		if (currentAssignment.keyResult != null) {
+			if (debug) logger.info("will not search assignments of " + currentObject + ". It already has a result, " + obj);
 			return false;
+		} else {
+			currentAssignment.keyResult = new RootResult(completed, obj, aPath, false);
 		}
-
-		ReferenceSite root = new RootResult(completed.size()+1, obj, aPath); // grandfa is not shown in results
-		doingAssignment.keyResult = new RootResult(completed.size()+1, obj, aPath);
-		root.add(doingAssignment.keyResult);
-		completed.put(obj.getDBID(), doingAssignment.keyResult);
+		
 		return true;
 	}
 
 	public static class RootResult extends ReferenceSite {
 		public final int num_prefix;
-		public RootResult(int order, IGObject obj, ToplevelPath aPath) {
+		public final boolean skippedDueToDepth; // Only a small fraction of results is terminated due to depth. Should we return them in a separate collection instead of marking every one? Just to save a little memory.  
+		public RootResult(Map<Long, RootResult> completed, IGObject obj, ToplevelPath aPath, boolean skip) {
 			super(debugTitle(obj), obj.computeSourceLocation(), 0, RefType.Declaration, aPath, obj);
-			num_prefix  = order; 
+			completed.put(obj.getDBID(), this);
+			num_prefix = completed.size();
+			skippedDueToDepth = skip;
 		}
 	}
 	
@@ -193,7 +221,7 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 			@Override
 			public ReferenceSearchResult add(ToplevelPath aPath, ReferenceSearchResult aRSR) {
 				if (aRSR instanceof ReferenceSite && ((ReferenceSite) aRSR).getRefType() == RefType.Assignment) {
-					doingAssignment.keyResult.add(aRSR);
+					currentAssignment.keyResult.add(aRSR);
 				}
 					
 				return aRSR;

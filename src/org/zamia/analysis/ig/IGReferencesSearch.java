@@ -25,6 +25,7 @@ import org.zamia.analysis.ReferenceSearchResult;
 import org.zamia.analysis.ReferenceSite;
 import org.zamia.analysis.ReferenceSite.RefType;
 import org.zamia.analysis.SourceLocation2AST;
+import org.zamia.instgraph.Scope;
 import org.zamia.instgraph.IGConcurrentStatement;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGContainerItem;
@@ -74,7 +75,7 @@ public class IGReferencesSearch {
 	protected boolean fSearchUpward;
 	protected boolean fSearchDownward;
 
-	static class SearchJob {
+	public static class SearchJob {
 
 		private IGObject fObject;
 
@@ -170,7 +171,7 @@ public class IGReferencesSearch {
 		logger.debug("IGObjectReferenceSearch: search(): start. item=%s, path=%s, searchUpward=%b, searchDownward=%b", aItem, aPath, fSearchUpward, fSearchDownward);
 
 		fJobs = new HashSetArray<SearchJob>();
-		SearchJob job = findLocalDeclarationScope(aItem, aPath);
+		SearchJob job = findLocalDeclarationScope(fIGM, aItem, aPath);
 
 		if (job == null) {
 			return null;
@@ -259,7 +260,7 @@ public class IGReferencesSearch {
 
 								IGObject obj2 = (IGObject) item2;
 
-								SearchJob job2 = findLocalDeclarationScope(obj2, path);
+								SearchJob job2 = findLocalDeclarationScope(fIGM, obj2, path);
 								if (job2 != null) {
 									fJobs.add(job2);
 									foundOriginal = true;
@@ -524,8 +525,17 @@ public class IGReferencesSearch {
 		ReferenceSite rs = new ReferenceSite(title, location, 0, refType, aPath, obj);
 		resultBuilder.add(rs, obj);
 	}
+
+	public static IGObject asObject(IGItem item) {
+		if (item instanceof IGObject) {
+			return (IGObject) item;
+		} else if (item instanceof IGOperationObject) {
+			return ((IGOperationObject) item).getObject();
+		}
+		return null;
+	}
 	
-	private SearchJob findLocalDeclarationScope(IGObject aObject, ToplevelPath aPath) {
+	public static SearchJob findLocalDeclarationScope(IGManager aIGM, IGObject aObject, ToplevelPath aPath) {
 
 		logger.debug("IGObjectReferenceSearch: findLocalDeclarationScope(): start. object=%s, path=%s", aObject, aPath);
 
@@ -533,25 +543,19 @@ public class IGReferencesSearch {
 		IGObject object = aObject;
 
 		while (true) {
-
-			IGItem item = fIGM.findItem(tlp.getToplevel(), tlp.getPath());
+			
+			IGItem item = aIGM.findItem(tlp.getToplevel(), tlp.getPath());
 
 			logger.debug("IGObjectReferenceSearch: findLocalDeclarationScope(): path=%s corresponds to IGItem %s", tlp, item);
 
 			IGContainer container = null;
 			IGConcurrentStatement scope = null;
 
-			if (item instanceof IGStructure) {
+			if (item instanceof Scope) {
 
-				IGStructure struct = (IGStructure) item;
-				container = struct.getContainer();
-				scope = struct;
-
-			} else if (item instanceof IGModule) {
-
-				IGStructure struct = ((IGModule) item).getStructure();
-				container = struct.getContainer();
-				scope = struct;
+				Scope s = (Scope) item;
+				container = s.getContainer();
+				scope = s.getStructure();
 
 			}
 
