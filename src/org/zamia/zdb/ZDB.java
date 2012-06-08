@@ -18,17 +18,27 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
+import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPInputStream;
 
+import org.python.modules.synchronize;
 import org.zamia.BuildPath;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
@@ -38,6 +48,7 @@ import org.zamia.util.FileUtils;
 import org.zamia.util.HashMapArray;
 import org.zamia.util.LevelGZIPOutputStream;
 import org.zamia.util.ObjectSize;
+import org.zamia.util.Pair;
 import org.zamia.util.ZHash;
 import org.zamia.util.ehm.EHMIterator;
 import org.zamia.util.ehm.EHMPageManager;
@@ -65,19 +76,19 @@ public class ZDB {
 
 	public final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private static final int CACHE_MAX_SIZE = 16384;
+	private static final int CACHE_MAX_SIZE = 
+			16384; // <- Guenter optimum determined by experiment (does opening zdb per every open project affect this num?)
+			//32768;
+			//65536;
+			//3; // debug purposes
 
-	//private static final int CACHE_MAX_SIZE = 32768;
-
-	//private static final int CACHE_MAX_SIZE = 65536;
-
-	//private static final int CACHE_MAX_SIZE = 8; // debug purposes
-
+	static final int FLUSH_OUT_WHEN = 1512; // this does not seem to have any noticabe effect in the range 100-100000
+	
 	public static final boolean dump = false;
 
 	public static final boolean ENABLE_STATISTICS = false;
 
-	public static final boolean ENABLE_COMPRESSION = true;
+	public static final boolean ENABLE_COMPRESSION = false;
 
 	public static final boolean ENABLE_LOCKING = true;
 
@@ -87,12 +98,14 @@ public class ZDB {
 
 	private HashMap<Long, ZDBCacheEntry> fCache;
 
-	private ZDBCacheEntry fCacheHead, fCacheTail;
+	public ZDBCacheEntry fCacheHead, fCacheTail;
 
 	private ZDBPersistentData fPD;
 
 	private File fDataFile, fPDFile, fEHMPagesFile, fOffsetsFile;
 	private FileLock fLock = null;
+	private long fLength;
+	private RandomAccessFile raf;
 
 	private Object fOwner;
 
@@ -105,7 +118,7 @@ public class ZDB {
 	// to avoid loops:
 	private HashMap<Object, Long> fCurrentlyStoring;
 
-	private HashMap<Long, Object> fCurrentlyEvicting;
+	private EvictingSet fCurrentlyEvicting; // We should not (re)load the value until it was saved. This set keeps the save queue.
 
 	private boolean fLockingEnabled = false;
 
@@ -117,7 +130,7 @@ public class ZDB {
 
 	private ExtendibleHashMap fOffsets;
 
-	public ZDB(File aDBDir, Object aOwner) throws ZDBException {
+	public ZDB(File aDBDir, Object aOwner) throws ZDBException, FileNotFoundException {
 
 		if (ENABLE_LOCKING) {
 			String override = System.getenv("ZAMIA_LOCKING");
@@ -145,17 +158,20 @@ public class ZDB {
 		return fOwner;
 	}
 
-	private synchronized void start() throws ZDBException {
+	private synchronized void start() throws ZDBException, FileNotFoundException {
 
 		mkdirChecked(fDBDir);
 
 		doLock();
 
+		fLength = fDataFile.length();
+		raf = new RandomAccessFile(fDataFile, "rw");
+		
 		fCache = new HashMap<Long, ZDBCacheEntry>();
 		fCacheHead = null;
 		fCacheTail = null;
 		fCurrentlyStoring = new HashMap<Object, Long>();
-		fCurrentlyEvicting = new HashMap<Long, Object>();
+		fCurrentlyEvicting = new EvictingSet();
 
 		fEHMManager = new EHMPageManager(fEHMPagesFile);
 		fEHMs = new HashMap<String, ExtendibleHashMap>();
@@ -167,15 +183,25 @@ public class ZDB {
 			fPD.clear();
 			fOffsets.clear();
 		}
-
+		
+		baosToDiskThread = new BaosToDiskThread(); 
+		
 	}
 
 	public synchronized void clear() {
+		
+		try {
+			restartBaosToDiskThread();
+			raf.setLength(fLength = 0);
+		} catch (IOException e) {
+			el.logException(e);
+		}
+		
 		fCache = new HashMap<Long, ZDBCacheEntry>();
 		fCacheHead = null;
 		fCacheTail = null;
 		fCurrentlyStoring = new HashMap<Object, Long>();
-		fCurrentlyEvicting = new HashMap<Long, Object>();
+		fCurrentlyEvicting = new EvictingSet();
 
 		fPD = new ZDBPersistentData();
 
@@ -186,7 +212,13 @@ public class ZDB {
 		fOffsets.clear();
 
 		FileUtils.deleteDirRecursive(fDBDir);
+		
 		mkdirChecked(fDBDir);
+	}
+
+	private void restartBaosToDiskThread() {
+		baosToDiskThread.shutdown();
+		baosToDiskThread = new BaosToDiskThread();
 	}
 
 	private void printStats() {
@@ -212,7 +244,9 @@ public class ZDB {
 		while (fCacheHead != null) {
 			evict();
 		}
-
+		
+		restartBaosToDiskThread();
+		
 		logger.info("ZDB: flush(): writing EHM pages...");
 
 		fEHMManager.flush();
@@ -231,6 +265,11 @@ public class ZDB {
 		long size = FileUtils.du(fDBDir) / (1024 * 1024);
 
 		logger.info("ZDB: flush(): done. Current DB size: %d MB.", size);
+		
+		assert !Thread.holdsLock(fCurrentlyEvicting);
+		assert fCurrentlyEvicting.isEmpty() :  
+			"After flush completed, " + fCurrentlyEvicting.size() + " entries remains evicting";
+
 	}
 
 	public synchronized void shutdown() {
@@ -240,7 +279,13 @@ public class ZDB {
 		}
 
 		flush();
-
+		baosToDiskThread.shutdown();
+		try {
+			raf.close();
+		} catch (IOException e) {
+			el.logException(e);
+		}
+		
 		doUnLock();
 	}
 
@@ -397,7 +442,6 @@ public class ZDB {
 		if (fCacheTail == null) {
 			fCacheTail = entry;
 		}
-
 		int nCachedItems = fCache.size();
 
 		if (nCachedItems > CACHE_MAX_SIZE) {
@@ -415,23 +459,58 @@ public class ZDB {
 			if (!fCacheTail.isDeleted()) {
 				System.out.printf("ZDB: Internal error: id %d was not part of cache.\n", id);
 			}
-		} else {
-			fCurrentlyEvicting.put(id, evictedEntry.getObject());
-		}
-
+		} 
+		
 		fCacheTail = fCacheTail.getPrev();
 		if (fCacheTail != null) {
 			fCacheTail.setNext(null);
 		} else {
 			fCacheHead = null;
 		}
-
-		if (evictedEntry != null) {
-			if (evictedEntry.isDirty()) {
-				storeOnDisk(evictedEntry);
-			}
-			fCurrentlyEvicting.remove(id);
+		
+		if (evictedEntry != null && evictedEntry.isDirty()) {
+			fCurrentlyEvicting.put(id, evictedEntry.getObject());
+			storeOnDisk(evictedEntry);
 		}
+		
+	}
+
+	//It may happen that the same id entry is evicted twice so that second eviction happens while
+	// the first one is still in the queue. Then, we should replace the value cached in the queue with 
+	// the new one and increment the counter. It is neccessary to keep object in the cache until last version  
+	// is saved to the disk to that when record is not found in the cache it is on the disk for sure. 
+//	static class EvictingSet extends HashMap<Long, Pair<Object, Integer>> {
+//		public synchronized void put(Long id, Object value) {
+//			Pair<Object, Integer> p = put(id, new Pair<Object, Integer>(value, 1));
+//			
+//			if (p != null) {
+//				System.err.println(p.getSecond() + "-ary eviction");
+//				put(id, new Pair<Object, Integer>(value, p.getSecond()+1)); // update the value and increment the count
+//			}
+//		}
+//
+//		public void remove(Long id) {
+//			assert Thread.holdsLock(this);
+//			Pair<Object, Integer> p = super.remove(id);
+//			if (p.getSecond() != 1) {
+//				System.err.println("there was a duplicate eviction! Cool!");
+//				p = new Pair<Object, Integer>(p.getFirst(), p.getSecond()-1);
+//				put((Long)id, p);
+//			}
+//		}
+//		public Object get(Long key) {
+//			Pair<Object, Integer> pair = super.get(key);
+//			return pair == null ? null : pair.getFirst();
+//		}
+//	}
+
+	//A simpler and possibly faster version of eviction set. It assumes that duplicate evictions are unlikely.
+	static class EvictingSet extends HashMap<Long, Object> {
+		public synchronized void put(long id, Object data) {
+			Object o = super.put(id, data);
+			if (o != null) throw new AssertionError("Evicting a record while previous eviction is not completed. The code supporting this case was disabled because it is considered unlikely. Check the cache size and let me know if this happens."); 
+		}
+		
 	}
 
 	private synchronized void storeOnDisk(ZDBCacheEntry aEntry) {
@@ -442,45 +521,123 @@ public class ZDB {
 		// (some objects may have writeObject() methods which trigger ZDB.store())
 		// we first serialize to mem and then write out the whole object in one go
 
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		BAOS baos = new BAOS();
 
 		try {
-			ObjectOutputStream serializer = new ObjectOutputStream(baos);
+			
+			ObjectOutputStream serializer = new ObjectOutputStream(ENABLE_COMPRESSION ? new LevelGZIPOutputStream(baos, Deflater.BEST_SPEED) : baos);
 			serializer.writeObject(aEntry.getObject());
-			serializer.flush();
+			serializer.close();
 			
 			//logger.info ("ZDB: File for %d is '%s'", id, dataFile);
 
-			long offset = fDataFile.length();
-
-			fOffsets.put(id, offset);
-
-			OutputStream out = openOutputFile(fDataFile, true);
-			try {
-				baos.writeTo(out);
-			} finally {
-				out.close();
-			}
+			fOffsets.put(baos.id = id, baos.offset = fLength);
+			baosToDiskThread.submit(baos);
+			fLength += baos.size();
+			
 		} catch (IOException e) {
 			el.logException(e);
 		}
 
 	}
 
-	static OutputStream openOutputFile(File name, boolean append) throws FileNotFoundException, IOException {
-
-		FileOutputStream f = new FileOutputStream(name, append);
-		return ENABLE_COMPRESSION ? new LevelGZIPOutputStream(f, Deflater.BEST_SPEED) : f;  
+	static class BAOS extends ByteArrayOutputStream {
+		public long id, offset;
+		byte[] getBytes() { return this.buf; }
+		BAOS() {super();}
+		BAOS(int capacity) {super(capacity);}
 	}
-
-	static ObjectInputStream openInputFile(File name, long offset) throws IOException {
-		FileInputStream fis = new FileInputStream(name);
-		fis.skip(offset);
-
-		return new ObjectInputStream(new BufferedInputStream(
-				ENABLE_COMPRESSION ? new GZIPInputStream(fis) : fis));
+	
+	BaosToDiskThread baosToDiskThread;
+	BAOS END_OF_STREAM = new BAOS(0); // null is dreadfully forbidden in the BlockingQueue
+	
+	//TODO: a single static thread, started when first ZDB is created and disposed as  
+	// the last zdb shuts down, could serve all ZDBs, provided that all data.bin files
+	// are located on the same disk (so that concurrence between writers does not make sense).
+	class BaosToDiskThread extends Thread {
 		
-	}
+		BaosToDiskThread() {
+			super("BaosToDisk - " + fOwner);
+			start();
+		}
+		
+		public void submit(BAOS baos) {
+			try {
+				input.put(baos);
+			} catch (InterruptedException e) {
+				el.logException(e);
+			}
+		}
+		
+		public void shutdown() {
+			submit(END_OF_STREAM);
+			try {
+				join();
+			} catch (InterruptedException e) { el.logException(e); }
+		}
+		
+		private BlockingQueue<BAOS> input = new LinkedBlockingQueue<BAOS>(10);
+		private BAOS buf = new BAOS(2 * FLUSH_OUT_WHEN);
+		private long offset;
+		private Collection<Long> ids = new ArrayList<Long>();
+		
+		private void flush() throws IOException {
+			if (buf.size() != 0) 
+				try {
+					synchronized (raf) {
+						raf.seek(offset); // seek can be avoided if we ensure that no seeks were done for other purposes
+						raf.write(buf.getBytes(), 0, buf.size());
+					}
+				} catch (IOException e) {el.logException(e);}
+
+			if (!ids.isEmpty()) {
+				synchronized (fCurrentlyEvicting) {
+					for (Long id : ids) {
+						fCurrentlyEvicting.remove(id);
+					}
+				}
+				ids.clear();
+			}
+			
+			buf.reset();
+			if (buf.getBytes().length > FLUSH_OUT_WHEN)
+				buf = new BAOS(FLUSH_OUT_WHEN);
+		}
+		
+		public void run() {
+			while (true) {
+				try {
+					
+					BAOS baos = input.take();
+					
+					if (baos == END_OF_STREAM) {
+						flush();
+						break;
+					}
+					
+					if (ENABLE_STATISTICS)
+						if (baos.offset != raf.length())
+							el.logException(new IOException("specified offset " + baos.offset + " is different from file size " + raf.length() ));
+
+//					logger.info("baosToDisk: " + baos.offset + " (" + baos.size() + " bytes) => ");
+					
+					if (ids.isEmpty())
+						offset = baos.offset; // remember location of the first chunk of the series
+					
+					ids.add(baos.id);
+					baos.writeTo(buf);
+					if (buf.size() > FLUSH_OUT_WHEN)
+						flush();
+					
+				} catch (Exception e) {
+					el.logException(e);
+				}
+				
+			}
+			
+		};
+	};
+	
 	public synchronized Object load(long aId) {
 
 		if (aId == 0) {
@@ -518,7 +675,9 @@ public class ZDB {
 			return obj;
 		}
 
-		obj = fCurrentlyEvicting.get(aId);
+		synchronized (fCurrentlyEvicting) {
+			obj = fCurrentlyEvicting.get(aId);
+		}
 		if (obj != null) {
 			//logger.debug ("ZDB: loading %d, was in evicting: %s", aId, obj);
 			return obj;
@@ -534,11 +693,22 @@ public class ZDB {
 		}
 
 		try {
-			ObjectInputStream in = openInputFile(fDataFile, offset);
-			try {
+			synchronized (raf) {
+				raf.seek(offset);
+				InputStream rafIs = new BufferedInputStream(new InputStream() {
+					public int read() throws IOException {
+						throw new IOException("not implemneted, sorry"); // tell me if this happens
+						//return raf.read(); 
+					}
+					
+					@Override
+					public int read(byte[] b, int off, int len) throws IOException {
+						return raf.read(b, off, len);
+					}
+				});
+				
+				ObjectInputStream in = new ObjectInputStream(ENABLE_COMPRESSION ? new GZIPInputStream(rafIs) : rafIs);
 				obj = in.readObject();
-			} finally {
-				in.close();
 			}
 		} catch (IOException e) {
 			logger.error("ZDB: IOException while reading element %s (file: '%s')", aId, fDataFile.getAbsolutePath());
@@ -563,12 +733,17 @@ public class ZDB {
 		if (aId == 0) {
 			return;
 		}
-		ZDBCacheEntry entry = fCache.get(aId);
+		
+		// Why do we introduce deleted flag instead of just removing from the list here?
+		// Guenter says that possibly because of (multithreaded) recurrence. 
+		// If it is not really needed then cache can be replaced by LinkedHashMap
+		ZDBCacheEntry entry = fCache.remove(aId);
 		if (entry != null) {
 			entry.setDirty(false);
-			entry.setDeleted(true);
-			fCache.remove(aId);
+			entry.setDeleted(true); 
 		}
+		
+		
 		fOffsets.delete(aId);
 	}
 
@@ -829,15 +1004,16 @@ public class ZDB {
 
 			BufferedInputStream in = null;
 			try {
-				in = new BufferedInputStream(new FileInputStream(fDataFile));
+				synchronized (raf) {
+					raf.seek(0);
 
-				byte buffer[] = new byte[BUFSIZE];
+					byte buffer[] = new byte[BUFSIZE];
 
-				int n = 0;
-				while ((n = in.read(buffer)) > 0) {
-					dout.write(buffer, 0, n);
+					int n = 0;
+					while ((n = raf.read(buffer)) > 0) {
+						dout.write(buffer, 0, n);
+					}
 				}
-
 			} catch (Throwable t) {
 				el.logException(t);
 			} finally {
@@ -963,18 +1139,20 @@ public class ZDB {
 
 			BufferedOutputStream bout = null;
 			try {
-				bout = new BufferedOutputStream(new FileOutputStream(fDataFile));
+				synchronized (raf) {
+					raf.seek(0);
 
-				byte buffer[] = new byte[BUFSIZE];
+					byte buffer[] = new byte[BUFSIZE];
 
-				int n = 0;
-				do {
-					n = din.read(buffer);
-					if (n > 0) {
-						bout.write(buffer, 0, n);
-					}
-				} while (n > 0);
+					int n = 0;
+					do {
+						n = din.read(buffer);
+						if (n > 0) {
+							raf.write(buffer, 0, n);
+						}
+					} while (n > 0);
 
+				}
 			} catch (Throwable t) {
 				el.logException(t);
 			} finally {
