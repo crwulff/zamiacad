@@ -114,6 +114,9 @@ public class IGAttributeStmt extends IGStmt {
 
 						break;
 
+					case VAL:
+						resValue = type.getDiscreteValue(argument.getOrd(), computeSourceLocation(), aErrorMode, aReport).computeStaticValue(aRuntime, aErrorMode, aReport);
+						break;
 					default:
 						throw new ZamiaException("Sorry. not implemented yet: Attribute " + fOp + " for discrete types.", computeSourceLocation());
 					}
