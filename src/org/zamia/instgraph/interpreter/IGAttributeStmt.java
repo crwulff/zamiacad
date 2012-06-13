@@ -96,15 +96,21 @@ public class IGAttributeStmt extends IGStmt {
 
 						} else if (type.isEnum()) {
 
-							val = argument.toString().toLowerCase();
+							if (type.isCharEnum())
+								val = (argument.isCharLiteral() ? "'" + argument.getId() + "'" : argument.getId()).toLowerCase();
+							
+							else {
+								val = argument.toString().toLowerCase();
 
-							if (val.startsWith("\\") && val.endsWith("\\")) {
-								// extended identifier => double backslashes
-								val = val.substring(1, val.length() - 1).replace("\\", "\\\\");
-								val = "\\" + val + "\\";
-							} else {
-								val = "'" + val + "'";
+								if (val.startsWith("\\") && val.endsWith("\\")) {
+									// extended identifier => double backslashes
+									val = val.substring(1, val.length() - 1).replace("\\", "\\\\");
+									val = "\\" + val + "\\";
+								} else {
+									val = "'" + val + "'";
+								}
 							}
+							
 						}
 
 						if (val == null) {
