@@ -592,6 +592,9 @@ public class IGStaticValue extends IGOperation {
 					return "" + fCharLiteral;
 				}
 
+				if (type.isCharEnum())
+					return Character.toString((char) this.getOrd());
+				
 				String id = getId();
 				if (id != null) {
 					return getId();
