@@ -621,13 +621,13 @@ public class IGStaticValue extends IGOperation {
 				IGTypeStatic st = getStaticType();
 				int nUnits = st.getNumUnits(null);
 
-				String baseUnit = "";
+				String baseUnit = ""; // no primary unit?
 				if (nUnits > 0) {
 					IGStaticValue unit = st.getUnit(0, null);
 					baseUnit = unit.getId();
 				}
 
-				return "" + fNum + baseUnit;
+				return fNum + " " + baseUnit.toLowerCase(); // everything must be lowercased in spec
 
 			case RANGE:
 				return fAscending.isTrue() ? fLeft.toHRString() + " to " + fRight.toHRString() : fLeft.toHRString() + " downto " + fRight.toHRString();

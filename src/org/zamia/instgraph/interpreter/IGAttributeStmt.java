@@ -17,6 +17,7 @@ import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGType;
+import org.zamia.instgraph.IGType.TypeCat;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.sim.ref.IGFileDriver;
 import org.zamia.instgraph.sim.ref.IGSignalDriver;
@@ -68,31 +69,13 @@ public class IGAttributeStmt extends IGStmt {
 		if (type != null) {
 
 			if (argument != null) {
-
-				if (type.isDiscrete()) {
-
+				
+				if (fOp == AttrOp.IMAGE) {
+					
 					IGTypeStatic resType = getResType().computeStaticType(aRuntime, aErrorMode, aReport);
-					if (resType == null) {
-						return ReturnStatus.ERROR;
-					}
-
-					switch (fOp) {
-					case POS:
-
-						String id = argument.getId();
-
-						resValue = type.findEnumLiteral(id);
-						if (resValue == null) {
-							throw new ZamiaException("Enum literal not found :" + id, sourceLocation);
-						}
-
-						resValue = new IGStaticValueBuilder(resType, null, sourceLocation).setNum(resValue.getOrd()).buildConstant();
-
-						break;
-
-					case IMAGE:
-
-						String val = null;
+					String val = null;
+					
+					if (type.isDiscrete()) {
 
 						if (type.isInteger()) {
 
@@ -117,12 +100,35 @@ public class IGAttributeStmt extends IGStmt {
 							
 						}
 
-						if (val == null) {
-							throw new ZamiaException("Sorry, not implemented yet: Attribute IMAGE is only supported for NUMERIC and ENUM types atm...", sourceLocation);
+					} else if (type.getCat() == TypeCat.PHYSICAL) {
+						val = argument.toString();
+					}
+					
+					if (val == null) {
+						throw new ZamiaException("Sorry, not implemented yet: Attribute IMAGE is not supported for " + type, sourceLocation);
+					}
+						
+					resValue = IGFileDriver.line2IG(val, resType, aRuntime, sourceLocation, aErrorMode, aReport, aRuntime.getZDB());
+					
+				} else if (type.isDiscrete()) {
+
+					IGTypeStatic resType = getResType().computeStaticType(aRuntime, aErrorMode, aReport);
+					if (resType == null) {
+						return ReturnStatus.ERROR;
+					}
+
+					switch (fOp) {
+					case POS:
+
+						String id = argument.getId();
+
+						resValue = type.findEnumLiteral(id);
+						if (resValue == null) {
+							throw new ZamiaException("Enum literal not found :" + id, sourceLocation);
 						}
-						
-						resValue = IGFileDriver.line2IG(val, resType, aRuntime, sourceLocation, aErrorMode, aReport, aRuntime.getZDB());
-						
+
+						resValue = new IGStaticValueBuilder(resType, null, sourceLocation).setNum(resValue.getOrd()).buildConstant();
+
 						break;
 
 					case VAL:
@@ -132,7 +138,9 @@ public class IGAttributeStmt extends IGStmt {
 						throw new ZamiaException("Sorry. not implemented yet: Attribute " + fOp + " for discrete types.", sourceLocation);
 					}
 
-				} else {
+				} 
+				else
+				{
 					if (!type.isArray()) {
 						throw new ZamiaException("Not an array type: " + type, sourceLocation);
 					}
