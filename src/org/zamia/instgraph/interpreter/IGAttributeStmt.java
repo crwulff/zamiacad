@@ -11,7 +11,9 @@ package org.zamia.instgraph.interpreter;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationAttribute.AttrOp;
+import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGType;
@@ -61,6 +63,8 @@ public class IGAttributeStmt extends IGStmt {
 		IGStaticValue resValue = null;
 
 		IGTypeStatic type = sf.getType();
+		SourceLocation sourceLocation = computeSourceLocation();
+		
 		if (type != null) {
 
 			if (argument != null) {
@@ -79,10 +83,10 @@ public class IGAttributeStmt extends IGStmt {
 
 						resValue = type.findEnumLiteral(id);
 						if (resValue == null) {
-							throw new ZamiaException("Enum literal not found :" + id, computeSourceLocation());
+							throw new ZamiaException("Enum literal not found :" + id, sourceLocation);
 						}
 
-						resValue = new IGStaticValueBuilder(resType, null, computeSourceLocation()).setNum(resValue.getOrd()).buildConstant();
+						resValue = new IGStaticValueBuilder(resType, null, sourceLocation).setNum(resValue.getOrd()).buildConstant();
 
 						break;
 
@@ -114,63 +118,64 @@ public class IGAttributeStmt extends IGStmt {
 						}
 
 						if (val == null) {
-							throw new ZamiaException("Sorry, not implemented yet: Attribute IMAGE is only supported for NUMERIC and ENUM types atm...", computeSourceLocation());
+							throw new ZamiaException("Sorry, not implemented yet: Attribute IMAGE is only supported for NUMERIC and ENUM types atm...", sourceLocation);
 						}
-						resValue = IGFileDriver.line2IG(val, resType, aRuntime, computeSourceLocation(), aErrorMode, aReport, aRuntime.getZDB());
-
+						
+						resValue = IGFileDriver.line2IG(val, resType, aRuntime, sourceLocation, aErrorMode, aReport, aRuntime.getZDB());
+						
 						break;
 
 					case VAL:
-						resValue = type.getDiscreteValue(argument.getOrd(), computeSourceLocation(), aErrorMode, aReport).computeStaticValue(aRuntime, aErrorMode, aReport);
+						resValue = type.getDiscreteValue(argument.getOrd(), sourceLocation, aErrorMode, aReport).computeStaticValue(aRuntime, aErrorMode, aReport);
 						break;
 					default:
-						throw new ZamiaException("Sorry. not implemented yet: Attribute " + fOp + " for discrete types.", computeSourceLocation());
+						throw new ZamiaException("Sorry. not implemented yet: Attribute " + fOp + " for discrete types.", sourceLocation);
 					}
 
 				} else {
 					if (!type.isArray()) {
-						throw new ZamiaException("Not an array type: " + type, computeSourceLocation());
+						throw new ZamiaException("Not an array type: " + type, sourceLocation);
 					}
 
 					// FIXME
-					throw new ZamiaException("Sorry. not implemented yet.", computeSourceLocation());
+					throw new ZamiaException("Sorry. not implemented yet.", sourceLocation);
 				}
 			} else {
 
 				switch (fOp) {
 				case HIGH:
 					if (type.isArray()) {
-						resValue = type.getStaticIndexType(computeSourceLocation()).getStaticHigh(computeSourceLocation());
+						resValue = type.getStaticIndexType(sourceLocation).getStaticHigh(sourceLocation);
 					} else {
-						resValue = type.getStaticHigh(computeSourceLocation());
+						resValue = type.getStaticHigh(sourceLocation);
 					}
 					break;
 				case LOW:
 					if (type.isArray()) {
-						resValue = type.getStaticIndexType(computeSourceLocation()).getStaticLow(computeSourceLocation());
+						resValue = type.getStaticIndexType(sourceLocation).getStaticLow(sourceLocation);
 					} else {
-						resValue = type.getStaticLow(computeSourceLocation());
+						resValue = type.getStaticLow(sourceLocation);
 					}
 					break;
 				case LEFT:
 					if (type.isArray()) {
-						resValue = type.getStaticIndexType(computeSourceLocation()).getStaticLeft(computeSourceLocation());
+						resValue = type.getStaticIndexType(sourceLocation).getStaticLeft(sourceLocation);
 					} else {
-						resValue = type.getStaticLeft(computeSourceLocation());
+						resValue = type.getStaticLeft(sourceLocation);
 					}
 					break;
 				case RIGHT:
 					if (type.isArray()) {
-						resValue = type.getStaticIndexType(computeSourceLocation()).getStaticRight(computeSourceLocation());
+						resValue = type.getStaticIndexType(sourceLocation).getStaticRight(sourceLocation);
 					} else {
-						resValue = type.getStaticRight(computeSourceLocation());
+						resValue = type.getStaticRight(sourceLocation);
 					}
 					break;
 				case ASCENDING:
 					if (type.isArray()) {
-						resValue = type.getStaticIndexType(computeSourceLocation()).getStaticAscending(computeSourceLocation());
+						resValue = type.getStaticIndexType(sourceLocation).getStaticAscending(sourceLocation);
 					} else {
-						resValue = type.getStaticAscending(computeSourceLocation());
+						resValue = type.getStaticAscending(sourceLocation);
 					}
 					break;
 				case RANGE:
@@ -178,12 +183,12 @@ public class IGAttributeStmt extends IGStmt {
 					break;
 				case REVERSE_RANGE:
 					if (type.isArray()) {
-						resValue = type.getStaticIndexType(computeSourceLocation()).getStaticRange();
+						resValue = type.getStaticIndexType(sourceLocation).getStaticRange();
 					} else {
 						resValue = type.getStaticRange();
 					}
 
-					IGStaticValueBuilder b = new IGStaticValueBuilder(resValue.getStaticType(), null, computeSourceLocation());
+					IGStaticValueBuilder b = new IGStaticValueBuilder(resValue.getStaticType(), null, sourceLocation);
 
 					// reverse direction
 
@@ -192,7 +197,7 @@ public class IGAttributeStmt extends IGStmt {
 
 					boolean ascB = !asc.isTrue();
 
-					asc = ascB ? ascT.getEnumLiteral(1, computeSourceLocation(), ASTErrorMode.EXCEPTION, null) : ascT.getEnumLiteral(0, computeSourceLocation(),
+					asc = ascB ? ascT.getEnumLiteral(1, sourceLocation, ASTErrorMode.EXCEPTION, null) : ascT.getEnumLiteral(0, sourceLocation,
 							ASTErrorMode.EXCEPTION, null);
 
 					b.setAscending(asc);
@@ -207,14 +212,14 @@ public class IGAttributeStmt extends IGStmt {
 					break;
 				case LENGTH:
 					if (!type.isArray()) {
-						throw new ZamiaException("Attribute " + fOp + " is not defined for non-array types.", computeSourceLocation());
+						throw new ZamiaException("Attribute " + fOp + " is not defined for non-array types.", sourceLocation);
 					}
-					IGTypeStatic idxType = type.getStaticIndexType(computeSourceLocation());
-					long card = idxType.computeCardinality(computeSourceLocation());
-					resValue = new IGStaticValueBuilder(idxType, null, computeSourceLocation()).setNum(card).buildConstant();
+					IGTypeStatic idxType = type.getStaticIndexType(sourceLocation);
+					long card = idxType.computeCardinality(sourceLocation);
+					resValue = new IGStaticValueBuilder(idxType, null, sourceLocation).setNum(card).buildConstant();
 					break;
 				default:
-					throw new ZamiaException("Internal error: attribute " + fOp + " not implemented for types.", computeSourceLocation());
+					throw new ZamiaException("Internal error: attribute " + fOp + " not implemented for types.", sourceLocation);
 				}
 			}
 		} else {
@@ -233,7 +238,7 @@ public class IGAttributeStmt extends IGStmt {
 					if (aErrorMode == ASTErrorMode.RETURN_NULL) {
 						return ReturnStatus.ERROR;
 					} else {
-						throw new ZamiaException("Internal error: value expected for attribute computation.", computeSourceLocation());
+						throw new ZamiaException("Internal error: value expected for attribute computation.", sourceLocation);
 					}
 				}
 
@@ -246,66 +251,66 @@ public class IGAttributeStmt extends IGStmt {
 			case LENGTH:
 
 				if (type.isArray()) {
-					if (!checkConstrained(type, aErrorMode, aReport, computeSourceLocation())) {
+					if (!checkConstrained(type, aErrorMode, aReport, sourceLocation)) {
 						return ReturnStatus.ERROR;
 					}
-					type = type.getStaticIndexType(computeSourceLocation());
+					type = type.getStaticIndexType(sourceLocation);
 				}
 
 				IGTypeStatic srType = getResType().computeStaticType(aRuntime, aErrorMode, aReport);
 
-				resValue = new IGStaticValueBuilder(srType, null, computeSourceLocation()).setNum(type.computeCardinality(computeSourceLocation())).buildConstant();
+				resValue = new IGStaticValueBuilder(srType, null, sourceLocation).setNum(type.computeCardinality(sourceLocation)).buildConstant();
 				break;
 			case LOW:
 				if (type.isArray()) {
-					resValue = type.getStaticIndexType(computeSourceLocation()).getStaticLow(computeSourceLocation());
+					resValue = type.getStaticIndexType(sourceLocation).getStaticLow(sourceLocation);
 				} else {
 					resValue = v.getAscending().isTrue() ? v.getLeft() : v.getRight();
 				}
 				break;
 			case HIGH:
 				if (type.isArray()) {
-					resValue = type.getStaticIndexType(computeSourceLocation()).getStaticHigh(computeSourceLocation());
+					resValue = type.getStaticIndexType(sourceLocation).getStaticHigh(sourceLocation);
 				} else {
 					resValue = v.getAscending().isTrue() ? v.getRight() : v.getLeft();
 				}
 				break;
 			case LEFT:
 				if (type.isArray()) {
-					resValue = type.getStaticIndexType(computeSourceLocation()).getStaticLeft(computeSourceLocation());
+					resValue = type.getStaticIndexType(sourceLocation).getStaticLeft(sourceLocation);
 				} else {
 					resValue = v.getLeft();
 				}
 				break;
 			case RIGHT:
 				if (type.isArray()) {
-					resValue = type.getStaticIndexType(computeSourceLocation()).getStaticRight(computeSourceLocation());
+					resValue = type.getStaticIndexType(sourceLocation).getStaticRight(sourceLocation);
 				} else {
 					resValue = v.getRight();
 				}
 				break;
 			case ASCENDING:
 				if (type.isArray()) {
-					resValue = type.getStaticIndexType(computeSourceLocation()).getStaticAscending(computeSourceLocation());
+					resValue = type.getStaticIndexType(sourceLocation).getStaticAscending(sourceLocation);
 				} else {
 					resValue = v.getAscending();
 				}
 				break;
 			case RANGE:
 				if (type.isArray()) {
-					resValue = type.getStaticIndexType(computeSourceLocation()).getStaticRange();
+					resValue = type.getStaticIndexType(sourceLocation).getStaticRange();
 				} else {
 					resValue = type.getStaticRange();
 				}
 				break;
 			case REVERSE_RANGE:
 				if (type.isArray()) {
-					resValue = type.getStaticIndexType(computeSourceLocation()).getStaticRange();
+					resValue = type.getStaticIndexType(sourceLocation).getStaticRange();
 				} else {
 					resValue = type.getStaticRange();
 				}
 
-				IGStaticValueBuilder b = new IGStaticValueBuilder(resValue.getStaticType(), null, computeSourceLocation());
+				IGStaticValueBuilder b = new IGStaticValueBuilder(resValue.getStaticType(), null, sourceLocation);
 
 				// reverse direction
 
@@ -314,7 +319,7 @@ public class IGAttributeStmt extends IGStmt {
 
 				boolean ascB = !asc.isTrue();
 
-				asc = ascB ? ascT.getEnumLiteral(1, computeSourceLocation(), ASTErrorMode.EXCEPTION, null) : ascT.getEnumLiteral(0, computeSourceLocation(),
+				asc = ascB ? ascT.getEnumLiteral(1, sourceLocation, ASTErrorMode.EXCEPTION, null) : ascT.getEnumLiteral(0, sourceLocation,
 						ASTErrorMode.EXCEPTION, null);
 
 				b.setAscending(asc);
@@ -336,19 +341,19 @@ public class IGAttributeStmt extends IGStmt {
 					return ReturnStatus.ERROR;
 				}
 
-				resValue = rt.getEnumLiteral(driver.isEvent() ? 1 : 0, computeSourceLocation(), ASTErrorMode.EXCEPTION, null);
+				resValue = rt.getEnumLiteral(driver.isEvent() ? 1 : 0, sourceLocation, ASTErrorMode.EXCEPTION, null);
 
 				break;
 			case LAST_VALUE:
 
 				driver = sf.getObjectDriver().getTargetDriver();
 				if (!(driver instanceof IGSignalDriver)) {
-					throw new ZamiaException("Internal error: attribute " + fOp + " is only supported for signals.", computeSourceLocation());
+					throw new ZamiaException("Internal error: attribute " + fOp + " is only supported for signals.", sourceLocation);
 				}
 				IGSignalDriver signalDriver = (IGSignalDriver) driver;
 
 				if (!(aRuntime instanceof IGSimProcess)) {
-					throw new ZamiaException("Internal error: attribute " + fOp + " is only supported for runtime with signals' history.", computeSourceLocation());
+					throw new ZamiaException("Internal error: attribute " + fOp + " is only supported for runtime with signals' history.", sourceLocation);
 				}
 				IGSimProcess simProcess = (IGSimProcess) aRuntime;
 
@@ -356,7 +361,7 @@ public class IGAttributeStmt extends IGStmt {
 
 				break;
 			default:
-				throw new ZamiaException("Internal error: attribute " + fOp + " not implemented for values.", computeSourceLocation());
+				throw new ZamiaException("Internal error: attribute " + fOp + " not implemented for values.", sourceLocation);
 			}
 
 		}

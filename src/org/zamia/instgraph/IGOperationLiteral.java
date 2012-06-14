@@ -104,45 +104,23 @@ public class IGOperationLiteral extends IGOperation {
 
 		IGTypeStatic t = getType().computeStaticType(aRuntime, ASTErrorMode.EXCEPTION, null);
 
+		IGStaticValueBuilder builder = new IGStaticValueBuilder(t, getId(), computeSourceLocation());
 		switch (fCat) {
 		case DECIMAL:
-			ac = new IGStaticValueBuilder(t, getId(), computeSourceLocation()).setReal(fReal).buildConstant();
+			ac = builder.setReal(fReal).buildConstant();
 			break;
 
 		case INTEGER:
-			ac = new IGStaticValueBuilder(t, getId(), computeSourceLocation()).setNum(fNum).buildConstant();
+			
+			ac = builder.setNum(fNum).buildConstant();
 			break;
 
 		case STRING:
-
-			IGStaticValueBuilder builder = new IGStaticValueBuilder(t, getId(), computeSourceLocation());
-
-			IGTypeStatic et = t.getStaticElementType(computeSourceLocation());
-
-			int n = fStr.length();
-			int offset = builder.getArrayOffset();
-			for (int i = 0; i < n; i++) {
-				char c = fStr.charAt(n-1-i);
-
-//				IGStaticValue el = et.findEnumLiteral(c);
-//				if (c == '\t') {
-//					el = et.findEnumLiteral("HT");
-//				}
-				IGStaticValue el = et.getEnumLiteral(c, computeSourceLocation(), null, null);
-
-				if (el == null) {
-					throw new ZamiaException("Couldn't find character literal " + c, computeSourceLocation());
-				}
-
-				builder.set(offset + i, el, computeSourceLocation());
-
-			}
-
-			ac = builder.buildConstant();
+			ac = computeString(fStr, builder, computeSourceLocation());
 			break;
 
 		case CHAR:
-			ac = new IGStaticValueBuilder(t, getId(), computeSourceLocation()).setChar(fChar).buildConstant();
+			ac = builder.setChar(fChar).buildConstant();
 			break;
 
 		}
@@ -155,6 +133,36 @@ public class IGOperationLiteral extends IGOperation {
 			aRuntime.putCachedLiteralActualConstant(this, ac);
 		}
 		return ac;
+	}
+
+	public static IGStaticValue computeString(String aInput, IGStaticValueBuilder aBuilder, SourceLocation aSourceLocation) throws ZamiaException {
+
+		IGTypeStatic t = aBuilder.getType();
+		IGTypeStatic et = t.getStaticElementType(aSourceLocation);
+
+		int n = aInput.length();
+		int offset = aBuilder.getArrayOffset();
+		for (int i = 0; i < n; i++) {
+			char c = aInput.charAt(n-1-i);
+
+			IGStaticValue el = et.findEnumLiteral(c);
+			if (c == '\t') {
+				el = et.findEnumLiteral("HT");
+			}
+			
+//			IGStaticValue el = et.isCharEnum() 
+//					? et.getEnumLiteral(c, aSourceLocation, null, null)
+//					: et.findEnumLiteral(c);
+
+			if (el == null) {
+				throw new ZamiaException("Couldn't find character literal " + c, aSourceLocation);
+			}
+
+			aBuilder.set(offset + i, el, aSourceLocation);
+
+		}
+
+		return aBuilder.buildConstant();
 	}
 
 	@Override

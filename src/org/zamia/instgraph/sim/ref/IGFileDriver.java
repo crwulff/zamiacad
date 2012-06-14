@@ -70,21 +70,44 @@ public class IGFileDriver extends IGObjectDriver {
 		return line2IG(line, stringType, aRuntime, aLocation, aErrorMode, aReport, aSub.getZDB());
 	}
 
-	public static IGStaticValue line2IG(String aLine, IGType aStringType, IGInterpreterRuntimeEnv aRuntime,
-										SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode,
-										ErrorReport aReport, ZDB aZDB) throws ZamiaException {
-		// construct OperationLiteral
+	private static IGType line2IGPrepareType(String aLine, IGType aStringType, IGInterpreterRuntimeEnv aRuntime,
+			SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode,
+			ErrorReport aReport, ZDB aZDB) throws ZamiaException {
 		IGTypeStatic idxType = aStringType.getIndexType().computeStaticType(aRuntime, aErrorMode, aReport);
 		IGStaticValue left = idxType.getStaticLeft(aLocation);
 		IGStaticValue right = new IGStaticValueBuilder(left, aLocation).setNum(new BigInteger("" + aLine.length())).buildConstant();
 		IGStaticValue ascending = idxType.getStaticAscending();
 
 		IGRange range = new IGRange(left, right, ascending, aLocation, aZDB);
-		aStringType = aStringType.createSubtype(range, aRuntime, aLocation);
-
-		IGOperationLiteral lineOL = new IGOperationLiteral(aLine.toUpperCase(), aStringType, aLocation);
+		return aStringType = aStringType.createSubtype(range, aRuntime, aLocation);
+		
+	}
+	public static IGStaticValue line2IG(String aLine, IGType aStringType, IGInterpreterRuntimeEnv aRuntime,
+			SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode,
+			ErrorReport aReport, ZDB aZDB) throws ZamiaException {
+		// construct OperationLiteral
+		IGType type = line2IGPrepareType(aLine, aStringType, aRuntime, aLocation, aErrorMode, aReport, aZDB);
+		IGOperationLiteral lineOL = new IGOperationLiteral(aLine.toUpperCase(), type, aLocation);
 
 		return lineOL.computeStaticValue(aRuntime, aErrorMode, aReport);
+
+		//aLine = aLine.toUpperCase();
+		//IGStaticValueBuilder builder = new IGStaticValueBuilder(aStringType, aLine, aLocation);
+		//return IGOperationLiteral.computeString(aLine, builder, aLocation);
+
+	}
+
+	/**Optimized version of line2IG(IGType). Here we do not need to call simulator as the type is already static.*/
+	public static IGStaticValue line2IG(String aLine, IGTypeStatic aStringType, IGInterpreterRuntimeEnv aRuntime,
+			SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode,
+			ErrorReport aReport, ZDB aZDB) throws ZamiaException {
+
+		IGType type = line2IGPrepareType(aLine, aStringType, aRuntime, aLocation, aErrorMode, aReport, aZDB);
+		
+		aLine = aLine.toUpperCase();
+		IGStaticValueBuilder builder = new IGStaticValueBuilder((IGTypeStatic) type, aLine, aLocation);
+		return IGOperationLiteral.computeString(aLine, builder, aLocation);
+
 	}
 
 	public boolean isEOF(IGSubProgram aSub, SourceLocation aLocation) throws ZamiaException {
