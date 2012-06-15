@@ -145,14 +145,7 @@ public class IGOperationLiteral extends IGOperation {
 		for (int i = 0; i < n; i++) {
 			char c = aInput.charAt(n-1-i);
 
-//			IGStaticValue el = et.findEnumLiteral(c);
-//			if (c == '\t') {
-//				el = et.findEnumLiteral("HT");
-//			}
-			
-			IGStaticValue el = et.isCharEnum() 
-					? et.getEnumLiteral(c, aSourceLocation, null, null)
-					: et.findEnumLiteral(c);
+			IGStaticValue el = et.findEnumLiteral(c);
 
 			if (el == null) {
 				throw new ZamiaException("Couldn't find character literal " + c, aSourceLocation);

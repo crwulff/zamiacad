@@ -108,7 +108,7 @@ public class IGAttributeStmt extends IGStmt {
 						throw new ZamiaException("Sorry, not implemented yet: Attribute IMAGE is not supported for " + type, sourceLocation);
 					}
 						
-					resValue = IGFileDriver.line2IG(val, resType, aRuntime, sourceLocation, aErrorMode, aReport, aRuntime.getZDB());
+					resValue = IGFileDriver.line2IG(val, resType, aRuntime, sourceLocation, aErrorMode, aReport);
 					
 				} else if (type.isDiscrete()) {
 
