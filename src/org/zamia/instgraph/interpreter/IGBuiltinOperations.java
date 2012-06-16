@@ -16,6 +16,7 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGRange;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGSubProgram;
@@ -997,15 +998,14 @@ public class IGBuiltinOperations {
 		IGTypeStatic vCT = aRuntime.getDriver(intfV, aErrorMode, aReport).getCurrentType();
 		IGTypeStatic vT = intfV.getType().computeStaticType(aRuntime, aErrorMode, aReport);
 		if (valueL.toString().isEmpty()) {
-			String msg = "TEXTIO procedure READ(" + vT + ") : Parameter L designates an empty string.";
-			if (aErrorMode == ASTErrorMode.EXCEPTION) {
-				throw new ZamiaException(msg, aLocation);
-			} else {
-				if (aReport != null) {
-					aReport.append(msg, aLocation);
-				}
+			if (intfG != null)
+				aRuntime.setObjectValue(intfG, container.findFalseValue(), aLocation);
+			else {
+				String msg = "TEXTIO procedure READ(" + vT + ") : Parameter L designates an empty string.";
+				throwReport(aErrorMode, msg, aLocation, aReport);
 				return ReturnStatus.ERROR;
 			}
+			return ReturnStatus.CONTINUE;
 		}
 
 		IGTypeStatic idxType = lT.getStaticIndexType(aLocation);
@@ -1182,14 +1182,7 @@ public class IGBuiltinOperations {
 			} else {
 				msg = "TEXTIO procedure READ(" + vT + ") : Wrong " + vT + " length. Expected " + vN + ", found " + total + ".";
 			}
-			if (aErrorMode == ASTErrorMode.EXCEPTION) {
-				throw new ZamiaException(msg, aLocation);
-			} else {
-				if (aReport != null) {
-					aReport.append(msg, aLocation);
-				}
-				return ReturnStatus.ERROR;
-			}
+			throwReport(aErrorMode, msg, aLocation, aReport);
 		}
 
 		aRuntime.setObjectValue(intfL, nValueL, aLocation);
@@ -1197,6 +1190,15 @@ public class IGBuiltinOperations {
 		return ReturnStatus.CONTINUE;
 	}
 
+	private static void throwReport(ASTErrorMode aErrorMode, String msg, SourceLocation aLocation, ErrorReport aReport) throws ZamiaException {
+		if (aErrorMode == ASTErrorMode.EXCEPTION) {
+			throw new ZamiaException(msg, aLocation);
+		} else {
+			if (aReport != null) {
+				aReport.append(msg, aLocation);
+			}
+		}
+	}
 	private static void append(int idx, IGStaticValue aEnumLiteral, IGStaticValueBuilder aRetValueBuilder, SourceLocation aLocation) throws ZamiaException {
 
 		IGTypeStatic type = aRetValueBuilder.getType();
