@@ -148,7 +148,9 @@ public class IGOperationLiteral extends IGOperation {
 			IGStaticValue el = et.findEnumLiteral(c);
 
 			if (el == null) {
-				throw new ZamiaException("Couldn't find character literal " + c, aSourceLocation);
+				el = et.getEnumLiteral(c, aSourceLocation, null, null);
+				if (el == null)
+					throw new ZamiaException("Couldn't find character literal " + c, aSourceLocation);
 			}
 
 			aBuilder.set(offset + i, el, aSourceLocation);
