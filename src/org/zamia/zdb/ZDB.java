@@ -36,6 +36,7 @@ import java.util.zip.GZIPInputStream;
 import org.zamia.BuildPath;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
+import org.zamia.Utils;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.util.FileUtils;
@@ -69,7 +70,7 @@ public class ZDB {
 
 	public final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private static final int CACHE_MAX_SIZE = 
+	private static int CACHE_MAX_SIZE = 
 			16384; // <- Guenter optimum determined by experiment (does opening zdb per every open project affect this num?)
 			//32768;
 			//65536;
@@ -79,11 +80,10 @@ public class ZDB {
 	
 	public static final boolean dump = false;
 
-	public static final boolean ENABLE_STATISTICS = false;
-
-	public static final boolean ENABLE_COMPRESSION = false;
-
-	public static final boolean ENABLE_LOCKING = true;
+	// overridable by environment
+	public static boolean ENABLE_COMPRESSION = true; 
+	public static boolean ENABLE_STATISTICS = false;
+	public static boolean ENABLE_LOCKING = true;
 
 	private static final int BUFSIZE = 1 << 16;
 
@@ -103,17 +103,12 @@ public class ZDB {
 	private Object fOwner;
 
 	// statistics:
-
-	private HashMap<String, Integer> fNumObjectsByClass;
-
-	private HashMap<String, Integer> fSizeofObjectsByClass;
+	private Utils.StatCounter fNumObjectsByClass, fSizeofObjectsByClass;
 
 	// to avoid loops:
 	private HashMap<Object, Long> fCurrentlyStoring;
 
 	private EvictingSet fCurrentlyEvicting; // We should not (re)load the value until it was saved. This set keeps the save queue.
-
-	private boolean fLockingEnabled = false;
 
 	// EHM support:
 
@@ -123,14 +118,18 @@ public class ZDB {
 
 	private ExtendibleHashMap fOffsets;
 
+	static {
+		ENABLE_LOCKING = Utils.getEnvBool("ZAMIA_LOCKING", ENABLE_LOCKING);
+		ENABLE_COMPRESSION = Utils.getEnvBool("ZAMIA_COMPRESSION", ENABLE_COMPRESSION);
+		ENABLE_STATISTICS = Utils.getEnvBool("ZAMIA_STATISTICS", ENABLE_STATISTICS);
+		String cacheSize = System.getenv("ZAMIA_CACHE_SIZE");
+		if (cacheSize != null) try {
+			CACHE_MAX_SIZE = Integer.parseInt(cacheSize);
+		} catch (NumberFormatException ne) {el.logException(ne);}
+			
+	}
+	
 	public ZDB(File aDBDir, Object aOwner) throws ZDBException, FileNotFoundException {
-
-		if (ENABLE_LOCKING) {
-			String override = System.getenv("ZAMIA_LOCKING");
-			if (override == null || !"disabled".equalsIgnoreCase(override)) {
-				fLockingEnabled = true;
-			}
-		}
 
 		fDBDir = aDBDir;
 		fOwner = aOwner;
@@ -140,8 +139,8 @@ public class ZDB {
 		fOffsetsFile = new File(fDBDir.getAbsolutePath() + File.separator + OFFSETS_FILENAME);
 
 		if (ENABLE_STATISTICS) {
-			fNumObjectsByClass = new HashMap<String, Integer>();
-			fSizeofObjectsByClass = new HashMap<String, Integer>();
+			fNumObjectsByClass = new Utils.StatCounter();
+			fSizeofObjectsByClass = new Utils.StatCounter();
 		}
 
 		start();
@@ -222,9 +221,9 @@ public class ZDB {
 			logger.info("ZDB:");
 
 			for (String clsName : fNumObjectsByClass.keySet()) {
-				Integer num = fNumObjectsByClass.get(clsName);
+				Long num = fNumObjectsByClass.get(clsName);
 				int n = num.intValue();
-				Integer size = fSizeofObjectsByClass.get(clsName);
+				Long size = fSizeofObjectsByClass.get(clsName);
 				int s = size.intValue();
 				logger.info("ZDB: %6d, %9d Bytes, %9d AvgBytes, %s", n, s, s / n, clsName);
 			}
@@ -335,21 +334,8 @@ public class ZDB {
 				}
 			}
 
-			Integer cnt = fNumObjectsByClass.get(clsName);
-			int n = 0;
-			if (cnt != null) {
-				n = cnt.intValue();
-			}
-			n++;
-			fNumObjectsByClass.put(clsName, n);
-
-			Integer size = fSizeofObjectsByClass.get(clsName);
-			int s = 0;
-			if (size != null) {
-				s = size.intValue();
-			}
-			s += ObjectSize.deepSizeOf(aObj);
-			fSizeofObjectsByClass.put(clsName, s);
+			fNumObjectsByClass.inc(clsName);
+			fSizeofObjectsByClass.inc(clsName, ObjectSize.deepSizeOf(aObj));
 		}
 
 		if (dump) {
@@ -498,6 +484,7 @@ public class ZDB {
 //	}
 
 	//A simpler and possibly faster version of eviction set. It assumes that duplicate evictions are unlikely.
+	@SuppressWarnings("serial")
 	static class EvictingSet extends HashMap<Long, Object> {
 		public synchronized void put(long id, Object data) {
 			Object o = super.put(id, data);
@@ -608,14 +595,15 @@ public class ZDB {
 						break;
 					}
 					
-					if (ENABLE_STATISTICS)
-						if (baos.offset != raf.length())
-							el.logException(new IOException("specified offset " + baos.offset + " is different from file size " + raf.length() ));
-
 //					logger.info("baosToDisk: " + baos.offset + " (" + baos.size() + " bytes) => ");
 					
 					if (ids.isEmpty())
 						offset = baos.offset; // remember location of the first chunk of the series
+					
+					if (logger.isDebugEnabled()) {
+						if (offset != raf.length())
+							el.logException(new IOException("specified offset " + baos.offset + " is different from file size " + raf.length() ));
+					}
 					
 					ids.add(baos.id);
 					baos.writeTo(buf);
@@ -881,9 +869,8 @@ public class ZDB {
 	}
 
 	private void doLock() throws ZDBException {
-		if (!fLockingEnabled) {
+		if (!ENABLE_LOCKING)
 			return;
-		}
 
 		File lockFile = new File(fDBDir.getAbsolutePath() + File.separator + LOCK_FILENAME);
 
@@ -896,7 +883,7 @@ public class ZDB {
 	}
 
 	private void doUnLock() {
-		if (fLockingEnabled) {
+		if (ENABLE_LOCKING) {
 			try {
 				fLock.release();
 			} catch (IOException e) {el.logException(e);}

@@ -39,13 +39,29 @@ public class Utils {
 		return sb.toString();
 	}
 
-	public static class Counter<KeyT> extends HashMap<KeyT, Integer> {
-		public int inc(KeyT key) {
-			Integer cnt = get(key);
-			cnt = (cnt == null) ? 1 : cnt +1;
-			put(key, cnt);
-			return cnt;
+	public static boolean getEnvBool(String name, boolean deflt) {
+		String override = System.getenv(name);
+		if (override != null) {
+			override = override.toLowerCase();
+			if (override.equals("yes") || override.equals("1") || override.equals("true") || override.startsWith("enable")) 
+				return true;
+			if (override.equals("no") || override.equals("0") || override.equals("false") || override.startsWith("disable"))
+				return false;
+		}
+		return deflt;
+	}
+
+	public static class StatCounter extends HashMap<String, Long> {
+		public void inc(String clsName, long l) {
+			Long cnt = get(clsName);
+			cnt = (cnt != null ? cnt : 0) + l;
+			put(clsName, cnt);
+		}
+		public void inc(String clsName) {
+			inc(clsName, 1);
 		}
 	}
+
+	
 }
 

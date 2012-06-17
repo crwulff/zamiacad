@@ -176,6 +176,9 @@ public class ZamiaLogger {
 		logger.info(format, t, args);
 	}
 
+	public boolean isDebugEnabled() {
+		return logger.isDebugEnabled();
+	}
 	public void debug(int indent, String format, Object... args) {
 
 		if (!logger.isDebugEnabled())
