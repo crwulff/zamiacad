@@ -70,21 +70,27 @@ public class IGFileDriver extends IGObjectDriver {
 		return line2IG(line, stringType, aRuntime, aLocation, aErrorMode, aReport);
 	}
 
+	public static IGStaticValueBuilder newLineBuilder(int aLen, IGType aStringType, IGInterpreterRuntimeEnv aRuntime,
+			SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
+		
+		IGTypeStatic idxType = aStringType.getIndexType().computeStaticType(aRuntime, aErrorMode, aReport);
+		IGStaticValue svLeft = idxType.getStaticLeft(aLocation);
+		
+		BigInteger iRight = BigInteger.valueOf(aLen); 
+		IGStaticValue svRight = new IGStaticValueBuilder(svLeft, aLocation).setNum(iRight).buildConstant();
+		IGStaticValue ascending = idxType.getStaticAscending();
+
+		IGRange range = new IGRange(svLeft, svRight, ascending, aLocation, aRuntime.getZDB());
+		aStringType = aStringType.createSubtype(range, aRuntime, aLocation);
+		
+		return new IGStaticValueBuilder((IGTypeStatic) aStringType, "LINE BUILDER", aLocation);
+		
+	}
 	/**Optimized version of line2IG(IGType) that does not calls simulator as the type is already static.*/
 	public static IGStaticValue line2IG(String aLine, IGType aStringType, IGInterpreterRuntimeEnv aRuntime,
 			SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
-		IGTypeStatic idxType = aStringType.getIndexType().computeStaticType(aRuntime, aErrorMode, aReport);
-		IGStaticValue left = idxType.getStaticLeft(aLocation);
-		
-		BigInteger right = BigInteger.valueOf(aLine.length()); 
-		IGStaticValue rightVal = new IGStaticValueBuilder(left, aLocation).setNum(right).buildConstant();
-		IGStaticValue ascending = idxType.getStaticAscending();
-
-		IGRange range = new IGRange(left, rightVal, ascending, aLocation, aRuntime.getZDB());
-		aStringType = aStringType.createSubtype(range, aRuntime, aLocation);
-		
-		IGStaticValueBuilder builder = new IGStaticValueBuilder((IGTypeStatic) aStringType, "LINE BUILDER", aLocation);
+		IGStaticValueBuilder builder = newLineBuilder(aLine.length(), aStringType, aRuntime, aLocation, aErrorMode, aReport);
 		return IGOperationLiteral.computeString(aLine, builder, aLocation);
 
 	}

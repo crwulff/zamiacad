@@ -14,6 +14,7 @@ import java.math.BigInteger;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGRange;
@@ -27,6 +28,8 @@ import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.instgraph.sim.ref.IGFileDriver;
 import org.zamia.instgraph.sim.ref.IGSimProcess;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
+
+import com.spinn3r.log5j.Logger;
 
 import static org.zamia.instgraph.IGObject.OIDir.*;
 
@@ -1218,14 +1221,47 @@ public class IGBuiltinOperations {
 
 	private static ReturnStatus execWrite(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
 			throws ZamiaException {
-		//todo: also process JUSTIFIED and FIELD
+		
+		//todo: also process JUSTIFIED/FIELD options
 		IGContainer container = aSub.getContainer();
 		IGObject intfL = container.resolveObject("L");
 
 		IGObject intfV = container.resolveObject("VALUE");
 		IGStaticValue valueV = aRuntime.getObjectValue(intfV);
-		//todo: aRuntime.getObjectValue(intfL) and append to this value before setting object value to intfL.
-		aRuntime.setObjectValue(intfL, valueV, aLocation);
+
+		IGStaticValue valueL = aRuntime.getObjectValue(intfL);
+		
+		IGTypeStatic lT;
+		int l, r;
+		IGStaticValueBuilder nValueLB;
+		if (valueL == null || (lT = valueL.getStaticType()).isAccess()) { // null or not assigned pointer -> refer new line
+			nValueLB = IGFileDriver.newLineBuilder(1, container.findStringType(), aRuntime, aLocation, aErrorMode, aReport);
+			l = 1; r = 0;
+		} else { // append to old
+			IGTypeStatic idxType = lT.getStaticIndexType(aLocation);
+			IGStaticValue range = idxType.getStaticRange();
+			l = (int) range.getLeft().getOrd();
+			r = (int) range.getRight().getOrd();
+			IGStaticValue rangeR = new IGStaticValueBuilder(range.getRight().getStaticType(), null, aLocation).setNum(r + 1).buildConstant();
+			range = new IGStaticValueBuilder(range, aLocation).setRight(rangeR).buildConstant();
+			IGTypeStatic rangeType = lT.createSubtype(range, aLocation);
+			nValueLB = new IGStaticValueBuilder(rangeType, null, aLocation);
+		}
+		
+		// Copy original
+		// TODO: avoid copying
+		for (int i = 1; i < r+1; i++) {
+			IGStaticValue cv = valueL.getValue(i, aLocation);
+			nValueLB.set(i+1, cv, aLocation);
+		}
+
+		// Append the character
+		// Surprisingly, it is not necessary that the V element is singular char or bit. 
+		// 			It can eqivalently be int, bool, time or array!
+		nValueLB.set(1, valueV, aLocation);
+
+		valueL = nValueLB.buildConstant();
+		aRuntime.setObjectValue(intfL, valueL, aLocation);
 
 		return ReturnStatus.CONTINUE;
 	}
@@ -1256,8 +1292,13 @@ public class IGBuiltinOperations {
 		IGObject intfL = container.resolveObject("L");
 		IGStaticValue valueL = aRuntime.getObjectValue(intfL);
 
+		if (valueL == null || valueL.toString().isEmpty()) {
+			throwReport(aErrorMode, "WRITELINE(empty line) was called", aLocation, aReport);
+			return ReturnStatus.ERROR;
+		}
+
 		if (driverF.getValue(aLocation).getId().equals("STD_OUTPUT")) {
-			System.out.println(valueL);
+			ZamiaLogger.getInstance().info(valueL.toString());
 		} else {
 			((IGFileDriver) driverF).writeLine(valueL, aLocation);
 		}
