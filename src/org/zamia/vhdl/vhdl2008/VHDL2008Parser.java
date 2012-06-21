@@ -5276,7 +5276,7 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
     jj_consume_token(ASSIGN);
     exp = expression();
     jj_consume_token(SEMICOLON);
-          {if (true) return new SequentialVariableAssignment (target, exp, null, target.getLineCol());}
+          {if (true) return new SequentialVariableAssignment (target, exp, null, exp.getLineCol());}
     throw new Error("Missing return statement in function");
   }
 

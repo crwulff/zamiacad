@@ -490,16 +490,9 @@ public class Report {
 					return "";
 				}
 
-				if (item instanceof Hit) {
+				String codeItem = item instanceof Hit ? "assignment" : "condition";
 
-					return String.format("This assignment (%d:%d) looks suspicious!", getLine(), getCol());
-
-				} else if (item instanceof Expression) {
-
-					return String.format("This condition (%d:%d) looks suspicious!", getLine(), getCol());
-				}
-
-				return "";
+				return String.format("This %s (%d:%d) looks suspicious (s=%.3f)", codeItem, getLine(), getCol(), stat.v1);
 			}
 
 			public boolean satisfies(Criterion aCriterion) {
@@ -545,11 +538,11 @@ public class Report {
 
 						StringBuilder b = new StringBuilder();
 						b.append(String.format("%3s|%-5s", "<" + failedCnt, passedCnt + ">"));
-						b.append(String.format("1) %.2f  ", v1));
-						b.append(String.format("2) %.2f  ", v2));
-						b.append(String.format("3) %.2f  ", v3));
-						b.append(String.format("4) %.2f  ", v4));
-						b.append(String.format("5) %.2f", v5));
+						b.append(String.format("1) %.3f  ", v1));
+						b.append(String.format("2) %.3f  ", v2));
+						b.append(String.format("3) %.3f  ", v3));
+						b.append(String.format("4) %.3f  ", v4));
+						b.append(String.format("5) %.3f", v5));
 
 						fAsString = b.toString();
 					}

@@ -5,6 +5,8 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
@@ -129,14 +131,22 @@ public class ReportUtils {
 				String[] parts = line.substring(line.indexOf(">") + 1).trim().split("\\d\\)");
 
 				double[] rates = new double[]{
-						Double.parseDouble(parts[1].trim()),
-						Double.parseDouble(parts[2].trim()),
-						Double.parseDouble(parts[3].trim()),
-						Double.parseDouble(parts[4].trim()),
-						Double.parseDouble(parts[5].trim())
+						parseDouble(parts[1]),
+						parseDouble(parts[2].trim()),
+						parseDouble(parts[3].trim()),
+						parseDouble(parts[4].trim()),
+						parseDouble(parts[5].trim())
 				};
 
 				itemLine.initStat(passedCnt, failedCnt, rates);
+			}
+		}
+
+		private double parseDouble(String part) {
+			try {
+				return NumberFormat.getInstance().parse(part.trim()).doubleValue();
+			} catch (ParseException e) {
+				return 0;
 			}
 		}
 
