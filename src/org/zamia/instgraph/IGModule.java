@@ -175,5 +175,6 @@ public class IGModule extends IGDesignUnit implements Scope {
 		ee.setInterpreterEnv(env);
 		
 		fStructure.updateInstantiations(aDeleteNodes, ee, fActualGenerics);
+		storeOrUpdate();
 	}
 }
