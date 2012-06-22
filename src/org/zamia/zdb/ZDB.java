@@ -76,12 +76,12 @@ public class ZDB {
 			//65536;
 			//3; // debug purposes
 
-	static final int FLUSH_OUT_WHEN = 1512; // this does not seem to have any noticabe effect in the range 100-100000
+	static int FLUSH_OUT_WHEN = 1512; // this does not seem to have any noticabe effect in the range 100-100000
 	
 	public static final boolean dump = false;
 
 	// overridable by environment
-	public static boolean ENABLE_COMPRESSION = true; 
+	public static boolean ENABLE_COMPRESSION = false; 
 	public static boolean ENABLE_STATISTICS = false;
 	public static boolean ENABLE_LOCKING = true;
 
@@ -122,11 +122,8 @@ public class ZDB {
 		ENABLE_LOCKING = Utils.getEnvBool("ZAMIA_LOCKING", ENABLE_LOCKING);
 		ENABLE_COMPRESSION = Utils.getEnvBool("ZAMIA_COMPRESSION", ENABLE_COMPRESSION);
 		ENABLE_STATISTICS = Utils.getEnvBool("ZAMIA_STATISTICS", ENABLE_STATISTICS);
-		String cacheSize = System.getenv("ZAMIA_CACHE_SIZE");
-		if (cacheSize != null) try {
-			CACHE_MAX_SIZE = Integer.parseInt(cacheSize);
-		} catch (NumberFormatException ne) {el.logException(ne);}
-			
+		CACHE_MAX_SIZE = Utils.getEnvInt("ZAMIA_CACHE_SIZE", CACHE_MAX_SIZE);
+		FLUSH_OUT_WHEN = Utils.getEnvInt("ZAMIA_WRITER_SIZE", FLUSH_OUT_WHEN);
 	}
 	
 	public ZDB(File aDBDir, Object aOwner) throws ZDBException, FileNotFoundException {
@@ -448,7 +445,6 @@ public class ZDB {
 		}
 		
 		if (evictedEntry != null && evictedEntry.isDirty()) {
-			fCurrentlyEvicting.put(id, evictedEntry.getObject());
 			storeOnDisk(evictedEntry);
 		}
 		
@@ -497,6 +493,8 @@ public class ZDB {
 
 		long id = aEntry.getId();
 
+		Object obj = aEntry.getObject();
+		fCurrentlyEvicting.put(id, obj);
 		// since serialization can trigger more store operations
 		// (some objects may have writeObject() methods which trigger ZDB.store())
 		// we first serialize to mem and then write out the whole object in one go
@@ -506,7 +504,7 @@ public class ZDB {
 		try {
 			
 			ObjectOutputStream serializer = new ObjectOutputStream(ENABLE_COMPRESSION ? new LevelGZIPOutputStream(baos, Deflater.BEST_SPEED) : baos);
-			serializer.writeObject(aEntry.getObject());
+			serializer.writeObject(obj);
 			serializer.close();
 			
 			//logger.info ("ZDB: File for %d is '%s'", id, dataFile);
@@ -565,6 +563,7 @@ public class ZDB {
 			if (buf.size() != 0) 
 				try {
 					synchronized (raf) {
+						assert offset == raf.length() : "specified offset " + offset + " is different from file size " + raf.length();
 						raf.seek(offset); // seek can be avoided if we ensure that no seeks were done for other purposes
 						raf.write(buf.getBytes(), 0, buf.size());
 					}
@@ -597,12 +596,8 @@ public class ZDB {
 					
 //					logger.info("baosToDisk: " + baos.offset + " (" + baos.size() + " bytes) => ");
 					
-					if (ids.isEmpty())
+					if (ids.isEmpty()) {
 						offset = baos.offset; // remember location of the first chunk of the series
-					
-					if (logger.isDebugEnabled()) {
-						if (offset != raf.length())
-							el.logException(new IOException("specified offset " + baos.offset + " is different from file size " + raf.length() ));
 					}
 					
 					ids.add(baos.id);

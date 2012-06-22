@@ -5,6 +5,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import org.zamia.zdb.ZDB;
+
 public class Utils {
 		
 	public static <T> T removeLast(List<T> list) {
@@ -39,6 +41,17 @@ public class Utils {
 		return sb.toString();
 	}
 
+	public static int getEnvInt(String name, int deflt) {
+		try {
+			String sVal = System.getenv(name);
+			if (sVal != null) 
+				return Integer.parseInt(sVal); 
+		} catch (NumberFormatException ne) {
+			ExceptionLogger.getInstance().logException(ne);
+		}
+		return deflt; 
+	}
+
 	public static boolean getEnvBool(String name, boolean deflt) {
 		String override = System.getenv(name);
 		if (override != null) {
@@ -50,7 +63,7 @@ public class Utils {
 		}
 		return deflt;
 	}
-
+	
 	public static class StatCounter extends HashMap<String, Long> {
 		public void inc(String clsName, long l) {
 			Long cnt = get(clsName);
@@ -62,6 +75,5 @@ public class Utils {
 		}
 	}
 
-	
 }
 
