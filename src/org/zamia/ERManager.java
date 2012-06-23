@@ -112,19 +112,7 @@ public class ERManager {
 
 		String path = sf.getAbsolutePath();
 
-		long errsDBID = fZDB.getIdx(ERROR_IDX, path);
-		HashSetArray<Long> errs = null;
-		if (errsDBID != 0) {
-			errs = (HashSetArray<Long>) fZDB.load(errsDBID);
-		} else {
-			errs = new HashSetArray<Long>();
-			errsDBID = fZDB.store(errs);
-			fZDB.putIdx(ERROR_IDX, path, errsDBID);
-		}
-
-		errs.add(dbid);
-
-		fZDB.update(errsDBID, errs);
+		fZDB.index(ERROR_IDX, path, dbid);
 
 		logger.debug("ERManager: Error added: %s", aMsg.toString());
 

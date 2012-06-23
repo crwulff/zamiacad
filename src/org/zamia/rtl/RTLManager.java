@@ -286,20 +286,7 @@ public class RTLManager {
 					if (!module.isSynthesized() && aSynthesize) {
 
 						String uid = aDUUID.getUID();
-
-						long dbid = fZDB.getIdx(SIGNATURES_IDX, uid);
-						HashSetArray<String> signatures = new HashSetArray<String>();
-						if (dbid == 0) {
-							signatures = new HashSetArray<String>();
-							signatures.add(aSignature);
-							dbid = fZDB.store(signatures);
-							fZDB.putIdx(SIGNATURES_IDX, uid, dbid);
-						} else {
-							signatures = (HashSetArray<String>) fZDB.load(dbid);
-							if (signatures.add(aSignature)) {
-								fZDB.update(dbid, signatures);
-							}
-						}
+						fZDB.index(SIGNATURES_IDX, uid, aSignature);
 
 						if (!fTodo.contains(aSignature)) {
 							fTodo.add(aSignature);

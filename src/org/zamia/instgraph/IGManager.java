@@ -514,21 +514,8 @@ public final class IGManager {
 			if (!module.isStatementsElaborated() && aElaborateStatements) {
 
 				String uid = aDUUID.getUID();
-
-				long dbid = fZDB.getIdx(SIGNATURES_IDX, uid);
-				HashSetArray<String> signatures = new HashSetArray<String>();
-				if (dbid == 0) {
-					signatures = new HashSetArray<String>();
-					signatures.add(aSignature);
-					dbid = fZDB.store(signatures);
-					fZDB.putIdx(IGManager.SIGNATURES_IDX, uid, dbid);
-				} else {
-					signatures = (HashSetArray<String>) fZDB.load(dbid);
-					if (signatures.add(aSignature)) {
-						fZDB.update(dbid, signatures);
-					}
-				}
-
+				fZDB.index(SIGNATURES_IDX, uid, aSignature);
+				
 				if (!fTodo.contains(aSignature)) {
 					fTodo.add(aSignature);
 
@@ -544,25 +531,8 @@ public final class IGManager {
 		}
 
 		if (aParentDUUID != null) {
-			// register instantiator
-
 			String uid = aDUUID.getUID();
-
-			mid = fZDB.getIdx(INSTANTIATORS_IDX, uid);
-			if (mid != 0) {
-				HashSetArray<DMUID> instantiators = (HashSetArray<DMUID>) fZDB.load(mid);
-
-				if (!instantiators.contains(aParentDUUID)) {
-					instantiators.add(aParentDUUID);
-					fZDB.update(mid, instantiators);
-				}
-			} else {
-				HashSetArray<DMUID> instantiators = new HashSetArray<DMUID>();
-
-				instantiators.add(aParentDUUID);
-				mid = fZDB.store(instantiators);
-				fZDB.putIdx(INSTANTIATORS_IDX, uid, mid);
-			}
+			fZDB.index(INSTANTIATORS_IDX, uid, aParentDUUID);
 		}
 
 		if (ENABLE_MULTITHREADING) {

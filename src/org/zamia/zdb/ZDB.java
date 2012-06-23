@@ -41,6 +41,7 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.util.FileUtils;
 import org.zamia.util.HashMapArray;
+import org.zamia.util.HashSetArray;
 import org.zamia.util.LevelGZIPOutputStream;
 import org.zamia.util.ObjectSize;
 import org.zamia.util.ZHash;
@@ -805,6 +806,24 @@ public class ZDB {
 		putIdx(aIdx, aId, id);
 	}
 
+	public <T> void index(String primaryIdx, String name, T value) {
+		long collectionDBID = getIdx(primaryIdx, name);
+		if (collectionDBID != 0) {
+			HashSetArray<T> collection = (HashSetArray<T>) load(collectionDBID);
+
+			if (!collection.add(value))
+				update(collectionDBID, collection);
+			
+		} else {
+			HashSetArray<T> instantiators = new HashSetArray<T>();
+
+			instantiators.add(value);
+			collectionDBID = store(instantiators);
+			putIdx(primaryIdx, name, collectionDBID);
+		}
+	}
+	
+	
 	public synchronized boolean isIdxKey(String aIdx, String aKey) {
 		HashMapArray<String, Long> idx = fPD.getIdx(aIdx);
 		if (idx == null)
