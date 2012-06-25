@@ -70,11 +70,17 @@ public class IGSubProgram extends IGContainerItem {
 			fReturnTypeDBID = 0;
 		}
 
-		IGContainer container = new IGContainer(aParentContainerId, aSrc, aZDB);
-		container.setReturnType(aReturnType);
+		IGContainer container = (fReturnTypeDBID != 0)
+				? 	new IGContainer(aParentContainerId, aSrc, aZDB) { // it is a function, it has a return value
+						public IGType getReturnType() {
+							return (IGType) getZDB().load(fReturnTypeDBID);
+						}
+					} 
+				: new IGContainer(aParentContainerId, aSrc, aZDB);
+		
 		fContainerDBID = aZDB.store(container);
 	}
-
+	
 	public IGContainer getContainer() {
 		return (IGContainer) getZDB().load(fContainerDBID);
 	}

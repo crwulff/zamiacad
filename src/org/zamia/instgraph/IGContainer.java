@@ -61,20 +61,12 @@ public class IGContainer extends IGItem {
 
 	private long fParentDBID = 0;
 
-	private long fReturnTypeDBID;
-
 	public IGContainer(long aParentDBID, SourceLocation aLocation, ZDB aZDB) {
 		super(aLocation, aZDB);
 		fParentDBID = aParentDBID;
 	}
 
-	public void setReturnType(IGType aType) {
-		fReturnTypeDBID = save(aType);
-	}
-
 	public IGType getReturnType() {
-		if (fReturnTypeDBID != 0)
-			return (IGType) getZDB().load(fReturnTypeDBID);
 		if (fParentDBID != 0) {
 			IGContainer parent = (IGContainer) getZDB().load(fParentDBID);
 			return parent.getReturnType();
