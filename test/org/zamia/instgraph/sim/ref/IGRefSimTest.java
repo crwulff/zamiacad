@@ -30,6 +30,7 @@ import org.zamia.vhdl.ast.DMUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.zamia.util.FileUtils.copyLastFile;
 import static org.zamia.util.FileUtils.unzip;
 
 /**
@@ -481,6 +482,9 @@ public class IGRefSimTest {
 
 	private void cleanErados() {
 		unzip(new File("examples/erados/src/processor/correct_files.zip"));
+		copyLastFile(
+				new File("examples/erados/SOFTWARE/SPARTAN3_STARTERKIT/TEST_PROCESSOR_PROGRAMS/or/"),
+				new File("examples/erados/SOFTWARE/SPARTAN3_STARTERKIT/TEST_PROCESSOR_PROGRAMS/OBJECT_CODE.OC.MIF"));
 	}
 
 	private class MarkerException extends Exception {

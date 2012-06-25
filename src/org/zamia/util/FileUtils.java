@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
@@ -98,15 +99,26 @@ public class FileUtils {
 					}
 				} else {
 					/* Copy last file in source directory to new destination */
-					File[] files = aSrc.listFiles();
-					File srcFile = files[files.length - 1];
-					org.apache.commons.io.FileUtils.copyFile(srcFile, aDest);
-					logger.info("Copied %s to %s", srcFile, aDest);
+					copyLastFile(aSrc, aDest);
 				}
 			} else {
 				org.apache.commons.io.FileUtils.copyFile(aSrc, aDest);
 				logger.info("Copied %s to %s", aSrc, aDest);
 			}
+			return true;
+		} catch (IOException e) {
+			el.logException(e);
+			return false;
+		}
+	}
+
+	public static boolean copyLastFile(File aSrcDir, File aDestFile) {
+		try {
+			File[] files = aSrcDir.listFiles();
+			Arrays.sort(files);
+			File srcFile = files[files.length - 1];
+			org.apache.commons.io.FileUtils.copyFile(srcFile, aDestFile);
+			logger.info("Copied %s to %s", srcFile, aDestFile);
 			return true;
 		} catch (IOException e) {
 			el.logException(e);
