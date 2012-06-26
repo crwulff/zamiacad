@@ -17,7 +17,6 @@ import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGObject;
-import org.zamia.instgraph.IGRange;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGSubProgram;
@@ -28,8 +27,6 @@ import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.instgraph.sim.ref.IGFileDriver;
 import org.zamia.instgraph.sim.ref.IGSimProcess;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
-
-import com.spinn3r.log5j.Logger;
 
 import static org.zamia.instgraph.IGObject.OIDir.*;
 
@@ -1291,11 +1288,6 @@ public class IGBuiltinOperations {
 
 		IGObject intfL = container.resolveObject("L");
 		IGStaticValue valueL = aRuntime.getObjectValue(intfL);
-
-		if (valueL == null || valueL.toString().isEmpty()) {
-			throwReport(aErrorMode, "WRITELINE(empty line) was called", aLocation, aReport);
-			return ReturnStatus.ERROR;
-		}
 
 		if (driverF.getValue(aLocation).getId().equals("STD_OUTPUT")) {
 			ZamiaLogger.getInstance().info(valueL.toString());
