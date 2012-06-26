@@ -98,7 +98,6 @@ public class ZDB {
 	private File fDataFile, fPDFile, fEHMPagesFile, fOffsetsFile;
 	private FileLock fLock = null;
 	private long fLength;
-	private RandomAccessFile raf;
 
 	private Object fOwner;
 
@@ -107,8 +106,6 @@ public class ZDB {
 
 	// to avoid loops:
 	private HashMap<Object, Long> fCurrentlyStoring;
-
-	private EvictingSet fCurrentlyEvicting; // We should not (re)load the value until it was saved. This set keeps the save queue.
 
 	// EHM support:
 
@@ -153,46 +150,21 @@ public class ZDB {
 
 		doLock();
 
-		fLength = fDataFile.length();
-		raf = new RandomAccessFile(fDataFile, "rw");
-		
-		fCache = new HashMap<Long, ZDBCacheEntry>();
-		fCacheHead = null;
-		fCacheTail = null;
-		fCurrentlyStoring = new HashMap<Object, Long>();
-		fCurrentlyEvicting = new EvictingSet();
+		initStructures();
 
 		fEHMManager = new EHMPageManager(fEHMPagesFile);
 		fEHMs = new HashMap<String, ExtendibleHashMap>();
 		fOffsets = new ExtendibleHashMap(fEHMManager, fOffsetsFile);
 
-		fPD = new ZDBPersistentData();
-
 		if (!fPD.load(fPDFile)) {
 			fPD.clear();
 			fOffsets.clear();
 		}
-		
-		baosToDiskThread = new BaosToDiskThread(); 
-		
 	}
 
 	public synchronized void clear() {
-		
-		try {
-			restartBaosToDiskThread();
-			raf.setLength(fLength = 0);
-		} catch (IOException e) {
-			el.logException(e);
-		}
-		
-		fCache = new HashMap<Long, ZDBCacheEntry>();
-		fCacheHead = null;
-		fCacheTail = null;
-		fCurrentlyStoring = new HashMap<Object, Long>();
-		fCurrentlyEvicting = new EvictingSet();
 
-		fPD = new ZDBPersistentData();
+		baosToDiskThread.shutdown();
 
 		fEHMManager.clear();
 		for (ExtendibleHashMap ehm : fEHMs.values()) {
@@ -201,12 +173,20 @@ public class ZDB {
 		fOffsets.clear();
 
 		FileUtils.deleteDirRecursive(fDBDir);
-		
 		mkdirChecked(fDBDir);
+
+		initStructures();
 	}
 
-	private void restartBaosToDiskThread() {
-		baosToDiskThread.shutdown();
+	private void initStructures() {
+
+		fCache = new HashMap<Long, ZDBCacheEntry>();
+		fCacheHead = null;
+		fCacheTail = null;
+		fCurrentlyStoring = new HashMap<Object, Long>();
+
+		fPD = new ZDBPersistentData();
+
 		baosToDiskThread = new BaosToDiskThread();
 	}
 
@@ -233,9 +213,11 @@ public class ZDB {
 		while (fCacheHead != null) {
 			evict();
 		}
-		
-		restartBaosToDiskThread();
-		
+
+		baosToDiskThread.shutdown();
+		baosToDiskThread.sanityCheck();
+		baosToDiskThread = new BaosToDiskThread();
+
 		logger.info("ZDB: flush(): writing EHM pages...");
 
 		fEHMManager.flush();
@@ -254,10 +236,6 @@ public class ZDB {
 		long size = FileUtils.du(fDBDir) / (1024 * 1024);
 
 		logger.info("ZDB: flush(): done. Current DB size: %d MB.", size);
-		
-		assert !Thread.holdsLock(fCurrentlyEvicting);
-		assert fCurrentlyEvicting.isEmpty() :  
-			"After flush completed, " + fCurrentlyEvicting.size() + " entries remains evicting";
 
 	}
 
@@ -269,12 +247,7 @@ public class ZDB {
 
 		flush();
 		baosToDiskThread.shutdown();
-		try {
-			raf.close();
-		} catch (IOException e) {
-			el.logException(e);
-		}
-		
+
 		doUnLock();
 	}
 
@@ -494,7 +467,8 @@ public class ZDB {
 		long id = aEntry.getId();
 
 		Object obj = aEntry.getObject();
-		fCurrentlyEvicting.put(id, obj);
+
+		baosToDiskThread.addCurrentlyEvicting(aEntry);
 		// since serialization can trigger more store operations
 		// (some objects may have writeObject() methods which trigger ZDB.store())
 		// we first serialize to mem and then write out the whole object in one go
@@ -533,12 +507,30 @@ public class ZDB {
 	// the last zdb shuts down, could serve all ZDBs, provided that all data.bin files
 	// are located on the same disk (so that concurrence between writers does not make sense).
 	class BaosToDiskThread extends Thread {
-		
+
+		private final RandomAccessFile raf;
+
+		private final EvictingSet fCurrentlyEvicting; // We should not (re)load the value until it was saved. This set keeps the save queue.
+
 		BaosToDiskThread() {
 			super("BaosToDisk - " + fOwner);
+			raf = createNewFile();
+			fCurrentlyEvicting = new EvictingSet();
+			fLength = fDataFile.length();
 			start();
 		}
-		
+
+		private RandomAccessFile createNewFile() {
+			try {
+				return new RandomAccessFile(fDataFile, "rw");
+			} catch (FileNotFoundException e) {
+				// if we cannot create files in temp directory,
+				// then just crushing zamia with NPE is not a that bad thing
+				el.logException(e);
+				return null;
+			}
+		}
+
 		public void submit(BAOS baos) {
 			try {
 				input.put(baos);
@@ -552,6 +544,7 @@ public class ZDB {
 			try {
 				join();
 			} catch (InterruptedException e) { el.logException(e); }
+			safeClose(raf);
 		}
 		
 		private BlockingQueue<BAOS> input = new LinkedBlockingQueue<BAOS>(10);
@@ -560,27 +553,22 @@ public class ZDB {
 		private Collection<Long> ids = new ArrayList<Long>();
 		
 		private void flush() throws IOException {
-			if (buf.size() != 0) 
-				try {
-					synchronized (raf) {
-						assert offset == raf.length() : "specified offset " + offset + " is different from file size " + raf.length();
-						raf.seek(offset); // seek can be avoided if we ensure that no seeks were done for other purposes
-						raf.write(buf.getBytes(), 0, buf.size());
-					}
-				} catch (IOException e) {el.logException(e);}
-
-			if (!ids.isEmpty()) {
-				synchronized (fCurrentlyEvicting) {
-					for (Long id : ids) {
-						fCurrentlyEvicting.remove(id);
-					}
-				}
-				ids.clear();
+			synchronized (raf) {
+				assert offset == raf.length() : "specified offset " + offset + " is different from file size " + raf.length();
+				raf.seek(offset); // seek can be avoided if we ensure that no seeks were done for other purposes
+				raf.write(buf.getBytes(), 0, buf.size());
 			}
+
+			synchronized (fCurrentlyEvicting) {
+				for (Long id : ids) {
+					fCurrentlyEvicting.remove(id);
+				}
+			}
+			ids.clear();
 			
 			buf.reset();
-			if (buf.getBytes().length > FLUSH_OUT_WHEN)
-				buf = new BAOS(FLUSH_OUT_WHEN);
+			if (buf.getBytes().length > 2 * FLUSH_OUT_WHEN)
+				buf = new BAOS(2 * FLUSH_OUT_WHEN);
 		}
 		
 		public void run() {
@@ -590,11 +578,11 @@ public class ZDB {
 					BAOS baos = input.take();
 					
 					if (baos == END_OF_STREAM) {
-						flush();
+						if (!ids.isEmpty()) {
+							flush();
+						}
 						break;
 					}
-					
-//					logger.info("baosToDisk: " + baos.offset + " (" + baos.size() + " bytes) => ");
 					
 					if (ids.isEmpty()) {
 						offset = baos.offset; // remember location of the first chunk of the series
@@ -611,8 +599,76 @@ public class ZDB {
 				
 			}
 			
-		};
-	};
+		}
+
+		public Object readObject(long aOffset) throws ClassNotFoundException, IOException {
+
+			synchronized (raf) {
+				raf.seek(aOffset);
+				InputStream rafIs = new BufferedInputStream(new InputStream() {
+					public int read() throws IOException {
+						throw new IOException("not implemneted, sorry"); // tell me if this happens
+						//return raf.read();
+					}
+
+					@Override
+					public int read(byte[] b, int off, int len) throws IOException {
+						return raf.read(b, off, len);
+					}
+				});
+
+				ObjectInputStream in = new ObjectInputStream(ENABLE_COMPRESSION ? new GZIPInputStream(rafIs) : rafIs);
+				return in.readObject();
+			}
+		}
+
+		public void exportTo(DataOutputStream aOutputStream) throws IOException {
+
+			synchronized (raf) {
+				raf.seek(0);
+
+				byte buffer[] = new byte[BUFSIZE];
+
+				int n;
+				while ((n = raf.read(buffer)) > 0) {
+					aOutputStream.write(buffer, 0, n);
+				}
+			}
+		}
+
+		public void importFrom(DataInputStream aInputStream) throws IOException {
+
+			synchronized (raf) {
+				raf.seek(0);
+
+				byte buffer[] = new byte[BUFSIZE];
+
+				int n;
+				do {
+					n = aInputStream.read(buffer);
+					if (n > 0) {
+						raf.write(buffer, 0, n);
+					}
+				} while (n > 0);
+			}
+		}
+
+		public void sanityCheck() {
+			assert !Thread.holdsLock(fCurrentlyEvicting);
+			assert fCurrentlyEvicting.isEmpty() :
+					"After flush completed, " + fCurrentlyEvicting.size() + " entries remains evicting";
+		}
+
+		public void addCurrentlyEvicting(ZDBCacheEntry aEntry) {
+			fCurrentlyEvicting.put(aEntry.getId(), aEntry.getObject());
+		}
+
+		public Object getCurrentlyEvicting(long aId) {
+			synchronized (fCurrentlyEvicting) {
+				return fCurrentlyEvicting.get(aId);
+			}
+		}
+	}
 	
 	public synchronized Object load(long aId) {
 
@@ -651,9 +707,7 @@ public class ZDB {
 			return obj;
 		}
 
-		synchronized (fCurrentlyEvicting) {
-			obj = fCurrentlyEvicting.get(aId);
-		}
+		obj = baosToDiskThread.getCurrentlyEvicting(aId);
 		if (obj != null) {
 			//logger.debug ("ZDB: loading %d, was in evicting: %s", aId, obj);
 			return obj;
@@ -669,23 +723,7 @@ public class ZDB {
 		}
 
 		try {
-			synchronized (raf) {
-				raf.seek(offset);
-				InputStream rafIs = new BufferedInputStream(new InputStream() {
-					public int read() throws IOException {
-						throw new IOException("not implemneted, sorry"); // tell me if this happens
-						//return raf.read(); 
-					}
-					
-					@Override
-					public int read(byte[] b, int off, int len) throws IOException {
-						return raf.read(b, off, len);
-					}
-				});
-				
-				ObjectInputStream in = new ObjectInputStream(ENABLE_COMPRESSION ? new GZIPInputStream(rafIs) : rafIs);
-				obj = in.readObject();
-			}
+			obj = baosToDiskThread.readObject(offset);
 		} catch (IOException e) {
 			logger.error("ZDB: IOException while reading element %s (file: '%s')", aId, fDataFile.getAbsolutePath());
 			el.logException(e);
@@ -977,24 +1015,10 @@ public class ZDB {
 
 			logger.info("ZDB: export(): exporting data objects...");
 
-			BufferedInputStream in = null;
 			try {
-				synchronized (raf) {
-					raf.seek(0);
-
-					byte buffer[] = new byte[BUFSIZE];
-
-					int n = 0;
-					while ((n = raf.read(buffer)) > 0) {
-						dout.write(buffer, 0, n);
-					}
-				}
-			} catch (Throwable t) {
+				baosToDiskThread.exportTo(dout);
+			} catch (IOException t) {
 				el.logException(t);
-			} finally {
-				if (in != null) {
-					in.close();
-				}
 			}
 
 			logger.info("ZDB: export(): exporting data objects... done");
@@ -1112,28 +1136,10 @@ public class ZDB {
 
 			logger.info("ZDB: import(): importing data objects...");
 
-			BufferedOutputStream bout = null;
 			try {
-				synchronized (raf) {
-					raf.seek(0);
-
-					byte buffer[] = new byte[BUFSIZE];
-
-					int n = 0;
-					do {
-						n = din.read(buffer);
-						if (n > 0) {
-							raf.write(buffer, 0, n);
-						}
-					} while (n > 0);
-
-				}
-			} catch (Throwable t) {
+				baosToDiskThread.importFrom(din);
+			} catch (IOException t) {
 				el.logException(t);
-			} finally {
-				if (bout != null) {
-					bout.close();
-				}
 			}
 
 			logger.info("ZDB: import(): importing data objects... done");
