@@ -8,6 +8,7 @@
  */
 package org.zamia.zdb;
 
+import org.junit.After;
 import org.junit.Test;
 import org.zamia.ZamiaLogger;
 import org.zamia.util.FileUtils;
@@ -175,4 +176,11 @@ public class ZDBTest {
 
 	}
 
+	@After
+	public void tearDown() {
+		if (fZDB != null) {
+			fZDB.shutdown();
+			fZDB = null;
+		}
+	}
 }

@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.log4j.Level;
+import org.junit.After;
 import org.junit.Test;
 import org.zamia.BuildPath;
 import org.zamia.SourceFile;
@@ -485,6 +486,14 @@ public class IGRefSimTest {
 		copyLastFile(
 				new File("examples/erados/SOFTWARE/SPARTAN3_STARTERKIT/TEST_PROCESSOR_PROGRAMS/or/"),
 				new File("examples/erados/SOFTWARE/SPARTAN3_STARTERKIT/TEST_PROCESSOR_PROGRAMS/OBJECT_CODE.OC.MIF"));
+	}
+
+	@After
+	public void tearDown() throws Exception {
+		if (fZPrj != null) {
+			fZPrj.shutdown();
+			fZPrj = null;
+		}
 	}
 
 	private class MarkerException extends Exception {

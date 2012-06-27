@@ -8,6 +8,7 @@
 package org.zamia.instgraph.sim.vcd;
 
 import org.apache.log4j.Level;
+import org.junit.After;
 import org.junit.Test;
 import org.zamia.DMManager;
 import org.zamia.ERManager;
@@ -138,8 +139,6 @@ public class VCDTest {
 			assertNotNull(t);
 			assertTrue(t.compareTo(startTime) >= 0);
 		}
-
-		fZPrj.shutdown();
 	}
 
 	@Test
@@ -177,8 +176,6 @@ public class VCDTest {
 			assertNotNull(t);
 			assertTrue(t.compareTo(startTime) >= 0);
 		}
-
-		fZPrj.shutdown();
 	}
 
 	@Test
@@ -218,8 +215,6 @@ public class VCDTest {
 			assertNotNull(t);
 			assertTrue(t.compareTo(startTime) >= 0);
 		}
-
-		fZPrj.shutdown();
 	}
 
 	@Test
@@ -232,4 +227,11 @@ public class VCDTest {
 		assertEquals("VERYLONGID#78", id);
 	}
 
+	@After
+	public void tearDown() {
+		if (fZPrj != null) {
+			fZPrj.shutdown();
+			fZPrj = null;
+		}
+	}
 }
