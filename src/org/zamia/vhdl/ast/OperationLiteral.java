@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 import org.zamia.ErrorReport;
+import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
@@ -31,6 +32,7 @@ import org.zamia.instgraph.IGRange;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
 /**
@@ -362,37 +364,8 @@ public class OperationLiteral extends Operation {
 					numBits += bitsPerDigit;
 			}
 
-			IGType it = aTypeHint.getIndexType();
-
-			IGOperation ascending = it.getAscending(aContainer, getLocation());
-			IGOperation left = it.getLeft(getLocation());
-			IGOperation length = it.getDiscreteValue(numBits - 1, getLocation(), aErrorMode, aReport);
-			if (length == null) {
-				return null;
-			}
-
-			IGOperation right;
-
-			if (ascending instanceof IGStaticValue) {
-
-				IGStaticValue sAscending = (IGStaticValue) ascending;
-				if (sAscending.isTrue()) {
-					right = new IGOperationBinary(left, length, BinOp.ADD, it, getLocation(), zdb).optimize(env);
-				} else {
-					right = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
-				}
-
-			} else {
-				IGOperation rightAsc = new IGOperationBinary(left, length, BinOp.ADD, it, getLocation(), zdb).optimize(env);
-				IGOperation rightDesc = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
-
-				right = new IGOperationPhi(ascending, rightAsc, rightDesc, it, getLocation(), zdb).optimize(env);
-			}
-
-			IGRange range = new IGRange(left, right, ascending, getLocation(), zdb);
-
-			IGType type = aTypeHint.createSubtype(range, aEE.getInterpreterEnv(), getLocation());
-
+			IGType type = IGRange.subRange(numBits-1, aTypeHint, aContainer, getLocation(), aEE, aErrorMode, aReport);
+			
 			String bitstring = parseBitStringLiteral();
 
 			value = new IGOperationLiteral(bitstring, type, getLocation());
@@ -511,34 +484,7 @@ public class OperationLiteral extends Operation {
 				return res;
 			}
 
-			it = aTypeHint.getIndexType();
-
-			ascending = it.getAscending(aContainer, getLocation());
-			left = it.getLeft(getLocation());
-			length = it.getDiscreteValue(image.length() - 1, getLocation(), aErrorMode, aReport);
-			if (length == null) {
-				return null;
-			}
-
-			if (ascending instanceof IGStaticValue) {
-
-				IGStaticValue sAscending = (IGStaticValue) ascending;
-				if (sAscending.isTrue()) {
-					right = new IGOperationBinary(left, length, BinOp.ADD, it, getLocation(), zdb).optimize(env);
-				} else {
-					right = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
-				}
-
-			} else {
-				IGOperation rightAsc = new IGOperationBinary(left, length, BinOp.ADD, it, getLocation(), zdb).optimize(env);
-				IGOperation rightDesc = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
-
-				right = new IGOperationPhi(ascending, rightAsc, rightDesc, it, getLocation(), zdb).optimize(env);
-			}
-
-			range = new IGRange(left, right, ascending, getLocation(), zdb);
-
-			type = aTypeHint.createSubtype(range, aEE.getInterpreterEnv(), getLocation());
+			type = IGRange.subRange(image.length() - 1, aTypeHint, aContainer, getLocation(), aEE, aErrorMode, aReport);
 
 			value = new IGOperationLiteral(image, type, getLocation());
 
@@ -550,4 +496,6 @@ public class OperationLiteral extends Operation {
 		}
 		return res;
 	}
+
+
 }

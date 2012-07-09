@@ -202,41 +202,10 @@ public class Name extends VHDLNode {
 
 			if (id.charAt(0) == '"' && getNumExtensions() == 0 && aTypeHint != null && aTypeHint.isArray()) {
 
-				IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
-				ZDB zdb = aEE.getZDB();
-
-				IGType it = aTypeHint.getIndexType();
-
 				int l = id.length();
-
 				String image = id.substring(1, l - 1);
 
-				IGOperation ascending = it.getAscending(aContainer, getLocation());
-				IGOperation left = it.getLeft(getLocation());
-				IGOperation length = it.getDiscreteValue(image.length() - 1, getLocation(), aErrorMode, aReport);
-				if (length == null) {
-					return null;
-				}
-				IGOperation right;
-				if (ascending instanceof IGStaticValue) {
-
-					IGStaticValue sAscending = (IGStaticValue) ascending;
-					if (sAscending.isTrue()) {
-						right = new IGOperationBinary(left, length, BinOp.ADD, it, getLocation(), zdb).optimize(env);
-					} else {
-						right = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
-					}
-
-				} else {
-					IGOperation rightAsc = new IGOperationBinary(left, length, BinOp.ADD, it, getLocation(), zdb).optimize(env);
-					IGOperation rightDesc = new IGOperationBinary(left, length, BinOp.SUB, it, getLocation(), zdb).optimize(env);
-
-					right = new IGOperationPhi(ascending, rightAsc, rightDesc, it, getLocation(), zdb).optimize(env);
-				}
-
-				IGRange range = new IGRange(left, right, ascending, getLocation(), zdb);
-
-				IGType type = aTypeHint.createSubtype(range, aEE.getInterpreterEnv(), getLocation());
+				IGType type = IGRange.subRange(image.length() - 1, aTypeHint, aContainer, getLocation(), aEE, aErrorMode, aReport);
 
 				rr.addItem(new IGOperationLiteral(image, type, getLocation()));
 

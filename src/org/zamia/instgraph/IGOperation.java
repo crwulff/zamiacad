@@ -11,6 +11,7 @@ package org.zamia.instgraph;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
+import org.python.antlr.PythonParser.assert_stmt_return;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
@@ -156,56 +157,45 @@ public abstract class IGOperation extends IGContainerItem {
 	 * 
 	 */
 
-	public IGOperation getRangeLeft(SourceLocation aSrc) throws ZamiaException {
+	private IGType checkType(SourceLocation aSrc) throws ZamiaException {
 		IGType t = getType();
 		if (!t.isRange()) {
 			throw new ZamiaException("Range expected here.", aSrc);
 		}
+		return t;
+	}
+	
+	public IGOperation getRangeLeft(SourceLocation aSrc) throws ZamiaException {
+		IGType t = checkType(aSrc);
 		return new IGOperationAttribute(AttrOp.LEFT, this, null, t.getBaseType(), aSrc, getZDB());
 	}
 
 	public IGOperation getRangeRight(SourceLocation aSrc) throws ZamiaException {
-		IGType t = getType();
-		if (!t.isRange()) {
-			throw new ZamiaException("Range expected here.", aSrc);
-		}
+		IGType t = checkType(aSrc);
 		return new IGOperationAttribute(AttrOp.RIGHT, this, null, t.getBaseType(), aSrc, getZDB());
 	}
 
 	public IGOperation getRangeAscending(IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
-		IGType t = getType();
-		if (!t.isRange()) {
-			throw new ZamiaException("Range expected here.", aSrc);
-		}
+		IGType t = checkType(aSrc);
 		return new IGOperationAttribute(AttrOp.ASCENDING, this, null, aContainer.findBoolType(), aSrc, getZDB());
 	}
 
-	public IGOperation getRangeMin(IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
-
-		IGType t = getType();
-		if (!t.isRange()) {
-			throw new ZamiaException("Range expected here.", aSrc);
-		}
-
-		IGOperation left = getRangeLeft(aSrc);
-		IGOperation right = getRangeRight(aSrc);
+	public IGOperation getRange(boolean max, IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
+		IGType t = checkType(aSrc);
+		
+		IGOperation left = max ? getRangeRight(aSrc) : getRangeLeft(aSrc);
+		IGOperation right = max ? getRangeLeft(aSrc) : getRangeRight(aSrc);
 		IGOperation ascending = getRangeAscending(aContainer, aSrc);
 
 		return new IGOperationPhi(ascending, left, right, t.getBaseType(), aSrc, getZDB());
+		
 	}
 
+	public IGOperation getRangeMin(IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
+		return getRange(false, aContainer, aSrc);
+	}
 	public IGOperation getRangeMax(IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
-
-		IGType t = getType();
-		if (!t.isRange()) {
-			throw new ZamiaException("Range expected here.", aSrc);
-		}
-
-		IGOperation left = getRangeLeft(aSrc);
-		IGOperation right = getRangeRight(aSrc);
-		IGOperation ascending = getRangeAscending(aContainer, aSrc);
-
-		return new IGOperationPhi(ascending, right, left, t.getBaseType(), aSrc, getZDB());
+		return getRange(true, aContainer, aSrc);
 	}
 
 	/**

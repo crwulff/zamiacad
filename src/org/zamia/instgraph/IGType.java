@@ -790,65 +790,49 @@ public class IGType extends IGContainerItem {
 		return fRange;
 	}
 
-	public void setLeft(IGOperation aLeft, SourceLocation aSrc) throws ZamiaException {
+	private void checkScalar(SourceLocation aSrc) throws ZamiaException {
 		if (!isScalar()) {
 			throw new ZamiaException("Scalar type expected here.", aSrc);
 		}
-		if (!(fRange instanceof IGRange)) {
-			throw new ZamiaException("Internal error, sorry.", aSrc);
+	}
+	
+	private IGRange checkRange(SourceLocation aSrc) throws ZamiaException {
+		checkScalar(aSrc);
+		if (fRange instanceof IGRange) {
+			return (IGRange) fRange;
 		}
-		IGRange range = (IGRange) fRange;
-		range.setLeft(aLeft);
+		throw new ZamiaException("Range internal error, sorry.", aSrc);
+	}
+	
+	public void setLeft(IGOperation aLeft, SourceLocation aSrc) throws ZamiaException {
+		checkRange(aSrc).setLeft(aLeft);
 	}
 
 	public IGOperation getLeft(SourceLocation aSrc) throws ZamiaException {
-		if (!isScalar()) {
-			throw new ZamiaException("Scalar type expected here.", aSrc);
-		}
+		checkScalar(aSrc);
 		return fRange.getRangeLeft(aSrc);
 	}
 
 	public void setRight(IGOperation aRight, SourceLocation aSrc) throws ZamiaException {
-		if (!isScalar()) {
-			throw new ZamiaException("Scalar type expected here.", aSrc);
-		}
-		if (!(fRange instanceof IGRange)) {
-			throw new ZamiaException("Internal error, sorry.", aSrc);
-		}
-		IGRange range = (IGRange) fRange;
-		range.setRight(aRight);
+		checkRange(aSrc).setRight(aRight);
 	}
 
 	public IGOperation getRight(SourceLocation aSrc) throws ZamiaException {
-		if (!isScalar()) {
-			throw new ZamiaException("Scalar type expected here.", aSrc);
-		}
+		checkScalar(aSrc);
 		return fRange.getRangeRight(aSrc);
 	}
 
 	public IGOperation getAscending(IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
-		if (!isScalar()) {
-			throw new ZamiaException("Scalar type expected here.", aSrc);
-		}
-
+		checkScalar(aSrc);
 		return fRange.getRangeAscending(aContainer, aSrc);
 	}
 
 	public void setAscending(IGOperation aAscending, SourceLocation aSrc) throws ZamiaException {
-		if (!isScalar()) {
-			throw new ZamiaException("Scalar type expected here.", aSrc);
-		}
-		if (!(fRange instanceof IGRange)) {
-			throw new ZamiaException("Internal error, sorry.", aSrc);
-		}
-		IGRange range = (IGRange) fRange;
-		range.setAscending(aAscending);
+		checkRange(aSrc).setAscending(aAscending);
 	}
 
 	public IGOperation getRange(SourceLocation aSrc) throws ZamiaException {
-		if (!isScalar()) {
-			throw new ZamiaException("Scalar type expected here.", aSrc);
-		}
+		checkScalar(aSrc);
 		return getRange();
 	}
 
