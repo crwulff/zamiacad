@@ -149,13 +149,11 @@ public abstract class Operation extends VHDLNode {
 			IGOperationCache aCache, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
 		AssociationList al = new AssociationList(this, getLineCol());
-		AssociationElement ae = new AssociationElement(this, getLineCol());
+		AssociationElement ae = al.add(this, getLineCol());
 		ae.setActualPart(aA);
-		al.add(ae);
 		if (aB != null) {
-			ae = new AssociationElement(this, getLineCol());
+			ae = al.add(this, getLineCol());
 			ae.setActualPart(aB);
-			al.add(ae);
 		}
 
 		ErrorReport report = aReport;

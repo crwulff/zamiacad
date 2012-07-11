@@ -58,6 +58,11 @@ public class AssociationList extends VHDLNode {
 		associations.add(ae_);
 		ae_.setParent(this, true);
 	}
+	public AssociationElement add(VHDLNode parent_, long location_) {
+		AssociationElement ae_ = new AssociationElement(parent_, location_);
+		add(ae_);
+		return ae_;
+	}
 
 	@Override
 	public VHDLNode getChild(int idx_) {

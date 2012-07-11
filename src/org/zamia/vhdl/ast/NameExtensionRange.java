@@ -164,7 +164,7 @@ public class NameExtensionRange extends NameExtension {
 
 			for (int i = 0; i < nRanges; i++) {
 				Range range = fRanges.get(i);
-				AssociationElement ae = new AssociationElement(this, getLineCol());
+				AssociationElement ae = al.add(this, getLineCol());
 
 				if (range.isRange()) {
 					aReport.append("Ranges are not supported here.", getLocation());
@@ -172,7 +172,6 @@ public class NameExtensionRange extends NameExtension {
 				}
 
 				ae.setActualPart(range.isName() ? new OperationName(range.getName(), ae, range.getLineCol()) : range.getLeft());
-				al.add(ae);
 			}
 
 			IGOperationInvokeSubprogram invocation = sp.generateInvocation(al, aContainer, aEE, aCache, aPrevLocation, aReport);

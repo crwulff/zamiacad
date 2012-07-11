@@ -158,10 +158,8 @@ public class NameExtensionIndex extends NameExtension {
 
 			for (int i = 0; i < nIndices; i++) {
 				Operation op = fIndices.get(i);
-				AssociationElement ae = new AssociationElement(this, getLineCol());
-
+				AssociationElement ae = al.add(this, getLineCol());
 				ae.setActualPart(op);
-				al.add(ae);
 			}
 
 			IGOperationInvokeSubprogram invocation = sp.generateInvocation(al, aContainer, aEE, aCache, aPrevLocation, aReport);
