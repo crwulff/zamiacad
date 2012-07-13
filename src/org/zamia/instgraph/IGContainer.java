@@ -53,7 +53,7 @@ public class IGContainer extends IGItem {
 
 	private ArrayList<Long> fLocalItems = new ArrayList<Long>();
 
-	private ArrayList<Long> fInterfaces = new ArrayList<Long>();
+	public ArrayList<Long> fInterfaces = new ArrayList<Long>();
 
 	private ArrayList<Long> fGenerics = new ArrayList<Long>();
 
