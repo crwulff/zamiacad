@@ -116,10 +116,10 @@ public class IGFileDriver extends IGObjectDriver {
 
 		switch (getDir()) {
 			case NONE:
-				throw new ZamiaException("Attempt to access a closed file.");
+				throw new ZamiaException("Attempt to access a closed file.", aLocation);
 			case IN:
 				String fileName = getFileName(aLocation);
-				throw new ZamiaException("Attempt to write to or flush file \"" + fileName+ "\" which is opened only for reading.");
+				throw new ZamiaException("Attempt to write to or flush file \"" + fileName+ "\" which is opened only for reading.", aLocation);
 		}
 
 		File file = getFile(aLocation);

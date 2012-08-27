@@ -58,157 +58,108 @@ public class TypeDefinitionFile extends TypeDefinition {
 	}
 
 	@Override
-	public IGType computeIG(IGContainer aContainer, IGElaborationEnv aEE) {
-		IGType type = null;
+	public IGType computeIG(final IGContainer aContainer, final IGElaborationEnv aEE) {
+		
 		try {
 			IGType elementType = fTypeMark.computeIGAsType(aContainer, aEE, new IGOperationCache(), ASTErrorMode.EXCEPTION, null);
 
-			 type = new IGType(TypeCat.FILE, null, null, null, elementType, null, false, getLocation(), aEE.getZDB());
+			final IGType type = new IGType(TypeCat.FILE, null, null, null, elementType, null, false, getLocation(), aEE.getZDB());
 
 			// now declare the implicit operations
+
+			class Helper {
+				IGSubProgram sub;
+				IGContainer container;
+				Helper start(IGBuiltin id, boolean f, IGType ... returnType) throws ZamiaException {
+					IGType rt = returnType.length == 0 ? null : returnType[0];
+					sub = new IGSubProgram(aContainer.store(), rt, id.name(), getLocation(), aEE.getZDB());
+					sub.setBuiltin(id);
+					container = sub.getContainer();
+					if (f)
+						add(OIDir.IN, type, "F");
+					return this;
+				 }
+				Helper fin(OIDir dir, IGType type, String name) throws ZamiaException {
+					add(dir, type, name);
+					fin();
+					return this;
+				 }
+					public Helper add(OIDir dir, IGType type, String name) throws ZamiaException {
+						add(dir, null, type, name);
+						return this;
+					}
+					public Helper add(OIDir dir, IGStaticValue deflt, IGType type, String name) throws ZamiaException {
+						container.addInterface(new IGObject(
+								dir, deflt, IGObjectCat.CONSTANT, type, name, getLocation(), aEE.getZDB()));
+						return this;
+					}
+					public Helper addOpenKind() throws ZamiaException {
+						IGType okT = aContainer.findOpenKindType(); IGStaticValue iv = okT.findEnumLiteral("READ_MODE");
+						add(OIDir.IN, iv, okT, "FILE_OPEN_KIND");
+						return this;
+					}
+					public Helper fin() throws ZamiaException {
+						sub.computeSignatures();
+						sub.storeOrUpdate();
+						sub.getContainer().storeOrUpdate();
+						aContainer.add(sub);
+						return this;
+					}
+			 }
 
 			/*
 			 *  procedure read ( file f : file_type; value : out element_type ) ;
 			 */
 
-			IGSubProgram sub = new IGSubProgram(aContainer.store(), null, "READ", getLocation(), aEE.getZDB());
-
-			sub.setBuiltin(IGBuiltin.READ);
-
-			IGContainer container = sub.getContainer();
-
-			IGObject intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, type, "F", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-			intf = new IGObject(OIDir.OUT, null, IGObjectCat.CONSTANT, elementType, "VALUE", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-
-			sub.computeSignatures();
-
-			sub.storeOrUpdate();
-			container.storeOrUpdate();
-			aContainer.add(sub);
+			Helper h = new Helper();
+			
+			h.start(IGBuiltin.READ, true).fin(OIDir.OUT, elementType, "VALUE");
 
 			/*
 			 * procedure write ( file f : file_type; value : in element_type ) ;
 			 */
 
-			sub = new IGSubProgram(aContainer.store(), null, "WRITE", getLocation(), aEE.getZDB());
-
-			sub.setBuiltin(IGBuiltin.WRITE);
-
-			container = sub.getContainer();
-
-			intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, type, "F", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-			intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, elementType, "VALUE", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-
-			sub.computeSignatures();
-
-			sub.storeOrUpdate();
-			container.storeOrUpdate();
-			aContainer.add(sub);
+			h.start(IGBuiltin.WRITE, true).fin(OIDir.IN, elementType, "VALUE");
 
 			/*
 			 * function endfile ( file f : file_type )  return boolean ; 
 			 */
 
-			sub = new IGSubProgram(aContainer.store(), aContainer.findBoolType(), "ENDFILE", getLocation(), aEE.getZDB());
+			h.start(IGBuiltin.ENDFILE, true, aContainer.findBoolType()).fin();
 
-			sub.setBuiltin(IGBuiltin.ENDFILE);
-
-			container = sub.getContainer();
-
-			intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, type, "F", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-
-			sub.computeSignatures();
-
-			sub.storeOrUpdate();
-			container.storeOrUpdate();
-			aContainer.add(sub);
-
+			
 			/*
 			 * procedure file_close ( file f : file_type ) ;
 			 */
 
-			sub = new IGSubProgram(aContainer.store(), null, "FILE_CLOSE", getLocation(), aEE.getZDB());
-
-			sub.setBuiltin(IGBuiltin.FILE_CLOSE);
-
-			container = sub.getContainer();
-
-			intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, type, "F", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-
-			sub.computeSignatures();
-
-			sub.storeOrUpdate();
-			container.storeOrUpdate();
-			aContainer.add(sub);
-
+			h.start(IGBuiltin.FILE_CLOSE, true).fin();
+			
 			/*
 			 * procedure file_open( file f : file_type; external_name: in string; open_kind: in file_open_kind := read_mode ) ;
 			 */
 
-			sub = new IGSubProgram(aContainer.store(), null, "FILE_OPEN", getLocation(), aEE.getZDB());
-
-			sub.setBuiltin(IGBuiltin.FILE_OPEN);
-
-			container = sub.getContainer();
-
-			intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, type, "F", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-			intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, aContainer.findStringType(), "EXTERNAL_NAME", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-
-			IGType okT = aContainer.findOpenKindType();
-			IGStaticValue iv = okT.findEnumLiteral("READ_MODE");
-
-			intf = new IGObject(OIDir.IN, iv, IGObjectCat.CONSTANT, okT, "FILE_OPEN_KIND", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-
-			sub.computeSignatures();
-
-			sub.storeOrUpdate();
-			container.storeOrUpdate();
-			aContainer.add(sub);
-
+			h.start(IGBuiltin.FILE_OPEN, true).add(OIDir.IN, aContainer.findStringType(), "EXTERNAL_NAME") 
+				.addOpenKind().fin();
+			
 			/*
 			 * procedure file_open( status: out file_open_status; file f : file_type; external_name: in string; open_kind: in file_open_kind := read_mode ) ;
 			 */
 
-			sub = new IGSubProgram(aContainer.store(), null, "FILE_OPEN", getLocation(), aEE.getZDB());
+			h.start(IGBuiltin.FILE_OPEN, false).add(OIDir.OUT, aContainer.findFileOpenStatusType(), "STATUS")
+				.add(OIDir.IN, type, "F").add(OIDir.IN, aContainer.findStringType(), "EXTERNAL_NAME")
+				.addOpenKind(); h.fin();
 
-			sub.setBuiltin(IGBuiltin.FILE_OPEN);
-
-			container = sub.getContainer();
-
-			intf = new IGObject(OIDir.OUT, null, IGObjectCat.CONSTANT, aContainer.findFileOpenStatusType(), "STATUS", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-			intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, type, "F", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-			intf = new IGObject(OIDir.IN, null, IGObjectCat.CONSTANT, aContainer.findStringType(), "EXTERNAL_NAME", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-
-			okT = aContainer.findOpenKindType();
-			iv = okT.findEnumLiteral("READ_MODE");
-
-			intf = new IGObject(OIDir.IN, iv, IGObjectCat.CONSTANT, okT, "FILE_OPEN_KIND", getLocation(), aEE.getZDB());
-			container.addInterface(intf);
-
-			sub.computeSignatures();
-
-			sub.storeOrUpdate();
-			container.storeOrUpdate();
-			aContainer.add(sub);
-
+			/*
+			 * Implicit procedure FLUSH (file F: TEXT) */
+			h.start(IGBuiltin.FLUSH, true).fin();	
+			
+			return type;
 		} catch (ZamiaException e) {
 			reportError(e);
-			type = IGType.createErrorType(aEE.getZDB());
+			return IGType.createErrorType(aEE.getZDB());
 		}
 
-		return type;
+		
 	}
-
+	
 }
