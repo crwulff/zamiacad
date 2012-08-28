@@ -148,6 +148,10 @@ public class IGBuiltinOperations {
 
 		case FILE_CLOSE:
 			return execFileClose(aSub, aRuntime, aLocation, aErrorMode, aReport);
+			
+		case FLUSH:
+			ZamiaLogger.getInstance().info("Flush is not needed. Zamia keeps files closed. ");
+			return ReturnStatus.CONTINUE;
 
 		case NOW:
 			return execNow(aSub, aRuntime, aLocation, aErrorMode, aReport);
