@@ -14,7 +14,7 @@ package TEXTIO is
 	
 	-- Input Routines for Standard Types
 
-	procedure READLINE(F: in TEXT; L: out LINE);
+	procedure READLINE (file F: TEXT; L: inout LINE);
 
 	procedure READ(L: inout LINE; VALUE: out BIT; GOOD: out BOOLEAN);
 	procedure READ(L: inout LINE; VALUE: out BIT);
@@ -42,7 +42,7 @@ package TEXTIO is
 
 	-- Output Routines for Standard Types
 
-	procedure WRITELINE(F: out TEXT; L: in LINE);
+	procedure WRITELINE (file F: TEXT; L: inout LINE);
 
 	procedure WRITE(L: inout LINE; VALUE: in BIT;
 			JUSTIFIED: in SIDE := RIGHT; FIELD: in WIDTH := 0);

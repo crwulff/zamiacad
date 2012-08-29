@@ -13,7 +13,7 @@ architecture read_from_file of FILE_READ is
 begin
 
   receive_data: process
-    variable l    : line;
+    variable l, l2    : line;
     variable ok   : boolean := false;
     variable ok_2 : boolean := false;
 
@@ -225,6 +225,32 @@ begin
      -- TODO: TIME
 
      assert endfile(stimulus) report "ENDFILE() failed. Expected = true, actual = false.";
+     
+    -- TESET READ_AFTER_WRITE
+    WRITE(l, character'('d')); 
+     writeline(output, l); -- drain the line
+     
+     --WARNING: D is read instead of d
+ 	WRITE(l, character'('d')); READ(l, v_char); --assert v_char = '1' report "got char = " & v_char & " instead of 'd'";
+	WRITE(l, integer'(-3)); READ(l, v_int); assert v_int = -3 report "got int = " & integer'image(v_int) & " instead of -3";
+	WRITE(l, character'('-')); WRITE(l, character'('4')); READ(l, v_int); assert v_int = -4 report "got int = " & integer'image(v_int) & " instead of -3";
+	WRITE(l, boolean'(true)); READ(l, v_bool); assert v_bool = true report "got " & boolean'image(v_bool) & " instead of true";
+	WRITE(l, boolean'(false)); READ(l, v_bool); assert v_bool = false report "got " & boolean'image(v_bool) & " instead of false";
+	WRITE(l, string'("abc")); READ(l, v_string(1 to 3)); assert v_string(1 to 3) = "abc" report "got string = " & v_string(1 to 3) & " instead of abc";
+	 
+	report "str len = " & integer'image(l'length)  & 
+		" : " & integer'image(l'low) & 
+		" to " & integer'image(l'high);
+ 
+	assert l'length = 0 report "line len must be 0, actual = " & integer'image(l'length); 
+	assert l'low = 1 report "line low must be 1, actual = " & integer'image(l'low); 
+	assert l'high = 0 report "line high must be 0, actual = " & integer'image(l'high);
+	 
+	write(l, string'("ABC"));
+	l2 := l;
+	flush(output);
+	assert l2'length = 2 report "another ref to the same lime must decrease len" severity NOTE;
+	
      wait;
   end process receive_data;
 end read_from_file;

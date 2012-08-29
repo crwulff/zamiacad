@@ -13,6 +13,7 @@ import java.math.BigInteger;
 
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
+import org.zamia.Utils;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGContainer;
@@ -1232,36 +1233,52 @@ public class IGBuiltinOperations {
 
 		IGStaticValue valueL = aRuntime.getObjectValue(intfL);
 		
-		IGTypeStatic lT;
-		int l, r;
-		IGStaticValueBuilder nValueLB;
-		if (valueL == null || (lT = valueL.getStaticType()).isAccess()) { // null or not assigned pointer -> refer new line
-			nValueLB = IGFileDriver.newLineBuilder(1, container.findStringType(), aRuntime, aLocation, aErrorMode, aReport);
-			l = 1; r = 0;
+		IGTypeStatic lT = valueL.getStaticType();
+		String strV = valueV.toString();
+		int wasL, wasR, len = strV.length();
+		
+		
+		if (lT.isAccess()) { // null or not assigned pointer -> refer new line
+			wasL = 1; wasR = 0;
 		} else { // append to old
 			IGTypeStatic idxType = lT.getStaticIndexType(aLocation);
 			IGStaticValue range = idxType.getStaticRange();
-			l = (int) range.getLeft().getOrd();
-			r = (int) range.getRight().getOrd();
-			IGStaticValue rangeR = new IGStaticValueBuilder(range.getRight().getStaticType(), null, aLocation).setNum(r + 1).buildConstant();
-			range = new IGStaticValueBuilder(range, aLocation).setRight(rangeR).buildConstant();
-			IGTypeStatic rangeType = lT.createSubtype(range, aLocation);
-			nValueLB = new IGStaticValueBuilder(rangeType, null, aLocation);
+			wasL = (int) range.getLeft().getOrd();
+			wasR = (int) range.getRight().getOrd();
 		}
 		
-		// Copy original
-		// TODO: avoid copying
-		for (int i = 1; i < r+1; i++) {
+		// allocate a string len chars longer than the original
+		IGStaticValueBuilder nValueLB = IGFileDriver.newLineBuilder(
+				wasR + len, container.findStringType(), aRuntime, aLocation, aErrorMode, aReport);
+		
+		// shift original symbols to the right. Can we avoid copying?
+		for (int i = wasL; i < wasR+1; i++) {
 			IGStaticValue cv = valueL.getValue(i, aLocation);
-			nValueLB.set(i+1, cv, aLocation);
+			nValueLB.set(i+len, cv, aLocation);
 		}
 
-		// Append the character
-		// Surprisingly, it is not necessary that the V element is singular char or bit. 
-		// 			It can eqivalently be int, bool, time or array!
-		nValueLB.set(1, valueV, aLocation);
+		// Insert the value into provided slot.
+		// Interestinly, we could just insert a single valueV. 
+		//  - - - - - - - - 
+		// nValueLB.set(1, valueV, aLocation);
+		// ZamiaLogger.getInstance().info(valueV.getStaticType().toString());
+		//  - - - - - - - - 
+		// It would result in a wired, non-char string but such line can be successfully saved into the file
+		// , e.g. write(line, int); writeline(file, line). However, read, write(line, int); read(line, int), 
+		// fails. So, we have to convert our valueV into separate chars of line len.
+		
+		IGType t1 = lT.getElementType(), t2 = t1.getElementType();	// The line type can be either access or string. In 
+		IGTypeStatic charType = (IGTypeStatic) (t2 == null ? t1 : t2); // the first case, we need to take the type twice 
+		
+		for (int i = len ; i != 0 ; i--) {
+			char c = strV.charAt(len-i);
+			IGStaticValue staticChar = charType.findEnumLiteral(c);
+			nValueLB.set(i, staticChar, aLocation);
+		}
 
+		//Here is an error, however. We return a string rather than line as required.
 		valueL = nValueLB.buildConstant();
+
 		aRuntime.setObjectValue(intfL, valueL, aLocation);
 
 		return ReturnStatus.CONTINUE;
@@ -1299,7 +1316,10 @@ public class IGBuiltinOperations {
 			((IGFileDriver) driverF).writeLine(valueL, aLocation);
 		}
 
-		aRuntime.setObjectValue(intfL, null, aLocation);
+		//return empty line
+		valueL = IGFileDriver.newLineBuilder(
+				0, container.findStringType(), aRuntime, aLocation, aErrorMode, aReport).buildConstant();
+		aRuntime.setObjectValue(intfL, valueL, aLocation);
 
 		return ReturnStatus.CONTINUE;
 	}
