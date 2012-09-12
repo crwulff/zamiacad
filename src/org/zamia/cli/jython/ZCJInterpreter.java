@@ -58,6 +58,11 @@ public class ZCJInterpreter {
 
 	public synchronized void evalFile(String aPath) throws ZamiaException {
 
+		if (System.getenv("PYTHONPATH") == null) {
+			logger.warn("System variable PYTHONPATH is not specified, python will not work");
+			return;
+		}
+
 		if (aPath.startsWith("builtin:")) {
 			String uri = aPath.substring(8);
 
