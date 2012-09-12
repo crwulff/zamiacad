@@ -19,6 +19,7 @@ import java.util.Iterator;
 import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaLogger;
 import org.zamia.util.HashMapArray;
+import org.zamia.zdb.ZDB.ZDBInputStream;
 
 
 /**
@@ -121,13 +122,13 @@ public class ZDBPersistentData {
 
 	}
 
-	boolean load(File aPDFile) {
+	boolean load(File aPDFile, ZDB aZDB) {
 
 		if (aPDFile.exists() && aPDFile.canRead()) {
 			try {
 				
-				ObjectInputStream ois = ZDB.openObjectInputStream(aPDFile);
-				
+				ObjectInputStream ois = aZDB.new ZDBInputStream(ZDB.openInputStream(aPDFile));
+ 
 				try {
 				
 					int v = ois.readInt();

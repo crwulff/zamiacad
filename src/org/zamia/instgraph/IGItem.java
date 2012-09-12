@@ -8,6 +8,8 @@
  */
 package org.zamia.instgraph;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -44,8 +46,6 @@ public abstract class IGItem implements Serializable, ZDBIIDSaver {
 
 	public static final ExceptionLogger el = ExceptionLogger.getInstance();
 
-	private String fZPrjID;
-
 	protected long fDBID;
 
 	private long fSFDBID;
@@ -63,7 +63,6 @@ public abstract class IGItem implements Serializable, ZDBIIDSaver {
 		if (aZDB != null) {
 			fZDB = aZDB;
 			ZamiaProject zprj = (ZamiaProject) aZDB.getOwner();
-			fZPrjID = zprj.getId();
 			if (aLocation != null) {
 				fSFDBID = getOrCreateSFHID(aLocation.fSF);
 				fLine = aLocation.fLine;
@@ -108,14 +107,6 @@ public abstract class IGItem implements Serializable, ZDBIIDSaver {
 	}
 
 	public ZDB getZDB() {
-
-		if (fZDB == null) {
-			ZamiaProject zprj = ZamiaProject.lookupProject(fZPrjID);
-			if (zprj != null) {
-				fZDB = zprj.getZDB();
-			}
-		}
-
 		return fZDB;
 	}
 
@@ -400,4 +391,8 @@ public abstract class IGItem implements Serializable, ZDBIIDSaver {
 		return false;
 	}
 
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		setZDB(((ZDB.ZDBInputStream)in).getZDB());
+		in.defaultReadObject();
+	}
 }

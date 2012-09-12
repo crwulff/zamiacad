@@ -10,9 +10,11 @@
 package org.zamia.util.ehm;
 
 import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.DataOutput;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
@@ -47,7 +49,7 @@ public class ExtendibleHashMap {
 
 		if (fFile.exists() && fFile.canRead())
 			try {
-				ObjectInputStream in = ZDB.openObjectInputStream(fFile);
+				ObjectInputStream in = new ObjectInputStream(ZDB.openInputStream(fFile));
 
 				try {
 					fRoot = loadNodes(in, null);

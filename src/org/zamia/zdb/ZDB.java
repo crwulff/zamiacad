@@ -157,7 +157,7 @@ public class ZDB {
 		fEHMs = new HashMap<String, ExtendibleHashMap>();
 		fOffsets = new ExtendibleHashMap(fEHMManager, fOffsetsFile);
 
-		if (!fPD.load(fPDFile)) {
+		if (!fPD.load(fPDFile, this)) {
 			fPD.clear();
 			fOffsets.clear();
 		}
@@ -618,7 +618,7 @@ public class ZDB {
 					}
 				});
 
-				ObjectInputStream in = new ObjectInputStream(ENABLE_COMPRESSION ? new GZIPInputStream(rafIs) : rafIs);
+				ObjectInputStream in = new ZDBInputStream(ENABLE_COMPRESSION ? new GZIPInputStream(rafIs) : rafIs);
 				return in.readObject();
 			}
 		}
@@ -733,10 +733,6 @@ public class ZDB {
 		}
 		
 		if (obj != null) {
-
-			if (obj instanceof ZDBIIDSaver) {
-				((ZDBIIDSaver) obj).setZDB(this);
-			}
 
 			storeInMem(aId, obj, false);
 		}
@@ -1300,12 +1296,11 @@ public class ZDB {
 
 	}
 
-	public static ObjectInputStream openObjectInputStream(File file) throws IOException {
+	public static InputStream openInputStream(File file) throws IOException {
 		InputStream fis = new BufferedInputStream(new FileInputStream(file));
-		return new ObjectInputStream(
-				ZDB.ENABLE_COMPRESSION ? new BufferedInputStream(new GZIPInputStream(fis)) : fis);
+		return (ENABLE_COMPRESSION ? new BufferedInputStream(new GZIPInputStream(fis)) : fis);
 	}
-
+	
 	public static ObjectOutputStream openObjectOutputStream(File file) throws IOException {
 		OutputStream fs = new BufferedOutputStream(new FileOutputStream(file));
 		OutputStream os = ZDB.ENABLE_COMPRESSION ? new BufferedOutputStream(new LevelGZIPOutputStream(fs, Deflater.BEST_SPEED)) : fs;
@@ -1317,6 +1312,15 @@ public class ZDB {
 			out.close();
 		} catch (IOException e) {
 			el.logException(e);
+		}
+	}
+	
+	public class ZDBInputStream extends ObjectInputStream {
+		public ZDBInputStream(InputStream in) throws IOException {
+			super(in);
+		}
+		public ZDB getZDB() {
+			return ZDB.this;
 		}
 	}
 
