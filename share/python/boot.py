@@ -85,12 +85,12 @@ def copy(src, dest):
     printf('Failed to copy %s', src)
 
 def unzipAll(zipFileName):
-  ok = FileUtils.unzip(File(zipFileName))
+  ok = FileUtils.unzip(file(zipFileName))
   if (not ok):
     printf('Failed to unzip %s cleanly', zipFileName)
 
 def unzip(zipFileName, filePathsToUnzip):
-  ok = FileUtils.unzip(File(zipFileName), filePathsToUnzip)
+  ok = FileUtils.unzip(file(zipFileName), filePathsToUnzip)
   if (not ok):
     printf('Failed to unzip %s cleanly', zipFileName)
 
