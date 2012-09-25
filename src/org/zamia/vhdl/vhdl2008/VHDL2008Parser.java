@@ -23,11 +23,11 @@ import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
+import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.ast.*;
 import org.zamia.vhdl.ast.EntityAspect.EntityAspectKind;
-import org.zamia.vhdl.ast.InterfaceDeclaration.InterfaceKind;
 import org.zamia.vhdl.ast.OperationCompare.CompareOp;
 import org.zamia.vhdl.ast.OperationLiteral.LiteralCat;
 import org.zamia.vhdl.ast.OperationLogic.LogicOp;
@@ -1271,7 +1271,7 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
   final public ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, OIDir defaultDir_) throws ParseException, ZamiaException {
         ArrayList<InterfaceDeclaration> idds;
         ArrayList<Identifier> ids;
-        InterfaceKind kind = null;
+        IGObjectCat kind = null;
         TypeDefinition td;
         OIDir dir = defaultDir_;
         Operation op = null;
@@ -1283,19 +1283,19 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
       switch (jj_nt.kind) {
       case FILE:
         jj_consume_token(FILE);
-                    kind = InterfaceKind.FILE;
+                    kind = IGObjectCat.FILE;
         break;
       case VARIABLE:
         jj_consume_token(VARIABLE);
-                         kind = InterfaceKind.VARIABLE;
+                         kind = IGObjectCat.VARIABLE;
         break;
       case CONSTANT:
         jj_consume_token(CONSTANT);
-                         kind = InterfaceKind.CONSTANT;
+                         kind = IGObjectCat.CONSTANT;
         break;
       case SIGNAL:
         jj_consume_token(SIGNAL);
-                       kind = InterfaceKind.SIGNAL;
+                       kind = IGObjectCat.SIGNAL;
         break;
       default:
         jj_la1[49] = jj_gen;
@@ -1329,9 +1329,9 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
                                         erm.addError (new ZamiaException ("Function parameters must have mode IN.", ids.get(0).getLocation()));
                                 }
                                 if (kind == null) {
-                                        kind = InterfaceKind.CONSTANT;
+                                        kind = IGObjectCat.CONSTANT;
                                 } else {
-                                        if (kind == InterfaceKind.VARIABLE) {
+                                        if (kind == IGObjectCat.VARIABLE) {
                                                 erm.addError (new ZamiaException ("Function parameters must be signals, constants or files.", ids.get(0).getLocation()));
                                         }
                                 }
@@ -1339,22 +1339,22 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
                         case PROCEDURE:
                                 if (kind == null) {
                                         if (dir == OIDir.IN) {
-                                                kind = InterfaceKind.CONSTANT;
+                                                kind = IGObjectCat.CONSTANT;
                                         } else {
-                                                kind = InterfaceKind.VARIABLE;
+                                                kind = IGObjectCat.VARIABLE;
                                         }
                                 }
                                 break;
                         case PORT:
                                 if (kind == null) {
-                                        kind = InterfaceKind.SIGNAL;
+                                        kind = IGObjectCat.SIGNAL;
                                 }
                                 break;
                         case GENERIC:
                                 if (kind == null) {
-                                        kind = InterfaceKind.CONSTANT;
+                                        kind = IGObjectCat.CONSTANT;
                                 } else {
-                                        if (kind == InterfaceKind.CONSTANT) {
+                                        if (kind == IGObjectCat.CONSTANT) {
                                                 erm.addError (new ZamiaException ("Generics must be constants.", ids.get(0).getLocation()));
                                         }
                                 }

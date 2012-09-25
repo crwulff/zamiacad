@@ -38,19 +38,15 @@ import org.zamia.instgraph.IGType;
 @SuppressWarnings("serial")
 public class InterfaceDeclaration extends DeclarativeItem {
 
-	public enum InterfaceKind {
-		SIGNAL, VARIABLE, FILE, CONSTANT
-	};
-
 	protected TypeDefinition type;
 
 	private Operation value;
 
-	private InterfaceKind kind;
+	private IGObjectCat kind;
 
 	private OIDir dir;
 
-	public InterfaceDeclaration(String id_, TypeDefinition type_, OIDir dir_, Operation value_, InterfaceKind kind_, VHDLNode parent_, long location_) {
+	public InterfaceDeclaration(String id_, TypeDefinition type_, OIDir dir_, Operation value_, IGObjectCat kind_, VHDLNode parent_, long location_) {
 		super(id_, parent_, location_);
 		setType(type_);
 		setValue(value_);
@@ -86,7 +82,7 @@ public class InterfaceDeclaration extends DeclarativeItem {
 	}
 
 	public boolean isSignal() {
-		return kind == InterfaceKind.SIGNAL;
+		return kind == IGObjectCat.SIGNAL;
 	}
 
 	@Override
@@ -110,7 +106,7 @@ public class InterfaceDeclaration extends DeclarativeItem {
 		return null;
 	}
 
-	public InterfaceKind getKind() {
+	public IGObjectCat getKind() {
 		return kind;
 	}
 
@@ -162,21 +158,8 @@ public class InterfaceDeclaration extends DeclarativeItem {
 			break;
 		}
 
-		switch (kind) {
-		case SIGNAL:
-			obj = new IGObject(oiDir, initialValue, IGObjectCat.SIGNAL, t, getId(), getLocation(), aEE.getZDB());
-			break;
-		case CONSTANT:
-			obj = new IGObject(oiDir, initialValue, IGObjectCat.CONSTANT, t, getId(), getLocation(), aEE.getZDB());
-			break;
-		case VARIABLE:
-			obj = new IGObject(oiDir, initialValue, IGObjectCat.VARIABLE, t, getId(), getLocation(), aEE.getZDB());
-			break;
-		case FILE:
-			obj = new IGObject(oiDir, initialValue, IGObjectCat.FILE, t, getId(), getLocation(), aEE.getZDB());
-			break;
-
-		}
+		IGObjectCat cat = IGObjectCat.values()[kind.ordinal()];
+		obj = new IGObject(oiDir, initialValue, cat, t, getId(), getLocation(), aEE.getZDB());
 
 		return obj;
 	}

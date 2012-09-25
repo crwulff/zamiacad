@@ -17,7 +17,6 @@ import org.zamia.vhdl.ast.OperationCompare.CompareOp;
 import org.zamia.vhdl.ast.OperationLogic.LogicOp;
 import org.zamia.vhdl.ast.OperationShift.ShiftOp;
 import org.zamia.vhdl.ast.OperationLiteral.LiteralCat;
-import org.zamia.vhdl.ast.InterfaceDeclaration.InterfaceKind;
 import org.zamia.vhdl.ast.EntityAspect.EntityAspectKind;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.util.*;
