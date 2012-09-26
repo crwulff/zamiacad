@@ -1232,11 +1232,15 @@ public class IGBuiltinOperations {
 		IGStaticValue valueV = aRuntime.getObjectValue(intfV);
 
 		IGStaticValue valueL = aRuntime.getObjectValue(intfL);
-		
+
+		// vairables in procedures (as opposed to vars in processes) are not initialized
+		// at sim start, so we can get line eq null at process start.
+		if (valueL == null)
+			valueL = IGFileDriver.newLineBuilder(0, container.findStringType(), aRuntime, aLocation, aErrorMode, aReport).buildConstant();
+
 		IGTypeStatic lT = valueL.getStaticType();
 		String strV = valueV.toString();
 		int wasL, wasR, len = strV.length();
-		
 		
 		if (lT.isAccess()) { // null or not assigned pointer -> refer new line
 			wasL = 1; wasR = 0;

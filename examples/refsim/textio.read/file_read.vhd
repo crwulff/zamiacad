@@ -26,6 +26,17 @@ begin
     variable v_string    : string(1 to 11);
     variable v_string_r  : string(11 downto 7);
     variable v_int       : integer;
+	
+	-- This caused NPE because procedure variables, as opposed to precess variables
+	--	are not initialized at simulation start and line was null causing NPE in write(line, val).
+	procedure WRITE_PROC is
+		variable LINE1: LINE;
+	begin
+		report "555";
+		write(LINE1, string'("aaa"));
+		report "222";
+	end procedure;
+	
   begin
 
      assert not endfile(stimulus) report "BIT: EOF reached unexpectedly, or ENDFILE() failed";
@@ -250,7 +261,8 @@ begin
 	l2 := l;
 	flush(output);
 	assert l2'length = 2 report "another ref to the same lime must decrease len" severity NOTE;
-	
-     wait;
+
+	WRITE_PROC;
+    wait;
   end process receive_data;
 end read_from_file;
