@@ -1377,9 +1377,9 @@ public class IGBuiltinOperations {
 			if (status.equalsValue(fost.findEnumLiteral("OPEN_OK"))) {
 				/* OK, do nothing */
 			} else if (status.equalsValue(fost.findEnumLiteral("NAME_ERROR"))) {
-				throw new ZamiaException("Cannot open file \"" + valueN + "\"; it is already open.", aLocation);
-			} else if (status.equalsValue(fost.findEnumLiteral("STATUS_ERROR"))) {
 				throw new ZamiaException("Failed to open VHDL file \"" + valueN + "\" in " + openMode + "; no such file or directory.", aLocation);
+			} else if (status.equalsValue(fost.findEnumLiteral("STATUS_ERROR"))) {
+				throw new ZamiaException("Cannot open file \"" + valueN + "\"; it is already open.", aLocation);
 			} else {
 				throw new ZamiaException("Cannot open file \"" + valueN + "\" in " + openMode + ".", aLocation);
 			}
