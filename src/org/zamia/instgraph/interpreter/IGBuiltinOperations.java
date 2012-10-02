@@ -22,6 +22,7 @@ import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGSubProgram;
 import org.zamia.instgraph.IGSubProgram.IGBuiltin;
+import org.zamia.instgraph.IGType.TypeCat;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
@@ -388,7 +389,6 @@ public class IGBuiltinOperations {
 			}
 			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vA==null", aLocation);
 		}
-		long ordA = vA.getOrd();
 
 		IGObject intfB = container.resolveObject("b");
 		IGStaticValue vB = aRuntime.getObjectValue(intfB);
@@ -398,33 +398,40 @@ public class IGBuiltinOperations {
 			}
 			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vB==null", aLocation);
 		}
-		long ordB = vB.getOrd();
-
+		
+		IGTypeStatic typeA = vA.getStaticType();
 		boolean res = false;
 
-		switch (aSub.getBuiltin()) {
-		case SCALAR_EQUALS:
-			res = ordA == ordB;
-			break;
-		case SCALAR_GREATER:
-			res = ordA > ordB;
-			break;
-		case SCALAR_GREATEREQ:
-			res = ordA >= ordB;
-			break;
-		case SCALAR_LESS:
-			res = ordA < ordB;
-			break;
-		case SCALAR_LESSEQ:
-			res = ordA <= ordB;
-			break;
-		case SCALAR_NEQUALS:
-			res = ordA != ordB;
-			break;
-		default:
-			throw new ZamiaException("Sorry. Internal error. Unsupported operation: " + aSub, aLocation);
-		}
+		if (typeA.isPhysical()) {
+			res = vA.comparePhysical(vB, aSub, aLocation);
+		} else {
+			long ordA = vA.getOrd();
+			long ordB = vB.getOrd();
 
+			switch (aSub.getBuiltin()) {
+			case SCALAR_EQUALS:
+				res = ordA == ordB;
+				break;
+			case SCALAR_GREATER:
+				res = ordA > ordB;
+				break;
+			case SCALAR_GREATEREQ:
+				res = ordA >= ordB;
+				break;
+			case SCALAR_LESS:
+				res = ordA < ordB;
+				break;
+			case SCALAR_LESSEQ:
+				res = ordA <= ordB;
+				break;
+			case SCALAR_NEQUALS:
+				res = ordA != ordB;
+				break;
+			default:
+				throw new ZamiaException("Sorry. Internal error. Unsupported operation: " + aSub, aLocation);
+			}
+
+		}
 		IGTypeStatic rt = aSub.getReturnType().computeStaticType(aRuntime, aErrorMode, aReport);
 		if (rt == null) {
 			return ReturnStatus.ERROR;

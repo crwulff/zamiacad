@@ -20,6 +20,7 @@ import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGOperationUnary.UnaryOp;
+import org.zamia.instgraph.IGSubProgram.IGBuiltin;
 import org.zamia.instgraph.IGType.TypeCat;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
@@ -639,6 +640,22 @@ public class IGStaticValue extends IGOperation {
 		return "***ERR: UNKNOWN VALUE TYPE " + getType();
 	}
 
+	public boolean comparePhysical(IGStaticValue aThat, IGSubProgram aSub, SourceLocation aLocation) throws ZamiaException {
+		BigInteger that = aThat.fNum;
+		
+		switch (aSub.getBuiltin()) {
+		case SCALAR_EQUALS: return fNum.equals(that);
+		case SCALAR_GREATER: return fNum.compareTo(that) > 0;
+		case SCALAR_GREATEREQ: return fNum.compareTo(that) >= 0;
+		case SCALAR_LESS: return fNum.compareTo(that) < 0;
+		case SCALAR_LESSEQ: return fNum.compareTo(that) <= 0;
+		case SCALAR_NEQUALS: return !fNum.equals(that);
+		default:
+			throw new ZamiaException("Sorry. Internal error. Unsupported operation: " + aSub, aLocation);
+		}
+		
+	}
+	
 	public static IGStaticValue computeUnary(IGStaticValue aA, UnaryOp aOp, SourceLocation aSrc, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
 		IGTypeStatic t = aA.getStaticType();

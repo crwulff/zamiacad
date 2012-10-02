@@ -153,6 +153,13 @@ public class IGRefSimTest {
 	}
 
 	@Test
+	public void testCompare() throws Exception {
+
+		runTest("examples/refsim/compare", 1, 152);
+
+	}
+
+	@Test
 	public void testFCounter() throws Exception {
 
 		runTest("examples/refsim/fcounter", 1, 152);
