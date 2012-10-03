@@ -156,10 +156,21 @@ public class IGSubProgram extends IGContainerItem {
 		StringBuilder buf = new StringBuilder();
 
 		IGContainer container = getContainer();
+
 		IGType rt = getReturnType();
 		
 		buf.append(rt == null ? "PROCEDURE " : "FUNCTION ");
-		buf.append(Utils.concatenate(container.fInterfaces, ", "));
+		buf.append(getId() + "(");
+		int nInterf = container.getNumInterfaces();
+		for (int i = 0; i < nInterf; i++) {
+			IGObject interf = container.getInterface(i);
+
+			buf.append(interf);
+			if (i < nInterf - 1) {
+				buf.append(", ");
+			}
+		}
+		buf.append(") ");
 		buf.append(rt == null ? "" : "RETURN " + rt);
 
 		return buf.toString();
