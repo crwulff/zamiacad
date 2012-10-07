@@ -118,8 +118,10 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 			}
 			
 			if (generation++ == maxDepth) {
-				for (SearchAssignment a : nextGeneration)
-					a.keyResult = new RootResult(completed, (IGObject) fZPrj.getZDB().load(a.getDBID()), a.getPath(), true);
+				for (SearchAssignment a : nextGeneration) {
+					currentAssignment = a;
+					createEntryResult((IGObject) fZPrj.getZDB().load(a.getDBID()), a.getPath(), true);
+				}
 				break;
 			}
 		}
@@ -190,28 +192,30 @@ public class IGAssignmentsSearch extends IGReferencesSearch {
 
 	}
 
-	@Override 
-	protected boolean createEntryResult(IGObject obj, ToplevelPath aPath) {
-		
+	boolean createEntryResult(IGObject obj, ToplevelPath aPath, boolean truncated) {
 		currentAssignment.keyResult = completed.get(obj.getDBID());
 		if (currentAssignment.keyResult != null) {
 			if (debug) logger.info("will not search assignments of " + currentObject + ". It already has a result, " + obj);
 			return false;
 		} else {
-			currentAssignment.keyResult = new RootResult(completed, obj, aPath, false);
+			currentAssignment.keyResult = new RootResult(completed, obj, aPath, truncated);
 		}
 		
-		return true;
+		return !truncated;
+	}
+	@Override
+	protected boolean createEntryResult(IGObject obj, ToplevelPath aPath) {
+		return createEntryResult(obj, aPath, false);
 	}
 
 	public static class RootResult extends ReferenceSite {
 		public final int num_prefix;
-		public final boolean skippedDueToDepth; // Only a small fraction of results is terminated due to depth. Should we return them in a separate collection instead of marking every one? Just to save a little memory.  
-		public RootResult(Map<Long, RootResult> completed, IGObject obj, ToplevelPath aPath, boolean skip) {
+		public final boolean truncated; // Only a small fraction of results is terminated due to depth. Should we return them in a separate collection instead of marking every one? Just to save a little memory.  
+		public RootResult(Map<Long, RootResult> completed, IGObject obj, ToplevelPath aPath, boolean truncate) {
 			super(debugTitle(obj), obj.computeSourceLocation(), 0, RefType.Declaration, aPath, obj);
 			completed.put(obj.getDBID(), this);
 			num_prefix = completed.size();
-			skippedDueToDepth = skip;
+			truncated = truncate;
 		}
 	}
 	
