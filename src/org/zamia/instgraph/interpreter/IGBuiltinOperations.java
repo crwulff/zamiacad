@@ -1072,13 +1072,14 @@ public class IGBuiltinOperations {
 		int total = 0;
 		String typeId = vT.getId();
 
-		/* skip leading whitespace characters */
+//		The READ procedures defined for a given type other than CHARACTER and STRING begin by skipping 
+//		leading whitespace characters. A whitespace character is defined as a space, a nonbreaking space, or a 
+//		horizontal tabulation character (SP, NBSP, or HT)
 		if (!(typeId.equals("CHARACTER") || typeId.equals("STRING"))) {
 			while (i >= l) {
 				IGStaticValue charV = valueL.getValue(i, aLocation);
-				char charLiteral = charV.getCharLiteral();
-				// a space, a non-breaking space, or a horizontal tabulation character (SP, NBSP, or HT)
-				if (charLiteral == ' ' || charLiteral == '\u00A0') {
+				int ord = charV.getEnumOrd();
+				if (ord == 32 || ord == 9 || ord == 160 /*160=nbsp*/) {
 					i--;
 				} else {
 					break;
