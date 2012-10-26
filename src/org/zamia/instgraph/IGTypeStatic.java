@@ -11,6 +11,7 @@ package org.zamia.instgraph;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGStaticValue.RANGE;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.util.HashMapArray;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
@@ -82,7 +83,7 @@ public class IGTypeStatic extends IGType {
 	}
 
 	public IGStaticValue getStaticLow(SourceLocation aSrc) throws ZamiaException {
-		return getStaticRange().getAscending(aSrc).isTrue() ? getStaticRange().getLeft(aSrc) : getStaticRange().getRight(aSrc);
+		return getStaticRange().getAscending().isTrue() ? getStaticRange().getLeft(aSrc) : getStaticRange().getRight(aSrc);
 	}
 
 	public IGStaticValue getStaticHigh(SourceLocation aSrc) throws ZamiaException {
@@ -207,7 +208,7 @@ public class IGTypeStatic extends IGType {
 		IGStaticValue asc = new IGStaticValue.INNER_BOOLEAN_DUPLICATE(true, getZDB());
 
 		IGTypeStatic rType = new IGTypeStatic(TypeCat.RANGE, null, null, this, null, false, aSrc, getZDB());
-		fRange = new IGStaticValueBuilder(rType, null, aSrc).setLeft(left).setRight(right).setAscending(asc).buildConstant();
+		fRange = new IGStaticValue.RANGE(rType, left, right, asc);
 	}
 
 	/*
@@ -299,7 +300,8 @@ public class IGTypeStatic extends IGType {
 			return new IGTypeStatic(fCat, aRange, null, null, this, false, aSrc, getZDB());
 
 		case ARRAY:
-			IGTypeStatic idxType = aRange != null ? getStaticIndexType(null).createSubtype(aRange, aSrc) : getStaticIndexType(null);
+			IGTypeStatic it = getStaticIndexType(null);
+			IGTypeStatic idxType = aRange != null ? it.createSubtype(aRange, aSrc) : it;
 
 			return new IGTypeStatic(fCat, null, idxType, getStaticElementType(null), this, aRange != null ? false : fUnconstrained, aSrc, getZDB());
 

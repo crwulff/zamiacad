@@ -53,25 +53,183 @@ public class IGStaticValue extends IGOperation {
 
 	private BigDecimal fReal;
 
-	private ArrayList<IGStaticValue> fArrayValues;
-
-	private int fArrayOffset;
-
-	private HashMapArray<String, IGStaticValue> fRecordValues;
-
 	protected IGStaticValue(IGStaticValueBuilder aBuilder, boolean dummy) {
 		super(aBuilder.getType(), aBuilder.getSrc(), aBuilder.getZDB());
 		fId = aBuilder.getId();
 	};
 	
-	protected IGStaticValue(ZDB aZDB) {
-		super(null, null, aZDB);
+	protected IGStaticValue(IGType aType, ZDB aZDB) {
+		super(aType, null, aZDB);
+	}
+	
+	public static class ARRAY extends IGStaticValue {
+		private final ArrayList<IGStaticValue> fArrayValues;
+		private int fArrayOffset; // this is cached value of our_type'low
+		public ARRAY(IGStaticValueBuilder aBuilder) throws ZamiaException {
+			super(aBuilder, true);
+			IGTypeStatic type = aBuilder.getType();
+			assert getType().isArray() : "IGStaticValue.Array must be of array type but " + getType() + " is " + getType().getCat();
+			SourceLocation location = computeSourceLocation();
+			
+			IGTypeStatic indexType = type.getStaticIndexType(location);
+
+			if (!type.isUnconstrained()) {
+			
+				int card = (int) indexType.computeCardinality(location);
+				
+				fArrayOffset = (int) indexType.getStaticLow(location).getOrd();
+				if (card >= 0) {
+					fArrayValues = new ArrayList<IGStaticValue>(card);
+					for (int i = 0; i < card; i++) {
+						fArrayValues.add(aBuilder.get(i + fArrayOffset, location));
+					}
+				}  else {
+					//throw new ZamiaException("IGStaticValue: array cardinality is negative", location);
+					fArrayValues = null;
+				}
+			} else {
+				//throw new ZamiaException("IGStaticValue: array must be constrained", location);
+				fArrayValues = null;
+			}
+		}
+		
+		public int getNumArrayEntries(SourceLocation aLocation) { return fArrayValues.size();}
+		
+		@Override
+		public IGStaticValue getValue(int aIdx, SourceLocation aSrc) throws ZamiaException {
+			if (fArrayValues == null)
+				return null;
+			// boundary check
+			int minIdx = fArrayOffset;
+			int maxIdx = fArrayOffset + fArrayValues.size() - 1;
+			if (aIdx < minIdx || aIdx > maxIdx) {
+				throw new ZamiaException("IGStaticValue: getValue(): array index out of bounds: " + aIdx + " limit was " + minIdx + " to " + maxIdx, aSrc);
+			}
+			return fArrayValues.get(aIdx - fArrayOffset);
+		}
+		
+		public int getArrayOffset() {
+			return fArrayOffset;
+		}
+		
+		public String toHRString() {
+			StringBuilder buf = new StringBuilder();
+
+			IGTypeStatic at = getStaticType();
+
+			// boolean ascending = isSTAscending(at);
+
+			if (fArrayValues != null) {
+				int n = fArrayValues.size();
+				if (at.isLogic() || at.isString()) {
+					// buf.append("\"");
+					for (int i = n - 1; i >= 0; i--) {
+						IGStaticValue v = fArrayValues.get(i);
+						buf.append(v != null ? v.toHRString() : "[null]");
+					}
+					// buf.append("\"");
+				} else {
+
+					buf.append("(");
+					for (int i = 0; i < n; i++) {
+						buf.append(fArrayValues.get(i));
+						if (i < n - 1)
+							buf.append(", ");
+					}
+					buf.append(")");
+				}
+			} else {
+				buf.append(" NULL ");
+			}
+			return buf.toString();
+
+		}
+		
+		public String toBinString() throws ZamiaException {
+
+			IGTypeStatic type = getStaticType();
+
+			if (!type.isLogic()) {
+				return toHRString();
+			}
+
+			StringBuilder buf = new StringBuilder("B\"");
+			IGTypeStatic idxType = type.getStaticIndexType(null);
+			boolean ascending = idxType.isAscending();
+			int n = getNumArrayEntries(null);
+
+			for (int i = 0; i < n; i++) {
+				buf.append(getValue(ascending ? i + fArrayOffset : n - i - 1 + fArrayOffset, null).toHRString());
+			}
+
+			return buf.append("\"").toString();
+		}
+		
+	}
+	
+	public static class RANGE extends IGStaticValue {
+		
+		private final IGStaticValue fLeft, fRight, fAscending;
+		
+		public static class Builder {
+			
+			private final IGType fType;
+			
+			private IGStaticValue fLeft, fRight, fAscending;
+			
+			public Builder(IGStaticValue aPrototype) { 
+				fType = aPrototype.getStaticType();
+				fLeft = aPrototype.getLeft();
+				fRight = aPrototype.getRight();
+				fAscending = aPrototype.getAscending();
+			}
+			public Builder setLeft(IGStaticValue aVal) {fLeft = aVal; return this;}
+			public Builder setRight(IGStaticValue aVal) {fRight = aVal; return this;}
+			public Builder setAsc(IGStaticValue aVal) {fAscending = aVal; return this;}
+			public RANGE buildConstant() throws ZamiaException {
+				return new RANGE(fType, fLeft, fRight, fAscending);
+			}
+			
+		}
+		public RANGE(IGType aType, IGStaticValue aLeft, IGStaticValue aRight, IGStaticValue aAscending) throws ZamiaException {
+			super(aType, aType.getZDB());
+			assert aType.isRange() : "IGStaticValue.RANGE: Range type " + aType + " must have RANGE cathegory";
+			assert aAscending != null : "IGStaticValue.RANGE: ascending attribute must not be null";
+			fLeft = aLeft; 
+			fRight = aRight;
+			fAscending = aAscending;
+		}
+		
+		@Override
+		public String toHRString() {
+			return fAscending.isTrue() ? fLeft.toHRString() + " to " + fRight.toHRString() : fLeft.toHRString() + " downto " + fRight.toHRString();
+		}
+		
+		//TODO: get rid of the location. It was used to throw exception on range type check.  
+		public IGStaticValue getAscending(SourceLocation aLocation) { return fAscending; }
+		public IGStaticValue getAscending() { return fAscending; }
+		public IGStaticValue getLeft(SourceLocation aLocation) { return fLeft; }
+		public IGStaticValue getLeft() { return fLeft; }
+		public IGStaticValue getRight(SourceLocation aLocation) {return fRight; }
+		public IGStaticValue getRight() { return fRight; }
+
+		public IGOperation getRangeLeft(SourceLocation aSrc) { return fLeft; }
+		public IGOperation getRangeRight(SourceLocation aSrc) {return fRight;}
+		public IGOperation getRangeAscending(IGContainer aContainer, SourceLocation aSrc) {return fAscending;}
+		public IGOperation getRangeMin(IGContainer aContainer, SourceLocation aSrc) {
+			return fAscending.isTrue() ? fLeft : fRight ;
+		}
+		public IGOperation getRangeMax(IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
+			return fAscending.isTrue() ? fRight : fLeft;
+		}
+
+		
 	}
 	
 	public static class INNER_BOOLEAN_DUPLICATE extends IGStaticValue {
 		private final boolean fTruthValue;
 		public INNER_BOOLEAN_DUPLICATE(boolean aTruthValue, ZDB aZDB) {
-			super(aZDB);
+			super(null, aZDB);
 			fTruthValue = aTruthValue;
 		}
 		
@@ -137,9 +295,59 @@ public class IGStaticValue extends IGOperation {
 		public String toHRString() {return "FILE " + fFile;}
 
 	}
-	public File getFile() { return null;}
+	
+	public static class RECORD extends IGStaticValue {
+		private final HashMapArray<String, IGStaticValue> fRecordValues;
 
-	private IGStaticValue fLeft, fRight, fAscending;
+		RECORD(IGStaticValueBuilder aBuilder) throws ZamiaException {
+			super(aBuilder, true);
+			SourceLocation location = computeSourceLocation();
+			fRecordValues = new HashMapArray<String, IGStaticValue>();
+
+			IGType type = aBuilder.getType();
+			int n = type.getNumRecordFields(null);
+			for (int i = 0; i < n; i++) {
+				IGRecordField rf = type.getRecordField(i, location);
+				String rfID = rf.getId();
+				fRecordValues.put(rfID, aBuilder.get(rf, location));
+			}
+
+		}
+		
+		public IGStaticValue getRecordFieldValue(String aId, SourceLocation aSrc) throws ZamiaException {
+			return fRecordValues.get(aId);
+		}
+		
+		public String toHRString() {
+			try {
+				StringBuilder buf = new StringBuilder();
+				buf.append("(");
+
+				IGTypeStatic rt = getStaticType();
+
+				if (rt != null) {
+					int n = rt.getNumRecordFields(null);
+					for (int i = 0; i < n; i++) {
+						IGRecordField rf = rt.getRecordField(i, null);
+						String rfID = rf.getId();
+						buf.append(fRecordValues.get(rfID));
+						if (i < n - 1)
+							buf.append(", ");
+					}
+				} else {
+					buf.append(" NULL ");
+				}
+				buf.append(")");
+				return buf.toString();
+
+			} catch (Exception e) {
+				return "***ERR: " + e.getMessage();
+			}
+		}
+
+	}
+	
+	public File getFile() { return null;}
 
 	IGStaticValue(IGStaticValueBuilder aBuilder) throws ZamiaException {
 		super(aBuilder.getType(), aBuilder.getSrc(), aBuilder.getZDB());
@@ -151,47 +359,10 @@ public class IGStaticValue extends IGOperation {
 		fId = aBuilder.getId();
 		fNum = aBuilder.getNum();
 		fReal = aBuilder.getReal();
-		fLeft = aBuilder.getLeft();
-		fRight = aBuilder.getRight();
-		fAscending = aBuilder.getAscending();
 
 		IGTypeStatic type = aBuilder.getType();
 
 		switch (type.getCat()) {
-		case ARRAY:
-			SourceLocation location = computeSourceLocation();
-			
-			IGTypeStatic indexType = type.getStaticIndexType(location);
-
-			if (!type.isUnconstrained()) {
-				int card = (int) indexType.computeCardinality(location);
-				fArrayOffset = (int) indexType.getStaticLow(location).getOrd();
-
-				if (card >= 0) {
-					fArrayValues = new ArrayList<IGStaticValue>(card);
-
-					for (int i = 0; i < card; i++) {
-						fArrayValues.add(aBuilder.get(i + fArrayOffset, location));
-					}
-				}
-
-			}
-			break;
-
-		case RECORD:
-			location = computeSourceLocation();
-			fRecordValues = new HashMapArray<String, IGStaticValue>();
-
-			int n = type.getNumRecordFields(null);
-
-			for (int i = 0; i < n; i++) {
-				IGRecordField rf = type.getRecordField(i, location);
-				String rfID = rf.getId();
-				fRecordValues.put(rfID, aBuilder.get(rf, location));
-			}
-
-			break;
-
 		case INTEGER:
 			if (fNum == null) {
 				logger.error("IGStaticValue: Internal error: cat==INTEGER, fNum == null: %s", computeSourceLocation());
@@ -300,18 +471,7 @@ public class IGStaticValue extends IGOperation {
 	 ************************************************/
 
 	public IGStaticValue getValue(int aIdx, SourceLocation aSrc) throws ZamiaException {
-		if (!getType().isArray()) {
-			throw new ZamiaException("IGStaticValue: getValue(): this is not an array.", aSrc);
-		}
-		if (fArrayValues == null)
-			return null;
-		// boundary check
-		int minIdx = fArrayOffset;
-		int maxIdx = fArrayOffset + fArrayValues.size() - 1;
-		if (aIdx < minIdx || aIdx > maxIdx) {
-			throw new ZamiaException("IGStaticValue: getValue(): array index out of bounds: " + aIdx + " limit was " + minIdx + " to " + maxIdx, aSrc);
-		}
-		return fArrayValues.get(aIdx - fArrayOffset);
+		throw new ZamiaException("IGStaticValue: getValue(): this is not an array.", aSrc);
 	}
 
 	/************************************************
@@ -321,10 +481,7 @@ public class IGStaticValue extends IGOperation {
 	 ************************************************/
 
 	public IGStaticValue getRecordFieldValue(String aId, SourceLocation aSrc) throws ZamiaException {
-		if (!getType().isRecord()) {
-			throw new ZamiaException("IGStaticValue: getValue(): this is not a record.", aSrc);
-		}
-		return fRecordValues.get(aId);
+		throw new ZamiaException("RuntimeException, IGStaticValue: getValue(): this is not a record.");
 	}
 
 	/**************************************************
@@ -447,37 +604,36 @@ public class IGStaticValue extends IGOperation {
 	 * 
 	 ************************************************/
 
-	public IGStaticValue getAscending(SourceLocation aLocation) throws ZamiaException {
-		if (!getStaticType().isRange()) {
-			throw new ZamiaException("IGStaticValue: Range typed value expected here.", aLocation);
+	//getAscending/Left/Right used getStaticType().isRange() check to throw exception 
+	// but getRangeLeft/Right/Ascending used getStaticType().isRange() check. What is the difference?
+	private class RangeException extends ZamiaException{
+		RangeException(SourceLocation aLocation) {
+			super("IGStaticValue: This value was not created as range. Its type, " + getType()  
+					+ ", "+(getStaticType().isRange() ? "is" : "is not")+ " range cathegory.", aLocation);
 		}
-		return fAscending;
 	}
-
-	public IGStaticValue getLeft(SourceLocation aLocation) throws ZamiaException {
-		if (!getStaticType().isRange()) {
-			throw new ZamiaException("IGStaticValue: Range typed value expected here.", aLocation);
-		}
-		return fLeft;
-	}
-
-	public IGStaticValue getRight(SourceLocation aLocation) throws ZamiaException {
-		if (!getStaticType().isRange()) {
-			throw new ZamiaException("IGStaticValue: Range typed value expected here.", aLocation);
-		}
-		return fRight;
-	}
-
-	public IGStaticValue getLeft() {
-		return fLeft;
-	}
-
-	public IGStaticValue getRight() {
-		return fRight;
+	public IGStaticValue getAscending(SourceLocation aLocation)   throws ZamiaException { 
+		throw new RangeException(aLocation);
 	}
 
 	public IGStaticValue getAscending() {
-		return fAscending;
+		return null;
+	}
+
+	public IGStaticValue getLeft(SourceLocation aLocation) throws ZamiaException {
+		throw new RangeException(aLocation);
+	}
+
+	public IGStaticValue getRight(SourceLocation aLocation) throws ZamiaException {
+		throw new RangeException(aLocation);
+	}
+
+	public IGStaticValue getLeft() {
+		return null;
+	}
+
+	public IGStaticValue getRight() {
+		return null;
 	}
 
 	/************************************************
@@ -570,58 +726,6 @@ public class IGStaticValue extends IGOperation {
 		try {
 			IGType type = getType();
 			switch (type.getCat()) {
-			case ARRAY:
-				StringBuilder buf = new StringBuilder();
-
-				IGTypeStatic at = getStaticType();
-
-				// boolean ascending = isSTAscending(at);
-
-				if (fArrayValues != null) {
-					int n = fArrayValues.size();
-					if (at.isLogic() || at.isString()) {
-						// buf.append("\"");
-						for (int i = n - 1; i >= 0; i--) {
-							IGStaticValue v = fArrayValues.get(i);
-							buf.append(v != null ? v.toHRString() : "[null]");
-						}
-						// buf.append("\"");
-					} else {
-
-						buf.append("(");
-						for (int i = 0; i < n; i++) {
-							buf.append(fArrayValues.get(i));
-							if (i < n - 1)
-								buf.append(", ");
-						}
-						buf.append(")");
-					}
-				} else {
-					buf.append(" NULL ");
-				}
-				return buf.toString();
-
-			case RECORD:
-				buf = new StringBuilder();
-				buf.append("(");
-
-				IGTypeStatic rt = getStaticType();
-
-				if (rt != null) {
-					int n = rt.getNumRecordFields(null);
-					for (int i = 0; i < n; i++) {
-						IGRecordField rf = rt.getRecordField(i, null);
-						String rfID = rf.getId();
-						buf.append(fRecordValues.get(rfID));
-						if (i < n - 1)
-							buf.append(", ");
-					}
-				} else {
-					buf.append(" NULL ");
-				}
-				buf.append(")");
-				return buf.toString();
-
 			case ACCESS:
 				// FIXME
 				return "ACCESS";
@@ -645,8 +749,6 @@ public class IGStaticValue extends IGOperation {
 
 				return fNum + " " + baseUnit.toLowerCase(); // everything must be lowercased in spec
 
-			case RANGE:
-				return fAscending.isTrue() ? fLeft.toHRString() + " to " + fRight.toHRString() : fLeft.toHRString() + " downto " + fRight.toHRString();
 			}
 		} catch (Exception e) {
 			return "***ERR: " + e.getMessage();
@@ -1184,7 +1286,6 @@ public class IGStaticValue extends IGOperation {
 				type = value.getStaticType();
 				continue;
 			}
-
 			if (resolvedValue instanceof CHAR_LITERAL) {
 				char curC = resolvedValue.getCharLiteral();
 				char newC = value.getCharLiteral();
@@ -1306,7 +1407,7 @@ public class IGStaticValue extends IGOperation {
 	}
 
 	public int getArrayOffset() {
-		return fArrayOffset;
+		return -1;
 	}
 
 	public int getEnumOrd() {
@@ -1396,53 +1497,23 @@ public class IGStaticValue extends IGOperation {
 
 	@Override
 	public IGOperation getRangeLeft(SourceLocation aSrc) throws ZamiaException {
-		IGType t = getType();
-		if (!t.isRange()) {
-			throw new ZamiaException("IGStaticValue: Range expected here.", aSrc);
-		}
-		return fLeft;
+		throw new RangeException(aSrc);
 	}
 
 	public IGOperation getRangeRight(SourceLocation aSrc) throws ZamiaException {
-		IGType t = getType();
-		if (!t.isRange()) {
-			throw new ZamiaException("IGStaticValue: Range expected here.", aSrc);
-		}
-		return fRight;
+		throw new RangeException(aSrc);
 	}
 
 	public IGOperation getRangeAscending(IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
-		IGType t = getType();
-		if (!t.isRange()) {
-			throw new ZamiaException("IGStaticValue: Range expected here.", aSrc);
-		}
-		return fAscending;
+		throw new RangeException(aSrc);
 	}
 
 	public IGOperation getRangeMin(IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
-
-		IGType t = getType();
-		if (!t.isRange()) {
-			throw new ZamiaException("IGStaticValue: Range expected here.", aSrc);
-		}
-
-		if (fAscending.isTrue()) {
-			return fLeft;
-		}
-		return fRight;
+		throw new RangeException(aSrc);
 	}
 
 	public IGOperation getRangeMax(IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
-
-		IGType t = getType();
-		if (!t.isRange()) {
-			throw new ZamiaException("IGStaticValue: Range expected here.", aSrc);
-		}
-
-		if (!fAscending.isTrue()) {
-			return fLeft;
-		}
-		return fRight;
+		throw new RangeException(aSrc);
 	}
 
 	@Override
@@ -1451,12 +1522,8 @@ public class IGStaticValue extends IGOperation {
 	}
 
 	public int getNumArrayEntries(SourceLocation aLocation) throws ZamiaException {
-		if (fArrayValues == null) {
-			Throwable t = new Throwable();
-			t.printStackTrace();
-			throw new ZamiaException("IGStaticValue: Internal interpreter error: either not an array at all or unconstrained: " + this + ", type: " + getType(), aLocation);
-		}
-		return fArrayValues.size();
+		new Throwable().printStackTrace();
+		throw new ZamiaException("IGStaticValue: Internal interpreter error: not array: " + this + ", type: " + getType(), aLocation);
 	}
 
 	public boolean equalsValue(IGStaticValue aV) throws ZamiaException {
@@ -1575,7 +1642,8 @@ public class IGStaticValue extends IGOperation {
 		try {
 			long l = toLongNumber();
 
-			int len = fArrayValues != null ? (fArrayValues.size() + 3) / 4 : 1;
+			
+			int len = (this instanceof ARRAY) ? (((ARRAY)this).fArrayValues.size() + 3) / 4 : 1;
 			if (len < 1) {
 				len = 1;
 			}
@@ -1626,30 +1694,6 @@ public class IGStaticValue extends IGOperation {
 	}
 
 	public String toBinString() throws ZamiaException {
-
-		IGTypeStatic type = getStaticType();
-
-		if (!type.isLogic()) {
-			return toHRString();
-		}
-
-		if (type.isArray()) {
-			StringBuilder buf = new StringBuilder("B\"");
-
-			IGTypeStatic idxType = type.getStaticIndexType(null);
-
-			boolean ascending = idxType.isAscending();
-
-			int n = getNumArrayEntries(null);
-
-			for (int i = 0; i < n; i++) {
-				buf.append(getValue(ascending ? i + fArrayOffset : n - i - 1 + fArrayOffset, null).toHRString());
-			}
-			buf.append("\"");
-
-			return buf.toString();
-		} else {
-			return toHRString();
-		}
+		return toHRString();
 	}
 }

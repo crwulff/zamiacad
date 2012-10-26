@@ -987,7 +987,7 @@ public class IGBuiltinOperations {
 			IGStaticValue ascending = boolT.getEnumLiteral(a ? 1 : 0, aLocation, ASTErrorMode.EXCEPTION, null);
 
 			IGTypeStatic rType = idxType.getStaticRange().getStaticType();
-			IGStaticValue range = new IGStaticValueBuilder(rType, null, aLocation).setLeft(left).setRight(right).setAscending(ascending).buildConstant();
+			IGStaticValue range = new IGStaticValue.RANGE(rType, left, right, ascending);
 
 			rt = rt.createSubtype(range, aLocation);
 		}
@@ -1204,7 +1204,8 @@ public class IGBuiltinOperations {
 		IGStaticValue nValueL = valueL;
 		if (isSmthRead) {
 			IGStaticValue nR = new IGStaticValueBuilder(range.getRight().getStaticType(), null, aLocation).setNum(i).buildConstant();
-			IGStaticValue nRange = new IGStaticValueBuilder(range, aLocation).setRight(nR).buildConstant();
+			IGStaticValue nRange = new IGStaticValue.RANGE.Builder(range).setRight(nR).buildConstant();
+			
 			IGTypeStatic nType = lT.createSubtype(nRange, aLocation);
 
 			IGStaticValueBuilder nValueLB = new IGStaticValueBuilder(nType, null, aLocation);

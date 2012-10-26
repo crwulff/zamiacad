@@ -152,7 +152,7 @@ public class IGArrayAggregateStmt extends IGOpStmt {
 			IGStaticValue ascending = new IGStaticValue.INNER_BOOLEAN_DUPLICATE(bAsc, getZDB());
 
 			IGTypeStatic rType = idxType.getStaticRange().getStaticType();//new IGTypeStatic(TypeCat.RANGE, null, null, idxType, null, false, computeSourceLocation(), getZDB());
-			IGStaticValue range = new IGStaticValueBuilder(rType, null, computeSourceLocation()).setLeft(left).setRight(right).setAscending(ascending).buildConstant();
+			IGStaticValue range = new IGStaticValue.RANGE(rType, left, right, ascending);
 
 			rt = rt.createSubtype(range, computeSourceLocation());
 		}

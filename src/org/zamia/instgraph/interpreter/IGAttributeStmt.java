@@ -216,8 +216,6 @@ public class IGAttributeStmt extends IGStmt {
 						resValue = type.getStaticRange();
 					}
 
-					IGStaticValueBuilder b = new IGStaticValueBuilder(resValue.getStaticType(), null, sourceLocation);
-
 					// reverse direction
 
 					IGStaticValue asc = resValue.getAscending();
@@ -228,15 +226,9 @@ public class IGAttributeStmt extends IGStmt {
 					asc = ascB ? ascT.getEnumLiteral(1, sourceLocation, ASTErrorMode.EXCEPTION, null) : ascT.getEnumLiteral(0, sourceLocation,
 							ASTErrorMode.EXCEPTION, null);
 
-					b.setAscending(asc);
-
 					// left becomes right, right becomes left
-
-					b.setRight(resValue.getLeft());
-					b.setLeft(resValue.getRight());
-
-					resValue = b.buildConstant();
-
+					resValue = new IGStaticValue.RANGE(resValue.getStaticType(), /*left*/resValue.getRight(), /*right*/ resValue.getLeft(), asc);
+					
 					break;
 				case LENGTH:
 					if (!type.isArray()) {
@@ -338,8 +330,6 @@ public class IGAttributeStmt extends IGStmt {
 					resValue = type.getStaticRange();
 				}
 
-				IGStaticValueBuilder b = new IGStaticValueBuilder(resValue.getStaticType(), null, sourceLocation);
-
 				// reverse direction
 
 				IGStaticValue asc = resValue.getAscending();
@@ -350,15 +340,9 @@ public class IGAttributeStmt extends IGStmt {
 				asc = ascB ? ascT.getEnumLiteral(1, sourceLocation, ASTErrorMode.EXCEPTION, null) : ascT.getEnumLiteral(0, sourceLocation,
 						ASTErrorMode.EXCEPTION, null);
 
-				b.setAscending(asc);
-
 				// left becomes right, right becomes left
-
-				b.setRight(resValue.getLeft());
-				b.setLeft(resValue.getRight());
-
-				resValue = b.buildConstant();
-
+				resValue = new IGStaticValue.RANGE(resValue.getStaticType(), /*left*/resValue.getRight(), /*right*/resValue.getLeft(), asc);
+				
 				break;
 			case EVENT:
 

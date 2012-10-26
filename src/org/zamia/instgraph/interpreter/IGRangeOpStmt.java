@@ -77,7 +77,9 @@ public class IGRangeOpStmt extends IGOpStmt {
 
 					IGStaticValue nR = new IGStaticValueBuilder(r.getRight().getStaticType(), null, src).setNum(rr).buildConstant();
 					IGStaticValue nL = new IGStaticValueBuilder(r.getLeft().getStaticType(), null, src).setNum(ll).buildConstant();
-					r = new IGStaticValueBuilder(r, src).setLeft(nL).setRight(nR).buildConstant();
+					
+					r = new IGStaticValue.RANGE.Builder(r).setLeft(nL).setRight(nR).buildConstant();
+
 				}
 
 				IGObjectDriver rangeDriver = driver.createRangeDriver(r, rT, src);
@@ -125,8 +127,6 @@ public class IGRangeOpStmt extends IGOpStmt {
 
 			SourceLocation location = computeSourceLocation();
 
-			IGStaticValueBuilder builder = new IGStaticValueBuilder(rT, null, location);
-
 			IGStaticValue l = leftSF.getValue();
 			r = rightSF.getValue();
 			IGStaticValue a = ascendingSF.getValue();
@@ -141,11 +141,8 @@ public class IGRangeOpStmt extends IGOpStmt {
 				return ReturnStatus.ERROR;
 			}
 
-			builder.setLeft(leftSF.getValue());
-			builder.setAscending(ascendingSF.getValue());
-			builder.setRight(rightSF.getValue());
-
-			aRuntime.push(builder.buildConstant());
+			IGStaticValue item = new IGStaticValue.RANGE(rT, leftSF.getValue(), rightSF.getValue(), ascendingSF.getValue());
+			aRuntime.push(item);
 			break;
 
 		case ASCENDING:

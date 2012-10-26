@@ -91,8 +91,6 @@ public class IGStaticValueBuilder {
 
 	private File fFile;
 
-	private IGStaticValue fLeft, fRight, fAscending;
-	
 	private ZDB fZDB;
 
 	public IGStaticValueBuilder(IGTypeStatic aType, String aId, SourceLocation aSrc) throws ZamiaException {
@@ -142,7 +140,8 @@ public class IGStaticValueBuilder {
 	}
 
 	public IGStaticValue buildConstant() throws ZamiaException {
-		if (getType().isEnum()) {
+		IGType type = getType();
+		if (type.isEnum()) {
 			if (isCharLiteral())
 				return new IGStaticValue.CHAR_LITERAL(this);
 			return new IGStaticValue.ENUM(this);
@@ -150,6 +149,13 @@ public class IGStaticValueBuilder {
 		assert !isCharLiteral() : "Char literal is expected to be enum" ;
 		if (getFile() != null)
 			return new IGStaticValue.FILE(this);
+		
+		switch (type.getCat()) {
+			case ARRAY: return new IGStaticValue.ARRAY(this);
+			case RANGE: throw new ZamiaException("attempt to use StaticValueBuilder for range create. Invoke value constructor directly.");
+			case RECORD: return new IGStaticValue.RECORD(this);
+		}
+		
 		return new IGStaticValue(this);
 	}
 
@@ -338,18 +344,6 @@ public class IGStaticValueBuilder {
 		return fSrc;
 	}
 
-	public IGStaticValue getLeft() {
-		return fLeft;
-	}
-
-	public IGStaticValue getRight() {
-		return fRight;
-	}
-
-	public IGStaticValue getAscending() {
-		return fAscending;
-	}
-
 	public void setConstant(IGStaticValue aConstant) throws ZamiaException {
 		fId = aConstant.getId();
 		fType = aConstant.getStaticType();
@@ -359,10 +353,7 @@ public class IGStaticValueBuilder {
 		fNum = aConstant.getNum();
 		fReal = aConstant.getReal();
 		fFile = aConstant.getFile();
-		fLeft = aConstant.getLeft();
-		fRight = aConstant.getRight();
-		fAscending = aConstant.getAscending();
-
+		
 		switch (fType.getCat()) {
 		case ARRAY:
 			IGTypeStatic indexType = fType.getStaticIndexType(fSrc);
@@ -453,19 +444,6 @@ public class IGStaticValueBuilder {
 
 	public void setEnumOrd(int aEnumOrd) {
 		fEnumOrd = aEnumOrd;
-	}
-
-	public IGStaticValueBuilder setLeft(IGStaticValue aValue) {
-		fLeft = aValue;
-		return this;
-	}
-	public IGStaticValueBuilder setRight(IGStaticValue aValue) {
-		fRight = aValue;
-		return this;
-	}
-	public IGStaticValueBuilder setAscending(IGStaticValue aValue) {
-		fAscending = aValue;
-		return this;
 	}
 
 	public IGStaticValueBuilder setReal(double aD) {
