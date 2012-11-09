@@ -411,13 +411,13 @@ public class IGStaticValueBuilder {
 		if (getType().isEnum()) {
 			fEnumOrd = (int) aOrd;
 		} else {
-			fNum = new BigInteger(""+aOrd);
+			fNum = BigInteger.valueOf(aOrd);
 		}
 		return this;
 	}
 	
 	public IGStaticValueBuilder setNum(long aNum) {
-		fNum = new BigInteger(""+aNum);
+		fNum = BigInteger.valueOf(aNum);
 		return this;
 	}
 
