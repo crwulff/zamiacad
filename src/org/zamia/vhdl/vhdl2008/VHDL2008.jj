@@ -24,22 +24,30 @@ PARSER_BEGIN(VHDL2008Parser)
 
 package org.zamia.vhdl.vhdl2008;
 
-import org.zamia.*;
-import org.zamia.zdb.*;
-import org.zamia.vhdl.ast.*;
-import org.zamia.vhdl.ast.OperationMath.MathOp;
-import org.zamia.vhdl.ast.OperationCompare.CompareOp;
-import org.zamia.vhdl.ast.OperationLogic.LogicOp;
-import org.zamia.vhdl.ast.OperationShift.ShiftOp;
-import org.zamia.vhdl.ast.OperationLiteral.LiteralCat;
-import org.zamia.vhdl.ast.InterfaceDeclaration.InterfaceKind;
-import org.zamia.vhdl.ast.EntityAspect.EntityAspectKind;
-import org.zamia.instgraph.IGObject.OIDir;
-import org.zamia.util.*;
-import java.util.*;
-import java.io.Reader;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
+import java.util.ArrayList;
+
+import org.zamia.DMManager;
+import org.zamia.ERManager;
+import org.zamia.IHDLParser;
+import org.zamia.SourceFile;
+import org.zamia.SourceLocation;
+import org.zamia.ZamiaException;
+import org.zamia.ZamiaLogger;
+import org.zamia.ZamiaProject;
+import org.zamia.instgraph.IGObject.IGObjectCat;
+import org.zamia.instgraph.IGObject.OIDir;
+import org.zamia.util.HashSetArray;
+import org.zamia.vhdl.ast.*;
+import org.zamia.vhdl.ast.EntityAspect.EntityAspectKind;
+import org.zamia.vhdl.ast.OperationCompare.CompareOp;
+import org.zamia.vhdl.ast.OperationLiteral.LiteralCat;
+import org.zamia.vhdl.ast.OperationLogic.LogicOp;
+import org.zamia.vhdl.ast.OperationMath.MathOp;
+import org.zamia.vhdl.ast.OperationShift.ShiftOp;
+import org.zamia.zdb.ZDB;
 
 
 /**
@@ -1228,17 +1236,17 @@ ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, OIDi
 {
 	ArrayList<InterfaceDeclaration> idds;
 	ArrayList<Identifier> ids;
-	InterfaceKind kind = null;
+	IGObjectCat kind = null;
 	TypeDefinition td;
 	OIDir dir = defaultDir_;
 	Operation op = null;
 }
 {
 	
-	[ (<FILE> { kind = InterfaceKind.FILE; } 
-	  | <VARIABLE> { kind = InterfaceKind.VARIABLE; } 
-	  | <CONSTANT> { kind = InterfaceKind.CONSTANT; }
-	  | <SIGNAL> { kind = InterfaceKind.SIGNAL; }  ) ] ids = identifier_list() <COLON>
+	[ (<FILE> { kind = IGObjectCat.FILE; }
+	  | <VARIABLE> { kind = IGObjectCat.VARIABLE; }
+	  | <CONSTANT> { kind = IGObjectCat.CONSTANT; }
+	  | <SIGNAL> { kind = IGObjectCat.SIGNAL; }  ) ] ids = identifier_list() <COLON>
 	[ dir = mode() ] 
 	
 	{
@@ -1250,9 +1258,9 @@ ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, OIDi
 					erm.addError (new ZamiaException ("Function parameters must have mode IN.", ids.get(0).getLocation()));
 				}
 				if (kind == null) {
-					kind = InterfaceKind.CONSTANT;
+					kind = IGObjectCat.CONSTANT;
 				} else {
-					if (kind == InterfaceKind.VARIABLE) {
+					if (kind == IGObjectCat.VARIABLE) {
 						erm.addError (new ZamiaException ("Function parameters must be signals, constants or files.", ids.get(0).getLocation()));
 					}
 				}
@@ -1260,22 +1268,22 @@ ArrayList<InterfaceDeclaration> interface_declaration(InterfaceContext ic_, OIDi
 			case PROCEDURE:
 				if (kind == null) {
 					if (dir == OIDir.IN) {
-						kind = InterfaceKind.CONSTANT;
+						kind = IGObjectCat.CONSTANT;
 					} else {
-						kind = InterfaceKind.VARIABLE;
+						kind = IGObjectCat.VARIABLE;
 					}
 				}
 				break;
 			case PORT:
 				if (kind == null) {
-					kind = InterfaceKind.SIGNAL;
+					kind = IGObjectCat.SIGNAL;
 				}
 				break;
 			case GENERIC:
 				if (kind == null) {
-					kind = InterfaceKind.CONSTANT;
+					kind = IGObjectCat.CONSTANT;
 				} else {
-					if (kind == InterfaceKind.CONSTANT) {
+					if (kind == IGObjectCat.CONSTANT) {
 						erm.addError (new ZamiaException ("Generics must be constants.", ids.get(0).getLocation()));
 					}
 				}
@@ -2641,7 +2649,7 @@ Operation factor() throws ZamiaException :
 {
 	(
 		t= <ABS> p = primary() {res = new OperationMath(MathOp.ABS, p, null, getLocation(t)); }
-		| t=<NOT> p = primary() {res = new OperationLogic(LogicOp.NOT, p, null, null, getLocation(t)); }
+		| t=<NOT> p = primary() {res = new OperationLogic(LogicOp.NOT, p, null, null, getLocation(t), getLocation(t)); }
 		| res = primary() 
 			[ LOOKAHEAD(<EXP> primary()) t=<EXP> p = primary() 
 				{ 
@@ -2813,7 +2821,7 @@ Operation expression() throws ZamiaException :
 		)
 		op = relation() 
 		{
-			res = new OperationLogic(lo, res, op, null, res.getLineCol());
+			res = new OperationLogic(lo, res, op, null, res.getLineCol(), getLocation(t));
 		}
 	)*
 
@@ -2837,11 +2845,12 @@ Operation relation() throws ZamiaException :
 { 
 	Operation res, o;
 	CompareOp op;
+	long opLoc;
 }
 {
 	res = shift_expression() 
-	[ op = relational_operator() o = shift_expression() 
-	  { res = new OperationCompare(op, res, o, null, res.getLineCol()); }
+	[ op = relational_operator() { opLoc = getLocation(token); } o = shift_expression() 
+	  { res = new OperationCompare(op, res, o, null, res.getLineCol(), opLoc); }
 	]
 	
 	{return res;}
@@ -3623,7 +3632,7 @@ SequentialVariableAssignment variable_assignment_statement() throws ZamiaExcepti
 {
 	[ LOOKAHEAD( identifier() <COLON>) identifier() <COLON> ]
 	target = target() <ASSIGN> exp = expression() <SEMICOLON>
-	{ return new SequentialVariableAssignment (target, exp, null, target.getLineCol()); }
+	{ return new SequentialVariableAssignment (target, exp, null, exp.getLineCol()); }
 }
 
 SequentialIf if_statement() throws ZamiaException :

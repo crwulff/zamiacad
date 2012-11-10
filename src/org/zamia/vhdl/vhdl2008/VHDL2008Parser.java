@@ -3991,6 +3991,7 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
   final public Operation relation() throws ParseException, ZamiaException {
         Operation res, o;
         CompareOp op;
+        long opLoc;
     res = shift_expression();
     switch (jj_nt.kind) {
     case EQ:
@@ -4000,8 +4001,8 @@ public class VHDL2008Parser implements IHDLParser, VHDL2008ParserConstants {
     case GT:
     case LO:
       op = relational_operator();
-		long opLoc = getLocation(token);
-		o = shift_expression();
+                                       opLoc = getLocation(token);
+      o = shift_expression();
             res = new OperationCompare(op, res, o, null, res.getLineCol(), opLoc);
       break;
     default:
