@@ -234,7 +234,7 @@ public class VCDData {
 		char expansionC = '0';
 		switch (vs.charAt(0)) {
 		case '1':
-			expansionC = '0';
+			expansionC = '1';
 			break;
 		case '0':
 			expansionC = '0';
@@ -253,6 +253,9 @@ public class VCDData {
 			break;
 		case 'H':
 			expansionC = 'H';
+			break;
+		case '-':
+			expansionC = '-';
 			break;
 		default:
 			throw new ZamiaException("VCD: unknown value :" + vs.charAt(0), aLocation);
