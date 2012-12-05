@@ -26,6 +26,9 @@ begin
 
     assert v2 = X"FFFFFFFF" report "inversion failed.";
     
+    -- array "not" operator was not implemented until Dec 2012 patch 
+    assert (not v = X"FFFFFFFF") report "inversion 2 failed.";
+    
     wait;
   end process;
 

@@ -588,7 +588,7 @@ public class IGBuiltinOperations {
 			return ReturnStatus.ERROR;
 		}
 		IGType et = rt.getElementType();
-
+		rt = ensureConstrainedArray(rt, value, aLocation);
 		IGStaticValueBuilder builder = new IGStaticValueBuilder(rt, null, aLocation);
 
 		for (int i = 0; i < n; i++) {
@@ -766,6 +766,17 @@ public class IGBuiltinOperations {
 		return ReturnStatus.CONTINUE;
 	}
 
+	private static IGTypeStatic ensureConstrainedArray(IGTypeStatic aRt, IGStaticValue aAlternative, SourceLocation aLocation) throws ZamiaException {
+		if (aRt.isUnconstrained()) {
+			// compute constraints at runtime
+			aRt = aAlternative.getStaticType();
+			if (aRt.isUnconstrained()) {
+				throw new ZamiaException("Interpreter error: cannot determine resulting array boundaries, all types involved are unconstrained :-/", aLocation);
+			}
+		}
+		return aRt;
+	}
+		
 	private static ReturnStatus execArrayBinary(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
 			throws ZamiaException {
 
@@ -801,14 +812,7 @@ public class IGBuiltinOperations {
 		IGTypeStatic et = rt.getStaticElementType(aLocation);
 
 		if (rt.isUnconstrained()) {
-			// compute constraints at runtime
-			rt = valueA.getStaticType();
-			if (rt.isUnconstrained()) {
-				rt = valueB.getStaticType();
-				if (rt.isUnconstrained()) {
-					throw new ZamiaException("Interpreter error: cannot determine resulting array boundaries, all types involved are unconstrained :-/", aLocation);
-				}
-			}
+			rt = ensureConstrainedArray(valueA.getStaticType(), valueB, aLocation);
 		}
 
 		IGStaticValueBuilder builder = new IGStaticValueBuilder(rt, null, aLocation);
