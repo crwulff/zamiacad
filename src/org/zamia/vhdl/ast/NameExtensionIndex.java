@@ -200,7 +200,7 @@ public class NameExtensionIndex extends NameExtension {
 			// IGType tExp = zExp.getType();
 			IGType subtype = type.getElementType();
 
-			item = new IGOperationIndex(zExp, op, subtype, getLocation(), aContainer.getZDB());
+			item = op = new IGOperationIndex(zExp, op, subtype, getLocation(), aContainer.getZDB());
 
 			type = subtype;
 		}
