@@ -13,7 +13,6 @@ import java.math.BigInteger;
 
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
-import org.zamia.Utils;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGContainer;
@@ -22,7 +21,6 @@ import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGSubProgram;
 import org.zamia.instgraph.IGSubProgram.IGBuiltin;
-import org.zamia.instgraph.IGType.TypeCat;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
@@ -221,22 +219,18 @@ public class IGBuiltinOperations {
 		IGContainer container = aSub.getContainer();
 		IGObject intfA = container.resolveObject("a");
 		IGStaticValue vA = aRuntime.getObjectValue(intfA);
-		if (vA == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vA==null", aLocation);
+		if (vA == null)	{
+			return error(vA, "execIntBinary(): vA", aErrorMode, aLocation);
 		}
+
 		BigInteger numA = vA.getNum();
 
 		IGObject intfB = container.resolveObject("b");
 		IGStaticValue vB = aRuntime.getObjectValue(intfB);
-		if (vB == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vB==null", aLocation);
+		if (vB == null)	{
+			return error(vB, "execIntBinary(): vB", aErrorMode, aLocation);
 		}
+		
 		BigInteger numB = vB.getNum();
 
 		BigInteger res = null;
@@ -325,22 +319,18 @@ public class IGBuiltinOperations {
 		IGContainer container = aSub.getContainer();
 		IGObject intfA = container.resolveObject("a");
 		IGStaticValue vA = aRuntime.getObjectValue(intfA);
-		if (vA == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vA==null", aLocation);
+		if (vA == null)	{
+			return error(vA, "execRealBinary(): vA", aErrorMode, aLocation);
 		}
+		
 		BigDecimal numA = vA.getReal();
 
 		IGObject intfB = container.resolveObject("b");
 		IGStaticValue vB = aRuntime.getObjectValue(intfB);
-		if (vB == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vB==null", aLocation);
+		if (vB == null)	{
+			return error(vB, "execRealBinary(): vB", aErrorMode, aLocation);
 		}
+
 		BigDecimal numB = vB.getReal();
 
 		BigDecimal res = null;
@@ -383,20 +373,14 @@ public class IGBuiltinOperations {
 		IGContainer container = aSub.getContainer();
 		IGObject intfA = container.resolveObject("a");
 		IGStaticValue vA = aRuntime.getObjectValue(intfA);
-		if (vA == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vA==null", aLocation);
+		if (vA == null)	{
+			return error(vA, "execScalarCompare(): vA", aErrorMode, aLocation);
 		}
-
+		
 		IGObject intfB = container.resolveObject("b");
 		IGStaticValue vB = aRuntime.getObjectValue(intfB);
-		if (vB == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vB==null", aLocation);
+		if (vB == null)	{
+			return error(vB, "execScalarCompare(): vB", aErrorMode, aLocation);
 		}
 		
 		IGTypeStatic typeA = vA.getStaticType();
@@ -470,12 +454,10 @@ public class IGBuiltinOperations {
 		IGContainer container = aSub.getContainer();
 		IGObject intfA = container.resolveObject("a");
 		IGStaticValue vA = aRuntime.getObjectValue(intfA);
-		if (vA == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vA==null", aLocation);
+		if (vA == null)	{
+			return error(vA, "execIntBinary(): vB", aErrorMode, aLocation);
 		}
+		
 		boolean bA = vA.getOrd() == 1;
 
 		IGObject intfB = container.resolveObject("b");
@@ -583,12 +565,16 @@ public class IGBuiltinOperations {
 
 		int offset = value.getArrayOffset();
 		int n = value.getNumArrayEntries(aLocation);
-		IGTypeStatic rt = aSub.getReturnType().computeStaticType(aRuntime, aErrorMode, aReport);
+		IGType t = aSub.getReturnType();
+		IGTypeStatic rt = t.computeStaticType(aRuntime, aErrorMode, aReport);
 		if (rt == null) {
 			return ReturnStatus.ERROR;
 		}
+		
 		IGType et = rt.getElementType();
+
 		rt = ensureConstrainedArray(rt, value, aLocation);
+
 		IGStaticValueBuilder builder = new IGStaticValueBuilder(rt, null, aLocation);
 
 		for (int i = 0; i < n; i++) {
@@ -607,26 +593,26 @@ public class IGBuiltinOperations {
 		return ReturnStatus.CONTINUE;
 	}
 
+	private static ReturnStatus error(IGStaticValue value, String varName, ASTErrorMode aErrorMode, SourceLocation aLocation) throws ZamiaException {
+		if (aErrorMode == ASTErrorMode.RETURN_NULL) {
+			return ReturnStatus.ERROR;
+		}
+		throw new ZamiaException ("IGBuiltinOperations: " + varName + "==null", aLocation);
+	}
 	private static ReturnStatus execArrayCompare(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
 			throws ZamiaException {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfA = container.resolveObject("a");
 		IGStaticValue valueA = aRuntime.getObjectValue(intfA);
-		if (valueA == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vA==null", aLocation);
+		if (valueA == null)	{
+			return error(valueA, "execArrayCompare(): vA", aErrorMode, aLocation);
 		}
 
 		IGObject intfB = container.resolveObject("b");
 		IGStaticValue valueB = aRuntime.getObjectValue(intfB);
 		if (valueB == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vB==null", aLocation);
+			return error(valueB, "execArrayCompare(): vB", aErrorMode, aLocation);
 		}
 
 		int offsetA = valueA.getArrayOffset();
@@ -686,20 +672,14 @@ public class IGBuiltinOperations {
 		IGContainer container = aSub.getContainer();
 		IGObject intfA = container.resolveObject("a");
 		IGStaticValue valueA = aRuntime.getObjectValue(intfA);
-		if (valueA == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execArrayCompareRelative(): vA==null", aLocation);
+		if (valueA == null)	{
+			return error(valueA, "execArrayCompareRelative(): vA", aErrorMode, aLocation);
 		}
 
 		IGObject intfB = container.resolveObject("b");
 		IGStaticValue valueB = aRuntime.getObjectValue(intfB);
-		if (valueB == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execArrayCompareRelative(): vB==null", aLocation);
+		if (valueB == null)	{
+			return error(valueB, "execArrayCompareRelative(): vB", aErrorMode, aLocation);
 		}
 
 		int offsetA = valueA.getArrayOffset();
@@ -783,21 +763,16 @@ public class IGBuiltinOperations {
 		IGContainer container = aSub.getContainer();
 		IGObject intfA = container.resolveObject("a");
 		IGStaticValue valueA = aRuntime.getObjectValue(intfA);
-		if (valueA == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vA==null", aLocation);
+		if (valueA == null)	{
+			return error(valueA, "execArrayBinary(): vA", aErrorMode, aLocation);
 		}
 
 		IGObject intfB = container.resolveObject("b");
 		IGStaticValue valueB = aRuntime.getObjectValue(intfB);
-		if (valueB == null) {
-			if (aErrorMode == ASTErrorMode.RETURN_NULL) {
-				return ReturnStatus.ERROR;
-			}
-			throw new ZamiaException ("IGBuiltinOperations: execIntBinary(): vB==null", aLocation);
+		if (valueB == null)	{
+			return error(valueB, "execArrayBinary(): vB", aErrorMode, aLocation);
 		}
+		
 
 		int offsetA = valueA.getArrayOffset();
 		int offsetB = valueB.getArrayOffset();
