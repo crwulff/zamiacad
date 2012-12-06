@@ -223,7 +223,15 @@ public class IGInterpreterCode implements Serializable {
 		}
 	}
 
+	public void collectAllAssignments(IGHitCountLogger aAssignmentLogger) {
+		filterAssignments(aAssignmentLogger, -1);
+	}
+
 	public void collectExecutedAssignments(IGHitCountLogger aAssignmentLogger) {
+		filterAssignments(aAssignmentLogger, 0);
+	}
+
+	public void filterAssignments(IGHitCountLogger aAssignmentLogger, int aThreshold) {
 
 		if (assignmentTracer == null) {
 			return;
@@ -234,7 +242,7 @@ public class IGInterpreterCode implements Serializable {
 
 			int count = stmt.getExecCount();
 
-			if (count > 0) {
+			if (count > aThreshold) {
 				aAssignmentLogger.logHit(stmt.computeSourceLocation(), count);
 			}
 		}

@@ -467,6 +467,14 @@ public class IGInterpreterRuntimeEnv {
 		}
 	}
 
+	public void collectAllAssignments(IGHitCountLogger aAssignmentLogger) {
+		for (IGInterpreterCode code : fCodeSet) {
+			if (code != null) {
+				code.collectAllAssignments(aAssignmentLogger);
+			}
+		}
+	}
+
 	public void collectExecutedAssignments(IGHitCountLogger aAssignmentLogger) {
 		for (IGInterpreterCode code : fCodeSet) {
 			if (code != null) {

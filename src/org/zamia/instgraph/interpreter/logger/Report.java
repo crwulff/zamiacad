@@ -60,7 +60,7 @@ public class Report {
 		return report;
 	}
 
-	private final static Comparator<SourceFile> LOCATION_COMPARATOR = new Comparator<SourceFile>() {
+	public final static Comparator<SourceFile> LOCATION_COMPARATOR = new Comparator<SourceFile>() {
 		@Override
 		public int compare(SourceFile o1, SourceFile o2) {
 			return o1.getFileName().compareToIgnoreCase(o2.getFileName());
@@ -226,6 +226,7 @@ public class Report {
 	public void printStat(PrintStream out) {
 		withHits = false;
 		print(out);
+		withHits = true;
 	}
 
 	private static boolean withHits = true;
@@ -251,8 +252,6 @@ public class Report {
 			fileReport.print(out);
 
 		}
-
-		withHits = true;
 	}
 
 	private static void print(PrintStream out, String line, Object... args) {

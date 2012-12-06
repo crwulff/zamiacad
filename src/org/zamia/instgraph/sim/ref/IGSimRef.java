@@ -747,6 +747,15 @@ public class IGSimRef implements IGISimulator {
 		return lineLogger;
 	}
 
+	@SuppressWarnings("UnusedDeclaration")
+	public IGHitCountLogger collectAllAssignments(String aId) {
+		IGHitCountLogger assignmentLogger = new IGHitCountLogger(aId);
+		for (IGSimProcess process : fProcesses) {
+			process.collectAllAssignments(assignmentLogger);
+		}
+		return assignmentLogger;
+	}
+
 	public IGHitCountLogger collectExecutedAssignments(String aId) {
 		IGHitCountLogger assignmentLogger = new IGHitCountLogger(aId);
 		for (IGSimProcess process : fProcesses) {

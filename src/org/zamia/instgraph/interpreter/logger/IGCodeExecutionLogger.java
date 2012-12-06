@@ -1,6 +1,7 @@
 package org.zamia.instgraph.interpreter.logger;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -97,6 +98,34 @@ public abstract class IGCodeExecutionLogger {
 
 	CodeItem getItem(CodeItem aItemToFind) {
 		return fItems.tailSet(aItemToFind).first();
+	}
+
+	@SuppressWarnings("UnusedDeclaration")
+	public int getNumItems() {
+		int sum = 0;
+		if (isComposite()) {
+			for (IGCodeExecutionLogger fileLogger : fLoggersByFile.values()) {
+				sum += fileLogger.fItems.size();
+			}
+		} else {
+			sum = fItems.size();
+		}
+		return sum;
+	}
+
+	public void dropSystemFiles() {
+		if (isLeaf()) {
+			return;
+		}
+		LinkedList<SourceFile> systemFiles = new LinkedList<SourceFile>();
+		for (SourceFile file : fLoggersByFile.keySet()) {
+			if (!file.isLocal()) {
+				systemFiles.add(file);
+			}
+		}
+		for (SourceFile sysFile : systemFiles) {
+			fLoggersByFile.remove(sysFile);
+		}
 	}
 
 	public static IGCodeExecutionLogger mergeAll(IGCodeExecutionLogger... aLoggers) throws ZamiaException {
