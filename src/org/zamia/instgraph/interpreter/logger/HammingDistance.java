@@ -1,9 +1,11 @@
 package org.zamia.instgraph.interpreter.logger;
 
 import org.zamia.SourceFile;
+import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,8 @@ public class HammingDistance {
 
 	private double uniquenessJaan;
 	private double uniquenessMaksim;
+	private double deviation;
+	private double coverage;
 
 	private int numItems;
 
@@ -35,6 +39,14 @@ public class HammingDistance {
 
 	public double getUniquenessMaksim() {
 		return uniquenessMaksim;
+	}
+
+	public double getDeviation() {
+		return deviation;
+	}
+
+	public double getCoverage() {
+		return coverage;
 	}
 
 	public Integer getNumTests(SourceFile file) {
@@ -56,6 +68,17 @@ public class HammingDistance {
 
 	public double getSumNorm() {
 		return (double) getSum() / (getNumTests() * numItems);
+	}
+
+	public double getSumNormRaimund() {
+		int N = getNumDistances();
+		double halfSum = getSum() / 2;
+		return halfSum / N;
+	}
+
+	private int getNumDistances() {
+		int n = getNumTests();
+		return n * (n - 1) / 2;
 	}
 
 	public int getSum(int test) {
@@ -115,14 +138,16 @@ public class HammingDistance {
 	}
 
 	public String toString(EnumSet<Print> flags) {
-		StringBuilder b = new StringBuilder("           Test Quality: " + getSum()).append("\n");
-		b.append("Normalized Test Quality: ").append(getSumNorm()).append("\n");
-
+		StringBuilder b = new StringBuilder("                Test Quality: " + getSum()).append("\n");
+		b.append("     Normalized Test Quality: ").append(getSumNorm()).append("\n");
+		b.append("     Normalized Test Raimund: ").append(getSumNormRaimund()).append("\n");
+		b.append("              RMSD Deviation: ").append(deviation).append("\n");
 		b.append("           Uniqueness (Jaan): ").append(uniquenessJaan).append("\n");
 		b.append("           Uniqueness (Maks): ").append(uniquenessMaksim).append("\n");
 		b.append("Normalized Uniqueness (Maks): ").append(uniquenessMaksim / numItems).append("\n\n");
 		b.append("Num. Tests      : ").append(getNumTests()).append("\n");
-		b.append("Num. Assignments: ").append(numItems).append("\n\n");
+		b.append("Num. Assignments: ").append(numItems).append("\n");
+		b.append("Assign. Coverage: ").append(String.format("%.2f%%\n\n", coverage));
 
 		for (Map.Entry<SourceFile, TreeMap<Integer, Distance>> entry : distances.entrySet()) {
 			b.append(entry.getKey()).append(": ");
@@ -188,11 +213,22 @@ public class HammingDistance {
 		testDistances.put(test, distance);
 	}
 
+	/**
+	 * @param loggers loggers that represent executed statements
+	 * @param numItems total number of assignments in the design
+	 * @return assessment of the quality of diagnostic test
+	 */
 	public static HammingDistance createFrom(List<IGHitCountLogger> loggers, int numItems) {
+
+		if (loggers.size() < 2) {
+			logger.info("HammingDistance: Hamming distance can only be computed for multiple tests. Num of received tests: %d", loggers.size());
+			return null;
+		}
 
 		HashMap<SourceFile, boolean[][]> matrices = new HashMap<SourceFile, boolean[][]>();
 
 		int tst = 0;
+		int numTests = loggers.size();
 
 		for (IGHitCountLogger logger : loggers) {
 
@@ -206,7 +242,7 @@ public class HammingDistance {
 
 				boolean[][] matrix = matrices.containsKey(file) ? matrices.get(file) : null;
 				if (matrix == null) {
-					matrix = new boolean[loggers.size()][];
+					matrix = new boolean[numTests][];
 					matrices.put(file, matrix);
 				}
 				matrix[tst] = new boolean[n];
@@ -226,6 +262,8 @@ public class HammingDistance {
 
 		double uniquenessJaan = 0, uniquenessMaksim = 0;
 
+		// todo: matrices can be merged into a single matrix => quality can be computed as with deviation below.
+		// todo: In this case only the final quality values have to be stored in the object. The rest => to GC.
 		for (Map.Entry<SourceFile, boolean[][]> entry : matrices.entrySet()) {
 			SourceFile file = entry.getKey();
 			boolean[][] matrix = entry.getValue();
@@ -233,7 +271,6 @@ public class HammingDistance {
 			/* Compute Uniqueness (by Jaan) */
 			/* Compute Uniqueness (by Maksim) */
 			int numLines = matrix[0].length;
-			int numTests = matrix.length;
 			for (int line = 0; line < numLines; line++) {
 				int count = 0;
 				for (int test = 0; test < numTests; test++) {
@@ -266,6 +303,54 @@ public class HammingDistance {
 		ret.uniquenessJaan = uniquenessJaan;
 		ret.uniquenessMaksim = uniquenessMaksim;
 
+		/* Compute DEVIATION */
+		boolean[][] bigMatrix = mergeMatrices(new ArrayList<boolean[][]>(matrices.values()));
+		double hAve = ret.getSumNormRaimund();
+		int N = ret.getNumDistances();
+		double total = 0;
+		for (int first = 0; first < numTests - 1; first++) {
+			for (int second = first; second < numTests; second++) {
+				if (first == second) {
+					continue;
+				}
+				int dist = computeHammingDistance(first, second, bigMatrix);
+				total += Math.pow((double) dist - hAve, 2);
+			}
+		}
+		ret.deviation = Math.sqrt(total / N);
+
+		double coverage = 0;
+		try {
+			IGCodeExecutionLogger mergedLogger = IGCodeExecutionLogger.mergeAll(loggers.toArray(new IGCodeExecutionLogger[numTests]));
+			int covered = mergedLogger.getNumItems();
+			coverage = (double) covered / numItems * 100;
+		} catch (ZamiaException e) {
+			logger.debug("HammingDistance: could not merge loggers to compute coverage", e, "");
+		}
+
+		ret.coverage = coverage;
+
+		return ret;
+	}
+
+	private static boolean[][] mergeMatrices(List<boolean[][]> matrices) {
+		int numTests = 0;
+		int totalLines = 0; // over all files
+		for (boolean[][] matrix : matrices) {
+			totalLines += matrix[0].length;
+			numTests = matrix.length;
+		}
+
+		boolean[][] ret = new boolean[numTests][];
+		for (int test = 0; test < numTests; test++) {
+			ret[test] = new boolean[totalLines];
+			int globalLine = 0;
+			for (boolean[][] matrix : matrices) {
+				for (int line = 0; line < matrix[test].length; line++) {
+					ret[test][globalLine++] = matrix[test][line];
+				}
+			}
+		}
 		return ret;
 	}
 

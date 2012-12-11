@@ -71,6 +71,8 @@ public class HammingDistanceTest {
 		assertThat(hammingDistance.getAverage(file, 2), is((double) 4 / 2));
 		assertThat(hammingDistance.getUniquenessJaan(), is(10.5));
 		assertThat(hammingDistance.getUniquenessMaksim(), is((double) 1 + ((double) 2 / 3)));
+		assertThat(hammingDistance.getSum(), is(16));
+		assertThat(hammingDistance.getSumNormRaimund(), is((double) 8 / 3));
 	}
 
 	@Test
@@ -109,6 +111,7 @@ public class HammingDistanceTest {
 
 		assertNotNull(hammingDistance);
 
+		assertThat(hammingDistance.getNumTests(), is(4));
 		assertThat(hammingDistance.getNumTests(file), is(4));
 
 		assertThat(hammingDistance.getSum(file, 0), is(8));
@@ -123,6 +126,8 @@ public class HammingDistanceTest {
 		assertThat(hammingDistance.getAverage(file, 1), is((double) 8 / 3));
 		assertThat(hammingDistance.getAverage(file, 2), is((double) 4 / 3));
 		assertThat(hammingDistance.getAverage(file, 3), is((double) 4 / 3));
+		assertThat(hammingDistance.getSum(), is(24));
+		assertThat(hammingDistance.getSumNormRaimund(), is((double) 2));
 	}
 
 	@Test
@@ -184,5 +189,89 @@ public class HammingDistanceTest {
 		assertThat(hammingDistance.getAverage(file, 4), is((double) 4 / 4));
 		assertThat(hammingDistance.getUniquenessJaan(), is(16.25));
 		assertThat(hammingDistance.getUniquenessMaksim(), is(1.4));
+		assertThat(hammingDistance.getSum(), is(32));
+		assertThat(hammingDistance.getSumNormRaimund(), is(1.6));
+	}
+
+	@Test
+	public void multipleFilesAndCorrectDeviation() {
+
+		List<IGHitCountLogger> loggers = new ArrayList<IGHitCountLogger>(8);
+		IGHitCountLogger logger;
+
+		/*
+		* ************************
+		*  1
+		*    1 1 1
+		*    1
+		*    1
+		* *************************
+		* */
+		SourceFile file = new SourceFile("Test4.txt");
+		file.setLocalPath("some path");
+		file.setNumLines(4);
+
+		/*
+		* ************************
+		*      1
+		*    1 1 1
+		*    1
+		*
+		*    1   1
+		*  1   1
+		* *************************
+		* */
+		SourceFile file2 = new SourceFile("Test44.txt");
+		file2.setLocalPath("some path44");
+		file2.setNumLines(6);
+
+		logger = new IGHitCountLogger("Test1");
+		logger.logHit(new SourceLocation(file, 0, 0), 10);
+		logger.logHit(new SourceLocation(file2, 5, 0), 10);
+		loggers.add(logger);
+		logger = new IGHitCountLogger("Test2");
+		logger.logHit(new SourceLocation(file, 1, 0), 10);
+		logger.logHit(new SourceLocation(file, 2, 0), 10);
+		logger.logHit(new SourceLocation(file, 3, 0), 10);
+		logger.logHit(new SourceLocation(file2, 1, 0), 10);
+		logger.logHit(new SourceLocation(file2, 2, 0), 10);
+		logger.logHit(new SourceLocation(file2, 4, 0), 10);
+		loggers.add(logger);
+		logger = new IGHitCountLogger("Test3");
+		logger.logHit(new SourceLocation(file, 1, 0), 10);
+		logger.logHit(new SourceLocation(file2, 0, 0), 10);
+		logger.logHit(new SourceLocation(file2, 1, 0), 10);
+		logger.logHit(new SourceLocation(file2, 5, 0), 10);
+		loggers.add(logger);
+		logger = new IGHitCountLogger("Test4");
+		logger.logHit(new SourceLocation(file, 1, 0), 10);
+		logger.logHit(new SourceLocation(file2, 1, 0), 10);
+		logger.logHit(new SourceLocation(file2, 4, 0), 10);
+		loggers.add(logger);
+
+		hammingDistance = HammingDistance.createFrom(loggers, 10);
+
+		assertNotNull(hammingDistance);
+
+		assertThat(hammingDistance.getNumTests(), is(4));
+		assertThat(hammingDistance.getNumTests(file), is(4));
+		assertThat(hammingDistance.getNumTests(file2), is(4));
+
+		assertThat(hammingDistance.getSum(file, 0), is(8));
+		assertThat(hammingDistance.getSum(file, 1), is(8));
+		assertThat(hammingDistance.getSum(file, 2), is(4));
+		assertThat(hammingDistance.getSum(file, 3), is(4));
+		assertThat(hammingDistance.getMin(file, 0), is(2));
+		assertThat(hammingDistance.getMin(file, 1), is(2));
+		assertThat(hammingDistance.getMin(file, 2), is(0));
+		assertThat(hammingDistance.getMin(file, 3), is(0));
+		assertThat(hammingDistance.getAverage(file, 0), is((double) 8 / 3));
+		assertThat(hammingDistance.getAverage(file, 1), is((double) 8 / 3));
+		assertThat(hammingDistance.getAverage(file, 2), is((double) 4 / 3));
+		assertThat(hammingDistance.getAverage(file, 3), is((double) 4 / 3));
+		assertThat(hammingDistance.getSum(), is(58));
+		assertThat(hammingDistance.getSumNormRaimund(), is((double) 29 / 6));
+		assertThat(hammingDistance.getDeviation(), is(1.7716909687891083));
+		assertThat(hammingDistance.getCoverage(), is(90.00));
 	}
 }
