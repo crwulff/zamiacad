@@ -507,14 +507,6 @@ public class IGSimRef implements IGISimulator {
 				throw new ZamiaException("IGSimRef: initObject(): could not compute static type for new object: " + obj, src);
 			}
 
-			if (driver.getValue(src) == null) {
-				IGStaticValue zValue = IGStaticValue.generateZ(obj.getType().computeStaticType(aEnv, ASTErrorMode.EXCEPTION, null), src);
-				IGTypeStatic zT = zValue.getStaticType();
-				if (!(zT.isArray() && zT.isUnconstrained())) {
-					driver.setValue(zValue, src);
-				}
-			}
-
 			if (driver instanceof IGSignalDriver) {
 
 				IGSignalDriver sigDriver = (IGSignalDriver) driver;

@@ -10,7 +10,10 @@ begin
     FUNCTION bar ( l : bit_vector ) RETURN bit_vector IS
         ALIAS lv : bit_vector ( 1 TO l'LENGTH ) IS l;
         VARIABLE result : bit_vector ( 1 TO l'LENGTH ) := (OTHERS => '0');
+		variable B: bit; -- check if initialized (with '0'). Was not working until Dec 2012
     BEGIN
+		assert B = '0' report "local variable is not initialized." severity failure;
+		
         FOR i IN result'RANGE LOOP
             result(i) := not lv(i);
         END LOOP;

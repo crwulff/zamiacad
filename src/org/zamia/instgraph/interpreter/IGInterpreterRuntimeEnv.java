@@ -296,7 +296,7 @@ public class IGInterpreterRuntimeEnv {
 		
 		IGObjectDriver driver = context.createObject(intObject, aLocation);
 		
-		IGOperation iv = aObj.getInitialValue();
+		IGOperation iv = aObj.getInitialValue(); // if initial value was explicitly specified
 		if (iv != null) {
 			IGStaticValue value = iv.computeStaticValue(this, aErrorMode, aReport);
 			
@@ -312,6 +312,14 @@ public class IGInterpreterRuntimeEnv {
 			}
 			
 			driver.setValue(value, aLocation);
+		} else {
+			// default initial value
+			IGStaticValue zValue = IGStaticValue.generateZ(aObj.getType().computeStaticType(this, ASTErrorMode.EXCEPTION, null), aLocation);
+			IGTypeStatic zT = zValue.getStaticType();
+			if (!(zT.isArray() && zT.isUnconstrained())) {
+				driver.setValue(zValue, aLocation);
+			}
+
 		}
 
 		return driver;
