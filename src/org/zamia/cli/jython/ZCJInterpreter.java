@@ -59,7 +59,7 @@ public class ZCJInterpreter {
 	public synchronized void evalFile(String aPath) throws ZamiaException {
 
 		if (System.getenv("PYTHONPATH") == null) {
-			logger.warn("System variable PYTHONPATH is not specified, python will not work");
+			logger.info("System variable PYTHONPATH is not specified, python will not work");
 			return;
 		}
 
