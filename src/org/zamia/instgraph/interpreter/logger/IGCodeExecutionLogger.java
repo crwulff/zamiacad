@@ -237,6 +237,11 @@ public abstract class IGCodeExecutionLogger {
 			fLoc = aLocation;
 		}
 
+		@Override
+		public String toString() {
+			return String.format("%5s:%3s", fLoc.fLine, fLoc.fCol);
+		}
+
 		public abstract void merge(CodeItem aOther);
 
 		public abstract CodeItem subtract(CodeItem aOther);

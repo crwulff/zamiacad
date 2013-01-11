@@ -19,7 +19,7 @@ import java.io.Serializable;
  */
 
 @SuppressWarnings("serial")
-public class SourceLocation implements Serializable {
+public class SourceLocation implements Serializable, Comparable<SourceLocation> {
 
 	public SourceFile fSF;
 
@@ -79,4 +79,19 @@ public class SourceLocation implements Serializable {
 		return false;
 	}
 
+	@Override
+	public int compareTo(SourceLocation o) {
+		int res;
+		if (fSF != null) {
+			res = fSF.compareTo(o.fSF);
+			if (res != 0) {
+				return res;
+			}
+		}
+		res = Integer.compare(fLine, o.fLine);
+		if (res != 0) {
+			return res;
+		}
+		return Integer.compare(fCol, o.fCol);
+	}
 }

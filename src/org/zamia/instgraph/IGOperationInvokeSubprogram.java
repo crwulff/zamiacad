@@ -117,7 +117,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 		aCode.add(new IGExitContextStmt(computeSourceLocation(), getZDB()));
 	}
 
-	private SourceLocation computeOpSourceLocation() {
+	public SourceLocation computeOpSourceLocation() {
 
 		SourceLocation loc = computeSourceLocation();
 		loc.fLine = fOpLine;

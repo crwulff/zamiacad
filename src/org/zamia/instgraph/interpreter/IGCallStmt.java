@@ -11,6 +11,7 @@ package org.zamia.instgraph.interpreter;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.ConditionCounter;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGSubProgram;
 import org.zamia.instgraph.IGSubProgram.IGBuiltin;
@@ -33,6 +34,7 @@ public class IGCallStmt extends IGStmt {
 		fOpLine = aOpLocation.fLine;
 		fOpCol = aOpLocation.fCol;
 		fSPDBID = save(aSP);
+		fIsRelational = ConditionCounter.isRelational(aSP);
 	}
 
 	public IGSubProgram getSub() {
@@ -99,8 +101,6 @@ public class IGCallStmt extends IGStmt {
 
 				ReturnStatus status = IGBuiltinOperations.execBuiltin(sub, aRuntime, computeSourceLocation(), aErrorMode, aReport);
 
-				fIsRelational = isRelational(bi);
-
 				logLogicalValue(aRuntime);
 
 				return status;
@@ -114,8 +114,6 @@ public class IGCallStmt extends IGStmt {
 				logger.debug("IGCallStmt: calling " + code);
 			}
 			//code.dump(System.out);
-
-			fIsRelational = sub.isFunction() && sub.getReturnType().isBool();
 
 			return aRuntime.call(code, aErrorMode, aReport);
 		}
@@ -156,46 +154,11 @@ public class IGCallStmt extends IGStmt {
 		IGStaticValue logicalValue = sf.getValue();
 
 		if (logicalValue.isTrue())
-			fHasTrueOccurred = fHasTrueOccurred || true;
+			fHasTrueOccurred = true;
 		else
-			fHasFalseOccurred = fHasFalseOccurred || true;
+			fHasFalseOccurred = true;
 
 		aRuntime.push(logicalValue);
-	}
-
-	private static boolean isRelational(IGBuiltin builtin) {
-		switch (builtin) {
-			case SCALAR_EQUALS:
-			case SCALAR_GREATER:
-			case SCALAR_GREATEREQ:
-			case SCALAR_LESS:
-			case SCALAR_LESSEQ:
-			case SCALAR_NEQUALS:
-			case BOOL_AND:
-			case BOOL_NAND:
-			case BOOL_NOR:
-			case BOOL_OR:
-			case BOOL_XNOR:
-			case BOOL_XOR:
-			case BOOL_NOT:
-			case BIT_NOT:
-			case BIT_AND:
-			case BIT_NAND:
-			case BIT_NOR:
-			case BIT_OR:
-			case BIT_XNOR:
-			case BIT_XOR:
-			case ARRAY_NOT:
-			case ARRAY_EQUALS:
-			case ARRAY_NEQUALS:
-			case ARRAY_GREATER:
-			case ARRAY_GREATEREQ:
-			case ARRAY_LESS:
-			case ARRAY_LESSEQ:
-				return true;
-			default:
-				return false;
-		}
 	}
 
 	@Override

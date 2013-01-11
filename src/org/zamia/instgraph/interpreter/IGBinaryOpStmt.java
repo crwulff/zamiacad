@@ -11,6 +11,7 @@ package org.zamia.instgraph.interpreter;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.ConditionCounter;
 import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGType;
@@ -32,6 +33,7 @@ public class IGBinaryOpStmt extends IGOpStmt {
 	public IGBinaryOpStmt(BinOp aOp, IGType aResType, SourceLocation aLocation, ZDB aZDB) {
 		super(aResType, aLocation, aZDB);
 		fOp = aOp;
+		fIsRelational = ConditionCounter.isRelational(fOp);
 	}
 
 	@Override
@@ -79,35 +81,14 @@ public class IGBinaryOpStmt extends IGOpStmt {
 
 	void logLogicalValue(IGStaticValue logicalValue) throws ZamiaException {
 
-		fIsRelational = isRelational(fOp);
 		if (!fIsRelational) {
 			return;
 		}
 
 		if (logicalValue.isTrue())
-			fHasTrueOccurred = fHasTrueOccurred || true;
+			fHasTrueOccurred = true;
 		else
-			fHasFalseOccurred = fHasFalseOccurred || true;
-	}
-
-	private static boolean isRelational(BinOp binOp) {
-		switch (binOp) {
-			case EQUAL:
-			case LESSEQ:
-			case LESS:
-			case GREATER:
-			case GREATEREQ:
-			case NEQUAL:
-			case AND:
-			case NAND:
-			case OR:
-			case NOR:
-			case XOR:
-			case XNOR:
-				return true;
-			default:
-				return false;
-		}
+			fHasFalseOccurred = true;
 	}
 
 	public boolean isRelational() {

@@ -969,6 +969,50 @@ public final class IGManager {
 		return counter.getNumObjects();
 	}
 
+    /**
+     * Counts conditions in the specified range <tt>aStart</tt>:<tt>aEnd</tt> of the specified source file <tt>aPath</tt>
+     * in the given design unit.
+     *
+     * @param aDUUID    ID of the design unit where to count conditions in
+     * @param aPath     source file where to count conditions in
+     * @param aStart    starting line, inclusive
+     * @param aEnd      ending line, inclusive
+     * @return      number of atomic conditions in the specified range of the source file
+     * @throws ZamiaException
+     */
+    @SuppressWarnings("UnusedDeclaration")
+    public int countConditionsInRange(DMUID aDUUID, String aPath, int aStart, int aEnd) throws ZamiaException {
+        return createConditionCounter(aDUUID).getNumConditionsInRange(aPath, aStart, aEnd);
+	}
+
+    /**
+     * Counts all the conditions in the whole design under the given DUUID.
+     *
+     * @param aDUUID    ID of the design unit where to count conditions in
+     * @return          total number of atomic conditions in the given Design Unit
+     * @throws ZamiaException
+     */
+    public int countConditions(DMUID aDUUID) throws ZamiaException {
+        return createConditionCounter(aDUUID).getNumConditions();
+    }
+
+	private ConditionCounter createConditionCounter(DMUID aDUUID) throws ZamiaException {
+
+		logger.info("IGManager: Counting conditions in %s", aDUUID);
+
+		String signature = IGInstantiation.computeSignature(aDUUID, null);
+
+		IGModule module = findModule(signature);
+		if (module == null) {
+			return null;
+		}
+
+		ConditionCounter counter = new ConditionCounter();
+		module.accept(counter, Integer.MAX_VALUE);
+
+		return counter;
+	}
+
 	/*
 	 * access to indexed information
 	 */
