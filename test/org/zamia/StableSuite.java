@@ -15,9 +15,7 @@ import org.zamia.zdb.ZDBTest;
 /**
  * @author Anton Chepurov
  * 
- * Some tests do not close ZDB on exit, leaving it locked. To work around, set env. 
- *   var ZAMIA_LOCKING=disabled
- *   
+ *
  * To allocate enough VM memory: -ea -Xmx3000m -Xms800m -Xss8m -verbose:gc -XX:+PrintGCDetails
  * The problem is that even 3.5 GB is not enough for many Leon tests (OutOfMem is not propagated to the detector). So, they are ignored in FSCacheTest and IGTest
  * 

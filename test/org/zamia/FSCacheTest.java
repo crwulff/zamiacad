@@ -312,6 +312,8 @@ public class FSCacheTest {
 
 		assertEquals(13, nNodes);
 
+		fZPrj.shutdown();
+
 		// now, move the sources
 
 		File f = new File("examples/add4");
@@ -334,6 +336,8 @@ public class FSCacheTest {
 		}
 
 		assertEquals(0, n);
+
+		igm = fZPrj.getIGM();
 
 		nNodes = igm.countNodes(duuid);
 
@@ -381,6 +385,8 @@ public class FSCacheTest {
 
 		assertEquals(1933, nNodes);
 
+		fZPrj.shutdown();
+
 		// now, move the sources
 		File f = new File("examples/leonSOC");
 		File f2 = new File("examples/leonSOC.1");
@@ -403,6 +409,8 @@ public class FSCacheTest {
 
 		assertEquals(0, n);
 
+		igm = fZPrj.getIGM();
+
 		nNodes = igm.countNodes(duuid);
 
 		logger.info("Leon IG has %d nodes.", nNodes);
@@ -411,6 +419,7 @@ public class FSCacheTest {
 
 		f2.renameTo(f);
 
+		fZPrj.shutdown();
 	}
 
 	@After
