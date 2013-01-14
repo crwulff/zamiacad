@@ -376,23 +376,18 @@ public class IGBuiltinOperations {
 		if (vA == null)	{
 			return error(vA, "execScalarCompare(): vA", aErrorMode, aLocation);
 		}
+		long ordA = vA.getOrd();
 		
 		IGObject intfB = container.resolveObject("b");
 		IGStaticValue vB = aRuntime.getObjectValue(intfB);
 		if (vB == null)	{
 			return error(vB, "execScalarCompare(): vB", aErrorMode, aLocation);
 		}
-		
-		IGTypeStatic typeA = vA.getStaticType();
-		boolean res = false;
+		long ordB = vB.getOrd();
 
-		if (typeA.isPhysical()) {
-			res = vA.comparePhysical(vB, aSub, aLocation);
-		} else {
-			long ordA = vA.getOrd();
-			long ordB = vB.getOrd();
+		boolean res;
 
-			switch (aSub.getBuiltin()) {
+		switch (aSub.getBuiltin()) {
 			case SCALAR_EQUALS:
 				res = ordA == ordB;
 				break;
@@ -413,8 +408,6 @@ public class IGBuiltinOperations {
 				break;
 			default:
 				throw new ZamiaException("Sorry. Internal error. Unsupported operation: " + aSub, aLocation);
-			}
-
 		}
 		IGTypeStatic rt = aSub.getReturnType().computeStaticType(aRuntime, aErrorMode, aReport);
 		if (rt == null) {
