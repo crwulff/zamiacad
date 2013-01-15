@@ -1352,12 +1352,15 @@ public class IGBuiltinOperations {
 
 		if (intfS == null) {
 
+			IGStaticValue openOk = fost.findEnumLiteral("OPEN_OK");
+			IGStaticValue errorName = fost.findEnumLiteral("NAME_ERROR");
+			IGStaticValue errorStatus = fost.findEnumLiteral("STATUS_ERROR");
 
-			if (status.equalsValue(fost.findEnumLiteral("OPEN_OK"))) {
+			if (status.equalsValue(openOk)) {
 				/* OK, do nothing */
-			} else if (status.equalsValue(fost.findEnumLiteral("NAME_ERROR"))) {
+			} else if (status.equalsValue(errorName)) {
 				throw new ZamiaException("Failed to open VHDL file \"" + valueN + "\" in " + openMode + "; no such file or directory.", aLocation);
-			} else if (status.equalsValue(fost.findEnumLiteral("STATUS_ERROR"))) {
+			} else if (status.equalsValue(errorStatus)) {
 				throw new ZamiaException("Cannot open file \"" + valueN + "\"; it is already open.", aLocation);
 			} else {
 				throw new ZamiaException("Cannot open file \"" + valueN + "\" in " + openMode + ".", aLocation);
