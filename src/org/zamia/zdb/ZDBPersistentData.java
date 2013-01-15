@@ -19,7 +19,6 @@ import java.util.Iterator;
 import org.zamia.ExceptionLogger;
 import org.zamia.ZamiaLogger;
 import org.zamia.util.HashMapArray;
-import org.zamia.zdb.ZDB.ZDBInputStream;
 
 
 /**
@@ -127,7 +126,7 @@ public class ZDBPersistentData {
 		if (aPDFile.exists() && aPDFile.canRead()) {
 			try {
 				
-				ObjectInputStream ois = aZDB.new ZDBInputStream(ZDB.openInputStream(aPDFile));
+				ObjectInputStream ois = aZDB.createZDBObjectInputStream(aPDFile);
  
 				try {
 				
