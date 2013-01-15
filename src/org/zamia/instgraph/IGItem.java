@@ -62,7 +62,6 @@ public abstract class IGItem implements Serializable, ZDBIIDSaver {
 
 		if (aZDB != null) {
 			fZDB = aZDB;
-			ZamiaProject zprj = (ZamiaProject) aZDB.getOwner();
 			if (aLocation != null) {
 				fSFDBID = getOrCreateSFHID(aLocation.fSF);
 				fLine = aLocation.fLine;
@@ -392,7 +391,7 @@ public abstract class IGItem implements Serializable, ZDBIIDSaver {
 	}
 
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-		setZDB(((ZDB.ZDBInputStream)in).getZDB());
+		setZDB(ZDB.getZDBFromStream(in));
 		in.defaultReadObject();
 	}
 }

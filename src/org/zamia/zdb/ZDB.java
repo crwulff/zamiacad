@@ -618,8 +618,10 @@ public class ZDB {
 					}
 				});
 
-				ObjectInputStream in = new ZDBInputStream(ENABLE_COMPRESSION ? new GZIPInputStream(rafIs) : rafIs);
-				return in.readObject();
+				if (ENABLE_COMPRESSION)
+					rafIs = new GZIPInputStream(rafIs);
+
+				return new ZDBInputStream(rafIs).readObject();
 			}
 		}
 
@@ -1314,12 +1316,23 @@ public class ZDB {
 			el.logException(e);
 		}
 	}
-	
-	public class ZDBInputStream extends ObjectInputStream {
-		public ZDBInputStream(InputStream in) throws IOException {
+
+	public static ZDB getZDBFromStream(ObjectInputStream inputStream) {
+		if (inputStream instanceof ZDBInputStream) {
+			return ((ZDBInputStream) inputStream).getZDB();
+		}
+		return null;
+	}
+
+	public ObjectInputStream createZDBObjectInputStream(File aFile) throws IOException {
+		return new ZDBInputStream(openInputStream(aFile));
+	}
+
+	private class ZDBInputStream extends ObjectInputStream {
+		private ZDBInputStream(InputStream in) throws IOException {
 			super(in);
 		}
-		public ZDB getZDB() {
+		private ZDB getZDB() {
 			return ZDB.this;
 		}
 	}
