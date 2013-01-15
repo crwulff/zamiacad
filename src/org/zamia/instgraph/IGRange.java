@@ -8,19 +8,15 @@
  */
 package org.zamia.instgraph;
 
-import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGObject.OIDir;
-import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
-import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGPushStmt;
 import org.zamia.instgraph.interpreter.IGRangeOpStmt;
 import org.zamia.instgraph.interpreter.IGRangeOpStmt.IGRangeOp;
 import org.zamia.util.HashSetArray;
-import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
 
@@ -171,36 +167,4 @@ public class IGRange extends IGOperation {
 	public IGOperation getRangeAscending(IGContainer aContainer, SourceLocation aSrc) throws ZamiaException {
 		return fAscending;
 	}
-
-	public static IGType subRange(int aLength, IGType aTypeHint, IGContainer aContainer, SourceLocation aSrc, IGElaborationEnv aEE, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
-		
-		IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
-		ZDB zdb = aEE.getZDB();
-		IGType it = aTypeHint.getIndexType();
-
-		IGOperation length = it.getDiscreteValue(aLength, aSrc, aErrorMode, aReport);
-		if (length == null)
-			return null;
-
-		IGOperation left = it.getLeft(aSrc), right;
-		IGOperation ascending = it.getAscending(aContainer, aSrc);
-		if (ascending instanceof IGStaticValue) {
-
-			IGStaticValue sAscending = (IGStaticValue) ascending;
-			BinOp binOp = sAscending.isTrue() ? BinOp.ADD : BinOp.SUB;
-			right = new IGOperationBinary(left, length, binOp, it, aSrc, zdb).optimize(env);
-
-		} else {
-			IGOperation rightAsc = new IGOperationBinary(left, length, BinOp.ADD, it, aSrc, zdb).optimize(env);
-			IGOperation rightDesc = new IGOperationBinary(left, length, BinOp.SUB, it, aSrc, zdb).optimize(env);
-
-			right = new IGOperationPhi(ascending, rightAsc, rightDesc, it, aSrc, zdb).optimize(env);
-		}
-
-		IGRange range = new IGRange(left, right, ascending, aSrc, zdb);
-
-		return aTypeHint.createSubtype(range, aEE.getInterpreterEnv(), aSrc);
-
-	}
-	
 }

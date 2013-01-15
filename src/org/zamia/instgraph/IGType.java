@@ -15,6 +15,7 @@ import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
+import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.util.HashMapArray;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
@@ -594,6 +595,38 @@ public class IGType extends IGContainerItem {
 		}
 
 		throw new ZamiaException("Cannot create subtypes from type " + this, aSrc);
+	}
+
+	public IGType fitToLength(int aLength, IGContainer aContainer, SourceLocation aSrc, IGElaborationEnv aEE, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
+
+		IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
+		ZDB zdb = aEE.getZDB();
+		IGType it = getIndexType();
+
+		IGOperation length = it.getDiscreteValue(aLength, aSrc, aErrorMode, aReport);
+		if (length == null)
+			return null;
+
+		final IGOperation left = it.getLeft(aSrc);
+		final IGOperation ascending = it.getAscending(aContainer, aSrc);
+
+		IGOperation right;
+		if (ascending instanceof IGStaticValue) {
+
+			IGStaticValue sAscending = (IGStaticValue) ascending;
+			BinOp binOp = sAscending.isTrue() ? BinOp.ADD : BinOp.SUB;
+			right = new IGOperationBinary(left, length, binOp, it, aSrc, zdb).optimize(env);
+
+		} else {
+			IGOperation rightAsc = new IGOperationBinary(left, length, BinOp.ADD, it, aSrc, zdb).optimize(env);
+			IGOperation rightDesc = new IGOperationBinary(left, length, BinOp.SUB, it, aSrc, zdb).optimize(env);
+
+			right = new IGOperationPhi(ascending, rightAsc, rightDesc, it, aSrc, zdb).optimize(env);
+		}
+
+		IGRange range = new IGRange(left, right, ascending, aSrc, zdb);
+
+		return createSubtype(range, env, aSrc);
 	}
 
 	private void writeObject(ObjectOutputStream out) throws IOException {

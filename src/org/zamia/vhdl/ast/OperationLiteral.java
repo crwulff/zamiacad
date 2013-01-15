@@ -13,7 +13,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 
 import org.zamia.ErrorReport;
-import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
 import org.zamia.analysis.ReferenceSearchResult;
@@ -23,16 +22,11 @@ import org.zamia.analysis.ast.SearchJob;
 import org.zamia.instgraph.IGContainer;
 import org.zamia.instgraph.IGElaborationEnv;
 import org.zamia.instgraph.IGOperation;
-import org.zamia.instgraph.IGOperationBinary;
-import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGOperationLiteral;
-import org.zamia.instgraph.IGOperationPhi;
-import org.zamia.instgraph.IGRange;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
-import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
 /**
@@ -364,7 +358,7 @@ public class OperationLiteral extends Operation {
 					numBits += bitsPerDigit;
 			}
 
-			IGType type = IGRange.subRange(numBits-1, aTypeHint, aContainer, getLocation(), aEE, aErrorMode, aReport);
+			IGType type = aTypeHint.fitToLength(numBits-1, aContainer, getLocation(), aEE, aErrorMode, aReport);
 			
 			String bitstring = parseBitStringLiteral();
 
@@ -484,7 +478,7 @@ public class OperationLiteral extends Operation {
 				return res;
 			}
 
-			type = IGRange.subRange(image.length() - 1, aTypeHint, aContainer, getLocation(), aEE, aErrorMode, aReport);
+			type = aTypeHint.fitToLength(image.length() - 1, aContainer, getLocation(), aEE, aErrorMode, aReport);
 
 			value = new IGOperationLiteral(image, type, getLocation());
 

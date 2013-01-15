@@ -11,7 +11,6 @@ package org.zamia.instgraph;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-import org.python.antlr.PythonParser.assert_stmt_return;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;

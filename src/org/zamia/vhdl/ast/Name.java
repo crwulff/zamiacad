@@ -28,19 +28,13 @@ import org.zamia.instgraph.IGMappings;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationAlias;
-import org.zamia.instgraph.IGOperationBinary;
-import org.zamia.instgraph.IGOperationBinary.BinOp;
 import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGOperationInvokeSubprogram;
 import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGOperationObject;
-import org.zamia.instgraph.IGOperationPhi;
-import org.zamia.instgraph.IGRange;
 import org.zamia.instgraph.IGResolveResult;
-import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGSubProgram;
 import org.zamia.instgraph.IGType;
-import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.zdb.ZDB;
 
 /**
@@ -205,7 +199,7 @@ public class Name extends VHDLNode {
 				int l = id.length();
 				String image = id.substring(1, l - 1);
 
-				IGType type = IGRange.subRange(image.length() - 1, aTypeHint, aContainer, getLocation(), aEE, aErrorMode, aReport);
+				IGType type = aTypeHint.fitToLength(image.length() - 1, aContainer, getLocation(), aEE, aErrorMode, aReport);
 
 				rr.addItem(new IGOperationLiteral(image, type, getLocation()));
 
