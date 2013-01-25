@@ -45,28 +45,30 @@ public class IGInterpreterContext implements Serializable {
 
 	}
 
-	public IGObjectDriver createObject(IGInterpreterObject aObject, SourceLocation aLocation) throws ZamiaException {
+	public IGObjectDriver createObject(IGInterpreterObject aObject, boolean aForceLightweight, SourceLocation aLocation) throws ZamiaException {
 
 		long dbid = aObject.getDBID();
 
-		String id = aObject.getObject().getId();
-		
 		IGObject obj = aObject.getObject();
-		
-		IGObjectDriver driver = createDriver(id, obj.getDirection(), obj.getCat(), aObject.getStaticType(), aLocation);
+
+		IGObjectDriver driver = createDriver(obj.getId(), obj.getDirection(), obj.getCat(), aObject.getStaticType(), aForceLightweight || obj.isInputPort(), aLocation);
 
 		fDrivers.put(dbid, driver);
 
 		return driver;
 	}
 
-	protected IGObjectDriver createDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
+	protected IGObjectDriver createDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGTypeStatic aType, boolean aIsLightweight, SourceLocation aLocation) throws ZamiaException {
 		switch (aCat) {
 			case FILE:
-				return new IGFileDriver(aId, aDir, aCat, null, aType, aLocation);
+				return new IGFileDriver(aId, aDir, aCat, aType, aLocation);
 			default:
-				return new IGObjectDriver(aId, aDir, aCat, null, aType, aLocation);
+				return new IGObjectDriver(aId, aDir, aCat, aType, aLocation);
 		}
+	}
+
+	public boolean hasDriver(long aDBID) {
+		return fDrivers.containsKey(aDBID);
 	}
 
 	public IGObjectDriver getObjectDriver(long aDBID) {
@@ -89,7 +91,7 @@ public class IGInterpreterContext implements Serializable {
 		IGObjectDriver driver = fDrivers.get(dbid);
 
 		if (driver == null) {
-			driver = createObject(aObject, aLocation);
+			driver = createObject(aObject, false, aLocation);
 		}
 
 		driver.setValue(aValue, aLocation);

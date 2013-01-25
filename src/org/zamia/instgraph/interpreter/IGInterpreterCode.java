@@ -18,8 +18,10 @@ import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
+import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.interpreter.logger.IGHitCountLogger;
 import org.zamia.instgraph.interpreter.logger.IGLogicalExpressionLogger;
+import org.zamia.instgraph.sim.ref.IGSimProcess;
 import org.zamia.util.HashMapArray;
 
 
@@ -53,9 +55,16 @@ public class IGInterpreterCode implements Serializable {
 
 	private SourceLocation fLocation;
 
+	private transient IGSimProcess fRuntime;
+
 	public IGInterpreterCode(String aId, SourceLocation aLocation) {
 		fId = aId;
 		fLocation = aLocation;
+	}
+
+	public IGInterpreterCode(String aId, SourceLocation aLocation, IGSimProcess aRuntime) {
+		this(aId, aLocation);
+		fRuntime = aRuntime;
 	}
 
 	public void add(IGStmt stmt_) {
@@ -80,6 +89,18 @@ public class IGInterpreterCode implements Serializable {
 
 	public String getId() {
 		return fId;
+	}
+
+	public void enableMSProof(boolean enable) {
+		if (fRuntime != null) {
+			fRuntime.enableMSProof(enable);
+		}
+	}
+
+	public void makeObjectMSProof(IGObject aObject, SourceLocation aSrc) throws ZamiaException {
+		if (fRuntime != null) {
+			fRuntime.makeObjectMSProof(aObject, aSrc);
+		}
 	}
 
 	public void dump() {

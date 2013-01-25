@@ -1,0 +1,3 @@
+extern readonly WORK "examples/refsim/helperPackage"
+
+toplevel DRIVERS(PARTIALLYOVERLAPPINGNONRESOLVED)

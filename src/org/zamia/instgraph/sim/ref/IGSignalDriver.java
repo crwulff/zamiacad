@@ -9,12 +9,13 @@ import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.util.PathName;
-import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -49,7 +50,7 @@ public class IGSignalDriver extends IGObjectDriver {
 	 * details</i> section below.<p><p>
 	 * <b>Implementation details</b><p>
 	 * Alternatively, <tt>isEvent()</tt> value can be set from inside of
-	 * {@link #setNextValue(org.zamia.instgraph.IGStaticValue, org.zamia.SourceLocation)}
+	 * {@link #setNextValue(org.zamia.instgraph.IGStaticValue, org.zamia.SourceLocation, IGSimProcess)}
 	 * using {@link #updateEvent()}. In this case value will be updated with
 	 * each new {@link #fNextValue} and will always be valid. This alternative,
 	 * however, costs 2 extra value settings.
@@ -66,10 +67,14 @@ public class IGSignalDriver extends IGObjectDriver {
 	 * during a delta-cycle. These parts are further merged into a single {@link IGSignalChangeRequest} when processing
 	 * delta in {@link IGSimRef#processDelta(IGRequestList)}. <b>Must be cleared after each delta-cycle/merging!</b>
 	 */
-	private HashSet<IGSignalDriver> fToBeMerged = new HashSet<IGSignalDriver>();
+	private HashMap<IGSimProcess, List<IGSignalDriver>> fToBeMerged = new HashMap<IGSimProcess, List<IGSignalDriver>>();
 
-	public IGSignalDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
-		super(aId, aDir, aCat, aParent, aType, aLocation);
+	public IGSignalDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGTypeStatic aType, boolean aIsLightweight, SourceLocation aLocation) throws ZamiaException {
+		this(aId, aDir, aCat, null, aType, aLocation, aIsLightweight);
+	}
+
+	private IGSignalDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation, boolean aIsLightweight) throws ZamiaException {
+		super(aId, aDir, aCat, aParent, aType, aLocation, aIsLightweight);
 		initSignalListeners();
 	}
 
@@ -80,9 +85,9 @@ public class IGSignalDriver extends IGObjectDriver {
 	}
 
 	@Override
-	protected IGObjectDriver createChildDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
+	protected IGObjectDriver createChildDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation, boolean aIsLightweight) throws ZamiaException {
 
-		IGSignalDriver childDriver = new IGSignalDriver(aId, aDir, aCat, aParent, aType, aLocation);
+		IGSignalDriver childDriver = new IGSignalDriver(aId, aDir, aCat, aParent, aType, aLocation, aIsLightweight);
 
 		if (aParent != null && aParent instanceof IGSignalDriver) {
 
@@ -114,67 +119,170 @@ public class IGSignalDriver extends IGObjectDriver {
 		return fNextValue != null;
 	}
 
-	public void setNextValue(IGStaticValue aNextValue, SourceLocation aLocation) throws ZamiaException {
+	public void setNextValue(IGStaticValue aNextValue, SourceLocation aLocation, IGSimProcess aProcess) throws ZamiaException {
 
 		fNextValue = aNextValue;
 		fNextValueLocation = aLocation;
 
-		scheduleForMerge();
+		scheduleForMerge(aProcess);
 	}
 
-	private void scheduleForMerge() throws ZamiaException {
+	private void scheduleForMerge(IGSimProcess aProcess) throws ZamiaException {
 
 		IGSignalDriver targetDriver = getTargetSignalDriver();
 
-		targetDriver.fToBeMerged.add(this);
+		List<IGSignalDriver> processDrivers = targetDriver.fToBeMerged.get(aProcess);
+		if (processDrivers == null) {
+			processDrivers = new LinkedList<IGSignalDriver>();
+			targetDriver.fToBeMerged.put(aProcess, processDrivers);
+		}
+
+		processDrivers.add(this);
 	}
 
-	public IGSignalDriver mergeDrivers(IGSimProcess aProcess) throws ZamiaException {
+	/**
+	 * Merge all drivers of the underlying signal into a single driver and return it.
+	 * If merge happens, all other drivers become inactive after this method call.
+	 *
+	 * <p/>
+	 *
+	 * Merge is a 2-step process:
+	 * <br/> - drivers are merged processwise (within each process individually),
+	 * <br/> - values of processwise merge are merged using resolution function.
+	 *
+	 * @throws ZamiaException
+	 */
+	public void mergeDrivers() throws ZamiaException {
 
 		IGSignalDriver targetDriver = getTargetSignalDriver();
 
-		int numMerged = targetDriver.fToBeMerged.size();
+		if (targetDriver.isMergeRequired()) {
 
-		if (numMerged > 1) {
+			IGStaticValue lastValue = targetDriver.getValue(null);
 
-			IGStaticValue backupTarget = targetDriver.getValue(null);
+			DriversResolver driversResolver = targetDriver.mergeDriversProcesswise();
 
-			IGTypeStatic type = targetDriver.getCurrentType();
-			type = type.computeStaticType(aProcess, ASTErrorMode.EXCEPTION, null);
-			IGStaticValue defaultValue = IGStaticValue.generateZ(type, null, true);
+			targetDriver.resolveDrivers(driversResolver);
 
-			ArrayList<IGStaticValue> mergedValues = new ArrayList<IGStaticValue>(numMerged);
-			for (IGSignalDriver driver : targetDriver.fToBeMerged) {
+			//todo: if some part of the target is not set by drivers from fToBeMerged, this part must be restored from backupTarget into resolvedValue. ??? not needed anymore?
 
-				targetDriver.setValue(defaultValue, null);
+			IGStaticValue mergedValue = targetDriver.getValue(null);
 
-				driver.drive(); // note that driver becomes inactive after this call
-
-				mergedValues.add(targetDriver.getValue(null));
-			}
-
-			IGStaticValue resolvedValue = null;
-			for (IGStaticValue mergedValue : mergedValues) {
-				if (resolvedValue == null) {
-					resolvedValue = mergedValue;
-					continue;
-				}
-				resolvedValue = IGStaticValue.resolveStdLogic(resolvedValue, mergedValue);
-			}
-			//todo: if some part of the target is not set by drivers from fToBeMerged, this part must be restored from backupTarget into resolvedValue.
-			targetDriver.fNextValue = resolvedValue;
-
-			targetDriver.setValue(backupTarget, null);
+			targetDriver.setValue(lastValue, null);	// restore broken last value
+			targetDriver.setValue(mergedValue, null);
 
 			targetDriver.resetEvent();
 
-			targetDriver.fToBeMerged = new HashSet<IGSignalDriver>();
-
-			return targetDriver;
+			if (targetDriver.isActive()) {
+				throw new ZamiaException("IGSimRef: internal error: target driver remains active after merge: " + targetDriver.getIdInternal());
+			}
 		}
-		targetDriver.fToBeMerged = new HashSet<IGSignalDriver>();
 
-		return null;
+		targetDriver.fToBeMerged = new HashMap<IGSimProcess, List<IGSignalDriver>>();
+
+		targetDriver.clearWasActive();
+	}
+
+	private void resolveDrivers(DriversResolver driversResolver) throws ZamiaException {
+
+		if (getTargetDriver() != this) {
+			throw new ZamiaException("IGSimRef: IGSignalDriver: merge(): only target driver should be merged");
+		}
+
+		IGTypeStatic type = getCurrentType();
+
+		if (type.isArray()) {
+
+			for (IGObjectDriver driver : getArrayElementDrivers()) {
+
+				driversResolver.resolve(driver);
+			}
+		} else if (type.isRecord()) {
+
+			for (IGObjectDriver driver : getRecordFieldDrivers()) {
+
+				driversResolver.resolve(driver);
+			}
+		} else {
+
+			driversResolver.resolve(this);
+		}
+	}
+
+	/**
+	 * @return 	if there are at least 2 processes which drive this signal or at least 2 drivers inside a single process
+	 */
+	private boolean isMergeRequired() {
+		return fToBeMerged.size() > 1 || fToBeMerged.size() == 1 && fToBeMerged.values().iterator().next().size() > 1;
+	}
+
+	private DriversResolver mergeDriversProcesswise() throws ZamiaException {
+
+		if (getTargetDriver() != this) {
+			throw new ZamiaException("IGSimRef: IGSignalDriver: merge(): only target driver should be merged");
+		}
+
+		DriversResolver driversResolver = new DriversResolver(fToBeMerged.size());
+
+		IGStaticValue currentValue = getValue(null);
+
+		for (List<IGSignalDriver> processDrivers : fToBeMerged.values()) {
+
+			setValue(currentValue, null);
+			clearWasActive();
+
+			for (IGSignalDriver driver : processDrivers) {
+				driver.drive(); // note that driver becomes inactive after this call
+			}
+
+			driversResolver.add(getActiveElements());
+		}
+		return driversResolver;
+	}
+
+	private static class DriversResolver {
+
+		private Collection<HashMap<IGObjectDriver, IGStaticValue>> activeElements;
+
+		public DriversResolver(int size) {
+			activeElements = new ArrayList<HashMap<IGObjectDriver, IGStaticValue>>(size);
+		}
+
+		public void add(HashMap<IGObjectDriver, IGStaticValue> activeElements) {
+			this.activeElements.add(activeElements);
+		}
+
+		public void resolve(IGObjectDriver driver) throws ZamiaException {
+
+			ArrayList<IGStaticValue> values = new ArrayList<IGStaticValue>();
+
+			for (HashMap<IGObjectDriver, IGStaticValue> activeElement : activeElements) {
+				if (activeElement.containsKey(driver)) {
+					values.add(activeElement.get(driver));
+				}
+			}
+
+			IGStaticValue mergedValue;
+
+			if (values.isEmpty()) {
+
+				return;
+
+			} else if (values.size() == 1) {
+
+				mergedValue = values.get(0);
+
+			} else {
+
+				if (!driver.getCurrentType().getId().equals("STD_LOGIC")) {
+					throw new ZamiaException("Nonresolved signal '" + driver.getId() + "' has multiple sources");
+				}
+
+				mergedValue = IGStaticValue.resolveStdLogic(values);
+			}
+
+			driver.setValue(mergedValue, null);
+		}
 	}
 
 	private IGSignalDriver getTargetSignalDriver() throws ZamiaException {
@@ -236,7 +344,7 @@ public class IGSignalDriver extends IGObjectDriver {
 			setValue(fNextValue, fNextValueLocation);
 
 			if (IGSimRef.DEBUG) {
-				LOGGER.debug("IGSimRef: IGSignalDriver: drive(): setting %s to %s", getId(), fNextValue);
+				LOGGER.debug("IGSimRef: IGSignalDriver: drive(): setting %s to %s", getIdInternal(), fNextValue);
 			}
 
 			fNextValue = null;
@@ -377,7 +485,7 @@ public class IGSignalDriver extends IGObjectDriver {
 	}
 
 	/**
-	 * Method can be used to update {@link #fIsEvent} from inside of {@link #setNextValue(org.zamia.instgraph.IGStaticValue, org.zamia.SourceLocation)}
+	 * Method can be used to update {@link #fIsEvent} from inside of {@link #setNextValue(org.zamia.instgraph.IGStaticValue, org.zamia.SourceLocation, IGSimProcess)}
 	 *
 	 * @throws ZamiaException if driver cannot retrieve/set value
 	 */
@@ -431,6 +539,15 @@ public class IGSignalDriver extends IGObjectDriver {
 
 	public void setPath(PathName fPath) {
 		this.fPath = fPath;
+
+		if (debug) {
+			for (IGObjectDriver driver : getArrayElementDrivers()) {
+				((IGSignalDriver) driver).fPath = fPath;
+			}
+			for (IGObjectDriver driver : getRecordFieldDrivers()) {
+				((IGSignalDriver) driver).fPath = fPath;
+			}
+		}
 	}
 
 	public PathName getPath() {

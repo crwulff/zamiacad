@@ -979,7 +979,7 @@ public class IGBuiltinOperations {
 		IGObject intfG = container.resolveObject("GOOD");
 
 		IGTypeStatic lT = valueL.getStaticType();
-		IGTypeStatic vCT = aRuntime.getDriver(intfV, aErrorMode, aReport).getCurrentType();
+		IGTypeStatic vCT = aRuntime.getDriver(intfV).getCurrentType();
 		IGTypeStatic vT = intfV.getType().computeStaticType(aRuntime, aErrorMode, aReport);
 		if (valueL.toString().isEmpty()) {
 			if (intfG != null)
@@ -1272,7 +1272,7 @@ public class IGBuiltinOperations {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfF = container.resolveObject("F");
-		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF, aErrorMode, aReport).getTargetDriver();
+		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF).getTargetDriver();
 
 		IGObject intfL = container.resolveObject("L");
 
@@ -1288,7 +1288,7 @@ public class IGBuiltinOperations {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfF = container.resolveObject("F");
-		IGObjectDriver driverF = aRuntime.getDriver(intfF, aErrorMode, aReport).getTargetDriver();
+		IGObjectDriver driverF = aRuntime.getDriver(intfF).getTargetDriver();
 
 		IGObject intfL = container.resolveObject("L");
 		IGStaticValue valueL = aRuntime.getObjectValue(intfL);
@@ -1312,7 +1312,7 @@ public class IGBuiltinOperations {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfF = container.resolveObject("F");
-		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF, aErrorMode, aReport).getTargetDriver();
+		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF).getTargetDriver();
 
 		boolean isEOF = driverF.isEOF(aSub, aLocation);
 
@@ -1327,7 +1327,7 @@ public class IGBuiltinOperations {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfF = container.resolveObject("F");
-		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF, aErrorMode, aReport).getTargetDriver();
+		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF).getTargetDriver();
 
 		IGObject intfN = container.resolveObject("EXTERNAL_NAME");
 		IGStaticValue valueN = aRuntime.getObjectValue(intfN);
@@ -1377,7 +1377,7 @@ public class IGBuiltinOperations {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfF = container.resolveObject("F");
-		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF, aErrorMode, aReport).getTargetDriver();
+		IGFileDriver driverF = (IGFileDriver) aRuntime.getDriver(intfF).getTargetDriver();
 
 		driverF.close();
 

@@ -84,7 +84,7 @@ public class IGPushStmt extends IGStmt {
 		IGObject obj = getObject();
 		if (obj != null) {
 
-			IGObjectDriver driver = aRuntime.getDriver(obj, aErrorMode, aReport);
+			IGObjectDriver driver = aRuntime.getDriver(obj);
 			
 			if (driver == null) {
 				

@@ -353,6 +353,7 @@ public class IGTest {
 	}
 
 	@Test
+	@Ignore
 	public void testLiteral2() throws Exception {
 
 		runTest("examples/semantic/literal2Test", 1);

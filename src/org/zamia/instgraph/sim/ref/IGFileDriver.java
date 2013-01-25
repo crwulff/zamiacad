@@ -27,7 +27,6 @@ import org.zamia.instgraph.IGTypeStatic;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.vhdl.ast.VHDLNode;
-import org.zamia.zdb.ZDB;
 
 /**
  * @author Anton Chepurov
@@ -36,8 +35,8 @@ public class IGFileDriver extends IGObjectDriver {
 
 	private IGStaticValue fLineNr;
 
-	public IGFileDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
-		super(aId, aDir, aCat, aParent, aType, aLocation);
+	public IGFileDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
+		super(aId, aDir, aCat, aType, aLocation);
 	}
 
 	public IGStaticValue readLine(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {

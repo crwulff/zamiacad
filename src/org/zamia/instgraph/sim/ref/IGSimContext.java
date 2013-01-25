@@ -31,13 +31,13 @@ public class IGSimContext extends IGInterpreterContext {
 	}
 
 	@Override
-	protected IGObjectDriver createDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
+	protected IGObjectDriver createDriver(String aId, IGObject.OIDir aDir, IGObject.IGObjectCat aCat, IGTypeStatic aType, boolean aIsLightweight, SourceLocation aLocation) throws ZamiaException {
 
 		switch (aCat) {
 			case SIGNAL:
-				return new IGSignalDriver(aId, aDir, aCat, null, aType, aLocation);
+				return new IGSignalDriver(aId, aDir, aCat, aType, aIsLightweight, aLocation);
 			default:
-				return super.createDriver(aId, aDir, aCat, aType, aLocation);
+				return super.createDriver(aId, aDir, aCat, aType, aIsLightweight, aLocation);
 		}
 	}
 
@@ -60,5 +60,10 @@ public class IGSimContext extends IGInterpreterContext {
 
 	public PathName getPath() {
 		return fPath;
+	}
+
+	@Override
+	public String toString() {
+		return super.toString() + "<" + getPath() + ">";
 	}
 }

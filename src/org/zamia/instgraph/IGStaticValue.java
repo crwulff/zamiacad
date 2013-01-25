@@ -1160,98 +1160,87 @@ public class IGStaticValue extends IGOperation {
 		return resValue;
 	}
 
-	public static IGStaticValue resolveStdLogic(IGStaticValue aCurV, IGStaticValue aNewV) throws ZamiaException {
+	public static IGStaticValue resolveStdLogic(ArrayList<IGStaticValue> aValues) throws ZamiaException {
 
-		IGTypeStatic tCur = aCurV.getStaticType();
-		IGTypeStatic tNew = aNewV.getStaticType();
-		if (!tCur.conforms(tNew)) {
-			throw new ZamiaException("IGStaticValue: types of values being resolved don't conform to each other");
-		}
-
-		if (tCur.isArray()) {
-
-			IGTypeStatic elementType = tCur.getStaticElementType(null);
-			if (!elementType.isCharEnum()) {
-				throw new ZamiaException("IGStaticValue: resolution of array type with element " + elementType + " is not supported");
+		IGTypeStatic type = null;
+		IGStaticValue resolvedValue = null;
+		for (IGStaticValue value : aValues) {
+			if (resolvedValue == null) {
+				resolvedValue = value;
+				type = value.getStaticType();
+				continue;
 			}
+			if (resolvedValue.fIsCharLiteral) {
+				char curC = resolvedValue.fCharLiteral;
+				char newC = value.fCharLiteral;
 
-			IGStaticValueBuilder builder = new IGStaticValueBuilder(aCurV, null);
-			for (int i = 0, n = aCurV.fArrayValues.size(); i < n; i++) {
-				IGStaticValue elA = aCurV.fArrayValues.get(i - aCurV.fArrayOffset);
-				IGStaticValue elB = aNewV.fArrayValues.get(i - aNewV.fArrayOffset);
-				builder.set(i, resolveStdLogic(elA, elB), null);
-			}
-			return builder.buildConstant();
-		}
-		if (aCurV.fIsCharLiteral) {
-			char curC = aCurV.fCharLiteral;
-			char newC = aNewV.fCharLiteral;
-
-			if (curC == BIT_U || newC == BIT_U) {
-				curC = BIT_U;
-			} else {
-				switch (curC) {
-					case BIT_X:
-						break;
-					case BIT_0:
-						if (newC == BIT_X || newC == BIT_1 || newC == BIT_DC) {
-							curC = BIT_X;
-						}
-						break;
-					case BIT_1:
-						if (newC == BIT_X || newC == BIT_0 || newC == BIT_DC) {
-							curC = BIT_X;
-						}
-						break;
-					case BIT_Z:
-						curC = newC;
-						if (newC == BIT_DC) {
-							curC = BIT_X;
-						}
-						break;
-					case BIT_W:
-						if (newC == BIT_X || newC == BIT_DC) {
-							curC = BIT_X;
-						} else
-						if (newC == BIT_0 || newC == BIT_1) {
+				if (curC == BIT_U || newC == BIT_U) {
+					curC = BIT_U;
+				} else {
+					switch (curC) {
+						case BIT_X:
+							break;
+						case BIT_0:
+							if (newC == BIT_X || newC == BIT_1 || newC == BIT_DC) {
+								curC = BIT_X;
+							}
+							break;
+						case BIT_1:
+							if (newC == BIT_X || newC == BIT_0 || newC == BIT_DC) {
+								curC = BIT_X;
+							}
+							break;
+						case BIT_Z:
 							curC = newC;
-						}
-						break;
-					case BIT_L:
-						if (newC == BIT_X || newC == BIT_DC) {
-							curC = BIT_X;
-						} else
-						if (newC == BIT_0 || newC == BIT_1 || newC == BIT_W) {
+							if (newC == BIT_DC) {
+								curC = BIT_X;
+							}
+							break;
+						case BIT_W:
+							if (newC == BIT_X || newC == BIT_DC) {
+								curC = BIT_X;
+							} else
+							if (newC == BIT_0 || newC == BIT_1) {
+								curC = newC;
+							}
+							break;
+						case BIT_L:
+							if (newC == BIT_X || newC == BIT_DC) {
+								curC = BIT_X;
+							} else
+							if (newC == BIT_0 || newC == BIT_1 || newC == BIT_W) {
+								curC = newC;
+							} else
+							if (newC == BIT_H) {
+								curC = BIT_W;
+							}
+							break;
+						case BIT_H:
 							curC = newC;
-						} else
-						if (newC == BIT_H) {
-							curC = BIT_W;
-						}
-						break;
-					case BIT_H:
-						curC = newC;
-						if (newC == BIT_Z){
-							curC = BIT_H;
-						} else
-						if (newC == BIT_L){
-							curC = BIT_W;
-						} else
-						if (newC == BIT_DC){
+							if (newC == BIT_Z){
+								curC = BIT_H;
+							} else
+							if (newC == BIT_L){
+								curC = BIT_W;
+							} else
+							if (newC == BIT_DC){
+								curC = BIT_X;
+							}
+							break;
+						case BIT_DC:
 							curC = BIT_X;
-						}
-						break;
-					case BIT_DC:
-						curC = BIT_X;
-						break;
-					default:
-						throw new ZamiaException("IGStaticValue: resolution of charLiteral " + curC + " is not supported");
+							break;
+						default:
+							throw new ZamiaException("IGStaticValue: resolution of charLiteral " + curC + " is not supported");
+					}
 				}
-			}
-			return tCur.findEnumLiteral(curC);
+				resolvedValue = type.findEnumLiteral(curC);
 
-		} else {
-			throw new ZamiaException("IGStaticValue: resolution of " + tCur + " is not supported");
+			} else {
+				throw new ZamiaException("IGStaticValue: resolution of " + type + " is not supported");
+			}
 		}
+		return resolvedValue;
 	}
 
 	public static int getInt(String aString) {

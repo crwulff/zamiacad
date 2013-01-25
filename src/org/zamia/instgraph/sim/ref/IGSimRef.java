@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,6 +97,8 @@ public class IGSimRef implements IGISimulator {
 	private Set<IGSimProcess> fProcesses;
 
 	private IGAbstractProgressMonitor fMonitor;
+
+	private HashMap<Long, HashMap<PathName, IGSimProcess>> fWholeSignalDrivers;
 
 	public IGSimRef() {
 
@@ -253,11 +256,13 @@ public class IGSimRef implements IGISimulator {
 
 		fProcesses = new HashSet<IGSimProcess>();
 
+		fWholeSignalDrivers = new HashMap<Long, HashMap<PathName, IGSimProcess>>();
+
 		fSimSchedule = new IGSimSchedule();
 
 		PathName path = aToplevel.getStructure().getPath().getPath();
 
-		IGSimProcess moduleEnv = newProcess(path/* todo: or null? */);
+		IGSimProcess moduleEnv = newProcess(path/* todo: or null? */, path);
 		IGSimContext moduleContext = moduleEnv.pushContextFor(path);
 
 		initObjects(aToplevel.getContainer(), moduleEnv, path);
@@ -267,10 +272,8 @@ public class IGSimRef implements IGISimulator {
 		initStructure(aToplevel.getStructure(), moduleContext, path);
 	}
 
-	private IGSimProcess newProcess(PathName aPath) {
-		IGSimProcess process = new IGSimProcess(this, aPath, fZPrj);
-		fProcesses.add(process);
-		return process;
+	private IGSimProcess newProcess(PathName aPath, PathName aParentPath) {
+		return new IGSimProcess(this, aPath, aParentPath, fZPrj);
 	}
 
 	private void initStructure(IGStructure aStructure, IGSimContext aParentContext, PathName aParentPath) throws ZamiaException {
@@ -280,13 +283,18 @@ public class IGSimRef implements IGISimulator {
 
 			IGConcurrentStatement stmt = aStructure.getStatement(i);
 
+			PathName curPath = aParentPath.clonePathName();
+			if (stmt.getLabel() != null) {
+				curPath = curPath.append(stmt.getLabel());
+			}
+
 			if (stmt instanceof IGProcess) {
 
 				IGProcess proc = (IGProcess) stmt;
 
-				IGSimProcess processEnv = newProcess(aParentPath);
+				IGSimProcess processEnv = newProcess(curPath, aParentPath);
 				processEnv.pushContext(aParentContext);
-				processEnv.pushContextFor(aParentPath);
+				processEnv.pushContextFor(curPath);
 
 				IGContainer pContainer = proc.getContainer();
 
@@ -296,12 +304,14 @@ public class IGSimRef implements IGISimulator {
 
 				IGSequenceOfStatements seq = proc.getSequenceOfStatements();
 
-				IGInterpreterCode code = new IGInterpreterCode(proc.getLabel(), proc.computeSourceLocation());
+				IGInterpreterCode code = new IGInterpreterCode(proc.getLabel(), proc.computeSourceLocation(), processEnv);
 
 				seq.generateCode(code);
 
 				processEnv.call(code, ASTErrorMode.EXCEPTION, null);
 				processEnv.resume(ASTErrorMode.EXCEPTION, null);
+
+				fProcesses.add(processEnv);
 
 			} else if (stmt instanceof IGInstantiation) {
 
@@ -310,12 +320,11 @@ public class IGSimRef implements IGISimulator {
 				// get inst. module
 				IGModule instModule = fIGM.findModule(inst.getSignature());
 				IGContainer iContainer = instModule.getContainer();
-				PathName instPath = aParentPath.clonePathName().append(inst.getLabel());
 
 				// prepare environment for inst. module
-				IGSimProcess instEnv = newProcess(instPath);
+				IGSimProcess instEnv = newProcess(curPath, aParentPath);
 				instEnv.pushContext(aParentContext);
-				IGSimContext instContext = instEnv.pushContextFor(instPath);
+				IGSimContext instContext = instEnv.pushContextFor(curPath);
 
 				// init inst. module (GENERICS)
 				initObjects(LocalItemFilter.GENERICS, iContainer, instEnv, instEnv.getPath());
@@ -342,16 +351,14 @@ public class IGSimRef implements IGISimulator {
 				}
 
 				// init structure of inst. module (concurrent statements)
-				initStructure(instModule.getStructure(), instContext, instPath);
+				initStructure(instModule.getStructure(), instContext, curPath);
 
 			} else if (stmt instanceof IGStructure) {
 
 				IGStructure struct = (IGStructure) stmt;
 
-				PathName structPath = aParentPath.clonePathName().append(struct.getLabel());
-
 				// prepare environment for generated module
-				IGSimProcess structEnv = newProcess(structPath);
+				IGSimProcess structEnv = newProcess(curPath, aParentPath);
 				structEnv.pushContext(aParentContext); // for-generate constant will be added to parent context
 				// FIXME: TODO: the constant added to aParentContext will be visible everywhere aParentContext is used! It shouldn't be so. Use a new dedicated context here.  
 
@@ -360,7 +367,7 @@ public class IGSimRef implements IGISimulator {
 				initObjects(sContainer, structEnv, structEnv.getPath());
 
 				// init structure of generated module (concurrent statements)
-				initStructure(struct, aParentContext, structPath);
+				initStructure(struct, aParentContext, curPath);
 
 			} else {
 				throw new ZamiaException("IGSimRef: unsupported concurrent statement: " + stmt);
@@ -396,7 +403,7 @@ public class IGSimRef implements IGISimulator {
 		fChangeList = new ArrayList<IGSignalChange>();
 		fMappedChanges = new LinkedList<IGSignalChange>();
 
-		Collection<IGSignalChangeRequest> signalChanges = aRequestList.filterSignalChanges();
+		List<IGSignalChangeRequest> signalChanges = aRequestList.getSignalChanges();
 
 		mergeDrivers(signalChanges);
 
@@ -419,27 +426,14 @@ public class IGSimRef implements IGISimulator {
 
 	private void mergeDrivers(Collection<IGSignalChangeRequest> aSignalChanges) throws ZamiaException {
 
-		Collection<IGSignalChangeRequest> mergedRequests = new LinkedList<IGSignalChangeRequest>();
-
 		for (IGSignalChangeRequest req : aSignalChanges) {
 
 			IGSignalDriver driver = req.getDriver();
 
 			if (driver.isActive()) {
 
-				IGSignalDriver mergedDriver = driver.mergeDrivers(req.getProcess());
-
-				if (mergedDriver != null) {
-
-					IGSignalChangeRequest mergedRequest = new IGSignalChangeRequest(req.getProcess(), req.getTime(), mergedDriver.getNextValue(), mergedDriver, null);
-
-					mergedRequests.add(mergedRequest);
-				}
+				driver.mergeDrivers();
 			}
-		}
-
-		for (IGSignalChangeRequest mergeRequest : mergedRequests) {
-			aSignalChanges.add(mergeRequest);
 		}
 	}
 
@@ -455,18 +449,44 @@ public class IGSimRef implements IGISimulator {
 		fMonitor = aProgressMonitor;
 	}
 
-	private enum LocalItemFilter {
-		GENERICS, PORTS, LOCALS, ALL;
+	/**
+	 * Only bother about creating a Multiple Source Driver if a different process
+	 * has already been registered as a whole-driver of the signal.
+	 *
+	 *
+	 * @param aDBID signal to check
+	 * @param aParentPath
+	 * @param aProcess code of the process to check  @return if the signal is driven as a whole from more than one process (code) and it is not the specified code
+	 */
+	public boolean isMSProofRequiredForProcess(long aDBID, PathName aParentPath, IGSimProcess aProcess) {
 
-		public static boolean isGeneric(IGObject aObj) {
-			return aObj.getCat() == IGObject.IGObjectCat.CONSTANT && aObj.getDirection() == IGObject.OIDir.IN;
+		if (!fWholeSignalDrivers.containsKey(aDBID)) {
+			return false;
 		}
 
-		public static boolean isPort(IGObject aObj) {
-			IGObject.OIDir dir = aObj.getDirection();
-			return aObj.getCat() == IGObject.IGObjectCat.SIGNAL &&
-							dir != IGObject.OIDir.NONE && dir != IGObject.OIDir.APPEND;
+		HashMap<PathName, IGSimProcess> processByPath = fWholeSignalDrivers.get(aDBID);
+
+		if (!processByPath.containsKey(aParentPath)) {
+			return false;
 		}
+
+		return  processByPath.get(aParentPath) != aProcess;
+	}
+
+	public void registerMSProofProcess(long aDBID, PathName aParentPath, IGSimProcess aProcess) {
+
+		HashMap<PathName, IGSimProcess> processByPath = fWholeSignalDrivers.get(aDBID);
+
+		if (processByPath == null) {
+			processByPath = new HashMap<PathName, IGSimProcess>();
+			fWholeSignalDrivers.put(aDBID, processByPath);
+		}
+
+		processByPath.put(aParentPath, aProcess);
+	}
+
+	private static enum LocalItemFilter {
+		GENERICS, PORTS, LOCALS, ALL
 	}
 
 	private void initObjects(LocalItemFilter aFilter, IGContainer aContainer, IGInterpreterRuntimeEnv aEnv, PathName aPath) throws ZamiaException {
@@ -482,17 +502,17 @@ public class IGSimRef implements IGISimulator {
 
 			switch (aFilter) {
 				case GENERICS:
-					if (!LocalItemFilter.isGeneric(obj)) {
+					if (!obj.isGeneric()) {
 						continue;
 					}
 					break;
 				case PORTS:
-					if (!LocalItemFilter.isPort(obj)) {
+					if (!obj.isPort()) {
 						continue;
 					}
 					break;
 				case LOCALS:
-					if (LocalItemFilter.isGeneric(obj) || LocalItemFilter.isPort(obj)) {
+					if (obj.isGeneric() || obj.isPort()) {
 						continue;
 					}
 					break;

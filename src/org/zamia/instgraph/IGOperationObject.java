@@ -38,6 +38,7 @@ public class IGOperationObject extends IGOperation {
 
 	@Override
 	public void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
+		aCode.makeObjectMSProof(getObject(), computeSourceLocation());
 		aCode.add(new IGPushStmt(getObject(), computeSourceLocation(), getZDB()));
 
 		// FIXME?

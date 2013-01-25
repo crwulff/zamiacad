@@ -11,10 +11,12 @@ package org.zamia.instgraph.interpreter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGRecordField;
@@ -32,7 +34,23 @@ import org.zamia.instgraph.IGTypeStatic;
  * This class implements the simplest object semantics suitable for constants
  * and variables and is meant to be sub-classed to implement advanced
  * semantics e.g. for signals and signal parameters.
- * 
+ *
+ * This class exhibits chained behaviour for the next 3 cases:
+ * - range,
+ * - alias,
+ * - direct mapping (e.g. port mapping or Multiple Sources Proof drivers).
+ *
+ * Range/alias/mapped drivers are all lightweight. They do not store any actual
+ * data (apart from alias and range types), but instead delegate all calls to the
+ * target driver they are mapped to. Only this target driver stores the actual
+ * object values (i.e. is heavyweight).
+ *
+ * todo: think about introducing lightweight IGMappedDriver to represent chained drivers => should save some memory.
+ * todo: NB! drivers can switch from lightweight mode to heavyweight at runtime (see usages of
+ * todo: {@link #makeHeavyweight(org.zamia.SourceLocation)}).
+ * todo: hence introduction of IGMappedDriver class hierarchy will require ability to replace
+ * todo: drivers at runtime. too bothersome?
+ *
  * @author Guenter Bartsch
  *
  */
@@ -66,8 +84,10 @@ public class IGObjectDriver implements Serializable {
 
 	private int fIdxOffset = 0;
 
+	private boolean fWasActive;
+
 	// for logging/debugging purposes only:
-	private final static boolean debug = false;
+	protected final static boolean debug = false;
 
 	private final String fId;
 
@@ -75,7 +95,13 @@ public class IGObjectDriver implements Serializable {
 
 	private final int fCnt = counter++;
 
-	public IGObjectDriver(String aId, OIDir aDir, IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
+	private static int cleaned = 0;
+
+	public IGObjectDriver(String aId, OIDir aDir, IGObjectCat aCat, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
+		this(aId, aDir, aCat, null, aType, aLocation, false);
+	}
+
+	protected IGObjectDriver(String aId, OIDir aDir, IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation, boolean aIsLightweight) throws ZamiaException {
 		fId = aId;
 		fDir = aDir;
 		fCat = aCat;
@@ -83,13 +109,27 @@ public class IGObjectDriver implements Serializable {
 		fCurrentType = aType;
 		fParent = aParent;
 
+		if (aIsLightweight) {
+			return;
+		}
+		makeHeavyweight(aLocation);
+	}
+
+	void makeHeavyweight(SourceLocation aLocation) throws ZamiaException {
 		if (fDeclaredType.isArray()) {
 
+			if (fArrayElementDrivers != null) {
+				throw new ZamiaException("IGObjectDriver.makeHeavyweight(): internal error: driver is already heavyweight");
+			}
 			fArrayElementDrivers = new ArrayList<IGObjectDriver>();
 
 			adaptArraySize(aLocation);
 
 		} else if (fDeclaredType.isRecord()) {
+
+			if (fRecordFieldDrivers != null) {
+				throw new ZamiaException("IGObjectDriver.makeHeavyweight(): internal error: driver is already heavyweight");
+			}
 
 			int n = fDeclaredType.getNumRecordFields(aLocation);
 
@@ -101,14 +141,14 @@ public class IGObjectDriver implements Serializable {
 				IGTypeStatic rft = fDeclaredType.getStaticRecordFieldType(i);
 				String rfid = rf.getId();
 
-				fRecordFieldDrivers.put(rfid, createChildDriver(debug ? fId + "." + rfid : fId, fDir, fCat, this, rft, aLocation));
+				fRecordFieldDrivers.put(rfid, createChildDriver(debug ? fId + "." + rfid : fId, fDir, fCat, this, rft, aLocation, false));
 
 			}
 		}
 	}
 
-	protected IGObjectDriver createChildDriver(String aId, OIDir aDir, IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation) throws ZamiaException {
-		return new IGObjectDriver(aId, aDir, aCat, aParent, aType, aLocation);
+	protected IGObjectDriver createChildDriver(String aId, OIDir aDir, IGObjectCat aCat, IGObjectDriver aParent, IGTypeStatic aType, SourceLocation aLocation, boolean aIsLightweight) throws ZamiaException {
+		return new IGObjectDriver(aId, aDir, aCat, aParent, aType, aLocation, aIsLightweight);
 	}
 
 	public void setValue(IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
@@ -174,7 +214,7 @@ public class IGObjectDriver implements Serializable {
 			while (n < card) {
 				int idx = fIdxOffset + n;
 
-				fArrayElementDrivers.add(createChildDriver(debug ? fId + "(" + idx + ")" : fId, fDir, fCat, this, elementType, aLocation));
+				fArrayElementDrivers.add(createChildDriver(debug ? fId + "(" + idx + ")" : fId, fDir, fCat, this, elementType, aLocation, false));
 				n++;
 			}
 		}
@@ -223,11 +263,15 @@ public class IGObjectDriver implements Serializable {
 
 	protected void setValueInternal(IGStaticValue aValue, SourceLocation aLocation) throws ZamiaException {
 		fValue = aValue;
+		fWasActive = true;
 
 		// update children
 
 		if (fDeclaredType.isArray()) {
 
+			if (fArrayElementDrivers == null) {
+				return;
+			}
 			IGTypeStatic t = aValue.getStaticType();
 			if (!t.isArray()) {
 				throw new ZamiaException("IGObjectDriver: Internal error: tried to assign non-array value to an array.", aLocation);
@@ -265,6 +309,10 @@ public class IGObjectDriver implements Serializable {
 			}
 
 		} else if (fDeclaredType.isRecord()) {
+
+			if (fRecordFieldDrivers == null) {
+				return;
+			}
 
 			int n = fDeclaredType.getNumRecordFields(null);
 
@@ -320,6 +368,9 @@ public class IGObjectDriver implements Serializable {
 
 	}
 
+	/**
+	 * to be overridden in signal driver
+	 */
 	protected void clearReset() {
 		/* do nothing */
 	}
@@ -468,16 +519,17 @@ public class IGObjectDriver implements Serializable {
 		return isEventInternal();
 	}
 
-	// to be overriden in simulator subclass
+	/**
+	 * to be overridden in signal driver
+	 */
 	protected boolean isEventInternal() {
 		return false;
 	}
 
-	// to be overriden in simulator subclass
+	/**
+	 * to be overridden in signal driver
+	 */
 	public boolean isActive() {
-		if (fMappedTo != null) {
-			return fMappedTo.isActive();
-		}
 		return false;
 	}
 
@@ -494,6 +546,10 @@ public class IGObjectDriver implements Serializable {
 		return targetDriver;
 	}
 
+	public Collection<IGObjectDriver> getArrayElementDrivers() {
+		return fArrayElementDrivers != null ? fArrayElementDrivers : Collections.<IGObjectDriver>emptyList();
+	}
+
 	public IGObjectDriver getArrayElementDriver(int aIdx, SourceLocation aLocation) throws ZamiaException {
 		if (fMappedTo != null) {
 			if (fAliasedType != null) {
@@ -504,6 +560,10 @@ public class IGObjectDriver implements Serializable {
 		}
 
 		return fArrayElementDrivers.get(aIdx - fIdxOffset);
+	}
+
+	public Collection<IGObjectDriver> getRecordFieldDrivers() {
+		return fRecordFieldDrivers != null ? fRecordFieldDrivers.values() : Collections.<IGObjectDriver>emptyList();
 	}
 
 	public IGObjectDriver getRecordFieldDriver(String aId, SourceLocation aLocation) throws ZamiaException {
@@ -536,12 +596,47 @@ public class IGObjectDriver implements Serializable {
 		return fCat;
 	}
 
-	protected String getId() {
+	public String getId() {
+		return fId;
+	}
+
+	protected String getIdInternal() {
 		return fId + "@" + fCnt;
 	}
 
 	public void map(IGObjectDriver aActual, SourceLocation aLocation) throws ZamiaException {
 		fMappedTo = aActual;
+
+		// let's make it lightweight to save some memory s(all calls will be delegated to fMappedTo anyway)
+		makeLightweight();
+	}
+
+	private void makeLightweight() {
+
+		if (fDeclaredType.isArray()) {
+
+			if (fArrayElementDrivers == null) {
+				return;
+			}
+			for (IGObjectDriver driver : fArrayElementDrivers) {
+				driver.makeLightweight();
+			}
+
+			cleaned += fArrayElementDrivers.size();
+			fArrayElementDrivers = null;
+
+		} else if (fDeclaredType.isRecord()) {
+
+			if (fRecordFieldDrivers == null) {
+				return;
+			}
+			for (IGObjectDriver driver : fRecordFieldDrivers.values()) {
+				driver.makeLightweight();
+			}
+
+			cleaned += fRecordFieldDrivers.size();
+			fRecordFieldDrivers = null;
+		}
 	}
 
 	public IGTypeStatic getCurrentType() {
@@ -569,7 +664,7 @@ public class IGObjectDriver implements Serializable {
 
 		String id = debug ? fId + "(" + aRange + ")" : fId;
 
-		IGObjectDriver rangeDriver = createChildDriver(id, fDir, fCat, null, aRangeType, aLocation);
+		IGObjectDriver rangeDriver = createChildDriver(id, fDir, fCat, null, aRangeType, aLocation, true);
 
 		int rangeOffset = (int) aRangeType.getStaticIndexType(aLocation).getStaticLow(aLocation).getOrd();
 		IGTypeStatic currentType = getCurrentType();
@@ -595,7 +690,7 @@ public class IGObjectDriver implements Serializable {
 
 		String id = debug ? "&[" + toString() + "]{" + aAliasType + "}" : fId;
 
-		IGObjectDriver aliasedDriver = createChildDriver(id, fDir, fCat, null, aAliasType, aLocation);
+		IGObjectDriver aliasedDriver = createChildDriver(id, fDir, fCat, null, aAliasType, aLocation, true);
 
 		int aliasOffset = (int) aAliasType.getStaticIndexType(aLocation).getStaticLow(aLocation).getOrd();
 		IGTypeStatic currentType = getCurrentType();
@@ -613,6 +708,72 @@ public class IGObjectDriver implements Serializable {
 
 	public void setDir(OIDir aDir) {
 		fDir = aDir;
+	}
+
+	public boolean isInputPort() {
+		return IGObject.isInputPort(fCat, fDir);
+	}
+
+	protected HashMap<IGObjectDriver, IGStaticValue> getActiveElements() throws ZamiaException {
+
+		if (getTargetDriver() != this) {
+			throw new ZamiaException("IGSimRef: IGObjectDriver: getActiveElements(): not a target driver");
+		}
+
+		HashMap<IGObjectDriver, IGStaticValue> ret = new HashMap<IGObjectDriver, IGStaticValue>();
+
+		if (fDeclaredType.isArray()) {
+
+			for (IGObjectDriver driver : fArrayElementDrivers) {
+				addActive(driver, ret);
+			}
+
+		} else if (fDeclaredType.isRecord()) {
+
+			for (IGObjectDriver driver : fRecordFieldDrivers.values()) {
+				addActive(driver, ret);
+			}
+
+		} else {
+
+			addActive(this, ret);
+		}
+
+		return ret;
+	}
+
+	private void addActive(IGObjectDriver driver, HashMap<IGObjectDriver, IGStaticValue> actives) {
+		if (driver.fWasActive) {
+			actives.put(driver, driver.fValue);
+			driver.fWasActive = false;
+		}
+	}
+
+	protected void clearWasActive() {
+
+		if (fDeclaredType.isArray() && fArrayElementDrivers != null) {
+
+			for (IGObjectDriver driver : fArrayElementDrivers) {
+				driver.fWasActive = false;
+			}
+
+		} else if (fDeclaredType.isRecord() && fRecordFieldDrivers != null) {
+
+			for (IGObjectDriver driver : fRecordFieldDrivers.values()) {
+				driver.fWasActive = false;
+			}
+
+		}
+
+		fWasActive = false;
+	}
+
+	public static int geNumDrivers() {
+		return counter;
+	}
+
+	public static int geNumCleanedDrivers() {
+		return cleaned;
 	}
 
 	protected <D extends IGObjectDriver, R extends IGInterpreterRuntimeEnv>

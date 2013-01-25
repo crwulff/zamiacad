@@ -52,7 +52,9 @@ public abstract class IGOperation extends IGContainerItem {
 
 	public void generateCodeTransparentForLineCoverage(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
 		aCode.muteExecCount();
+		aCode.enableMSProof(this instanceof IGOperationObject);
 		generateCode(aFromInside, aCode);
+		aCode.enableMSProof(false);
 		aCode.unmuteExecCount();
 	}
 

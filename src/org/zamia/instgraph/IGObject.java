@@ -111,4 +111,20 @@ public final class IGObject extends IGContainerItem {
 	public void setInitialValue(IGOperation aIv) {
 		fInitialValue = aIv;
 	}
+
+	public boolean isGeneric() {
+		return fCat == IGObjectCat.CONSTANT && fDir == OIDir.IN;
+	}
+
+	public boolean isPort() {
+		return fCat == IGObjectCat.SIGNAL && fDir != OIDir.NONE && fDir != OIDir.APPEND;
+	}
+
+	public boolean isInputPort() {
+		return isInputPort(fCat, fDir);
+	}
+
+	public static boolean isInputPort(IGObjectCat aCat, OIDir aDir) {
+		return aCat == IGObjectCat.SIGNAL && aDir == OIDir.IN;
+	}
 }

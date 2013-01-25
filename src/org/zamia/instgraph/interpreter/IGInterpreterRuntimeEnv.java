@@ -81,16 +81,18 @@ public class IGInterpreterRuntimeEnv {
 	private ZamiaProject fZPrj;
 
 	public IGInterpreterRuntimeEnv(IGInterpreterCode aCode, ZamiaProject aZPrj) {
-		reset();
+		init();
 		fCode = aCode;
 		fZPrj = aZPrj;
 
 		pushContext(fZPrj.getDUM().getGlobalPackageContext());
 
-		fCodeSet.add(fCode);
+		if (fCode != null) {
+			fCodeSet.add(fCode);
+		}
 	}
 
-	public void reset() {
+	private void init() {
 		fPC = 0;
 		fContexts = new ZStack<IGInterpreterContext>();
 		fStructureContexts = new HashMap<IGStructure, IGInterpreterContext>();
@@ -294,7 +296,7 @@ public class IGInterpreterRuntimeEnv {
 		
 		IGInterpreterObject intObject = new IGInterpreterObject(aObj, type);
 		
-		IGObjectDriver driver = context.createObject(intObject, aLocation);
+		IGObjectDriver driver = context.createObject(intObject, false, aLocation);
 		
 		IGOperation iv = aObj.getInitialValue(); // if initial value was explicitly specified
 		if (iv != null) {
@@ -312,12 +314,14 @@ public class IGInterpreterRuntimeEnv {
 			}
 			
 			driver.setValue(value, aLocation);
+			driver.clearWasActive();
 		} else {
 			// default initial value
 			IGStaticValue zValue = IGStaticValue.generateZ(aObj.getType().computeStaticType(this, ASTErrorMode.EXCEPTION, null), aLocation);
 			IGTypeStatic zT = zValue.getStaticType();
 			if (!(zT.isArray() && zT.isUnconstrained())) {
 				driver.setValue(zValue, aLocation);
+				driver.clearWasActive();
 			}
 
 		}
@@ -325,7 +329,7 @@ public class IGInterpreterRuntimeEnv {
 		return driver;
 	}
 
-	public IGObjectDriver getDriver(IGObject aObj, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
+	public IGObjectDriver getDriver(IGObject aObj) {
 		int n = fContexts.size();
 		long dbid = aObj.getDBID();
 		for (int i = n - 1; i >= 0; i--) {
@@ -339,7 +343,7 @@ public class IGInterpreterRuntimeEnv {
 	
 	public IGStaticValue getObjectValue(IGObject aObj) throws ZamiaException {
 		
-		IGObjectDriver driver = getDriver(aObj, ASTErrorMode.EXCEPTION, null);
+		IGObjectDriver driver = getDriver(aObj);
 		if (driver == null) {
 			return null;
 		}
@@ -409,7 +413,7 @@ public class IGInterpreterRuntimeEnv {
 		return fZPrj;
 	}
 
-	private IGInterpreterContext getCurrentContext() {
+	protected IGInterpreterContext getCurrentContext() {
 		int n = fContexts.size();
 		if (n == 0) {
 			return null;
@@ -469,50 +473,38 @@ public class IGInterpreterRuntimeEnv {
 
 	public void collectExecutedLines(IGHitCountLogger aLineLogger) {
 		for (IGInterpreterCode code : fCodeSet) {
-			if (code != null) {
-				code.collectExecutedLines(aLineLogger);
-			}
+			code.collectExecutedLines(aLineLogger);
 		}
 	}
 
 	public void collectAllAssignments(IGHitCountLogger aAssignmentLogger) {
 		for (IGInterpreterCode code : fCodeSet) {
-			if (code != null) {
-				code.collectAllAssignments(aAssignmentLogger);
-			}
+			code.collectAllAssignments(aAssignmentLogger);
 		}
 	}
 
 	public void collectExecutedAssignments(IGHitCountLogger aAssignmentLogger) {
 		for (IGInterpreterCode code : fCodeSet) {
-			if (code != null) {
-				code.collectExecutedAssignments(aAssignmentLogger);
-			}
+			code.collectExecutedAssignments(aAssignmentLogger);
 		}
 	}
 
 	public void collectExecutedConditions(IGLogicalExpressionLogger aConditionLogger) {
 		for (IGInterpreterCode code : fCodeSet) {
-			if (code != null) {
-				code.collectExecutedConditions(aConditionLogger);
-			}
+			code.collectExecutedConditions(aConditionLogger);
 		}
 	}
 
 	public void collectExecutedBranches(IGLogicalExpressionLogger aBranchLogger) {
 		for (IGInterpreterCode code : fCodeSet) {
-			if (code != null) {
-				code.collectExecutedBranches(aBranchLogger);
-			}
+			code.collectExecutedBranches(aBranchLogger);
 		}
 	}
 
 	public void printStat(PrintStream out) {
 		for (IGInterpreterCode code : fCodeSet) {
-			if (code != null) {
-				out.println(code.toString());
-				code.dump(out);
-			}
+			out.println(code.toString());
+			code.dump(out);
 		}
 	}
 

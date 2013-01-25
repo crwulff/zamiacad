@@ -12,8 +12,7 @@ import org.zamia.ZamiaException;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
+import java.util.List;
 
 
 /**
@@ -25,12 +24,15 @@ public class IGRequestList {
 
 	private BigInteger fTime;
 
-	private ArrayList<IGSimRequest> fRequests;
+	private ArrayList<IGSignalChangeRequest> fSignalRequests;
+
+	private ArrayList<IGWakeupRequest> fWakeupRequests;
 
 	public IGRequestList(BigInteger aTime, IGRequestList aNext) {
 		fTime = aTime;
 		fNext = aNext;
-		fRequests = new ArrayList<IGSimRequest>();
+		fSignalRequests = new ArrayList<IGSignalChangeRequest>();
+		fWakeupRequests = new ArrayList<IGWakeupRequest>();
 	}
 
 	public IGRequestList getNext() {
@@ -42,22 +44,23 @@ public class IGRequestList {
 	}
 
 	public void addRequest(IGSimRequest aRequest) {
-		fRequests.add(aRequest);
+		if (aRequest instanceof IGSignalChangeRequest) {
+			fSignalRequests.add(((IGSignalChangeRequest) aRequest));
+		}
+		if (aRequest instanceof IGWakeupRequest) {
+			fWakeupRequests.add((IGWakeupRequest) aRequest);
+		}
 	}
 
 	public void executeSignals(IGSimRef aSimulator) throws ZamiaException {
-		for (IGSimRequest req : fRequests) {
-			if (req instanceof IGSignalChangeRequest) {
-				req.execute(aSimulator);
-			}
+		for (IGSignalChangeRequest req : fSignalRequests) {
+			req.execute(aSimulator);
 		}
 	}
 
 	public void executeWakeups(IGSimRef aSimulator) throws ZamiaException {
-		for (IGSimRequest req : fRequests) {
-			if (req instanceof IGWakeupRequest) {
-				req.execute(aSimulator);
-			}
+		for (IGWakeupRequest req : fWakeupRequests) {
+			req.execute(aSimulator);
 		}
 	}
 
@@ -66,7 +69,12 @@ public class IGRequestList {
 	}
 
 	public void cancelAllWakeups(IGSimProcess aProcess) {
-		for (IGSimRequest req : fRequests) {
+		for (IGSimRequest req : fWakeupRequests) {
+			if (req.getProcess() == aProcess) {
+				req.setCanceled(true);
+			}
+		}
+		for (IGSimRequest req : fSignalRequests) {
 			if (req.getProcess() == aProcess) {
 				req.setCanceled(true);
 			}
@@ -75,11 +83,12 @@ public class IGRequestList {
 
 	@Override
 	public String toString() {
-		StringBuffer buf = new StringBuffer("@ ");
+		StringBuilder buf = new StringBuilder("@ ");
 
-		buf.append(fTime).append("(").append(fRequests.size()).append(")").append(": ");
+		buf.append(fTime).append("(").append(fSignalRequests.size() + fWakeupRequests.size()).append(")").append(": ");
 
-		buf.append(fRequests);
+		buf.append(fSignalRequests);
+		buf.append(fWakeupRequests);
 
 		if (fNext != null) {
 			buf.append(" (more in next...)");
@@ -88,13 +97,7 @@ public class IGRequestList {
 		return buf.toString();
 	}
 
-	public Collection<IGSignalChangeRequest> filterSignalChanges() {
-		Collection<IGSignalChangeRequest> signalChanges = new LinkedList<IGSignalChangeRequest>();
-		for (IGSimRequest req : fRequests) {
-			if (req instanceof IGSignalChangeRequest) {
-				signalChanges.add((IGSignalChangeRequest) req);
-			}
-		}
-		return signalChanges;
+	public List<IGSignalChangeRequest> getSignalChanges() {
+		return fSignalRequests;
 	}
 }

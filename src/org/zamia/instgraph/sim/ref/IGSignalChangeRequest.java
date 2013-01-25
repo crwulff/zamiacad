@@ -42,7 +42,7 @@ public class IGSignalChangeRequest extends IGSimRequest {
 		if (isCanceled()) {
 			return;
 		}
-		fSignalDriver.setNextValue(fValue, fLocation);
+		fSignalDriver.setNextValue(fValue, fLocation, fProcess);
 	}
 
 	public BigInteger getTime() {

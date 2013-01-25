@@ -26,6 +26,7 @@ import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.ZamiaProjectBuilder;
 import org.zamia.instgraph.IGStaticValue;
+import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.util.PathName;
 import org.zamia.vhdl.ast.DMUID;
 
@@ -495,8 +496,65 @@ public class IGRefSimTest {
 				new File("examples/erados/SOFTWARE/SPARTAN3_STARTERKIT/TEST_PROCESSOR_PROGRAMS/OBJECT_CODE.OC.MIF"));
 	}
 
+	@Test
+	public void testDlx() throws Exception {
+
+		runTest("examples/dlx", 157, 5000);
+	}
+
+	@Test
+	public void multipleDriversInOneProcess() throws Exception {
+
+		runTest("examples/refsim/drivers", "BuildPathSingleProcess.txt", 1, 50);
+	}
+
+	@Test
+	public void multipleDriversInMultipleProcess() throws Exception {
+
+		runTest("examples/refsim/drivers", "BuildPathMultipleProcesses.txt", 1, 100);
+	}
+
+	@Test (expected = MarkerException.class)
+	public void multipleNonresolvedDriversInMultipleProcess() throws Exception {
+
+		try {
+			runTest("examples/refsim/drivers", "BuildPathMultipleNonresolvedProcesses.txt", 1, 30);
+		} catch (ZamiaException e) {
+			String message = e.getMessage();
+			if (message.contains("Nonresolved signal 'SIG(0)' has multiple sources")
+					|| message.contains("Nonresolved signal 'SIG' has multiple sources")) {
+				throw new MarkerException();
+			}
+		}
+	}
+
+	@Test
+	public void multipleNonoverlappingNonresolvedDriversInMultipleProcess() throws Exception {
+
+		runTest("examples/refsim/drivers", "BuildPathMultipleNonoverlappingNonresolvedProcesses.txt", 1, 30);
+	}
+
+	@Test (expected = MarkerException.class)
+	public void multiplePartiallyOverlappingNonresolvedDriversInMultipleProcess() throws Exception {
+
+		try {
+			runTest("examples/refsim/drivers", "BuildPathMultiplePartiallyOverlappingNonresolvedProcesses.txt", 1, 30);
+		} catch (ZamiaException e) {
+			String message = e.getMessage();
+			if (message.contains("Nonresolved signal 'SIG(4)' has multiple sources")
+					|| message.contains("Nonresolved signal 'SIG' has multiple sources")) {
+				throw new MarkerException();
+			}
+		}
+	}
+
 	@After
 	public void tearDown() throws Exception {
+		Runtime runtime = Runtime.getRuntime();
+		long used = runtime.totalMemory() - runtime.freeMemory();
+		logger.info("### DUMP ###  Number of IGObjectDrivers: %s", IGObjectDriver.geNumDrivers());
+		logger.info("### DUMP ###  Number of cleaned IGObjectDrivers: %s", IGObjectDriver.geNumCleanedDrivers());
+		logger.info("### DUMP ###  MEMORY USED ###  >> %s", used);
 		if (fZPrj != null) {
 			fZPrj.shutdown();
 			fZPrj = null;

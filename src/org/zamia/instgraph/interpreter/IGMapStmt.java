@@ -12,6 +12,7 @@ import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGStaticValue;
+import org.zamia.instgraph.sim.ref.IGSignalDriver;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
@@ -36,6 +37,8 @@ public class IGMapStmt extends IGStmt {
 	@Override
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
+		SourceLocation src = computeSourceLocation();
+
 		IGStackFrame actualSF = aRuntime.pop();
 		IGStackFrame formalSF = aRuntime.pop();
 
@@ -43,7 +46,7 @@ public class IGMapStmt extends IGStmt {
 		IGObjectDriver formal = formalSF.getObjectDriver();
 
 		if (formal == null) {
-			throw new ZamiaException("IGMapStmt: Invalid formal", computeSourceLocation());
+			throw new ZamiaException("IGMapStmt: Invalid formal", src);
 		}
 		
 		if (actual == null) {
@@ -51,21 +54,23 @@ public class IGMapStmt extends IGStmt {
 			IGStaticValue v = actualSF.getValue();
 
 			if (v == null) {
-				ZamiaException e = new ZamiaException ("IGMapStmt: actual is unitialized.", computeSourceLocation());
+				String msg = "IGMapStmt: actual is uninitialized.";
 				if (aErrorMode == ASTErrorMode.RETURN_NULL) {
 					if (aReport != null) {
-						aReport.append(e);
+						aReport.append(msg, src);
 					}
 					return ReturnStatus.ERROR;
 				} else {
-					throw e;
+					throw new ZamiaException (msg, src);
 				}
 			}
 
-			formal.schedule(false, null, null, v, aRuntime, computeSourceLocation());
+			ensureHeavyweight(formal, src);
+
+			formal.schedule(false, null, null, v, aRuntime, src);
 
 		} else {
-			formal.map(actual, computeSourceLocation());
+			formal.map(actual, src);
 		}
 		
 		if (IGInterpreterRuntimeEnv.dump) {
@@ -73,6 +78,28 @@ public class IGMapStmt extends IGStmt {
 		}
 
 		return ReturnStatus.CONTINUE;
+	}
+
+	private void ensureHeavyweight(IGObjectDriver driver, SourceLocation src) throws ZamiaException {
+
+		if (!driver.isInputPort()) {
+			return;
+		}
+		driver.makeHeavyweight(src);
+
+		if (driver instanceof IGSignalDriver) {
+			IGSignalDriver signalDriver = (IGSignalDriver) driver;
+			// restore broken missing path, last value and current value in children drivers
+			signalDriver.setPath(signalDriver.getPath());
+			IGStaticValue curValue = signalDriver.getValue(src);
+			IGStaticValue lastValue = signalDriver.getLastValue();
+			if (lastValue != null) {
+				signalDriver.setValue(lastValue, src);
+			}
+			if (curValue != null) {
+				signalDriver.setValue(curValue, src);
+			}
+		}
 	}
 
 }
