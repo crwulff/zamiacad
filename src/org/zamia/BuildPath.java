@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,7 +26,6 @@ import org.zamia.util.HashSetArray;
 import org.zamia.util.SimpleRegexp;
 import org.zamia.vhdl.ast.DMUID;
 import org.zamia.vhdl.ast.DMUID.LUType;
-
 
 /**
  * 
@@ -43,6 +43,20 @@ public class BuildPath implements Serializable {
 	public final static FSCache fsCache = FSCache.getInstance();
 
 	private static final int NUM_THREADS = 32;
+
+	public enum Symbol {
+		NOSYMBOL, IDENTIFIER, STRING, EOF, EQUALS, PERIOD, LPAREN, RPAREN,
+		
+		__KEYWORD__START__,
+		EXTERN, LOCAL, TOPLEVEL, READONLY, IGNORE, INCLUDE, OPTION, TRUE, FALSE, TOPDOWN, BOTTOMUP, LIST, NONE, DEFAULT, EXEC, RECURSIVE, NONRECURSIVE, SYNTHESIZE,
+		__KEYWORD__END__,
+	};
+	
+	static final public HashMap<String, Symbol> keyWords = new HashMap<String, Symbol>();
+	static {
+		for (Symbol s : EnumSet.range(Symbol.__KEYWORD__START__, Symbol.__KEYWORD__END__))
+			keyWords.put(s.name().toLowerCase(), s);
+	}
 
 	static class BPVar implements Serializable {
 		public BPVar(String aVarId, String aValue) {
@@ -69,10 +83,6 @@ public class BuildPath implements Serializable {
 
 	private ArrayList<String> fScripts;
 
-	public enum Symbol {
-		NOSYMBOL, IDENTIFIER, STRING, EOF, EXTERN, LOCAL, EQUALS, TOPLEVEL, PERIOD, LPAREN, RPAREN, READONLY, IGNORE, INCLUDE, OPTION, TRUE, FALSE, TOPDOWN, BOTTOMUP, LIST, DEFAULT, NONE, EXEC, RECURSIVE, NONRECURSIVE, SYNTHESIZE
-	};
-
 	private transient Reader fSrc;
 
 	private Symbol fSym;
@@ -80,8 +90,6 @@ public class BuildPath implements Serializable {
 	private StringBuilder fBuf;
 
 	private int fLine, fCol;
-
-	private HashMap<String, Symbol> fKeyWords;
 
 	private char fCh;
 
@@ -99,27 +107,6 @@ public class BuildPath implements Serializable {
 
 	public BuildPath(SourceFile sourceFile) {
 		setSrc(sourceFile);
-		fKeyWords = new HashMap<String, Symbol>();
-
-		fKeyWords.put("extern", Symbol.EXTERN);
-		fKeyWords.put("local", Symbol.LOCAL);
-		fKeyWords.put("toplevel", Symbol.TOPLEVEL);
-		fKeyWords.put("readonly", Symbol.READONLY);
-		fKeyWords.put("ignore", Symbol.IGNORE);
-		fKeyWords.put("include", Symbol.INCLUDE);
-		fKeyWords.put("option", Symbol.OPTION);
-		fKeyWords.put("true", Symbol.TRUE);
-		fKeyWords.put("false", Symbol.FALSE);
-		fKeyWords.put("topdown", Symbol.TOPDOWN);
-		fKeyWords.put("bottomup", Symbol.BOTTOMUP);
-		fKeyWords.put("list", Symbol.LIST);
-		fKeyWords.put("none", Symbol.NONE);
-		fKeyWords.put("default", Symbol.DEFAULT);
-		fKeyWords.put("exec", Symbol.EXEC);
-		fKeyWords.put("recursive", Symbol.RECURSIVE);
-		fKeyWords.put("nonrecursive", Symbol.NONRECURSIVE);
-		fKeyWords.put("synthesize", Symbol.SYNTHESIZE);
-
 		fBuf = new StringBuilder();
 
 		fDefaultEntry = new BuildPathEntry(null, "WORK", false, Integer.MAX_VALUE, false, true, true, true, null);
@@ -928,8 +915,8 @@ public class BuildPath implements Serializable {
 
 		fSym = Symbol.IDENTIFIER;
 		String ids = fBuf.toString();
-		if (fKeyWords.containsKey(ids)) {
-			fSym = fKeyWords.get(ids);
+		if (keyWords.containsKey(ids)) {
+			fSym = keyWords.get(ids);
 		}
 	}
 
