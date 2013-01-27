@@ -1213,9 +1213,9 @@ public class IGBuiltinOperations {
 		IGStaticValue valueL = aRuntime.getObjectValue(intfL);
 
 		// vairables in procedures (as opposed to vars in processes) are not initialized
-		// at sim start, so we can get line eq null at process start.
-		if (valueL == null)
-			valueL = IGFileDriver.newLineBuilder(0, container.findStringType(), aRuntime, aLocation, aErrorMode, aReport).buildConstant();
+		// at sim start, so we can get line eq null at process start. 
+//		if (valueL == null) // Once implicit default initialization was fixed, this is not necessary
+//			valueL = IGFileDriver.newLineBuilder(0, container.findStringType(), aRuntime, aLocation, aErrorMode, aReport).buildConstant();
 
 		IGTypeStatic lT = valueL.getStaticType();
 		String strV = valueV.toString();
