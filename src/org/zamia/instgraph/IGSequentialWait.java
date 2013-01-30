@@ -55,6 +55,30 @@ public class IGSequentialWait extends IGSequentialStatement {
 				fSensitivityList.add(aSensitivityList.get(i));
 			}
 		}
+		
+		
+		//LRM 10.2 Wait statement: If no sensitivity clause appears, the sensitivity set is 
+		// set to primaries in the condition of the condition clause.
+		if (fSensitivityList == null && fConditionClause != null) {
+
+			HashSetArray<IGItemAccess> accessedItems = new HashSetArray<IGItemAccess>();
+
+			fConditionClause.computeAccessedItems(false, null, AccessType.Read, 0, accessedItems);
+			int n = accessedItems.size();
+			fSensitivityList = new ArrayList<IGOperation>(n);
+			for (int i = 0; i < n; i++) {
+
+				IGItemAccess acc = accessedItems.get(i);
+
+				IGItem item = acc.getItem();
+				if (item instanceof IGObject) {
+					IGOperationObject obj = new IGOperationObject((IGObject) item, aSrc, aZDB);
+					fSensitivityList.add(obj);
+				}
+			}
+
+		}
+		
 	}
 
 	@Override
@@ -98,41 +122,25 @@ public class IGSequentialWait extends IGSequentialStatement {
 			}
 		}
 
-		HashSetArray<IGItemAccess> accessedItems = new HashSetArray<IGItemAccess>();
-
-		if (fConditionClause != null) {
-
-			fConditionClause.computeAccessedItems(false, null, AccessType.Read, 0, accessedItems);
-
-			int n = accessedItems.size();
-			for (int i = 0; i < n; i++) {
-
-				IGItemAccess acc = accessedItems.get(i);
-
-				IGItem item = acc.getItem();
-				if (item instanceof IGObject) {
-
-					IGObject obj = (IGObject) item;
-
-					aCode.add(new IGPushStmt(obj, computeSourceLocation(), getZDB()));
-					aCode.add(new IGScheduleEventWakeupStmt(computeSourceLocation(), getZDB()));
-				}
-			}
-
-		}
-
 		IGLabel waitLoopLabel = new IGLabel();
 		IGLabel waitDoneLabel = new IGLabel();
 		aCode.defineLabel(waitLoopLabel);
 
 		aCode.add(new IGWaitStmt(computeSourceLocation(), getZDB()));
 
+		//The timeout clause specifies the maximum amount of time the process will remain  
+		// suspended at this wait statement.
 		if (fTimeoutClause != null) {
 			aCode.add(new IGJumpTimeoutStmt(waitDoneLabel, computeSourceLocation(), getZDB()));
 		}
 
+		//LRM: The suspended process also resumes as a result of an event occurring on any signal  
+		// in the sensitivity set of the wait statement. If such an event occurs, the condition in  
+		// the condition clause is evaluated.
 		if (fSensitivityList != null) {
 
+			IGLabel condLabel = new IGLabel();
+			
 			int n = getNumSensitivityOps();
 
 			for (int i = 0; i < n; i++) {
@@ -140,18 +148,24 @@ public class IGSequentialWait extends IGSequentialStatement {
 				IGOperation zs = getSensitivityListOp(i);
 				zs.generateCode(true, aCode);
 
-				aCode.add(new IGJumpEventStmt(waitDoneLabel, computeSourceLocation(), getZDB()));
+				aCode.add(new IGJumpEventStmt(condLabel, computeSourceLocation(), getZDB()));
 			}
+			
+			aCode.defineLabel(condLabel);
+			
+			if (fConditionClause != null) {
+
+				fConditionClause.generateCode(true, aCode);
+
+				aCode.add(new IGJumpCStmt(waitDoneLabel, computeSourceLocation(), getZDB()));
+				
+				// LRM: if condition is FALSE, the process suspends again. Such repeated suspension 
+				// does not involve the recalculation of the timeout interval.
+				aCode.add(new IGJumpStmt(waitLoopLabel, computeSourceLocation(), getZDB()));
+				
+			}
+
 		}
-
-		if (fConditionClause != null) {
-
-			fConditionClause.generateCode(true, aCode);
-
-			aCode.add(new IGJumpCStmt(waitDoneLabel, computeSourceLocation(), getZDB()));
-		}
-
-		aCode.add(new IGJumpStmt(waitLoopLabel, computeSourceLocation(), getZDB()));
 
 		aCode.defineLabel(waitDoneLabel);
 
