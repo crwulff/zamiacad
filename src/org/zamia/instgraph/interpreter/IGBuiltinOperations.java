@@ -122,6 +122,10 @@ public class IGBuiltinOperations {
 		case ARRAY_XOR:
 			return execArrayBinary(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
+		case BITVECTOR_ROR:
+		case BITVECTOR_ROL:
+			return execBitvectorBinary(aSub, aRuntime, aLocation, aErrorMode, aReport);
+			
 		case ARRAY_CONCATAA:
 		case ARRAY_CONCATAE:
 		case ARRAY_CONCATEA:
@@ -750,6 +754,60 @@ public class IGBuiltinOperations {
 		return aRt;
 	}
 		
+	private static ReturnStatus execBitvectorBinary(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
+			throws ZamiaException {
+
+		IGContainer container = aSub.getContainer();
+		IGObject intfA = container.resolveObject("a");
+		IGStaticValue valueA = aRuntime.getObjectValue(intfA);
+		if (valueA == null)	{
+			return error(valueA, "execBitvectorBinary(): vA", aErrorMode, aLocation);
+		}
+
+		IGObject intfB = container.resolveObject("b");
+		IGStaticValue valueB = aRuntime.getObjectValue(intfB);
+		if (valueB == null)	{
+			return error(valueB, "execBitvectorBinary(): vB", aErrorMode, aLocation);
+		}
+		int shiftDistance = valueB.getInt();
+
+		IGTypeStatic rt = aSub.getReturnType().computeStaticType(aRuntime, aErrorMode, aReport);
+		if (rt == null) {
+			return ReturnStatus.ERROR;
+		}
+		
+		rt = valueA.getStaticType();
+		if (rt.isUnconstrained())
+			throw new ZamiaException("Interpreter error: cannot determine resulting array boundaries, all types involved are unconstrained :-/", aLocation);
+
+		IGStaticValueBuilder builder = new IGStaticValueBuilder(rt, null, aLocation);
+
+		IGSubProgram.IGBuiltin func = aSub.getBuiltin();
+		
+		if (func == IGBuiltin.BITVECTOR_ROL) {
+			func = IGBuiltin.BITVECTOR_ROR; // shift left is the same as shift right 
+			shiftDistance = -shiftDistance; // just into opposite direction 
+		}
+			
+		if (func == IGBuiltin.BITVECTOR_ROR) {
+			
+			int offset = valueA.getArrayOffset();
+			int nA = valueA.getNumArrayEntries(aLocation);
+			int limit = offset + nA;
+			for (int src = shiftDistance, dst = offset ; dst != limit ; src++, dst++) {
+				int wrappedSrc = //(src % nA) // this sux in Java
+						(src % nA + nA) % nA; // we must do this to support shift distance ouside the vector range
+				IGStaticValue el = valueA.getValue(wrappedSrc + offset, aLocation); // take bit
+				builder.set(dst, el, aLocation);  // put into dest
+			}
+		} else
+			throw new ZamiaException("Internal interpreter error: execArrayBinary() called on non-implemented op " + aSub.getBuiltin(), aLocation);
+
+		IGStaticValue resValue = builder.buildConstant();
+
+		aRuntime.push(resValue);
+		return ReturnStatus.CONTINUE;
+	}
 	private static ReturnStatus execArrayBinary(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
 			throws ZamiaException {
 
