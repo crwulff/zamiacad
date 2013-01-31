@@ -426,15 +426,24 @@ public class IGSimRef implements IGISimulator {
 
 	private void mergeDrivers(Collection<IGSignalChangeRequest> aSignalChanges) throws ZamiaException {
 
+		LinkedList<IGSignalChangeRequest> newRequests = new LinkedList<IGSignalChangeRequest>();
+
 		for (IGSignalChangeRequest req : aSignalChanges) {
 
 			IGSignalDriver driver = req.getDriver();
 
 			if (driver.isActive()) {
 
-				driver.mergeDrivers();
+				IGSignalDriver mergedDriver = driver.mergeDrivers();
+
+				if (mergedDriver != null) {
+
+					newRequests.add(new IGSignalChangeRequest(req.getProcess(), req.getTime(), mergedDriver.getNextValue(), mergedDriver, null));
+				}
 			}
 		}
+
+		aSignalChanges.addAll(newRequests);
 	}
 
 	private void initObjects(IGContainer aContainer, IGInterpreterRuntimeEnv aEnv, PathName aPath) throws ZamiaException {

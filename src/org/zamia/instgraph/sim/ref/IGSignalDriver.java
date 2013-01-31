@@ -152,11 +152,12 @@ public class IGSignalDriver extends IGObjectDriver {
 	 *
 	 * @throws ZamiaException
 	 */
-	public void mergeDrivers() throws ZamiaException {
+	public IGSignalDriver mergeDrivers() throws ZamiaException {
 
 		IGSignalDriver targetDriver = getTargetSignalDriver();
 
-		if (targetDriver.isMergeRequired()) {
+		boolean isMergeRequired = targetDriver.isMergeRequired();
+		if (isMergeRequired) {
 
 			IGStaticValue lastValue = targetDriver.getValue(null);
 
@@ -169,18 +170,16 @@ public class IGSignalDriver extends IGObjectDriver {
 			IGStaticValue mergedValue = targetDriver.getValue(null);
 
 			targetDriver.setValue(lastValue, null);	// restore broken last value
-			targetDriver.setValue(mergedValue, null);
+			targetDriver.fNextValue = mergedValue;
 
 			targetDriver.resetEvent();
-
-			if (targetDriver.isActive()) {
-				throw new ZamiaException("IGSimRef: internal error: target driver remains active after merge: " + targetDriver.getIdInternal());
-			}
 		}
 
 		targetDriver.fToBeMerged = new HashMap<IGSimProcess, List<IGSignalDriver>>();
 
 		targetDriver.clearWasActive();
+
+		return isMergeRequired ? targetDriver : null;
 	}
 
 	private void resolveDrivers(DriversResolver driversResolver) throws ZamiaException {
