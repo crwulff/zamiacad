@@ -23,6 +23,7 @@ import java.util.Set;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
 import org.zamia.ToplevelPath;
+import org.zamia.Utils;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
@@ -139,8 +140,7 @@ public class IGSimRef implements IGISimulator {
 		int counter = 0;
 		BigInteger lastSimulationTime = fSimulationTime;
 
-		BigInteger nanos = aTimeLimit.divide(MLN_FS);
-		logger.info("IGSimRef: ** Simulating till %5d ns                    **", nanos);
+		logger.info("IGSimRef: ** Simulating till %s                    **", Utils.formatTime(aTimeLimit));
 		logger.info("IGSimRef: *************************************************");
 
 		while (true) {
@@ -162,23 +162,22 @@ public class IGSimRef implements IGISimulator {
 			}
 			fSimulationTime = reqT;
 
-			nanos = fSimulationTime.divide(MLN_FS);
-
 			if (DEBUG) {
 				logger.debug("IGSimRef: *************************************************");
-				logger.debug("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
+				logger.debug("IGSimRef: ** Simulation time is now %s             **", Utils.formatTime(fSimulationTime));
 				logger.debug("IGSimRef: *************************************************");
 			}
 
 			// have we made progress in time?
 			if (lastSimulationTime.compareTo(fSimulationTime) < 0) {
+				//logger.info("Time advance from " + Utils.formatTime(lastSimulationTime) + " to " + Utils.formatTime(fSimulationTime));
 				lastSimulationTime = fSimulationTime;
 				counter = 0;
 				updateMonitor();
 			} else {
 				counter++;
 				if (counter >= SIM_MAX_ITERATIONS) {
-					logger.error("IGRefSim: Error, max iteration limit exceeded at %d ns.", nanos);
+					logger.error("IGRefSim: Error, max iteration limit exceeded at %s .", Utils.formatTime(fSimulationTime));
 					throw new ZamiaException("Simulator max iteration limit exceeded at " + lastSimulationTime + " fs.");
 				}
 			}
@@ -198,8 +197,7 @@ public class IGSimRef implements IGISimulator {
 			rl.executeWakeups(this);
 		}
 
-        nanos = fSimulationTime.divide(MLN_FS);
-        logger.info("IGSimRef: ** Simulation time is now %5d ns             **", nanos);
+        logger.info("IGSimRef: ** Simulation time is now %s              **", Utils.formatTime(fSimulationTime));
 		logger.info("IGSimRef: *************************************************");
 
 	}

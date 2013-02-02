@@ -1,5 +1,6 @@
 package org.zamia;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -73,7 +74,20 @@ public class Utils {
 		public void inc(String clsName) {
 			inc(clsName, 1);
 		}
+		
 	}
 
+	public static String formatTime(BigInteger femto) {
+		if (femto.equals(BigInteger.ZERO))
+			return "0";
+		StringBuilder time = new StringBuilder(femto.toString());
+		String[] units = {"fs", "ps", "ns", "us", "ms", "sec", "ksec", "Msec"};
+		for (String unit: units) {
+			if (time.length() <=3 || !time.toString().endsWith("000"))
+				return time + " " + unit;
+			time.setLength(time.length() - 3);
+		}
+		return time + " " + units[units.length-1];
+	}
 }
 
