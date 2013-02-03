@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zamiacad>
+  <action name="debug">
+    <settings>
+      <script>create_debug_data.py</script>
+    </settings>
+  </action>
+</zamiacad>

@@ -10,6 +10,7 @@ package org.zamia.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -173,4 +174,15 @@ public class FileUtils {
 
 		return isOk;
 	}
+
+	public static void closeSilently(Closeable aClosable) {
+		if (aClosable != null) {
+			try {
+				aClosable.close();
+			} catch (IOException e) {
+				el.logException(e);
+			}
+		}
+	}
+
 }

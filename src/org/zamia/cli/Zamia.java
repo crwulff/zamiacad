@@ -26,12 +26,16 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Level;
+import org.w3c.dom.Node;
+
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
 import org.zamia.cli.jython.ZCJInterpreter;
+import org.zamia.util.Pair;
+import org.zamia.util.XMLUtils;
 import org.zamia.util.ZamiaTmpDir;
 import org.zamia.zdb.ZDBException;
 
@@ -65,7 +69,11 @@ public class Zamia {
 
 	private String fProjectId = null;
 
+	private String fProjectBasePath;
+
 	private String fScriptFile = null;
+
+	private String fXmlFile = null;
 
 	private boolean fStartShell = true;
 
@@ -84,20 +92,22 @@ public class Zamia {
 		// determine default values for project variables
 
 		String curDirPath = System.getProperty("user.dir");
-		File curDir = new File(curDirPath);
 
-		fProjectId = curDir.getAbsoluteFile().getName();
-
-		String projectBasePath = curDirPath;
-
-		String projectBuildPath = projectBasePath + File.separator + "BuildPath.txt";
-
-		String projectDataPath = ZamiaTmpDir.getTmpDir().getAbsolutePath();
+		fProjectBasePath = curDirPath;
 
 		processArgs(args);
 
+		File curDir = new File(fProjectBasePath);
+		fProjectBasePath = curDir.getAbsolutePath();
+
+		fProjectId = curDir.getAbsoluteFile().getName();
+
+		String projectBuildPath = fProjectBasePath + File.separator + "BuildPath.txt";
+
+		String projectDataPath = ZamiaTmpDir.getTmpDir().getAbsolutePath();
+
 		logger.info("project id   : %s", fProjectId);
-		logger.info("project base : %s", projectBasePath);
+		logger.info("project base : %s", fProjectBasePath);
 		logger.info("BuildPath.txt: %s", projectBuildPath);
 
 		File bp = new File(projectBuildPath);
@@ -107,19 +117,33 @@ public class Zamia {
 		}
 
 		try {
-			fZPrj = new ZamiaProject(fProjectId, projectBasePath, new SourceFile(new File(projectBuildPath)), projectDataPath);
+			fZPrj = new ZamiaProject(fProjectId, fProjectBasePath, new SourceFile(new File(projectBuildPath)), projectDataPath);
 
 			fZCJ = fZPrj.getZCJ();
 
 			try {
 
 				if (fScriptFile != null) {
-					File scriptFile = new File(fScriptFile);
+					File scriptFile = new File(fProjectBasePath, fScriptFile);
 					if (scriptFile.exists()) {
 						logger.info("Running script file %s", scriptFile.getAbsoluteFile());
 						fZCJ.evalFile(scriptFile.getAbsolutePath());
 					} else {
 						logger.error("Specified script file %s doesn't exist!", scriptFile.getAbsoluteFile());
+					}
+				}
+
+				if (fXmlFile != null) {
+					File xmlFile = new File(fProjectBasePath, fXmlFile);
+					if (xmlFile.exists()) {
+						for (Pair<File, Node> scriptFile : XMLUtils.extractScriptFiles(xmlFile, fProjectBasePath)) {
+							fZCJ.setObject("actionXmlFile", xmlFile);
+							fZCJ.setObject("actionRootNode", scriptFile.getSecond());
+							logger.info("Running script file %s from XML file %s", scriptFile.getFirst().getAbsoluteFile(), xmlFile.getAbsoluteFile());
+							fZCJ.evalFile(scriptFile.getFirst().getAbsolutePath());
+						}
+					} else {
+						logger.error("Specified XML file %s doesn't exist!", xmlFile.getAbsoluteFile());
 					}
 				}
 
@@ -154,6 +178,18 @@ public class Zamia {
 		option.setArgs(1);
 		options.addOption(option);
 
+		option = new Option("d", "project base directory (default: current dir)");
+		option.setLongOpt("project-dir");
+		option.setValueSeparator('=');
+		option.setArgs(1);
+		options.addOption(option);
+
+		option = new Option("x", "xml script file to execute");
+		option.setLongOpt("xml-script-file");
+		option.setValueSeparator('=');
+		option.setArgs(1);
+		options.addOption(option);
+
 		option = new Option("s", "python script to execute");
 		option.setLongOpt("script");
 		option.setValueSeparator('=');
@@ -169,6 +205,14 @@ public class Zamia {
 
 			if (line.hasOption("f")) {
 				fScriptFile = line.getOptionValue("f");
+			}
+
+			if (line.hasOption("d")) {
+				fProjectBasePath += File.separator + line.getOptionValue("d");
+			}
+
+			if (line.hasOption("x")) {
+				fXmlFile = line.getOptionValue("x");
 			}
 
 			if (line.hasOption("s")) {

@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.zamia.analysis.SATest;
 import org.zamia.instgraph.IGTest;
+import org.zamia.instgraph.interpreter.logger.ReportUtilsTest;
 import org.zamia.instgraph.sim.ref.IGRefSimTest;
 import org.zamia.instgraph.sim.vcd.VCDTest;
 import org.zamia.instgraph.synth.IGSynthTest;
@@ -47,7 +48,8 @@ import org.zamia.zdb.ZDBTest;
 		VCDTest.class,
 		VerilogParserTest.class,
 		VerilogParserIntegrationTest.class,
-		IGSynthTest.class
+		IGSynthTest.class,
+		ReportUtilsTest.class
 })
 public class StableSuite {
 }

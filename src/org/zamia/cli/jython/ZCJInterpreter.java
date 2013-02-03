@@ -125,8 +125,12 @@ public class ZCJInterpreter {
 		fInterp.set(name, aObject);
 	}
 
-	public PyObject getObject(String name) {
-		return fInterp.get(name);
+	public <T> T getObject(String name, Class<T> aClass) {
+		PyObject pyObject = fInterp.get(name);
+		if (pyObject == null) {
+			return null;
+		}
+		return (T) pyObject.__tojava__(aClass);
 	}
 
 	public ZamiaProject getZprj() {

@@ -1,26 +1,45 @@
 package org.zamia.instgraph.interpreter.logger;
 
 import java.io.BufferedReader;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+
+import org.zamia.ExceptionLogger;
 import org.zamia.SourceFile;
 import org.zamia.SourceLocation;
+import org.zamia.ZamiaException;
+import org.zamia.ZamiaLogger;
+import org.zamia.util.XMLUtils;
+
+import static org.zamia.util.FileUtils.closeSilently;
 
 /**
  * @author Anton Chepurov
  */
 public class ReportUtils {
 
+	private static final ExceptionLogger el = ExceptionLogger.getInstance();
+	private static final ZamiaLogger logger = ZamiaLogger.getInstance();
+
 	public static Report readFromFile(File aFile) {
 
 		Reader reader = new Reader(aFile);
 
 		return reader.read();
+	}
+
+	public static void write2XMLFile(Report aReport, File aFile, Node aRootNode) {
+
+		Report2XML writer = new Report2XML(aReport, aFile, aRootNode);
+
+		writer.write();
 	}
 
 	private static class Reader {
@@ -254,12 +273,61 @@ public class ReportUtils {
 		}
 	}
 
-	private static void closeSilently(Closeable aClosable) {
-		if (aClosable != null) {
+	private static class Report2XML {
+
+		private Report fReport;
+		private File fFile;
+		private Document fXml;
+		private Node fRootNode;
+
+		public Report2XML(Report aReport, File aFile, Node aRootNode) {
+			fReport = aReport;
+			fFile = aFile;
+			fXml = aRootNode.getOwnerDocument();
+			fRootNode = aRootNode;
+		}
+
+		public void write() {
+
 			try {
-				aClosable.close();
-			} catch (IOException e) {
-				/* do nothing */
+
+				dumpReport2XML();
+
+				XMLUtils.xml2file(fXml, fFile);
+
+			} catch (ZamiaException e) {
+				logger.info("### ERROR ### when dumping Report to XML: " + e.getMessage());
+				el.logException(e);
+			}
+		}
+
+		private void dumpReport2XML() throws ZamiaException {
+
+			if (XMLUtils.hasNode("result", fRootNode)) {
+				return;
+			}
+
+			Element resultNode = XMLUtils.createNodeIn(fRootNode, "result", fXml);
+
+			String task = XMLUtils.getAttribute("name", fRootNode);
+
+			if (task.equals("debug")) {
+
+				for (SourceFile sourceFile : fReport.getFiles()) {
+
+					Element fileNode = XMLUtils.createNodeIn(resultNode, "file", fXml);
+					fileNode.setAttribute("path", sourceFile.getLocalPath());
+
+					for (Report.FileReport.ItemLine itemLine : fReport.getLines(sourceFile)) {
+
+						Element line = XMLUtils.createNodeIn(fileNode, "line", fXml);
+						line.setTextContent(String.valueOf(itemLine.getLine()));
+						String color = itemLine.getColor();
+						if (color != null) {
+							line.setAttribute("color", color);
+						}
+					}
+				}
 			}
 		}
 	}

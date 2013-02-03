@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zamiacad>
+  <action name="debug">
+    <settings>
+      <script>create_debug_data.py</script>
+    </settings>
+    <result>
+      <file path="alu.vhd">
+        <line color="orange">33</line>
+        <line color="yellow">40</line>
+      </file>
+      <file path="bus_mux.vhd">
+        <line color="yellow">55</line>
+        <line color="yellow">68</line>
+        <line color="yellow">78</line>
+        <line color="red">80</line>
+        <line color="yellow">82</line>
+        <line color="red">99</line>
+        <line color="orange">101</line>
+        <line color="red">126</line>
+        <line color="red">128</line>
+      </file>
+      <file path="control.vhd">
+        <line color="red">214</line>
+        <line color="red">215</line>
+        <line color="red">216</line>
+        <line color="red">217</line>
+        <line color="red">218</line>
+        <line color="red">219</line>
+        <line color="red">220</line>
+        <line color="red">232</line>
+        <line color="red">233</line>
+        <line color="red">276</line>
+        <line color="red">277</line>
+        <line color="red">278</line>
+        <line color="red">279</line>
+        <line color="red">280</line>
+        <line color="yellow">313</line>
+        <line color="yellow">314</line>
+        <line color="yellow">315</line>
+        <line color="yellow">316</line>
+        <line color="orange">325</line>
+        <line color="orange">326</line>
+      </file>
+      <file path="pc_next.vhd">
+        <line color="yellow">47</line>
+        <line color="yellow">49</line>
+      </file>
+      <file path="shifter.vhd">
+        <line color="yellow">41</line>
+        <line color="yellow">47</line>
+      </file>
+    </result>
+  </action>
+</zamiacad>

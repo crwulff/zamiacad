@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.w3c.dom.Node;
+
 import org.zamia.SourceFile;
 import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.interpreter.logger.IGCodeExecutionLogger.CodeItem;
@@ -269,8 +271,6 @@ public class Report {
 
 		TreeMap<CodeItem, ItemLine> lines = new TreeMap<CodeItem, ItemLine>(ITEM_COMPARATOR);
 
-		double fThreshold1 = -1, fThreshold2 = -1;
-
 		public FileReport(SourceFile file) {
 			this.file = file;
 		}
@@ -337,42 +337,11 @@ public class Report {
 		}
 
 		private double getThreshold1() {
-			if (fThreshold1 == -1) {
-				computeThresholds();
-			}
-			return fThreshold1;
+			return 0.6;
 		}
 
 		private double getThreshold2() {
-			if (fThreshold2 == -1) {
-				computeThresholds();
-			}
-			return fThreshold2;
-		}
-
-		private void computeThresholds() {
-			double maxV1 = getMaxV1();
-			if (maxV1 <= 0.5) {
-				fThreshold1 = fThreshold2 = 2; // max possible is 1.0
-				return;
-			}
-			double delta = (maxV1 - 0.5) / 3;
-			fThreshold1 = 0.5 + delta;
-			fThreshold2 = 0.5 + delta * 2;
-		}
-
-		private double getMaxV1() {
-
-			double maxV1 = 0;
-
-			for (ItemLine line : lines.values()) {
-				double v1 = line.getV1();
-				if (v1 > maxV1) {
-					maxV1 = v1;
-				}
-			}
-
-			return maxV1;
+			return 0.75;
 		}
 
 		public class ItemLine {
@@ -402,6 +371,11 @@ public class Report {
 					dest = passed;
 				}
 				dest[idx] = true;
+			}
+
+			@Override
+			public String toString() {
+				return item + " " + stat;
 			}
 
 			public String toString(int lastLine, int lastCol) {
@@ -453,6 +427,10 @@ public class Report {
 				return passedCnt;
 			}
 
+			public boolean isGreen() {
+				return !isSuspect();
+			}
+
 			public boolean isSuspect() {
 				return getV1() > 0.5;
 			}
@@ -496,6 +474,18 @@ public class Report {
 
 			public boolean satisfies(Criterion aCriterion) {
 				return aCriterion.isFulfilledBy(this);
+			}
+
+			public String getColor() {
+				if (isRed()) {
+					return "red";
+				} else if (isOrange()) {
+					return "orange";
+				} else if (isYellow()) {
+					return "yellow";
+				} else {
+					return "green";
+				}
 			}
 
 			class Stat {
@@ -557,6 +547,11 @@ public class Report {
 		return ReportUtils.readFromFile(aFile);
 	}
 
+	public void write2XMLFile(File aXmlFile, Node aRootNode) {
+
+		ReportUtils.write2XMLFile(this, aXmlFile, aRootNode);
+	}
+
 	private static abstract class Criterion {
 		private final String fTitle;
 
@@ -565,6 +560,11 @@ public class Report {
 		}
 
 		abstract boolean isFulfilledBy(FileReport.ItemLine itemLine);
+
+		@Override
+		public String toString() {
+			return fTitle;
+		}
 	}
 
 	private static final Criterion SUSPECTS_FILTER = new Criterion("SUSPECTS") {
@@ -594,7 +594,7 @@ public class Report {
 	private static final Criterion GREEN_FILTER = new Criterion("GREEN") {
 		@Override
 		public boolean isFulfilledBy(FileReport.ItemLine itemLine) {
-			return !itemLine.isSuspect();
+			return itemLine.isGreen();
 		}
 	};
 
@@ -619,7 +619,7 @@ public class Report {
 	}
 
 	private Report getFiltered(SourceFile aFile, Criterion aCriterion) {
-		if (fFilteredReports == null || fFilteredReports.get(aFile) == null) {
+		if (fFilteredReports == null || !fFilteredReports.containsKey(aFile)) {
 			filterItems(aFile);
 		}
 		return fFilteredReports.get(aFile).get(aCriterion);

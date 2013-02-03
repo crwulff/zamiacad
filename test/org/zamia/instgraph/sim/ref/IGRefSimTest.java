@@ -48,7 +48,7 @@ public class IGRefSimTest {
 
 	private final static BigInteger NANO_FACTOR = new BigInteger("1000000");
 
-	private final static boolean NO_ERADOS = !(new File("examples/erados/BuildPath.txt").exists());
+	private final static boolean NO_ROBSY = !(new File("examples/robsy/BuildPath.txt").exists());
 
 	public void setupTest(String aBasePath, String aBuildPath) throws Exception {
 		ZamiaLogger.setup(Level.DEBUG);
@@ -331,123 +331,123 @@ public class IGRefSimTest {
 		runTest("examples/refsim/arrayGreater", 1, 0);
 	}
 	@Test
-	public void testEradosBug1() throws Exception {
+	public void testRobsyBug1() throws Exception {
 
-		if (NO_ERADOS) {
+		if (NO_ROBSY) {
 			return; // ok, this test is optional
 		}
 
-		cleanErados();
+		cleanRobsy();
 
 		unzipBug(1);
 
-		runTest("examples/erados", 48, 4070);
+		runTest("examples/robsy", 48, 4070);
 
 		checkSignalValue("LEDS_LD", "00001001");
 
-		cleanErados();
+		cleanRobsy();
 	}
 	@Test
-	public void testEradosBug2() throws Exception {
+	public void testRobsyBug2() throws Exception {
 
-		if (NO_ERADOS) {
+		if (NO_ROBSY) {
 			return; // ok, this test is optional
 		}
 
-		cleanErados();
+		cleanRobsy();
 
 		unzipBug(2);
 
-		runTest("examples/erados", 48, 1550);
+		runTest("examples/robsy", 48, 1550);
 
 		checkSignalValue("LEDS_LD", "00000001");
 
-		cleanErados();
+		cleanRobsy();
 	}
 	@Test
-	public void testEradosBug3() throws Exception {
+	public void testRobsyBug3() throws Exception {
 
-		if (NO_ERADOS) {
+		if (NO_ROBSY) {
 			return; // ok, this test is optional
 		}
 
-		cleanErados();
+		cleanRobsy();
 
 		unzipBug(3);
 
-		runTest("examples/erados", 48, 13630);
+		runTest("examples/robsy", 48, 13630);
 
 		checkSignalValue("LEDS_LD", "00010111");
 
-		cleanErados();
+		cleanRobsy();
 	}
 	@Test
-	public void testEradosBug4() throws Exception {
+	public void testRobsyBug4() throws Exception {
 
-		if (NO_ERADOS) {
+		if (NO_ROBSY) {
 			return; // ok, this test is optional
 		}
 
-		cleanErados();
+		cleanRobsy();
 
 		unzipBug(4);
 
-		runTest("examples/erados", 48, 20050);
+		runTest("examples/robsy", 48, 20050);
 
 		checkSignalValue("LEDS_LD", "11111111");
 
-		cleanErados();
+		cleanRobsy();
 	}
 	@Test
-	public void testEradosBug5() throws Exception {
+	public void testRobsyBug5() throws Exception {
 
-		if (NO_ERADOS) {
+		if (NO_ROBSY) {
 			return; // ok, this test is optional
 		}
 
-		cleanErados();
+		cleanRobsy();
 
 		unzipBug(5);
 
-		runTest("examples/erados", 48, 18850);
+		runTest("examples/robsy", 48, 18850);
 
 		checkSignalValue("LEDS_LD", "00011010");
 
-		cleanErados();
+		cleanRobsy();
 	}
 	@Test
-	public void testEradosBug6() throws Exception {
+	public void testRobsyBug6() throws Exception {
 
-		if (NO_ERADOS) {
+		if (NO_ROBSY) {
 			return; // ok, this test is optional
 		}
 
-		cleanErados();
+		cleanRobsy();
 
 		unzipBug(6);
 
-		runTest("examples/erados", 48, 4790);
+		runTest("examples/robsy", 48, 4790);
 
 		checkSignalValue("LEDS_LD", "00001011");
 
-		cleanErados();
+		cleanRobsy();
 	}
 	@Test
-	public void testEradosBug7() throws Exception {
+	public void testRobsyBug7() throws Exception {
 
-		if (NO_ERADOS) {
+		if (NO_ROBSY) {
 			return; // ok, this test is optional
 		}
 
-		cleanErados();
+		cleanRobsy();
 
 		unzipBug(7);
 
-		runTest("examples/erados", 48, 12130);
+		runTest("examples/robsy", 48, 12130);
 
 		checkSignalValue("LEDS_LD", "00010101");
 
-		cleanErados();
+		cleanRobsy();
 	}
 
 	private void checkSignalValue(String signalName, String valueAsString) {
@@ -485,15 +485,15 @@ public class IGRefSimTest {
 		}
 
 		if (!buggyFiles.isEmpty()) {
-			unzip(new File("examples/erados/src/processor/buggy_files.zip"), buggyFiles);
+			unzip(new File("examples/robsy/src/processor/buggy_files.zip"), buggyFiles);
 		}
 	}
 
-	private void cleanErados() {
-		unzip(new File("examples/erados/src/processor/correct_files.zip"));
+	private void cleanRobsy() {
+		unzip(new File("examples/robsy/src/processor/correct_files.zip"));
 		copyLastFile(
-				new File("examples/erados/SOFTWARE/SPARTAN3_STARTERKIT/TEST_PROCESSOR_PROGRAMS/or/"),
-				new File("examples/erados/SOFTWARE/SPARTAN3_STARTERKIT/TEST_PROCESSOR_PROGRAMS/OBJECT_CODE.OC.MIF"));
+				new File("examples/robsy/SOFTWARE/SPARTAN3_STARTERKIT/TEST_PROCESSOR_PROGRAMS/or/"),
+				new File("examples/robsy/SOFTWARE/SPARTAN3_STARTERKIT/TEST_PROCESSOR_PROGRAMS/OBJECT_CODE.OC.MIF"));
 	}
 
 	@Test
