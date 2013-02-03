@@ -9,7 +9,9 @@
 package org.zamia.instgraph.sim.ref;
 
 import java.math.BigInteger;
+import java.util.Collection;
 
+import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
@@ -21,6 +23,7 @@ import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGObjectDriver;
 import org.zamia.util.PathName;
 import org.zamia.vhdl.ast.VHDLNode;
+import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 
 
 /**
@@ -143,6 +146,11 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 		IGObjectDriver msProofDriver = currentContext.createObject(new IGInterpreterObject(aObject, type), true, aSrc);
 
 		msProofDriver.map(targetDriver, aSrc);
+	}
+	
+	public void resume(Collection<IGSimPostponedProcess> postponed, ASTErrorMode aErrorMode, ErrorReport aReport)
+			throws ZamiaException {
+		super.resume(aErrorMode, aReport);
 	}
 
 }

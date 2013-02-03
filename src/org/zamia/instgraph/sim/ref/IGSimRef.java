@@ -38,6 +38,7 @@ import org.zamia.instgraph.IGMapping;
 import org.zamia.instgraph.IGModule;
 import org.zamia.instgraph.IGObject;
 import org.zamia.instgraph.IGOperation;
+import org.zamia.instgraph.IGPostponedProcess;
 import org.zamia.instgraph.IGProcess;
 import org.zamia.instgraph.IGSequenceOfStatements;
 import org.zamia.instgraph.IGStaticValue;
@@ -70,8 +71,6 @@ public class IGSimRef implements IGISimulator {
 	public final static boolean DEBUG = false;
 
 	protected final static ExceptionLogger el = ExceptionLogger.getInstance();
-
-	private static final BigInteger MLN_FS = new BigInteger("1000000");
 
 	private static final int SIM_MAX_ITERATIONS = 1000;
 
@@ -170,15 +169,22 @@ public class IGSimRef implements IGISimulator {
 
 			// have we made progress in time?
 			if (lastSimulationTime.compareTo(fSimulationTime) < 0) {
+
+				for (IGSimProcess process : fPostponedProcesses)
+						process.resume(ASTErrorMode.EXCEPTION, null);
+				fPostponedProcesses.clear();
+
 				//logger.info("Time advance from " + Utils.formatTime(lastSimulationTime) + " to " + Utils.formatTime(fSimulationTime));
+
 				lastSimulationTime = fSimulationTime;
 				counter = 0;
 				updateMonitor();
 			} else {
 				counter++;
 				if (counter >= SIM_MAX_ITERATIONS) {
-					logger.error("IGRefSim: Error, max iteration limit exceeded at %s .", Utils.formatTime(fSimulationTime));
-					throw new ZamiaException("Simulator max iteration limit exceeded at " + lastSimulationTime + " fs.");
+					String t = Utils.formatTime(fSimulationTime);
+					logger.error("IGRefSim: Error, max iteration limit exceeded at %s .", t);
+					throw new ZamiaException("Simulator max iteration limit exceeded at " + t);
 				}
 			}
 
@@ -214,10 +220,12 @@ public class IGSimRef implements IGISimulator {
 		fData.logChanges(fMappedChanges, currentTime);
 	}
 
+	
+	private Collection<IGSimPostponedProcess> fPostponedProcesses;
 	private void propagateSignalChanges() throws ZamiaException {
 
 		Collection<IGSignalDriver> eventDrivers = new LinkedList<IGSignalDriver>();
-		HashSet<IGSimProcess> listeningProcesses = new HashSet<IGSimProcess>();
+		Set<IGSimProcess> listeningProcesses = new HashSet<IGSimProcess>();
 
 		for (IGSignalChange signalChange : fChangeList) {
 			if (signalChange.isEvent()) {
@@ -232,7 +240,7 @@ public class IGSimRef implements IGISimulator {
 
 		// notify change
 		for (IGSimProcess process : listeningProcesses) {
-			process.resume(ASTErrorMode.EXCEPTION, null);
+			process.resume(fPostponedProcesses, ASTErrorMode.EXCEPTION, null);
 		}
 
 		invalidateEvents(eventDrivers);
@@ -253,6 +261,7 @@ public class IGSimRef implements IGISimulator {
 	private void init(IGModule aToplevel) throws ZamiaException {
 
 		fProcesses = new HashSet<IGSimProcess>();
+		fPostponedProcesses =  new HashSet<IGSimPostponedProcess>();
 
 		fWholeSignalDrivers = new HashMap<Long, HashMap<PathName, IGSimProcess>>();
 
@@ -267,14 +276,21 @@ public class IGSimRef implements IGISimulator {
 
 		// FIXME: fill moduleContext
 
-		initStructure(aToplevel.getStructure(), moduleContext, path);
+		Collection <IGSimPostponedProcess> postponed = new ArrayList<>();
+
+		initStructure(aToplevel.getStructure(), moduleContext, path, postponed);
+
+		for (IGSimProcess p: postponed) {
+			p.resume(ASTErrorMode.EXCEPTION, null);
+		}
+
 	}
 
 	private IGSimProcess newProcess(PathName aPath, PathName aParentPath) {
 		return new IGSimProcess(this, aPath, aParentPath, fZPrj);
 	}
 
-	private void initStructure(IGStructure aStructure, IGSimContext aParentContext, PathName aParentPath) throws ZamiaException {
+	private void initStructure(IGStructure aStructure, IGSimContext aParentContext, PathName aParentPath, Collection<IGSimPostponedProcess> aPostponed) throws ZamiaException {
 
 		int n = aStructure.getNumStatements();
 		for (int i = 0; i < n; i++) {
@@ -290,7 +306,10 @@ public class IGSimRef implements IGISimulator {
 
 				IGProcess proc = (IGProcess) stmt;
 
-				IGSimProcess processEnv = newProcess(curPath, aParentPath);
+				IGSimProcess processEnv = (proc instanceof IGPostponedProcess)
+						? new IGSimPostponedProcess(this, curPath, aParentPath, fZPrj)
+						: newProcess(curPath, aParentPath);
+
 				processEnv.pushContext(aParentContext);
 				processEnv.pushContextFor(curPath);
 
@@ -307,7 +326,8 @@ public class IGSimRef implements IGISimulator {
 				seq.generateCode(code);
 
 				processEnv.call(code, ASTErrorMode.EXCEPTION, null);
-				processEnv.resume(ASTErrorMode.EXCEPTION, null);
+				
+				processEnv.resume(aPostponed, ASTErrorMode.EXCEPTION, null);
 
 				fProcesses.add(processEnv);
 
@@ -349,7 +369,7 @@ public class IGSimRef implements IGISimulator {
 				}
 
 				// init structure of inst. module (concurrent statements)
-				initStructure(instModule.getStructure(), instContext, curPath);
+				initStructure(instModule.getStructure(), instContext, curPath, aPostponed);
 
 			} else if (stmt instanceof IGStructure) {
 
@@ -365,12 +385,13 @@ public class IGSimRef implements IGISimulator {
 				initObjects(sContainer, structEnv, structEnv.getPath());
 
 				// init structure of generated module (concurrent statements)
-				initStructure(struct, aParentContext, curPath);
+				initStructure(struct, aParentContext, curPath, aPostponed);
 
 			} else {
 				throw new ZamiaException("IGSimRef: unsupported concurrent statement: " + stmt);
 			}
 		}
+		
 	}
 
 	private void initGenerics(IGInstantiation aInst, IGContainer aInstContainer, IGInterpreterRuntimeEnv aRuntime) throws ZamiaException {

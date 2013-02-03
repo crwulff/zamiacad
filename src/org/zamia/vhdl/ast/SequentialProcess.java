@@ -192,7 +192,7 @@ public class SequentialProcess extends ConcurrentStatement {
 
 	@Override
 	public void computeIG(DMUID aDUUID, IGContainer aContainer, IGStructure aStructure, IGElaborationEnv aEE) throws ZamiaException {
-		IGProcess proc = new IGProcess(fPostponed, aContainer.getDBID(), fLabel, getLocation(), aEE.getZDB());
+		IGProcess proc = IGProcess.create(fPostponed, aContainer.getDBID(), fLabel, getLocation(), aEE.getZDB());
 
 		IGContainer container = proc.getContainer();
 

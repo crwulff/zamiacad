@@ -372,7 +372,7 @@ public class Block extends ConcurrentStatement {
 			 * let's simply turn this into a small process
 			 */
 
-			IGProcess proc = new IGProcess(false, blockContainer.getDBID(), null, getLocation(), aEE.getZDB());
+			IGProcess proc = IGProcess.create(false, blockContainer.getDBID(), null, getLocation(), aEE.getZDB());
 
 			IGSequenceOfStatements sos = new IGSequenceOfStatements(label, getLocation(), aEE.getZDB());
 			proc.setStatementSequence(sos);

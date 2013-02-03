@@ -548,6 +548,11 @@ public class IGRefSimTest {
 		}
 	}
 
+	@Test
+	public void postponedProcess() throws Exception {
+		runTest("examples/refsim/drivers", "BuildPath_Postponed.txt", 3, 100);
+	}
+	
 	@After
 	public void tearDown() throws Exception {
 		Runtime runtime = Runtime.getRuntime();

@@ -25,13 +25,18 @@ public class IGProcess extends IGConcurrentStatement implements Scope {
 
 	private IGSequenceOfStatements fSOS;
 
-	private boolean fPostponed; // FIXME: implement semantics
-
 	private long fContainerDBID;
 
 	private transient IGContainer fContainer = null;
 
-	public IGProcess(boolean aPostponed, long aParentContainerDBID, String aLabel, SourceLocation aLocation, ZDB aZDB) {
+	public static IGProcess create(boolean aPostponed, long aParentContainerDBID, String aLabel, SourceLocation aLocation, ZDB aZDB) {
+		if (aPostponed) {
+			return new IGPostponedProcess(aParentContainerDBID, aLabel, aLocation, aZDB);
+		}
+		return new IGProcess(aParentContainerDBID, aLabel, aLocation, aZDB);
+	}
+	
+	public IGProcess(long aParentContainerDBID, String aLabel, SourceLocation aLocation, ZDB aZDB) {
 		super(aLabel, aLocation, aZDB);
 
 		fContainer = new IGContainer(aParentContainerDBID, aLocation, aZDB);
@@ -56,9 +61,6 @@ public class IGProcess extends IGConcurrentStatement implements Scope {
 
 	@Override
 	public String toString() {
-		if (fPostponed) {
-			return "postponed process (id=" + getLabel() + ")";
-		}
 		return "process (id=" + getLabel() + ")";
 	}
 

@@ -81,7 +81,7 @@ public class ConcurrentAssertion extends ConcurrentStatement {
 		 * let's simply turn this into a small process
 		 */
 
-		IGProcess proc = new IGProcess(fPostponed, aContainer.getDBID(), fLabel, getLocation(), aEE.getZDB());
+		IGProcess proc = IGProcess.create(fPostponed, aContainer.getDBID(), fLabel, getLocation(), aEE.getZDB());
 
 		IGSequenceOfStatements sos = new IGSequenceOfStatements(fLabel, getLocation(), aEE.getZDB());
 		proc.setStatementSequence(sos);
