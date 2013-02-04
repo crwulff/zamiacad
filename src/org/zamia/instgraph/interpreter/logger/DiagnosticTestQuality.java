@@ -15,7 +15,7 @@ import java.util.TreeMap;
 /**
  * @author Anton Chepurov
  */
-public class HammingDistance {
+public class DiagnosticTestQuality {
 
 	public enum Print {SUM, MIN, AVE}
 
@@ -28,7 +28,7 @@ public class HammingDistance {
 
 	private int numItems;
 
-	private HammingDistance(int numItems) {
+	private DiagnosticTestQuality(int numItems) {
 		this.numItems = numItems;
 		distances = new TreeMap<SourceFile, TreeMap<Integer, Distance>>(Report.LOCATION_COMPARATOR);
 	}
@@ -218,10 +218,10 @@ public class HammingDistance {
 	 * @param numItems total number of assignments in the design
 	 * @return assessment of the quality of diagnostic test
 	 */
-	public static HammingDistance createFrom(List<IGHitCountLogger> loggers, int numItems) {
+	public static DiagnosticTestQuality createFrom(List<IGHitCountLogger> loggers, int numItems) {
 
 		if (loggers.size() < 2) {
-			logger.info("HammingDistance: Hamming distance can only be computed for multiple tests. Num of received tests: %d", loggers.size());
+			logger.info("DiagnosticTestQuality: test quality can only be computed for multiple tests. Num of received tests: %d", loggers.size());
 			return null;
 		}
 
@@ -258,7 +258,7 @@ public class HammingDistance {
 			tst++;
 		}
 
-		HammingDistance ret = new HammingDistance(numItems);
+		DiagnosticTestQuality ret = new DiagnosticTestQuality(numItems);
 
 		double uniquenessJaan = 0, uniquenessMaksim = 0;
 
@@ -325,7 +325,7 @@ public class HammingDistance {
 			int covered = mergedLogger.getNumItems();
 			coverage = (double) covered / numItems * 100;
 		} catch (ZamiaException e) {
-			logger.debug("HammingDistance: could not merge loggers to compute coverage", e, "");
+			logger.debug("DiagnosticTestQuality: could not merge loggers to compute coverage", e, "");
 		}
 
 		ret.coverage = coverage;
