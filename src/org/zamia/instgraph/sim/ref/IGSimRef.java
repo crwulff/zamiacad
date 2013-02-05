@@ -287,7 +287,15 @@ public class IGSimRef implements IGISimulator {
 	}
 
 	private IGSimProcess newProcess(PathName aPath, PathName aParentPath) {
-		return new IGSimProcess(this, aPath, aParentPath, fZPrj);
+		return newProcess(aPath, aParentPath, false);
+	}
+
+	private IGSimProcess newProcess(PathName aPath, PathName aParentPath, boolean aIsPostponed) {
+		IGSimProcess process = aIsPostponed ?
+				new IGSimPostponedProcess(this, aPath, aParentPath, fZPrj):
+				new IGSimProcess(this, aPath, aParentPath, fZPrj);
+		fProcesses.add(process);
+		return process;
 	}
 
 	private void initStructure(IGStructure aStructure, IGSimContext aParentContext, PathName aParentPath, Collection<IGSimPostponedProcess> aPostponed) throws ZamiaException {
@@ -306,9 +314,7 @@ public class IGSimRef implements IGISimulator {
 
 				IGProcess proc = (IGProcess) stmt;
 
-				IGSimProcess processEnv = (proc instanceof IGPostponedProcess)
-						? new IGSimPostponedProcess(this, curPath, aParentPath, fZPrj)
-						: newProcess(curPath, aParentPath);
+				IGSimProcess processEnv = newProcess(curPath, aParentPath, proc instanceof IGPostponedProcess);
 
 				processEnv.pushContext(aParentContext);
 				processEnv.pushContextFor(curPath);
@@ -328,8 +334,6 @@ public class IGSimRef implements IGISimulator {
 				processEnv.call(code, ASTErrorMode.EXCEPTION, null);
 				
 				processEnv.resume(aPostponed, ASTErrorMode.EXCEPTION, null);
-
-				fProcesses.add(processEnv);
 
 			} else if (stmt instanceof IGInstantiation) {
 
