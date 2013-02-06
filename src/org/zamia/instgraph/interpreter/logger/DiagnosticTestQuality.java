@@ -26,10 +26,10 @@ public class DiagnosticTestQuality {
 	private double deviation;
 	private double coverage;
 
-	private int numItems;
+	private int numCodeItems;
 
-	private DiagnosticTestQuality(int numItems) {
-		this.numItems = numItems;
+	private DiagnosticTestQuality(int numCodeItems) {
+		this.numCodeItems = numCodeItems;
 		distances = new TreeMap<SourceFile, TreeMap<Integer, Distance>>(Report.LOCATION_COMPARATOR);
 	}
 
@@ -67,7 +67,7 @@ public class DiagnosticTestQuality {
 	}
 
 	public double getSumNorm() {
-		return (double) getSum() / (getNumTests() * numItems);
+		return (double) getSum() / (getNumTests() * numCodeItems);
 	}
 
 	public double getSumNormRaimund() {
@@ -144,9 +144,9 @@ public class DiagnosticTestQuality {
 		b.append("              RMSD Deviation: ").append(deviation).append("\n");
 		b.append("           Uniqueness (Jaan): ").append(uniquenessJaan).append("\n");
 		b.append("           Uniqueness (Maks): ").append(uniquenessMaksim).append("\n");
-		b.append("Normalized Uniqueness (Maks): ").append(uniquenessMaksim / numItems).append("\n\n");
+		b.append("Normalized Uniqueness (Maks): ").append(uniquenessMaksim / numCodeItems).append("\n\n");
 		b.append("Num. Tests      : ").append(getNumTests()).append("\n");
-		b.append("Num. Assignments: ").append(numItems).append("\n");
+		b.append("Num. Assignments: ").append(numCodeItems).append("\n");
 		b.append("Assign. Coverage: ").append(String.format("%.2f%%\n\n", coverage));
 
 		for (Map.Entry<SourceFile, TreeMap<Integer, Distance>> entry : distances.entrySet()) {
@@ -215,10 +215,10 @@ public class DiagnosticTestQuality {
 
 	/**
 	 * @param loggers loggers that represent executed statements
-	 * @param numItems total number of assignments in the design
+	 * @param allAssignmentsLogger logger representing all assignments in the design
 	 * @return assessment of the quality of diagnostic test
 	 */
-	public static DiagnosticTestQuality createFrom(List<IGHitCountLogger> loggers, int numItems) {
+	public static DiagnosticTestQuality createFrom(List<IGHitCountLogger> loggers, IGHitCountLogger allAssignmentsLogger) {
 
 		if (loggers.size() < 2) {
 			logger.info("DiagnosticTestQuality: test quality can only be computed for multiple tests. Num of received tests: %d", loggers.size());
@@ -229,6 +229,7 @@ public class DiagnosticTestQuality {
 
 		int tst = 0;
 		int numTests = loggers.size();
+		int numCodeItems = allAssignmentsLogger.getNumItems();
 
 		for (IGHitCountLogger logger : loggers) {
 
@@ -238,27 +239,29 @@ public class DiagnosticTestQuality {
 				SourceFile file = entry.getKey();
 				IGHitCountLogger fileLogger = (IGHitCountLogger) entry.getValue();
 
-				int n = file.getNumLines();
+				IGCodeExecutionLogger allAssLogger = allAssignmentsLogger.getLogger(file);
 
 				boolean[][] matrix = matrices.containsKey(file) ? matrices.get(file) : null;
 				if (matrix == null) {
 					matrix = new boolean[numTests][];
 					matrices.put(file, matrix);
 				}
-				matrix[tst] = new boolean[n];
+				matrix[tst] = new boolean[allAssLogger.getNumItems()];
 
-				for (int line = 0; line < n; line++) {
-					int hits = fileLogger.getCount(line);
+				int line = 0;
+				for (IGCodeExecutionLogger.CodeItem codeItem : allAssLogger.fItems) {
+					int hits = fileLogger.getCount(codeItem.fLoc.fLine);
 					if (hits > 0) {
 						matrix[tst][line] = true;
 					}
+					line++;
 				}
 			}
 
 			tst++;
 		}
 
-		DiagnosticTestQuality ret = new DiagnosticTestQuality(numItems);
+		DiagnosticTestQuality ret = new DiagnosticTestQuality(numCodeItems);
 
 		double uniquenessJaan = 0, uniquenessMaksim = 0;
 
@@ -323,7 +326,7 @@ public class DiagnosticTestQuality {
 		try {
 			IGCodeExecutionLogger mergedLogger = IGCodeExecutionLogger.mergeAll(loggers.toArray(new IGCodeExecutionLogger[numTests]));
 			int covered = mergedLogger.getNumItems();
-			coverage = (double) covered / numItems * 100;
+			coverage = (double) covered / numCodeItems * 100;
 		} catch (ZamiaException e) {
 			logger.debug("DiagnosticTestQuality: could not merge loggers to compute coverage", e, "");
 		}

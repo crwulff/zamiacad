@@ -53,7 +53,13 @@ public class DiagnosticTestQualityTest {
 		logger.logHit(new SourceLocation(file, 1, 0), 10);
 		loggers.add(logger);
 
-		testQuality = DiagnosticTestQuality.createFrom(loggers, 4);
+		IGHitCountLogger allAssignmentsLogger = new IGHitCountLogger("All Assignments");
+		allAssignmentsLogger.logHit(new SourceLocation(file, 0, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 1, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 2, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 3, 0), 10);
+
+		testQuality = DiagnosticTestQuality.createFrom(loggers, allAssignmentsLogger);
 
 		assertNotNull(testQuality);
 
@@ -107,7 +113,13 @@ public class DiagnosticTestQualityTest {
 		logger.logHit(new SourceLocation(file, 1, 0), 10);
 		loggers.add(logger);
 
-		testQuality = DiagnosticTestQuality.createFrom(loggers, 4);
+		IGHitCountLogger allAssignmentsLogger = new IGHitCountLogger("All Assignments");
+		allAssignmentsLogger.logHit(new SourceLocation(file, 0, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 1, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 2, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 3, 0), 10);
+
+		testQuality = DiagnosticTestQuality.createFrom(loggers, allAssignmentsLogger);
 
 		assertNotNull(testQuality);
 
@@ -165,7 +177,13 @@ public class DiagnosticTestQualityTest {
 		logger.logHit(new SourceLocation(file, 1, 0), 10);
 		loggers.add(logger);
 
-		testQuality = DiagnosticTestQuality.createFrom(loggers, 4);
+		IGHitCountLogger allAssignmentsLogger = new IGHitCountLogger("All Assignments");
+		allAssignmentsLogger.logHit(new SourceLocation(file, 0, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 1, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 2, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 3, 0), 10);
+
+		testQuality = DiagnosticTestQuality.createFrom(loggers, allAssignmentsLogger);
 
 		assertNotNull(testQuality);
 
@@ -249,7 +267,19 @@ public class DiagnosticTestQualityTest {
 		logger.logHit(new SourceLocation(file2, 4, 0), 10);
 		loggers.add(logger);
 
-		testQuality = DiagnosticTestQuality.createFrom(loggers, 10);
+		IGHitCountLogger allAssignmentsLogger = new IGHitCountLogger("All Assignments");
+		allAssignmentsLogger.logHit(new SourceLocation(file, 0, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 1, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 2, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file, 3, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file2, 0, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file2, 1, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file2, 2, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file2, 3, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file2, 4, 0), 10);
+		allAssignmentsLogger.logHit(new SourceLocation(file2, 5, 0), 10);
+
+		testQuality = DiagnosticTestQuality.createFrom(loggers, allAssignmentsLogger);
 
 		assertNotNull(testQuality);
 
