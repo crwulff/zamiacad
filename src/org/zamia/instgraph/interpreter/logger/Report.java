@@ -2,11 +2,14 @@ package org.zamia.instgraph.interpreter.logger;
 
 import java.io.File;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -28,6 +31,12 @@ public class Report {
 
 	Header fHeader;
 
+	double fWhatif = -1;
+	double fWhatifHi = -1;
+	double fWhatifLo = -1;
+	int fLengthWhatif = 1, fLengthWhatifHi = 1, fLengthWhatifLo = 1;
+	int fNumTotalStmts = -1;
+
 	private TreeMap<SourceFile, FileReport> fFileReports = new TreeMap<SourceFile, FileReport>(LOCATION_COMPARATOR);
 
 	private static final ZamiaLogger logger = ZamiaLogger.getInstance();
@@ -45,9 +54,21 @@ public class Report {
 		fTitle = aTitle;
 	}
 
+
+	public static Report createReport(List<? extends IGCodeExecutionLogger> aLoggers, int aNumTotalStmts, String aTitle) {
+
+		return createReport(Collections.<IGHitCountLogger>emptyList(), aLoggers, aNumTotalStmts, aTitle);
+	}
+
 	public static Report createReport(List<? extends IGCodeExecutionLogger> aFailedLoggers,
 									  List<? extends IGCodeExecutionLogger> aPassedLoggers,
 									  String aTitle) {
+		return createReport(aFailedLoggers, aPassedLoggers, -1, aTitle);
+	}
+
+	public static Report createReport(List<? extends IGCodeExecutionLogger> aFailedLoggers,
+									  List<? extends IGCodeExecutionLogger> aPassedLoggers,
+									  int aNumTotalStmts, String aTitle) {
 
 		Report report = new Report(aTitle);
 
@@ -58,6 +79,10 @@ public class Report {
 		report.processLoggers(aPassedLoggers);
 
 		report.initStat();
+
+		report.fNumTotalStmts = aNumTotalStmts;
+
+		report.computeWHATIF();
 
 		return report;
 	}
@@ -126,7 +151,95 @@ public class Report {
 		return fFileReports.get(aFile);
 	}
 
-	private void initStat() {
+	void computeWHATIF() {
+
+		if (fNumTotalStmts == -1) {
+			return;
+		}
+
+		fWhatif = 0;
+		fWhatifHi = 0;
+		fWhatifLo = 0;
+
+		ArrayList<FileReport.ItemLine> stmts = new ArrayList<FileReport.ItemLine>(fNumTotalStmts);
+		for (FileReport fileReport : fFileReports.values()) {
+			for (FileReport.ItemLine itemLine : fileReport.lines.values()) {
+				stmts.add(itemLine);
+			}
+		}
+
+		int numTests = fHeader.passedCount;
+
+		int maxWhatif = 0, maxWhatifHi = 0, maxWhatifLo = 0;
+		for (FileReport.ItemLine stmt : stmts) {
+
+			HashSet<Integer> failingTests = new HashSet<Integer>();
+			for (int test = 0; test < numTests; test++) {
+				if (stmt.passed[test]) {
+					failingTests.add(test);
+				}
+			}
+
+			int tf = failingTests.size();
+			int tp = numTests - tf;
+
+			int whatif = 1, whatifHi = 1, whatifLo = 1;
+			for (FileReport.ItemLine candidateStmt : stmts) {
+
+				if (candidateStmt == stmt) {
+					continue;
+				}
+				// compute potential fails and passes for the candidateStmt
+				HashSet<Integer> potFails = new HashSet<Integer>();
+				HashSet<Integer> potPasses = new HashSet<Integer>();
+				for (int test = 0; test < numTests; test++) {
+					if (candidateStmt.passed[test]) {
+						if (failingTests.contains(test)) {
+							potFails.add(test);
+						} else {
+							potPasses.add(test);
+						}
+					}
+				}
+
+				if (potFails.isEmpty()) {
+					continue;
+				}
+
+				whatifHi++;
+
+				double score = computeStat1(potPasses.size(), tp, potFails.size(), tf);
+				if (isSuspect(score)) {
+					whatif++;
+				}
+
+				// count all identical candidates
+				if (potPasses.isEmpty() && potFails.containsAll(failingTests)) {
+					whatifLo++;
+				}
+			}
+
+			stmt.stat.whatif = whatif;
+			stmt.stat.whatifHi = whatifHi;
+			stmt.stat.whatifLo = whatifLo;
+			fWhatif += whatif;
+			fWhatifHi += whatifHi;
+			fWhatifLo += whatifLo;
+			maxWhatif = whatif > maxWhatif ? whatif : maxWhatif;
+			maxWhatifHi = whatifHi > maxWhatifHi ? whatifHi : maxWhatifHi;
+			maxWhatifLo = whatifLo > maxWhatifLo ? whatifLo : maxWhatifLo;
+		}
+
+		fWhatif /= (double) fNumTotalStmts;
+		fWhatifHi /= (double) fNumTotalStmts;
+		fWhatifLo /= (double) fNumTotalStmts;
+
+		fLengthWhatif = String.valueOf(maxWhatif).length();
+		fLengthWhatifHi = String.valueOf(maxWhatifHi).length();
+		fLengthWhatifLo = String.valueOf(maxWhatifLo).length();
+	}
+
+	void initStat() {
 
 		for (FileReport fileReport : fFileReports.values()) {
 
@@ -240,7 +353,7 @@ public class Report {
 	public void print(PrintStream out) {
 
 		print(out, "");
-		print(out, "###########  %s  ###########", fTitle);
+		print(out, "###########  %s  ###########    TotalStmts = %d   W = %.2f  L = %.2f  H = %.2f", fTitle, fNumTotalStmts, fWhatif, fWhatifLo, fWhatifHi);
 		print(out, "");
 
 		for (FileReport fileReport : fFileReports.values()) {
@@ -261,7 +374,7 @@ public class Report {
 		if (out == null) {
 			logger.info(line, args);
 		} else {
-			out.printf(line + "\n", args);
+			out.printf(Locale.US, line + "\n", args);
 		}
 	}
 
@@ -414,7 +527,7 @@ public class Report {
 
 			public void initStat(int aPassedCnt, int aFailedCnt, double[] aRates) {
 
-				stat = new Stat(aPassedCnt, aFailedCnt, aRates[0], aRates[1], aRates[2], aRates[3], aRates[4]);
+				stat = new Stat(aPassedCnt, aFailedCnt, aRates[0], aRates[1], aRates[2], aRates[3], aRates[4], (int) aRates[5], (int) aRates[6], (int) aRates[7]);
 			}
 
 			private int countItems(boolean[] items) {
@@ -432,7 +545,7 @@ public class Report {
 			}
 
 			public boolean isSuspect() {
-				return getV1() > 0.5;
+				return Report.isSuspect(getV1());
 			}
 
 			public boolean isYellow() {
@@ -494,7 +607,7 @@ public class Report {
 
 				final double v1, v2, v3, v4, v5;
 
-				String fAsString;
+				int whatif, whatifHi, whatifLo;
 
 				private Stat(int aPassedCnt, int aFailedCnt, int aTotalPassed, int aTotalFailed) {
 
@@ -504,11 +617,12 @@ public class Report {
 							computeStat2(aPassedCnt, aTotalPassed, aFailedCnt, aTotalFailed),
 							computeStat3(aPassedCnt, aTotalPassed, aFailedCnt, aTotalFailed),
 							computeStat4(aPassedCnt, aTotalPassed, aFailedCnt, aTotalFailed),
-							computeStat5(aPassedCnt, aTotalPassed, aFailedCnt, aTotalFailed)
+							computeStat5(aPassedCnt, aTotalPassed, aFailedCnt, aTotalFailed),
+							-1, -1, -1
 					);
 				}
 
-				private Stat(int aPassedCnt, int aFailedCnt, double v1, double v2, double v3, double v4, double v5) {
+				private Stat(int aPassedCnt, int aFailedCnt, double v1, double v2, double v3, double v4, double v5, int whatif, int whatifLo, int whatifHi) {
 
 					this.passedCnt = aPassedCnt;
 					this.failedCnt = aFailedCnt;
@@ -518,25 +632,27 @@ public class Report {
 					this.v3 = v3;
 					this.v4 = v4;
 					this.v5 = v5;
+
+					this.whatif = whatif;
+					this.whatifLo = whatifLo;
+					this.whatifHi = whatifHi;
 				}
 
 				@Override
 				public String toString() {
 
-					if (fAsString == null) {
+					StringBuilder b = new StringBuilder();
+					b.append(String.format("%3s|%-5s", "<" + failedCnt, passedCnt + ">"));
+					b.append(String.format(Locale.US, "1) %.3f  ", v1));
+					b.append(String.format(Locale.US, "2) %.3f  ", v2));
+					b.append(String.format(Locale.US, "3) %.3f  ", v3));
+					b.append(String.format(Locale.US, "4) %.3f  ", v4));
+					b.append(String.format(Locale.US, "5) %.3f  ", v5));
+					b.append(String.format("W) %" + fLengthWhatif + "d  ", whatif));
+					b.append(String.format("L) %" + fLengthWhatifLo + "d  ", whatifLo));
+					b.append(String.format("H) %" + fLengthWhatifHi + "d", whatifHi));
 
-						StringBuilder b = new StringBuilder();
-						b.append(String.format("%3s|%-5s", "<" + failedCnt, passedCnt + ">"));
-						b.append(String.format("1) %.3f  ", v1));
-						b.append(String.format("2) %.3f  ", v2));
-						b.append(String.format("3) %.3f  ", v3));
-						b.append(String.format("4) %.3f  ", v4));
-						b.append(String.format("5) %.3f", v5));
-
-						fAsString = b.toString();
-					}
-
-					return fAsString;
+					return b.toString();
 				}
 			}
 		}
@@ -715,5 +831,9 @@ public class Report {
 	private static double computeStat5(double p, double tp, double f, double tf) {
 
 		return f / tf;
+	}
+
+	private static boolean isSuspect(double aScore) {
+		return aScore > 0.5;
 	}
 }

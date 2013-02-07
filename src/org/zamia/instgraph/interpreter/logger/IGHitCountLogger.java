@@ -62,7 +62,7 @@ public class IGHitCountLogger extends IGCodeExecutionLogger {
 		fIsDirty = true;
 	}
 
-	public boolean hasLine(int aLine) {
+	public boolean hasHitsAt(int aLine) {
 		if (isComposite()) {
 			throw new RuntimeException("Trying to poll for line from COMPOSITE logger");
 		}
@@ -82,7 +82,7 @@ public class IGHitCountLogger extends IGCodeExecutionLogger {
 		}
 	}
 
-	public int getCount(int aLine) {
+	public int getHitsAt(int aLine) {
 		if (isComposite()) {
 			throw new RuntimeException("Trying to poll for count from COMPOSITE logger");
 		}

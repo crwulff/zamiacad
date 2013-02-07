@@ -2,6 +2,7 @@ package org.zamia.instgraph.interpreter.logger;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -111,6 +112,59 @@ public abstract class IGCodeExecutionLogger {
 			sum = fItems.size();
 		}
 		return sum;
+	}
+
+	public boolean hasLine(int aLine) {
+
+		if (isComposite()) {
+			throw new RuntimeException("Checking for line in COMPOSITE logger");
+		}
+
+		for (CodeItem item : fItems) {
+			if (item.fLoc.fLine == aLine) {
+				return true;
+			}
+			if (item.fLoc.fLine > aLine) {
+				return false;
+			}
+		}
+		return false;
+	}
+
+	public boolean hasLocation(CodeItem aCodeItem) {
+		return hasLocation(aCodeItem.fLoc.fLine, aCodeItem.fLoc.fCol);
+	}
+
+	public boolean hasLocation(int aLine, int aCol) {
+
+		if (isComposite()) {
+			throw new RuntimeException("Checking for location in COMPOSITE logger");
+		}
+
+		for (CodeItem item : fItems) {
+			if (item.fLoc.fLine == aLine && item.fLoc.fCol == aCol) {
+				return true;
+			}
+			if (item.fLoc.fLine > aLine) {
+				return false;
+			}
+		}
+		return false;
+	}
+
+	public void dropFiles(List<String> aPaths) {
+		if (isLeaf()) {
+			return;
+		}
+		LinkedList<SourceFile> droppedFiles = new LinkedList<SourceFile>();
+		for (SourceFile file : fLoggersByFile.keySet()) {
+			if (aPaths.contains(file.getLocalPath())) {
+				droppedFiles.add(file);
+			}
+		}
+		for (SourceFile droppedFile : droppedFiles) {
+			fLoggersByFile.remove(droppedFile);
+		}
 	}
 
 	public void dropSystemFiles() {

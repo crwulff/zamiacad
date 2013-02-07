@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Locale;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -76,6 +77,11 @@ public class ReportUtils {
 
 					if (line.startsWith("###########  ")) {
 						report = new Report(parseTitle(line));
+						report.fNumTotalStmts = parseTotalStmts(line);
+						String[] parts = line.split("[WLH] =");
+						report.fWhatif = parseDouble(parts[1].trim());
+						report.fWhatifLo = parseDouble(parts[2].trim());
+						report.fWhatifHi = parseDouble(parts[3].trim());
 						continue;
 					}
 
@@ -101,6 +107,11 @@ public class ReportUtils {
 					parseItemLine(line);
 				}
 
+				if (report.hasMarkers()) {
+					report.initStat();
+					report.computeWHATIF();
+				}
+
 				return report;
 
 			} catch (IOException e) {
@@ -108,6 +119,10 @@ public class ReportUtils {
 			} finally {
 				closeSilently(reader);
 			}
+		}
+
+		private int parseTotalStmts(String line) {
+			return Integer.parseInt(line.substring(line.indexOf("TotalStmts = ") + 13, line.indexOf("W =")).trim());
 		}
 
 		private String parseTitle(String line) {
@@ -140,30 +155,40 @@ public class ReportUtils {
 
 				itemLine.passed = parseMarkers(passedMarkers, header.passedCount);
 
-				itemLine.initStat();
-
 			} else {
 
 				int failedCnt = Integer.parseInt(line.substring(line.indexOf("<") + 1, line.indexOf("|")));
 				int passedCnt = Integer.parseInt(line.substring(line.indexOf("|") + 1, line.indexOf(">")));
 
-				String[] parts = line.substring(line.indexOf(">") + 1).trim().split("\\d\\)");
+				String[] parts = line.substring(line.indexOf(">") + 1).trim().split("[\\dWLH]\\)");
 
 				double[] rates = new double[]{
 						parseDouble(parts[1]),
 						parseDouble(parts[2].trim()),
 						parseDouble(parts[3].trim()),
 						parseDouble(parts[4].trim()),
-						parseDouble(parts[5].trim())
+						parseDouble(parts[5].trim()),
+						parseDouble(parts[6].trim()),
+						parseDouble(parts[7].trim()),
+						parseDouble(parts[8].trim())
 				};
 
 				itemLine.initStat(passedCnt, failedCnt, rates);
+
+				if (report.fLengthWhatif == 1) {
+					report.fLengthWhatif = line.indexOf("L)") - line.indexOf("W)") - 5;
+					report.fLengthWhatifLo = line.indexOf("H)") - line.indexOf("L)") - 5;
+					report.fLengthWhatifHi = line.length() - line.indexOf("H)") - 3;
+				}
 			}
 		}
 
 		private double parseDouble(String part) {
 			try {
-				return NumberFormat.getInstance().parse(part.trim()).doubleValue();
+				if (part.trim().equals("NaN")) {
+					return Double.NaN;
+				}
+				return NumberFormat.getInstance(Locale.US).parse(part.trim()).doubleValue();
 			} catch (ParseException e) {
 				return 0;
 			}
@@ -245,8 +270,10 @@ public class ReportUtils {
 			}
 
 			String[] parts = line.split("<F\\|P>");
-			String[] failed = parts[0].trim().split("\\s+");
-			String[] passed = parts[1].trim().split("\\s+");
+			parts[0] = parts[0].trim();
+			parts[1] = parts[1].trim();
+			String[] failed = parts[0].isEmpty() ? new String[0] :  parts[0].split("\\s+");
+			String[] passed = parts[1].isEmpty() ? new String[0] :  parts[1].split("\\s+");
 
 			int failedCount = failed.length;
 			int passedCount = passed.length;

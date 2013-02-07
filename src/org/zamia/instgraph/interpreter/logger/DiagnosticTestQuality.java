@@ -214,44 +214,43 @@ public class DiagnosticTestQuality {
 	}
 
 	/**
-	 * @param loggers loggers that represent executed statements
-	 * @param allAssignmentsLogger logger representing all assignments in the design
+	 * @param aExecutedStmts loggers that represent executed statements
+	 * @param aAllStmts logger representing all statements (assignments/conditions) in the design
 	 * @return assessment of the quality of diagnostic test
 	 */
-	public static DiagnosticTestQuality createFrom(List<IGHitCountLogger> loggers, IGHitCountLogger allAssignmentsLogger) {
+	public static DiagnosticTestQuality createFrom(List<? extends IGCodeExecutionLogger> aExecutedStmts, IGCodeExecutionLogger aAllStmts) {
 
-		if (loggers.size() < 2) {
-			logger.info("DiagnosticTestQuality: test quality can only be computed for multiple tests. Num of received tests: %d", loggers.size());
+		if (aExecutedStmts.size() < 2) {
+			logger.info("DiagnosticTestQuality: test quality can only be computed for multiple tests. Num of received tests: %d", aExecutedStmts.size());
 			return null;
 		}
 
 		HashMap<SourceFile, boolean[][]> matrices = new HashMap<SourceFile, boolean[][]>();
 
 		int tst = 0;
-		int numTests = loggers.size();
-		int numCodeItems = allAssignmentsLogger.getNumItems();
+		int numTests = aExecutedStmts.size();
+		int numAllStmts = aAllStmts.getNumItems();
 
-		for (IGHitCountLogger logger : loggers) {
+		for (IGCodeExecutionLogger logger : aExecutedStmts) {
 
 			logger.dropSystemFiles();
 
 			for (Map.Entry<SourceFile, IGCodeExecutionLogger> entry : logger.fLoggersByFile.entrySet()) {
 				SourceFile file = entry.getKey();
-				IGHitCountLogger fileLogger = (IGHitCountLogger) entry.getValue();
+				IGCodeExecutionLogger fileLogger = entry.getValue();
 
-				IGCodeExecutionLogger allAssLogger = allAssignmentsLogger.getLogger(file);
+				IGCodeExecutionLogger allStmtsLogger = aAllStmts.getLogger(file);
 
 				boolean[][] matrix = matrices.containsKey(file) ? matrices.get(file) : null;
 				if (matrix == null) {
 					matrix = new boolean[numTests][];
 					matrices.put(file, matrix);
 				}
-				matrix[tst] = new boolean[allAssLogger.getNumItems()];
+				matrix[tst] = new boolean[allStmtsLogger.getNumItems()];
 
 				int line = 0;
-				for (IGCodeExecutionLogger.CodeItem codeItem : allAssLogger.fItems) {
-					int hits = fileLogger.getCount(codeItem.fLoc.fLine);
-					if (hits > 0) {
+				for (IGCodeExecutionLogger.CodeItem codeItem : allStmtsLogger.fItems) {
+					if (fileLogger.hasLocation(codeItem)) {
 						matrix[tst][line] = true;
 					}
 					line++;
@@ -261,7 +260,7 @@ public class DiagnosticTestQuality {
 			tst++;
 		}
 
-		DiagnosticTestQuality ret = new DiagnosticTestQuality(numCodeItems);
+		DiagnosticTestQuality ret = new DiagnosticTestQuality(numAllStmts);
 
 		double uniquenessJaan = 0, uniquenessMaksim = 0;
 
@@ -308,6 +307,7 @@ public class DiagnosticTestQuality {
 
 		/* Compute DEVIATION */
 		boolean[][] bigMatrix = mergeMatrices(new ArrayList<boolean[][]>(matrices.values()));
+		assert bigMatrix[0].length == numAllStmts;
 		double hAve = ret.getSumNormRaimund();
 		int N = ret.getNumDistances();
 		double total = 0;
@@ -324,11 +324,11 @@ public class DiagnosticTestQuality {
 
 		double coverage = 0;
 		try {
-			IGCodeExecutionLogger mergedLogger = IGCodeExecutionLogger.mergeAll(loggers.toArray(new IGCodeExecutionLogger[numTests]));
+			IGCodeExecutionLogger mergedLogger = IGCodeExecutionLogger.mergeAll(aExecutedStmts.toArray(new IGCodeExecutionLogger[numTests]));
 			int covered = mergedLogger.getNumItems();
-			coverage = (double) covered / numCodeItems * 100;
+			coverage = (double) covered / numAllStmts * 100;
 		} catch (ZamiaException e) {
-			logger.debug("DiagnosticTestQuality: could not merge loggers to compute coverage", e, "");
+			logger.debug("DiagnosticTestQuality: could not merge aExecutedStmts to compute coverage", e, "");
 		}
 
 		ret.coverage = coverage;

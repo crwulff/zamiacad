@@ -54,13 +54,13 @@ public class IGHitCountLoggerTest {
 		assertTrue(!result.hasLoggerForFile(sf4));
 		assertTrue(!result.hasLoggerForFile(sf5));
 
-		assertTrue(((IGHitCountLogger) result.getLogger(sf1)).hasLine(10));
-		assertTrue(((IGHitCountLogger) result.getLogger(sf2)).hasLine(1));
-		assertTrue(((IGHitCountLogger) result.getLogger(sf3)).hasLine(13));
+		assertTrue(((IGHitCountLogger) result.getLogger(sf1)).hasHitsAt(10));
+		assertTrue(((IGHitCountLogger) result.getLogger(sf2)).hasHitsAt(1));
+		assertTrue(((IGHitCountLogger) result.getLogger(sf3)).hasHitsAt(13));
 
-		assertThat(((IGHitCountLogger) result.getLogger(sf1)).getCount(10), is(123));
-		assertThat(((IGHitCountLogger) result.getLogger(sf2)).getCount(1), is(122));
-		assertThat(((IGHitCountLogger) result.getLogger(sf3)).getCount(13), is(121));
+		assertThat(((IGHitCountLogger) result.getLogger(sf1)).getHitsAt(10), is(123));
+		assertThat(((IGHitCountLogger) result.getLogger(sf2)).getHitsAt(1), is(122));
+		assertThat(((IGHitCountLogger) result.getLogger(sf3)).getHitsAt(13), is(121));
 
 	}
 
@@ -101,17 +101,17 @@ public class IGHitCountLoggerTest {
 		assertTrue(result.hasLoggerForFile(sf4));
 		assertTrue(result.hasLoggerForFile(sf5));
 
-		assertTrue(((IGHitCountLogger) result.getLogger(sf1)).hasLine(10));
-		assertTrue(((IGHitCountLogger) result.getLogger(sf2)).hasLine(1));
-		assertTrue(((IGHitCountLogger) result.getLogger(sf3)).hasLine(13));
-		assertTrue(((IGHitCountLogger) result.getLogger(sf4)).hasLine(132));
-		assertTrue(((IGHitCountLogger) result.getLogger(sf5)).hasLine(198));
+		assertTrue(((IGHitCountLogger) result.getLogger(sf1)).hasHitsAt(10));
+		assertTrue(((IGHitCountLogger) result.getLogger(sf2)).hasHitsAt(1));
+		assertTrue(((IGHitCountLogger) result.getLogger(sf3)).hasHitsAt(13));
+		assertTrue(((IGHitCountLogger) result.getLogger(sf4)).hasHitsAt(132));
+		assertTrue(((IGHitCountLogger) result.getLogger(sf5)).hasHitsAt(198));
 
-		assertThat(((IGHitCountLogger) result.getLogger(sf1)).getCount(10), is(123));
-		assertThat(((IGHitCountLogger) result.getLogger(sf2)).getCount(1), is(122));
-		assertThat(((IGHitCountLogger) result.getLogger(sf3)).getCount(13), is(121));
-		assertThat(((IGHitCountLogger) result.getLogger(sf4)).getCount(132), is(11));
-		assertThat(((IGHitCountLogger) result.getLogger(sf5)).getCount(198), is(12));
+		assertThat(((IGHitCountLogger) result.getLogger(sf1)).getHitsAt(10), is(123));
+		assertThat(((IGHitCountLogger) result.getLogger(sf2)).getHitsAt(1), is(122));
+		assertThat(((IGHitCountLogger) result.getLogger(sf3)).getHitsAt(13), is(121));
+		assertThat(((IGHitCountLogger) result.getLogger(sf4)).getHitsAt(132), is(11));
+		assertThat(((IGHitCountLogger) result.getLogger(sf5)).getHitsAt(198), is(12));
 
 	}
 
