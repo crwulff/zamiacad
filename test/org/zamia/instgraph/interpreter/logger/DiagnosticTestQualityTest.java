@@ -360,7 +360,7 @@ public class DiagnosticTestQualityTest {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		report.print(new PrintStream(out));
 
-		String correct = "\n###########  Assignments  ###########    TotalStmts = 6   W = 1.00  L = 1.00  H = 1.00\n" +
+		String correct = "\n###########  Assignments  ###########    TotalStmts = 6   W = 1.00  L = 1.00  H = 1.00  We = 0.00  We2 = 0.00\n" +
 				"\n" +
 				"(some path) TestWhatif.txt:\n" +
 				"         <F|P> Test1 Test2 Test3 Test4 Test5 Test6\n" +
@@ -435,7 +435,7 @@ public class DiagnosticTestQualityTest {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		report.print(new PrintStream(out));
 
-		String correct = "\n###########  Assignments  ###########    TotalStmts = 6   W = 2.67  L = 1.00  H = 4.33\n" +
+		String correct = "\n###########  Assignments  ###########    TotalStmts = 6   W = 2.67  L = 1.00  H = 4.33  We = 0.56  We2 = 0.75\n" +
 				"\n" +
 				"(some path) TestWhatif.txt:\n" +
 				"         <F|P> Test1 Test2 Test3 Test4 Test5 Test6\n" +
@@ -523,7 +523,7 @@ public class DiagnosticTestQualityTest {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		report.print(new PrintStream(out));
 
-		String correct = "\n###########  Assignments  ###########    TotalStmts = 6   W = 1.00  L = 1.00  H = 6.00\n" +
+		String correct = "\n###########  Assignments  ###########    TotalStmts = 6   W = 1.00  L = 1.00  H = 6.00  We = 0.00  We2 = 0.00\n" +
 				"\n" +
 				"(some path) TestWhatif.txt:\n" +
 				"         <F|P> Test1 Test2 Test3 Test4 Test5 Test6\n" +
@@ -600,7 +600,7 @@ public class DiagnosticTestQualityTest {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		report.print(new PrintStream(out));
 
-		String correct = "\n###########  Assignments  ###########    TotalStmts = 6   W = 2.50  L = 1.17  H = 3.83\n" +
+		String correct = "\n###########  Assignments  ###########    TotalStmts = 6   W = 3.00  L = 1.40  H = 4.60  We = 2.80  We2 = 1.67\n" +
 				"\n" +
 				"(some path) TestWhatif.txt:\n" +
 				"         <F|P> Test1 Test2 Test3 Test4 Test5 Test6\n" +

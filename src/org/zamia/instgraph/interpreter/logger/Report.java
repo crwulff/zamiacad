@@ -28,7 +28,7 @@ import org.zamia.instgraph.interpreter.logger.IGLogicalExpressionLogger.Expressi
 public class Report {
 
 	private static final boolean OVER_TOTAL = false; // default = FALSE
-	private static final boolean DROP_ALWAYS_COVERED = true; // default = FALSE
+	private static final boolean DROP_ALWAYS_COVERED = false; // default = FALSE
 
 	String fTitle;
 
