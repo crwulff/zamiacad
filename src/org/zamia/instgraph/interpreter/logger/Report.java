@@ -27,6 +27,9 @@ import org.zamia.instgraph.interpreter.logger.IGLogicalExpressionLogger.Expressi
  */
 public class Report {
 
+	private static final boolean OVER_TOTAL = false; // default = FALSE
+	private static final boolean DROP_ALWAYS_COVERED = true; // default = FALSE
+
 	String fTitle;
 
 	Header fHeader;
@@ -34,6 +37,8 @@ public class Report {
 	double fWhatif = -1;
 	double fWhatifHi = -1;
 	double fWhatifLo = -1;
+	double fWhatifEmph = -1;
+	double fWhatifEmph2 = -1;
 	int fLengthWhatif = 1, fLengthWhatifHi = 1, fLengthWhatifLo = 1;
 	int fNumTotalStmts = -1;
 
@@ -160,10 +165,16 @@ public class Report {
 		fWhatif = 0;
 		fWhatifHi = 0;
 		fWhatifLo = 0;
+		fWhatifEmph = 0;
 
 		ArrayList<FileReport.ItemLine> stmts = new ArrayList<FileReport.ItemLine>(fNumTotalStmts);
 		for (FileReport fileReport : fFileReports.values()) {
 			for (FileReport.ItemLine itemLine : fileReport.lines.values()) {
+				if (DROP_ALWAYS_COVERED) {
+					if (itemLine.isAlwaysCovered()) {
+						continue;
+					}
+				}
 				stmts.add(itemLine);
 			}
 		}
@@ -230,13 +241,30 @@ public class Report {
 			maxWhatifLo = whatifLo > maxWhatifLo ? whatifLo : maxWhatifLo;
 		}
 
-		fWhatif /= (double) fNumTotalStmts;
-		fWhatifHi /= (double) fNumTotalStmts;
-		fWhatifLo /= (double) fNumTotalStmts;
+		if (OVER_TOTAL) {
+			fWhatif /= (double) fNumTotalStmts;
+			fWhatifHi /= (double) fNumTotalStmts;
+			fWhatifLo /= (double) fNumTotalStmts;
+		} else {
+			fWhatif /= (double) stmts.size();
+			fWhatifHi /= (double) stmts.size();
+			fWhatifLo /= (double) stmts.size();
+		}
 
 		fLengthWhatif = String.valueOf(maxWhatif).length();
 		fLengthWhatifHi = String.valueOf(maxWhatifHi).length();
 		fLengthWhatifLo = String.valueOf(maxWhatifLo).length();
+
+		for (FileReport.ItemLine stmt : stmts) {
+			fWhatifEmph += Math.pow((double) stmt.stat.whatif - fWhatif, 2);
+		}
+		if (OVER_TOTAL) {
+			fWhatifEmph2 = Math.sqrt(fWhatifEmph / (double) fNumTotalStmts);
+			fWhatifEmph /= (double) fNumTotalStmts;
+		} else {
+			fWhatifEmph2 = Math.sqrt(fWhatifEmph / (double) stmts.size());
+			fWhatifEmph /= (double) stmts.size();
+		}
 	}
 
 	void initStat() {
@@ -353,7 +381,7 @@ public class Report {
 	public void print(PrintStream out) {
 
 		print(out, "");
-		print(out, "###########  %s  ###########    TotalStmts = %d   W = %.2f  L = %.2f  H = %.2f", fTitle, fNumTotalStmts, fWhatif, fWhatifLo, fWhatifHi);
+		print(out, "###########  %s  ###########    TotalStmts = %d   W = %.2f  L = %.2f  H = %.2f  We = %.2f  We2 = %.2f", fTitle, fNumTotalStmts, fWhatif, fWhatifLo, fWhatifHi, fWhatifEmph, fWhatifEmph2);
 		print(out, "");
 
 		for (FileReport fileReport : fFileReports.values()) {
@@ -538,6 +566,10 @@ public class Report {
 					}
 				}
 				return passedCnt;
+			}
+
+			public boolean isAlwaysCovered() {
+				return passed.length == stat.passedCnt;
 			}
 
 			public boolean isGreen() {

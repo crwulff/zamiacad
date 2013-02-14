@@ -23,6 +23,8 @@ public class DiagnosticTestQuality {
 
 	private double uniquenessJaan;
 	private double uniquenessMaksim;
+	private double uniquenessMaksimEmph;
+	private double uniquenessMaksimEmph2;
 	private double deviation;
 	private double coverage;
 
@@ -144,6 +146,8 @@ public class DiagnosticTestQuality {
 		b.append("              RMSD Deviation: ").append(deviation).append("\n");
 		b.append("           Uniqueness (Jaan): ").append(uniquenessJaan).append("\n");
 		b.append("           Uniqueness (Maks): ").append(uniquenessMaksim).append("\n");
+		b.append("      Uniqueness Emph (Maks): ").append(uniquenessMaksimEmph).append("\n");
+		b.append("    Uniqueness Emph 2 (Maks): ").append(uniquenessMaksimEmph2).append("\n");
 		b.append("Normalized Uniqueness (Maks): ").append(uniquenessMaksim / numCodeItems).append("\n\n");
 		b.append("Num. Tests      : ").append(getNumTests()).append("\n");
 		b.append("Num. Assignments: ").append(numCodeItems).append("\n");
@@ -304,6 +308,26 @@ public class DiagnosticTestQuality {
 
 		ret.uniquenessJaan = uniquenessJaan;
 		ret.uniquenessMaksim = uniquenessMaksim;
+
+		double uniMaksEmph = 0;
+		for (Map.Entry<SourceFile, boolean[][]> entry : matrices.entrySet()) {
+			boolean[][] matrix = entry.getValue();
+
+			int numLines = matrix[0].length;
+			for (int line = 0; line < numLines; line++) {
+				int count = 0;
+				for (int test = 0; test < numTests; test++) {
+					if (matrix[test][line]) {
+						count++;
+					}
+				}
+				uniquenessMaksim = (double) count / numTests;
+				uniMaksEmph += Math.pow(uniquenessMaksim - ret.uniquenessMaksim, 2);
+			}
+		}
+
+		ret.uniquenessMaksimEmph = uniMaksEmph / numTests;
+		ret.uniquenessMaksimEmph2 = Math.sqrt(uniMaksEmph / numTests);
 
 		/* Compute DEVIATION */
 		boolean[][] bigMatrix = mergeMatrices(new ArrayList<boolean[][]>(matrices.values()));

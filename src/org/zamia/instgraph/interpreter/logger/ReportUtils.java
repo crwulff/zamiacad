@@ -78,10 +78,12 @@ public class ReportUtils {
 					if (line.startsWith("###########  ")) {
 						report = new Report(parseTitle(line));
 						report.fNumTotalStmts = parseTotalStmts(line);
-						String[] parts = line.split("[WLH] =");
+						String[] parts = line.split("[WLH(We)(We2)] =");
 						report.fWhatif = parseDouble(parts[1].trim());
 						report.fWhatifLo = parseDouble(parts[2].trim());
 						report.fWhatifHi = parseDouble(parts[3].trim());
+						report.fWhatifEmph = parseDouble(parts[4].trim());
+						report.fWhatifEmph2 = parseDouble(parts[5].trim());
 						continue;
 					}
 
