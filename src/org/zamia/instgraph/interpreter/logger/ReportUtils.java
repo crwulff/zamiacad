@@ -162,7 +162,7 @@ public class ReportUtils {
 				int failedCnt = Integer.parseInt(line.substring(line.indexOf("<") + 1, line.indexOf("|")));
 				int passedCnt = Integer.parseInt(line.substring(line.indexOf("|") + 1, line.indexOf(">")));
 
-				String[] parts = line.substring(line.indexOf(">") + 1).trim().split("[\\dWLH]\\)");
+				String[] parts = line.substring(line.indexOf(">") + 1).trim().split("[\\dWLH(Ham)]\\)");
 
 				double[] rates = new double[]{
 						parseDouble(parts[1]),
@@ -172,7 +172,8 @@ public class ReportUtils {
 						parseDouble(parts[5].trim()),
 						parseDouble(parts[6].trim()),
 						parseDouble(parts[7].trim()),
-						parseDouble(parts[8].trim())
+						parseDouble(parts[8].trim()),
+						parseDouble(parts[9].trim())
 				};
 
 				itemLine.initStat(passedCnt, failedCnt, rates);
@@ -180,7 +181,8 @@ public class ReportUtils {
 				if (report.fLengthWhatif == 1) {
 					report.fLengthWhatif = line.indexOf("L)") - line.indexOf("W)") - 5;
 					report.fLengthWhatifLo = line.indexOf("H)") - line.indexOf("L)") - 5;
-					report.fLengthWhatifHi = line.length() - line.indexOf("H)") - 3;
+					report.fLengthWhatifHi = line.indexOf("Ham)") - line.indexOf("H)") - 5;
+					report.fLengthHamming = line.length() - line.indexOf("Ham)") - 5;
 				}
 			}
 		}

@@ -39,7 +39,7 @@ public class Report {
 	double fWhatifLo = -1;
 	double fWhatifEmph = -1;
 	double fWhatifEmph2 = -1;
-	int fLengthWhatif = 1, fLengthWhatifHi = 1, fLengthWhatifLo = 1;
+	int fLengthWhatif = 1, fLengthWhatifHi = 1, fLengthWhatifLo = 1, fLengthHamming = 1;
 	int fNumTotalStmts = -1;
 
 	private TreeMap<SourceFile, FileReport> fFileReports = new TreeMap<SourceFile, FileReport>(LOCATION_COMPARATOR);
@@ -181,7 +181,7 @@ public class Report {
 
 		int numTests = fHeader.passedCount;
 
-		int maxWhatif = 0, maxWhatifHi = 0, maxWhatifLo = 0;
+		int maxWhatif = 0, maxWhatifHi = 0, maxWhatifLo = 0, maxHamming = 0;
 		for (FileReport.ItemLine stmt : stmts) {
 
 			HashSet<Integer> failingTests = new HashSet<Integer>();
@@ -239,6 +239,18 @@ public class Report {
 			maxWhatif = whatif > maxWhatif ? whatif : maxWhatif;
 			maxWhatifHi = whatifHi > maxWhatifHi ? whatifHi : maxWhatifHi;
 			maxWhatifLo = whatifLo > maxWhatifLo ? whatifLo : maxWhatifLo;
+
+			int hamming = 0;
+			for (FileReport.ItemLine candidateStmt : stmts) {
+
+				if (candidateStmt == stmt) {
+					continue;
+				}
+
+				hamming += computeHammingDistance(stmt, candidateStmt);
+			}
+			stmt.stat.hamming = hamming;
+			maxHamming = hamming > maxHamming ? hamming : maxHamming;
 		}
 
 		if (OVER_TOTAL) {
@@ -254,6 +266,7 @@ public class Report {
 		fLengthWhatif = String.valueOf(maxWhatif).length();
 		fLengthWhatifHi = String.valueOf(maxWhatifHi).length();
 		fLengthWhatifLo = String.valueOf(maxWhatifLo).length();
+		fLengthHamming = String.valueOf(maxHamming).length();
 
 		for (FileReport.ItemLine stmt : stmts) {
 			fWhatifEmph += Math.pow((double) stmt.stat.whatif - fWhatif, 2);
@@ -265,6 +278,15 @@ public class Report {
 			fWhatifEmph2 = Math.sqrt(fWhatifEmph / (double) stmts.size());
 			fWhatifEmph /= (double) stmts.size();
 		}
+	}
+
+	private static int computeHammingDistance(FileReport.ItemLine first, FileReport.ItemLine second) {
+		int dist = 0;
+		for (int test = 0; test < first.passed.length; test++) {
+			if (first.passed[test] ^ second.passed[test])
+				dist++;
+		}
+		return dist;
 	}
 
 	void initStat() {
@@ -555,7 +577,7 @@ public class Report {
 
 			public void initStat(int aPassedCnt, int aFailedCnt, double[] aRates) {
 
-				stat = new Stat(aPassedCnt, aFailedCnt, aRates[0], aRates[1], aRates[2], aRates[3], aRates[4], (int) aRates[5], (int) aRates[6], (int) aRates[7]);
+				stat = new Stat(aPassedCnt, aFailedCnt, aRates[0], aRates[1], aRates[2], aRates[3], aRates[4], (int) aRates[5], (int) aRates[6], (int) aRates[7], (int) aRates[8]);
 			}
 
 			private int countItems(boolean[] items) {
@@ -639,7 +661,7 @@ public class Report {
 
 				final double v1, v2, v3, v4, v5;
 
-				int whatif, whatifHi, whatifLo;
+				int whatif, whatifHi, whatifLo, hamming;
 
 				private Stat(int aPassedCnt, int aFailedCnt, int aTotalPassed, int aTotalFailed) {
 
@@ -650,11 +672,11 @@ public class Report {
 							computeStat3(aPassedCnt, aTotalPassed, aFailedCnt, aTotalFailed),
 							computeStat4(aPassedCnt, aTotalPassed, aFailedCnt, aTotalFailed),
 							computeStat5(aPassedCnt, aTotalPassed, aFailedCnt, aTotalFailed),
-							-1, -1, -1
+							-1, -1, -1, -1
 					);
 				}
 
-				private Stat(int aPassedCnt, int aFailedCnt, double v1, double v2, double v3, double v4, double v5, int whatif, int whatifLo, int whatifHi) {
+				private Stat(int aPassedCnt, int aFailedCnt, double v1, double v2, double v3, double v4, double v5, int whatif, int whatifLo, int whatifHi, int hamming) {
 
 					this.passedCnt = aPassedCnt;
 					this.failedCnt = aFailedCnt;
@@ -668,6 +690,7 @@ public class Report {
 					this.whatif = whatif;
 					this.whatifLo = whatifLo;
 					this.whatifHi = whatifHi;
+					this.hamming = hamming;
 				}
 
 				@Override
@@ -682,7 +705,8 @@ public class Report {
 					b.append(String.format(Locale.US, "5) %.3f  ", v5));
 					b.append(String.format("W) %" + fLengthWhatif + "d  ", whatif));
 					b.append(String.format("L) %" + fLengthWhatifLo + "d  ", whatifLo));
-					b.append(String.format("H) %" + fLengthWhatifHi + "d", whatifHi));
+					b.append(String.format("H) %" + fLengthWhatifHi + "d  ", whatifHi));
+					b.append(String.format("Ham) %" + fLengthHamming + "d", hamming));
 
 					return b.toString();
 				}

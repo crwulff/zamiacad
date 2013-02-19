@@ -364,12 +364,12 @@ public class DiagnosticTestQualityTest {
 				"\n" +
 				"(some path) TestWhatif.txt:\n" +
 				"         <F|P> Test1 Test2 Test3 Test4 Test5 Test6\n" +
-				"    0:  0 <|>      x                                 <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1\n" +
-				"    1:  0 <|>            x                           <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1\n" +
-				"    2:  0 <|>                  x                     <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1\n" +
-				"    3:  0 <|>                        x               <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1\n" +
-				"    4:  0 <|>                              x         <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1\n" +
-				"    5:  0 <|>                                    x   <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1\n";
+				"    0:  0 <|>      x                                 <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1  Ham) 10\n" +
+				"    1:  0 <|>            x                           <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1  Ham) 10\n" +
+				"    2:  0 <|>                  x                     <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1  Ham) 10\n" +
+				"    3:  0 <|>                        x               <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1  Ham) 10\n" +
+				"    4:  0 <|>                              x         <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1  Ham) 10\n" +
+				"    5:  0 <|>                                    x   <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 1  Ham) 10\n";
 
 		assertThat(out.toString(), equalTo(correct));
 	}
@@ -439,12 +439,12 @@ public class DiagnosticTestQualityTest {
 				"\n" +
 				"(some path) TestWhatif.txt:\n" +
 				"         <F|P> Test1 Test2 Test3 Test4 Test5 Test6\n" +
-				"    0:  0 <|>      x     x                           <0|2>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 2  L) 1  H) 5\n" +
-				"    1:  0 <|>            x     x                 x   <0|3>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 3  L) 1  H) 5\n" +
-				"    2:  0 <|>            x     x     x               <0|3>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 3  L) 1  H) 5\n" +
-				"    3:  0 <|>                        x               <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 2  L) 1  H) 2\n" +
-				"    4:  0 <|>      x     x     x           x     x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 4  L) 1  H) 5\n" +
-				"    5:  0 <|>      x                       x     x   <0|3>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 2  L) 1  H) 4\n";
+				"    0:  0 <|>      x     x                           <0|2>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 2  L) 1  H) 5  Ham) 15\n" +
+				"    1:  0 <|>            x     x                 x   <0|3>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 3  L) 1  H) 5  Ham) 15\n" +
+				"    2:  0 <|>            x     x     x               <0|3>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 3  L) 1  H) 5  Ham) 17\n" +
+				"    3:  0 <|>                        x               <0|1>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 2  L) 1  H) 2  Ham) 19\n" +
+				"    4:  0 <|>      x     x     x           x     x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 4  L) 1  H) 5  Ham) 17\n" +
+				"    5:  0 <|>      x                       x     x   <0|3>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 2  L) 1  H) 4  Ham) 19\n";
 
 		assertThat(out.toString(), equalTo(correct));
 	}
@@ -527,12 +527,12 @@ public class DiagnosticTestQualityTest {
 				"\n" +
 				"(some path) TestWhatif.txt:\n" +
 				"         <F|P> Test1 Test2 Test3 Test4 Test5 Test6\n" +
-				"    0:  0 <|>            x     x     x     x     x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6\n" +
-				"    1:  0 <|>      x           x     x     x     x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6\n" +
-				"    2:  0 <|>      x     x           x     x     x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6\n" +
-				"    3:  0 <|>      x     x     x           x     x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6\n" +
-				"    4:  0 <|>      x     x     x     x           x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6\n" +
-				"    5:  0 <|>      x     x     x     x     x         <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6\n";
+				"    0:  0 <|>            x     x     x     x     x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6  Ham) 10\n" +
+				"    1:  0 <|>      x           x     x     x     x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6  Ham) 10\n" +
+				"    2:  0 <|>      x     x           x     x     x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6  Ham) 10\n" +
+				"    3:  0 <|>      x     x     x           x     x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6  Ham) 10\n" +
+				"    4:  0 <|>      x     x     x     x           x   <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6  Ham) 10\n" +
+				"    5:  0 <|>      x     x     x     x     x         <0|5>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 6  Ham) 10\n";
 
 		assertThat(out.toString(), equalTo(correct));
 	}
@@ -604,11 +604,11 @@ public class DiagnosticTestQualityTest {
 				"\n" +
 				"(some path) TestWhatif.txt:\n" +
 				"         <F|P> Test1 Test2 Test3 Test4 Test5 Test6\n" +
-				"    0:  0 <|>      x     x     x     x     x     x   <0|6>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 5  L) 2  H) 5\n" +
-				"    1:  0 <|>      x     x     x     x     x     x   <0|6>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 5  L) 2  H) 5\n" +
-				"    3:  0 <|>            x                 x         <0|2>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 2  L) 1  H) 5\n" +
-				"    4:  0 <|>                  x     x     x         <0|3>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 4\n" +
-				"    5:  0 <|>      x     x                           <0|2>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 2  L) 1  H) 4\n";
+				"    0:  0 <|>      x     x     x     x     x     x   <0|6>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 5  L) 2  H) 5  Ham) 11\n" +
+				"    1:  0 <|>      x     x     x     x     x     x   <0|6>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 5  L) 2  H) 5  Ham) 11\n" +
+				"    3:  0 <|>            x                 x         <0|2>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 2  L) 1  H) 5  Ham) 13\n" +
+				"    4:  0 <|>                  x     x     x         <0|3>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 1  L) 1  H) 4  Ham) 14\n" +
+				"    5:  0 <|>      x     x                           <0|2>   1) 0.000  2) 0.000  3) NaN  4) NaN  5) NaN  W) 2  L) 1  H) 4  Ham) 15\n";
 
 		assertThat(out.toString(), equalTo(correct));
 	}
