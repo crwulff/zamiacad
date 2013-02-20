@@ -80,6 +80,11 @@ public class ExceptionLogger {
 		}
 	}
 
+	public void showArea(String aMessage, SourceFile aSF, int aLine) {
+		zl.error(aMessage);
+		showArea(Level.ERROR, aSF, aLine);
+	}
+
 	private void showArea(Level level, SourceFile sf_, int line_) {
 
 		if (sf_ == null)

@@ -113,6 +113,13 @@ public class XMLUtils {
 		return getNode(aXPathExpr, aContext) != null;
 	}
 
+	public static void removeNode(String aXPathExpr, Node aContext) throws ZamiaException {
+		Node child = getNode(aXPathExpr, aContext);
+		if (child == null) {
+			return;
+		}
+		aContext.removeChild(child);
+	}
 
 	public static String getText(Node aNode) throws ZamiaException {
 		return aNode == null ? null : aNode.getTextContent();

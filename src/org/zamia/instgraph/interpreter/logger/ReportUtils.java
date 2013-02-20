@@ -324,6 +324,8 @@ public class ReportUtils {
 
 				dumpReport2XML();
 
+				dumpReport2Console();
+
 				XMLUtils.xml2file(fXml, fFile);
 
 			} catch (ZamiaException e) {
@@ -332,10 +334,21 @@ public class ReportUtils {
 			}
 		}
 
+		private void dumpReport2Console() {
+
+			for (SourceFile sourceFile : fReport.getFiles()) {
+
+				for (Report.FileReport.ItemLine itemLine : fReport.getLines(sourceFile)) {
+
+					el.showArea(itemLine.getColor().toUpperCase() + " suspect:", sourceFile, itemLine.getLine());
+				}
+			}
+		}
+
 		private void dumpReport2XML() throws ZamiaException {
 
 			if (XMLUtils.hasNode("result", fRootNode)) {
-				return;
+				XMLUtils.removeNode("result", fRootNode);
 			}
 
 			Element resultNode = XMLUtils.createNodeIn(fRootNode, "result", fXml);
