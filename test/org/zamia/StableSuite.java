@@ -32,7 +32,8 @@ import org.zamia.zdb.ZDBTest;
  *    testArrayIdx
  *    testCombProc
  *  org.zamia.instgraph.IGTest 
- *    testVestsChXX and testHapra - example files not found)
+ *    testVestsChXX 
+ *    testHapra - example files not found
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({

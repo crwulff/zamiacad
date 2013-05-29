@@ -14,6 +14,7 @@ import org.zamia.ZamiaException;
 import org.zamia.instgraph.IGOperation;
 import org.zamia.instgraph.IGOperationAttribute.AttrOp;
 import org.zamia.instgraph.IGOperationLiteral;
+import org.zamia.instgraph.IGRange;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGStaticValueBuilder;
 import org.zamia.instgraph.IGType;
@@ -112,6 +113,12 @@ public class IGAttributeStmt extends IGStmt {
 					
 				} else if (type.isDiscrete()) {
 
+					class Helper {
+						private IGStaticValue getValue(IGStaticValue argument, int succ, IGTypeStatic type, IGInterpreterRuntimeEnv aRuntime, SourceLocation sourceLocation, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
+							return type.getDiscreteValue(argument.getOrd() + succ, sourceLocation, aErrorMode, aReport).computeStaticValue(aRuntime, aErrorMode, aReport);
+						}
+
+					}
 					IGTypeStatic resType = getResType().computeStaticType(aRuntime, aErrorMode, aReport);
 					if (resType == null) {
 						return ReturnStatus.ERROR;
@@ -119,7 +126,7 @@ public class IGAttributeStmt extends IGStmt {
 
 					switch (fOp) {
 					case POS:
-
+						
 						String id = argument.getId();
 
 						resValue = type.findEnumLiteral(id);
@@ -128,11 +135,24 @@ public class IGAttributeStmt extends IGStmt {
 						}
 
 						resValue = new IGStaticValueBuilder(resType, null, sourceLocation).setNum(resValue.getOrd()).buildConstant();
-
 						break;
 
 					case VAL:
-						resValue = type.getDiscreteValue(argument.getOrd(), sourceLocation, aErrorMode, aReport).computeStaticValue(aRuntime, aErrorMode, aReport);
+						resValue = new Helper().getValue(argument, 0, type, aRuntime, sourceLocation, aErrorMode, aReport);
+						break;
+					case SUCC:
+						resValue = new Helper().getValue(argument, 1, type, aRuntime, sourceLocation, aErrorMode, aReport);
+						break;
+					case PRED:
+						resValue = new Helper().getValue(argument, -1, type, aRuntime, sourceLocation, aErrorMode, aReport);
+						break;
+					case RIGHTOF:
+						boolean asc = type.isAscending();
+						resValue = new Helper().getValue(argument, asc? 1 : -1, type, aRuntime, sourceLocation, aErrorMode, aReport);
+						break;
+					case LEFTOF:
+						asc = type.isAscending();
+						resValue = new Helper().getValue(argument, asc? -1 : 1, type, aRuntime, sourceLocation, aErrorMode, aReport);
 						break;
 					default:
 						throw new ZamiaException("Sorry. not implemented yet: Attribute " + fOp + " for discrete types.", sourceLocation);

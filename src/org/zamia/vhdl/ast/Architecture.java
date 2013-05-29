@@ -415,7 +415,7 @@ public class Architecture extends SecondaryUnit {
 			} catch (ZamiaException e) {
 				reportError(e);
 			} catch (Throwable t) {
-				el.logException(t);
+				reportError(t.toString());
 			}
 		}
 

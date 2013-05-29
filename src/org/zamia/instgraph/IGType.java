@@ -707,17 +707,18 @@ public class IGType extends IGContainerItem {
 		return null;
 	}
 
-	public IGOperation getOne(SourceLocation aSrc) throws ZamiaException {
-		switch (fCat) {
-		case ENUM:
-			return fEnumLiterals.get(0);
-
-		case INTEGER:
-			return new IGOperationLiteral(1, this, aSrc);
-		}
-
-		throw new ZamiaException("Discrete type expected here.", aSrc);
-	}
+//	public IGStaticValue val(long n, SourceLocation aSrc, ASTErrorMode aErrorMode, IGInterpreterRuntimeEnv aEnv, ErrorReport aReport) throws ZamiaException {
+//		switch (fCat) {
+//		case ENUM:
+//			return fEnumLiterals.get((int)n);
+//
+//		case INTEGER:
+//			return new IGOperationLiteral(n, this, aSrc).computeStaticValue(aEnv, aErrorMode, aReport);
+//		default:
+//			throw new ZamiaException("Discrete type expected here.", aSrc);
+//		}
+//
+//	}
 
 	/*********************************************************
 	 * 

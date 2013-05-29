@@ -125,6 +125,11 @@ public class IGTest {
 	//	}
 
 	@Test
+	public void testLoop() throws Exception {
+		runTest("examples/semantic/loops", 1);
+	}
+	
+	@Test
 	public void testGenerics1() throws Exception {
 
 		runTest("examples/semantic/genericsTest1", 2);
