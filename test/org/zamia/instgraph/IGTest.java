@@ -129,6 +129,14 @@ public class IGTest {
 		runTest("examples/semantic/loops", 1);
 	}
 	
+	@Test @Ignore
+	/**Fails to sustain Std type overriding because they are
+	 * not "semantically resolved" and looked up by string name
+	 * instead.*/
+	public void testBuiltinTypes() throws Exception {
+		runTest("examples/semantic/typeTest/overriding_builtin_types", 1);
+	}
+
 	@Test
 	public void testGenerics1() throws Exception {
 
