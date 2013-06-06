@@ -37,8 +37,10 @@ public class SourceLocation implements Serializable, Comparable<SourceLocation> 
 		fCol = (int) (aLocation >> 32);
 	}
 
+	static public SourceFile dummyFile() {return new SourceFile(new File("unknown"));}
+	
 	public SourceLocation() {
-		fSF = new SourceFile(new File("unknown"));
+		fSF = dummyFile();
 		fLine = 0;
 		fCol = 0;
 	}

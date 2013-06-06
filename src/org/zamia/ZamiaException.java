@@ -9,6 +9,8 @@
 
 package org.zamia;
 
+import java.io.File;
+
 import org.zamia.vhdl.ast.VHDLNode;
 
 /**
@@ -35,6 +37,10 @@ public class ZamiaException extends Exception {
 	public ZamiaException(ExCat aCat, boolean aError, String aMessage, SourceLocation aLocation) {
 		super(aMessage);
 		fLocation = aLocation;
+		if (fLocation != null && fLocation.fSF == null) {
+			ZamiaLogger.getInstance().error(aMessage + " has no location! Correcting to a dummy.");
+			fLocation.fSF = SourceLocation.dummyFile();
+		}
 		fCat = aCat;
 		fError = aError;
 	}
