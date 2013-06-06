@@ -53,7 +53,7 @@ public class Zamia {
 
 	protected final static ExceptionLogger el = ExceptionLogger.getInstance();
 
-	public final static String VERSION = "0.11.1";
+	public final static String VERSION = "0.11.2";
 
 	public final static String COPYRIGHT1 = "Copyright 2003-2011 by the zamiaCAD project and is covered by the";
 
