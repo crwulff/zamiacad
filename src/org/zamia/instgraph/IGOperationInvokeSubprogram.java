@@ -56,12 +56,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 			return;
 		}
 
-		int n = fMappings.getNumMappings();
-
-		for (int i = 0; i < n; i++) {
-
-			IGMapping mapping = fMappings.getMapping(i);
-
+		for (IGMapping mapping : fMappings) {
 			IGOperation formal = mapping.getFormal();
 			OIDir dir = OIDir.NONE;
 			try {
@@ -106,9 +101,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 
 		// map interfaces
 
-		n = fMappings.getNumMappings();
-		for (int i = 0; i < n; i++) {
-			IGMapping mapping = fMappings.getMapping(i);
+		for (IGMapping mapping : fMappings) {
 			mapping.generateCode(aCode, computeSourceLocation());
 		}
 
@@ -132,12 +125,12 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 
 	@Override
 	public int getNumOperands() {
-		return fMappings.getNumMappings();
+		return fMappings.size();
 	}
 
 	@Override
 	public IGOperation getOperand(int aIdx) {
-		return fMappings.getMapping(aIdx).getActual();
+		return fMappings.get(aIdx).getActual();
 	}
 
 	@Override
@@ -145,9 +138,9 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 
 		StringBuilder buf = new StringBuilder(getSub().getId() + "(");
 
-		int n = fMappings.getNumMappings();
+		int n = fMappings.size();
 		for (int i = 0; i < n; i++) {
-			buf.append(fMappings.getMapping(i));
+			buf.append(fMappings.get(i));
 			if (i < n - 1)
 				buf.append(", ");
 		}
@@ -161,14 +154,14 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 	public String toHRString() {
 
 		if (isBinaryOp()) {
-			return "(" + fMappings.getMapping(0).getActual().toHRString() + ")" + getSub().getId() + "(" + fMappings.getMapping(1).getActual().toHRString() + ")";
+			return "(" + fMappings.get(0).getActual().toHRString() + ")" + getSub().getId() + "(" + fMappings.get(1).getActual().toHRString() + ")";
 		}
 
 		StringBuilder buf = new StringBuilder(getSub().getId() + "(");
 
-		int n = fMappings.getNumMappings();
+		int n = fMappings.size();
 		for (int i = 0; i < n; i++) {
-			buf.append(fMappings.getMapping(i).toHRString());
+			buf.append(fMappings.get(i).toHRString());
 			if (i < n - 1)
 				buf.append(", ");
 		}
@@ -185,7 +178,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 			return false;
 		}
 
-		int n = fMappings.getNumMappings();
+		int n = fMappings.size();
 
 		return n == 2;
 	}
@@ -199,11 +192,11 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 	}
 
 	public int getNumMappings() {
-		return fMappings.getNumMappings();
+		return fMappings.size();
 	}
 
 	public IGMapping getMapping(int aIdx) {
-		return fMappings.getMapping(aIdx);
+		return fMappings.get(aIdx);
 	}
 
 }

@@ -259,13 +259,8 @@ public class Block extends ConcurrentStatement {
 				env.newObject(generic, ASTErrorMode.EXCEPTION, null, generic.computeSourceLocation());
 			}
 
-			n = mappings.getNumMappings();
-			for (int i = 0; i < n; i++) {
-
-				IGMapping mapping = mappings.getMapping(i);
-
+			for (IGMapping mapping : mappings) {
 				mapping.generateCode(ic, getLocation());
-
 				//inst.addGeneric(mapping);
 			}
 
@@ -328,11 +323,7 @@ public class Block extends ConcurrentStatement {
 				throw new ZamiaException("Failed to compute block port mappings:\n" + report, this);
 			}
 
-			int n = mappings.getNumMappings();
-			for (int i = 0; i < n; i++) {
-
-				IGMapping mapping = mappings.getMapping(i);
-
+			for (IGMapping mapping : mappings) {
 				blockStructure.add(mapping);
 			}
 		}

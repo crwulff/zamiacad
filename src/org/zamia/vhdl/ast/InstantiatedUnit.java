@@ -282,19 +282,11 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 					IGInterpreterCode ic = new IGInterpreterCode("Generics computation for " + this, getLocation());
 					env.enterContext();
 
-					n = generics.size();
-					for (int i = 0; i < n; i++) {
-						IGObject generic = generics.get(i);
+					for (IGObject generic : generics)
 						env.newObject(generic, ASTErrorMode.EXCEPTION, null, generic.computeSourceLocation());
-					}
 
-					n = mappings.getNumMappings();
-					for (int i = 0; i < n; i++) {
-
-						IGMapping mapping = mappings.getMapping(i);
-
+					for (IGMapping mapping : mappings) {
 						mapping.generateCode(ic, mapping.computeSourceLocation());
-
 						inst.addGeneric(mapping);
 					}
 
@@ -309,9 +301,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 
 					// now, retrieve the generics
 
-					n = generics.size();
-					for (int i = 0; i < n; i++) {
-						IGObject generic = generics.get(i);
+					for (IGObject generic : generics) {
 						IGStaticValue actualGeneric = env.getObjectValue(generic);
 						inst.addActualGeneric(generic.getId(), actualGeneric);
 						logger.info("      GENERIC %s => %s", generic.getId(), actualGeneric);
@@ -365,11 +355,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 						reportError(msg);
 					}
 
-					n = mappings.getNumMappings();
-					for (int i = 0; i < n; i++) {
-
-						IGMapping mapping = mappings.getMapping(i);
-
+					for (IGMapping mapping : mappings) {
 						inst.add(mapping);
 					}
 				}

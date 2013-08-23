@@ -10,6 +10,7 @@ package org.zamia.instgraph;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * 
@@ -17,9 +18,7 @@ import java.util.ArrayList;
  * 
  */
 @SuppressWarnings("serial")
-public class IGMappings implements Serializable {
-
-	private ArrayList<IGMapping> fMappings = new ArrayList<IGMapping>();
+public class IGMappings extends ArrayList<IGMapping> implements Serializable {
 
 	private int fScore = 0;
 	
@@ -29,17 +28,22 @@ public class IGMappings implements Serializable {
 
 	}
 
-	public int getNumMappings() {
-		return fMappings.size();
+//	public int getNumMappings() {
+//		return fMappings.size();
+//	}
+//
+	
+	private boolean addBan() {
+		throw new InternalError("Substitution add is banned");
 	}
-
-	public IGMapping getMapping(int aIdx) {
-		return fMappings.get(aIdx);
-	}
-
+	public boolean add(IGMapping e) {return addBan();}
+	public void add(int index, IGMapping element) {addBan();}@Override
+	public boolean addAll(Collection<? extends IGMapping> c) {return addBan();}
+	public boolean addAll(int index, Collection<? extends IGMapping> c) {return addBan();}
+	
 	public void addMapping(IGMapping aMapping, int aScore) {
 		fScore += aScore;
-		fMappings.add(aMapping);
+		super.add(aMapping);
 	}
 
 	public int getScore() {
@@ -56,7 +60,7 @@ public class IGMappings implements Serializable {
 
 	@Override
 	public String toString() {
-		return "IGMappings{" + fScore + "}(" + fMappings + ")";
+		return "IGMappings{" + fScore + "}(" + super.toString() + ")";
 	}
 
 }
