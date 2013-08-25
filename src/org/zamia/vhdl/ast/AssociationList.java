@@ -142,7 +142,6 @@ public class AssociationList extends VHDLNode {
 			IGObject interf = interfaces.get(pIdx);
 
 			if (pIdx >= nParams) {
-				if (pIdx < nInterfaces) {
 
 					for (int i = pIdx; i < nInterfaces; i++) {
 
@@ -158,7 +157,6 @@ public class AssociationList extends VHDLNode {
 						res.setFailed(true);
 						return res;
 					}
-				}
 				break;
 			}
 
