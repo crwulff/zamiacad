@@ -128,13 +128,69 @@ public class AssociationList extends VHDLNode {
 	 * 
 	 */
 
-	public IGMappings map(IGContainer aFormalScope, IGElaborationEnv aFormalEE, IGOperationCache aFormalCache, IGContainer aActualScope, IGElaborationEnv aActualEE,
-			IGOperationCache aActualCache, ArrayList<IGObject> interfaces, boolean ignoreDanglingOutputs_, ErrorReport aReport, boolean checkDirs_) throws ZamiaException {
+	public IGMappings map(IGContainer aFormalScope, final IGElaborationEnv aFormalEE, IGOperationCache aFormalCache, IGContainer aActualScope, IGElaborationEnv aActualEE,
+			IGOperationCache aActualCache, ArrayList<IGObject> interfaces, boolean ignoreDanglingOutputs_, final ErrorReport aReport, final boolean checkDirs_) throws ZamiaException {
 		int pIdx = 0;
 		int nInterfaces = interfaces.size();
 		int nParams = getNumAssociations();
 
-		IGMappings res = new IGMappings();
+		final IGMappings res = new IGMappings();
+		
+		class ElementHandler {
+			final int map(String title, AssociationElement ae, IGOperation actualObj, IGOperation formalOp) throws ZamiaException {
+				
+				Operation actual = ae.getActualPart();
+				
+				//TODO: valtih: do we need the type check, provided that we compute the actual for the for the formal type? I cannot reproduce the failure here.
+				IGType actualType = actualObj.getType();
+				if (actualType == null) {
+					aReport.append("Failed to actual compute type for" + actual, actual.getLocation()); // named association
+					return 0;
+				}
+				
+
+				// TODO: should we make this check if actual was computed for this formal type?
+				IGType formalType = formalOp.getType();
+				int score = formalType.getAssignmentCompatibilityScore(actualType, ae.getLocation());
+				if (score == 0) {
+					aReport.append("Type mismatch in "+title+" mapping: formal=" + getObj(formalOp) + ", actual=" + actual + ", formalType=" + formalType + ", actualType="
+							+ actualType, actual.getLocation());
+					return 0;
+				}
+
+
+				if (checkDirs_) {
+					OIDir formalDir = formalOp.getDirection();
+					OIDir actualDir = actualObj.getDirection();
+					if (!checkDir(formalDir, actualDir)) {
+						aReport.append("Direction mismatch in "+title+" mapping formal " + getObj(formalOp) + " of mode " + formalDir + " to actual " + getObj(actualObj) + " of mode "
+						+ actualDir, actual.getLocation());
+						return 0;
+					}
+				}
+				
+				IGMapping mapping = new IGMapping(formalOp, actualObj, actual.getLocation(), aFormalEE.getZDB());
+				res.addMapping(mapping, score);
+
+				return score;
+
+			}
+			
+			Object getObj(IGOperation op) {
+				return op instanceof IGOperationObject ? ((IGOperationObject) op).getObject().getId() : op; 
+			}
+			private boolean checkDir(OIDir aFormalDir, OIDir aActualDir) {
+
+				switch (aFormalDir) {
+					case IN: return aActualDir != OIDir.OUT;
+					case OUT: return aActualDir != OIDir.IN;
+					default: return true;
+				}
+			}
+
+		}
+		ElementHandler helper = new ElementHandler();
+		
 
 		// phase one: positional elements
 
@@ -143,37 +199,36 @@ public class AssociationList extends VHDLNode {
 
 			if (pIdx >= nParams) {
 
-					for (int i = pIdx; i < nInterfaces; i++) {
+				for (int i = pIdx; i < nInterfaces; i++) {
 
-						IGObject intf = interfaces.get(i);
-						if (intf.getInitialValue() != null) {
-							continue;
-						}
-						if (ignoreDanglingOutputs_ && intf.getDirection() == OIDir.OUT) {
-							continue;
-						}
-
-						aReport.append("Too few actual parameters", getLocation());
-						res.setFailed(true);
-						return res;
+					IGObject intf = interfaces.get(i);
+					if (intf.getInitialValue() != null) {
+						continue;
 					}
+					if (ignoreDanglingOutputs_ && intf.getDirection() == OIDir.OUT) {
+						continue;
+					}
+
+					aReport.append("Too few actual parameters", getLocation());
+					res.setFailed(true);
+					return res;
+				}
 				break;
 			}
 
 			AssociationElement ae = getAssociation(pIdx);
 
 			FormalPart formal = ae.getFormalPart();
-			if (formal != null)
+			if (formal != null) // proceed to named associations
 				break;
 
 			Operation actual = ae.getActualPart();
 
 			if (actual != null) {
 
-				IGType formalType = interf.getType();
-
-				IGMapping mapping = null;
-
+				IGOperationObject formalOp = new IGOperationObject(interf, interf.computeSourceLocation(), aActualEE.getZDB());
+				IGType formalType = formalOp.getType();
+				
 				ErrorReport report = new ErrorReport();
 				IGOperation actualObj = actual.computeIGOperation(formalType, aActualScope, aActualEE, aActualCache, ASTErrorMode.RETURN_NULL, report);
 				if (actualObj == null) {
@@ -181,39 +236,12 @@ public class AssociationList extends VHDLNode {
 					return null;
 				}
 
-				IGType actualType = actualObj.getType();
-				if (actualType == null) {
-					aReport.append("Failed to compute type for " + actualObj, actual.getLocation());
-					res.setFailed(true);
-					pIdx++;
-					continue;
-				}
-
-				int score = formalType.getAssignmentCompatibilityScore(actualType, ae.getLocation());
+				int score = helper.map("positional", ae, actualObj, formalOp);
 				if (score == 0) {
-					aReport.append("Type mismatch in interface mapping: \n  formal=" + interf + ", \n  actual=" + actual + ", \n  formalType=" + formalType + ", \n  actualType="
-							+ actualType, actual.getLocation());
 					res.setFailed(true);
 					pIdx++;
 					continue;
 				}
-
-				if (checkDirs_) {
-					OIDir formalDir = interf.getDirection();
-					OIDir actualDir = actualObj.getDirection();
-					if (!checkDir(formalDir, actualDir)) {
-						aReport.append("Direction mismatch in positional mapping formal: " + formal + " formal dir: " + formalDir + " actual: " + actualObj + " actualDir: "
-								+ actualDir, actual.getLocation());
-
-						res.setFailed(true);
-						pIdx++;
-						continue;
-					}
-				}
-
-				mapping = new IGMapping(new IGOperationObject(interf, interf.computeSourceLocation(), aActualEE.getZDB()), actualObj, actual.getLocation(), aFormalEE.getZDB());
-
-				res.addMapping(mapping, score);
 
 			} else {
 				if (interf.getDirection() != OIDir.OUT || !ignoreDanglingOutputs_) {
@@ -279,6 +307,7 @@ public class AssociationList extends VHDLNode {
 						IGType formalType = formalOp.getType();
 
 						report = new ErrorReport();
+						
 						IGOperation actualObj = actual.computeIGOperation(formalType, aActualScope, aActualEE, aActualCache, ASTErrorMode.RETURN_NULL, report);
 						if (actualObj == null) {
 							aReport.append(report);
@@ -286,30 +315,10 @@ public class AssociationList extends VHDLNode {
 							continue;
 						}
 
-						IGType actualType = actualObj.getType();
-						if (actualType == null) {
-							aReport.append("Failed to actual compute type for" + actual, actual.getLocation());
+						int score = helper.map("named", ae, actualObj, formalOp);
+						if (score == 0)
 							continue;
-						}
 
-						int score = formalType.getAssignmentCompatibilityScore(actualType, ae.getLocation());
-						if (score == 0) {
-							aReport.append("Type mismatch in named mapping: formal=" + formalOp + ", actual=" + actual + ", formalType=" + formalType + ", actualType="
-									+ actualType, actual.getLocation());
-							continue;
-						}
-
-						if (checkDirs_) {
-							OIDir formalDir = formalOp.getDirection();
-							OIDir actualDir = actualObj.getDirection();
-							if (!checkDir(formalDir, actualDir)) {
-								aReport.append("Direction mismatch in named mapping formal: " + formal + ", formal dir: " + formalDir + ", actual: " + actual + ", actualDir: "
-										+ actualDir, actual.getLocation());
-								continue;
-							}
-						}
-
-						res.addMapping(new IGMapping(formalOp, actualObj, formal.getLocation(), aFormalEE.getZDB()), score);
 						foundMatch = true;
 						break;
 					} else {
@@ -341,15 +350,4 @@ public class AssociationList extends VHDLNode {
 		return res;
 	}
 
-	private boolean checkDir(OIDir aFormalDir, OIDir aActualDir) {
-
-		switch (aFormalDir) {
-		case IN:
-			return aActualDir != OIDir.OUT;
-		case OUT:
-			return aActualDir != OIDir.IN;
-		}
-
-		return true;
-	}
 }

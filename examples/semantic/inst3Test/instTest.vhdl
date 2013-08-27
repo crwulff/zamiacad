@@ -32,3 +32,38 @@ begin
 
 end architecture RTL;
 
+
+
+
+-- Detects port mapping errors (mismatched types and directions) 
+
+entity PORTCHECK is
+end entity;
+
+entity PORTCHECK_EL is
+	port (portA: in bit_vector 
+		   (1 to 3) 
+	);
+end entity;
+ 
+entity PORTCHECK_SUBEL is 
+	port (portB: out bit_vector); 
+end entity;
+
+architecture ARCH of PORTCHECK_SUBEL is begin end architecture;
+        
+architecture ARCH of PORTCHECK_EL is
+begin 
+	sub_TypeErr: entity PORTCHECK_SUBEL port map (1); -- must be error
+	sub_TypeErr2: entity PORTCHECK_SUBEL port map (porta => 1); -- must be error
+ 	sub_DirErr: entity PORTCHECK_SUBEL port map (porta); -- must be error
+ 	sub_DirErr: entity PORTCHECK_SUBEL port map (portB =>porta); -- must be error
+end architecture;
+       
+architecture ARCH of PORTCHECK is
+begin
+
+	U1: entity WORK.PORTCHECK_EL port map("101");
+            
+end architecture;
+

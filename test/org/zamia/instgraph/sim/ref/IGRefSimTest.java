@@ -89,7 +89,7 @@ public class IGRefSimTest {
 			logger.error("IGTest: error %6d/%6d: %s", i + 1, n, em.toString());
 		}
 
-		assertEquals(0, n);
+		assertEquals("must have 0 errors, got - " + n, 0, n);
 
 		n = fZPrj.getIGM().countNodes(duuid);
 		logger.info("IGTest: elaborated model for %s has %d unique modules.", duuid, n);

@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.zamia.BuildPath;
+import org.zamia.ERManager;
 import org.zamia.SourceFile;
 import org.zamia.Toplevel;
 import org.zamia.ZamiaException;
@@ -65,7 +66,27 @@ public class IGTest {
 		return aZPrj.getDUM().getArchDUUID(tl.getDUUID());
 	}
 
+	/**Default implementation expects 0 exceptions.*/
+	class ErrorChecker {
+		
+		public void handle() {
+			int nErr = fZPrj.getERM().getNumErrors();
+			logger.error("IGTest: Build finished. Found %d errors.", nErr);
+
+			for (int i = 0; i < nErr; i++) {
+				ZamiaException em = fZPrj.getERM().getError(i);
+				logger.error("IGTest: error %6d/%6d: %s", i + 1, nErr, em.toString());
+			}
+
+			assertEquals("No errors expected", 0, nErr);
+		}
+	}
+	
 	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes) throws Exception {
+		runTest(aTestDir, aBuildPathName, aNumNodes, new ErrorChecker());
+	}
+	
+	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes, ErrorChecker errChecker) throws Exception {
 		setupTest(aTestDir, aTestDir + File.separator + aBuildPathName);
 
 		ZamiaProjectBuilder builder = fZPrj.getBuilder();
@@ -74,17 +95,9 @@ public class IGTest {
 
 		DMUID duuid = getUID(fZPrj);
 
-		int n = fZPrj.getERM().getNumErrors();
-		logger.error("IGTest: Build finished. Found %d errors.", n);
+		errChecker.handle();
 
-		for (int i = 0; i < n; i++) {
-			ZamiaException em = fZPrj.getERM().getError(i);
-			logger.error("IGTest: error %6d/%6d: %s", i + 1, n, em.toString());
-		}
-
-		assertEquals(0, n);
-
-		n = fZPrj.getIGM().countNodes(duuid);
+		int n = fZPrj.getIGM().countNodes(duuid);
 		logger.info("IGTest: elaborated model for %s has %d unique modules.", duuid, n);
 		assertEquals(aNumNodes, n);
 	}
@@ -260,7 +273,27 @@ public class IGTest {
 	@Test
 	public void testInst3() throws Exception {
 
-		runTest("examples/semantic/inst3Test", 2);
+		runTest("examples/semantic/inst3Test", "BuildPath.txt", 2, new ErrorChecker() {
+			private void assertContains(int i, String expected) {
+				String msg = fZPrj.getERM().getError(i).toString();
+				assertTrue(msg + "\n\t ^^^ is the error message that failed to contain the following string vvv\n"+expected, msg.contains(expected));
+			}
+			
+			
+			public void handle() {
+				int nErr = fZPrj.getERM().getNumErrors();
+				assertEquals("Got wrong number of errors", 4, nErr);
+				
+				assertContains(0, "(instTest.vhdl) instTest.vhdl:57,48: Type mismatch in expression");
+				assertContains(1, "(instTest.vhdl) instTest.vhdl:58,58: Type mismatch in expression.");
+				assertContains(1, "(instTest.vhdl) instTest.vhdl:58,58: Failed to compute actual item in named mapping: 1, formal 1/1 was: PORTA (item=IGOperationObject(PORTA))");
+				assertContains(1, "(instTest.vhdl) instTest.vhdl:58,58: Failed to map: formal=PORTA, actual=1");
+				assertContains(2, "(instTest.vhdl) instTest.vhdl:59,48: Direction mismatch in positional mapping formal PORTB of mode OUT to actual PORTA of mode IN");
+				assertContains(3, "(instTest.vhdl) instTest.vhdl:60,56: Direction mismatch in named mapping formal PORTB of mode OUT to actual PORTA of mode IN");
+				assertContains(3, "(instTest.vhdl) instTest.vhdl:60,56: Failed to map: formal=PORTB, actual=PORTA");
+			}
+			
+		});
 	}
 
 	@Test
