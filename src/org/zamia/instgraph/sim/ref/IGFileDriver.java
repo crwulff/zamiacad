@@ -247,7 +247,7 @@ public class IGFileDriver extends IGObjectDriver {
 		// like /root. The latter look like project location. 
 		// To know which of the options is right, on 25 Jan 2012 I created "Open file path specification" question in comp.lang.vhdl
 		// I propose using project as default base dir, which optionally can be changed (in Modelsim style).
-		File parent = aFileName.computeSourceLocation().getDir();  
+		// Aug 2013: I am fed up - let's autodetect the file in project folder if VHDL source folder fails.
 		String name = aFileName.getId();
 		if (name == null) {
 			name = aFileName.toString();
@@ -256,7 +256,9 @@ public class IGFileDriver extends IGObjectDriver {
 		File res = new File(aFileName.getId());
 		if (res.isAbsolute())
 			return res;
-		return new File(parent, name);
+		File parent = aFileName.computeSourceLocation().getDir();
+		res = new File(parent, name);
+		return res.exists() ? res : new File(aFileName.getZPrj().fBasePath.toString(), name);
 	}
 
 	private LineNumberReader createReader(File aFile) throws IOException {
