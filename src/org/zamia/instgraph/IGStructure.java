@@ -9,8 +9,11 @@
 package org.zamia.instgraph;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import org.zamia.ASTNode;
 import org.zamia.ERManager;
@@ -22,6 +25,7 @@ import org.zamia.ZamiaProject;
 import org.zamia.analysis.SourceLocation2AST;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.util.HashSetArray;
+import org.zamia.util.ZdbList;
 import org.zamia.vhdl.ast.InstantiatedUnit;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
@@ -34,7 +38,7 @@ import org.zamia.zdb.ZDB;
 @SuppressWarnings("serial")
 public class IGStructure extends IGConcurrentStatement implements Scope {
 
-	private ArrayList<Long> fStatements = new ArrayList<Long>();
+	private ZdbList<IGConcurrentStatement> fStatements = new ZdbList<>();
 
 	private HashMap<String, Long> fLabeledStatements = new HashMap<String, Long>();
 
@@ -92,6 +96,10 @@ public class IGStructure extends IGConcurrentStatement implements Scope {
 		return (IGConcurrentStatement) getZDB().load(fStatements.get(idx));
 	}
 
+	public Iterable<IGConcurrentStatement> getStatements() {
+		return fStatements.zdbIterator(getZDB());
+	}
+	
 	public IGConcurrentStatement findStatement(String aLabel) {
 		Long dbid = fLabeledStatements.get(aLabel);
 

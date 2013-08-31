@@ -190,11 +190,7 @@ public final class IGManager {
 			 * index statements
 			 */
 
-			int n = aStruct.getNumStatements();
-
-			for (int i = 0; i < n; i++) {
-
-				IGConcurrentStatement stmt = aStruct.getStatement(i);
+			for (IGConcurrentStatement stmt : aStruct.getStatements()) {
 
 				String label = stmt.getLabel();
 
@@ -263,9 +259,7 @@ public final class IGManager {
 					HashSetArray<IGItemAccess> accessedItems = new HashSetArray<IGItemAccess>();
 					sos.computeAccessedItems(null, null, 0, accessedItems);
 
-					int m = accessedItems.size();
-					for (int j = 0; j < m; j++) {
-						IGItemAccess ai = accessedItems.get(j);
+					for (IGItemAccess ai : accessedItems) {
 
 						IGItem item = ai.getItem();
 
@@ -650,12 +644,9 @@ public final class IGManager {
 			String uid = duuid.getUID();
 
 			HashSetArray<String> signatures = (HashSetArray<String>) fZDB.getIdxObj(SIGNATURES_IDX, uid);
-
 			if (signatures != null) {
-				int m = signatures.size();
-				for (int j = 0; j < m; j++) {
-
-					String signature = signatures.get(j);
+				
+				for (String signature : signatures) {
 
 					if (deleteNodes.add(signature)) {
 						logger.info("IGManager: Need to re-elaborate completeley: %s", signature);
@@ -667,20 +658,14 @@ public final class IGManager {
 			if (dbid != 0) {
 				HashSetArray<DMUID> instantiators = (HashSetArray<DMUID>) fZDB.load(dbid);
 
-				int m = instantiators.size();
-				for (int j = 0; j < m; j++) {
+				for (DMUID instantiator : instantiators) {
 
-					DMUID instantiator = instantiators.get(j);
 					String uidI = instantiator.getUID();
 
 					HashSetArray<String> signaturesI = (HashSetArray<String>) fZDB.getIdxObj(SIGNATURES_IDX, uidI);
 
 					if (signaturesI != null) {
-						int l = signaturesI.size();
-						for (int k = 0; k < l; k++) {
-
-							String signature = signaturesI.get(k);
-
+						for (String signature : signaturesI) {
 							if (invalidateNodes.add(signature)) {
 								logger.info("IGManager: Need to re-elaborate statements: %s", signature);
 							}
@@ -690,10 +675,7 @@ public final class IGManager {
 			}
 		}
 
-		n = deleteNodes.size();
-		for (int i = 0; i < n; i++) {
-
-			String signature = deleteNodes.get(i);
+		for (String signature : deleteNodes) {
 
 			long dbid = fZDB.getIdx(MODULE_IDX, signature);
 
@@ -716,10 +698,7 @@ public final class IGManager {
 
 		initIGBuild();
 
-		n = invalidateNodes.size();
-		for (int i = 0; i < n; i++) {
-
-			String signature = invalidateNodes.get(i);
+		for (String signature : invalidateNodes) {
 
 			long dbid = fZDB.getIdx(MODULE_IDX, signature);
 
@@ -784,10 +763,7 @@ public final class IGManager {
 	@SuppressWarnings("unchecked")
 	private void removeFromInstantiators(DMUID aDUUID, IGStructure aStructure) {
 
-		int n = aStructure.getNumStatements();
-		for (int i = 0; i < n; i++) {
-
-			IGConcurrentStatement stmt = aStructure.getStatement(i);
+		for (IGConcurrentStatement stmt : aStructure.getStatements()) {
 
 			if (stmt instanceof IGInstantiation) {
 
@@ -907,9 +883,7 @@ public final class IGManager {
 
 			visit(aStructure.getContainer(), aPath.getNumSegments() == 0);
 
-			int n = aStructure.getNumStatements();
-			for (int i = 0; i < n; i++) {
-				IGConcurrentStatement stmt = aStructure.getStatement(i);
+			for (IGConcurrentStatement stmt : aStructure.getStatements()) {
 				if (stmt instanceof IGProcess) {
 					IGProcess process = (IGProcess) stmt;
 

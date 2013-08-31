@@ -54,10 +54,7 @@ public class IGSequenceOfStatements extends IGSequentialStatement {
 
 		computeAccessedItems(null, AccessType.Read, 0, accessedItems);
 
-		int n = accessedItems.size();
-		for (int i = 0; i < n; i++) {
-
-			IGItemAccess access = accessedItems.get(i);
+		for (IGItemAccess access : accessedItems) {
 
 			IGItem item = access.getItem();
 

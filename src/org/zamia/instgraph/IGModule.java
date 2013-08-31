@@ -100,9 +100,7 @@ public class IGModule extends IGDesignUnit implements Scope {
 			
 			aVisitor.visit(structure, path);
 
-			int n = structure.getNumStatements();
-			for (int i = 0; i < n; i++) {
-				IGConcurrentStatement stmt = structure.getStatement(i);
+			for (IGConcurrentStatement stmt : structure.getStatements()) {
 
 				if (stmt instanceof IGInstantiation) {
 

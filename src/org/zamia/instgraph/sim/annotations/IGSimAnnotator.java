@@ -272,9 +272,7 @@ public class IGSimAnnotator {
 		computeEnv(aStruct, aSim, aTimeOffset, aPath);
 		computeSignalInfos(aStruct.getContainer(), aLocalPrefix);
 
-		int n = aStruct.getNumStatements();
-		for (int i = 0; i < n; i++) {
-			IGConcurrentStatement stmt = aStruct.getStatement(i);
+		for (IGConcurrentStatement stmt : aStruct.getStatements()) {
 
 			if (!(stmt instanceof IGStructure)) {
 				continue;
@@ -382,9 +380,7 @@ public class IGSimAnnotator {
 
 			computeSignalInfos(struct.getContainer(), localPrefix);
 
-			n = struct.getNumStatements();
-			for (i = 0; i < n; i++) {
-				IGConcurrentStatement stmt = struct.getStatement(i);
+			for (IGConcurrentStatement stmt : struct.getStatements()) {
 
 				if (!(stmt instanceof IGStructure)) {
 					continue;

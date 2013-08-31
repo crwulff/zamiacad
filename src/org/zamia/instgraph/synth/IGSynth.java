@@ -283,10 +283,7 @@ public class IGSynth {
 
 		if (aSynthBody) {
 
-			int n = aIGS.getNumStatements();
-			for (int i = 0; i < n; i++) {
-
-				IGConcurrentStatement stmt = aIGS.getStatement(i);
+			for (IGConcurrentStatement stmt : aIGS.getStatements()) {
 
 				if (stmt instanceof IGProcess) {
 

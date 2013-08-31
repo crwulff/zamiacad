@@ -31,9 +31,7 @@ public class IGDefaultSequentialStatementVisitor implements IGStructureVisitor {
     @Override
     public void visit(IGStructure aStructure, PathName aPath) {
 
-        int n = aStructure.getNumStatements();
-        for (int i = 0; i < n; i++) {
-            IGConcurrentStatement stmt = aStructure.getStatement(i);
+		for (IGConcurrentStatement stmt : aStructure.getStatements()) {
             if (stmt instanceof IGProcess) {
                 IGProcess process = (IGProcess) stmt;
 

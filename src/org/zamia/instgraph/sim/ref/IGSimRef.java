@@ -300,10 +300,7 @@ public class IGSimRef implements IGISimulator {
 
 	private void initStructure(IGStructure aStructure, IGSimContext aParentContext, PathName aParentPath, Collection<IGSimPostponedProcess> aPostponed) throws ZamiaException {
 
-		int n = aStructure.getNumStatements();
-		for (int i = 0; i < n; i++) {
-
-			IGConcurrentStatement stmt = aStructure.getStatement(i);
+		for (IGConcurrentStatement stmt : aStructure.getStatements()) {
 
 			PathName curPath = aParentPath.clonePathName();
 			if (stmt.getLabel() != null) {

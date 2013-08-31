@@ -401,10 +401,7 @@ public class IGReferencesSearchNG {
 
 				IGStructure struct = (IGStructure) scope;
 
-				int n = struct.getNumStatements();
-				for (int i = 0; i < n; i++) {
-
-					IGConcurrentStatement stmt = struct.getStatement(i);
+				for (IGConcurrentStatement stmt : struct.getStatements()) {
 
 					String label = stmt.getLabel();
 
