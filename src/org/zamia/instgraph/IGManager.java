@@ -636,10 +636,7 @@ public final class IGManager {
 		HashSetArray<String> deleteNodes = new HashSetArray<String>();
 		HashSetArray<String> invalidateNodes = new HashSetArray<String>();
 
-		int n = aDUUIDs.size();
-		for (int i = 0; i < n; i++) {
-
-			DMUID duuid = aDUUIDs.get(i);
+		for (DMUID duuid : aDUUIDs) {
 
 			DMUID archDUUID = fDUM.getArchDUUID(duuid);
 

@@ -310,13 +310,10 @@ public class IGSimAnnotator {
 		try {
 			SFDMInfo info = fDMM.compileFile(aSF, null);
 
-			int n = info.getNumDMUIDs();
 
 			Pair<IGItem, ToplevelPath> pair = null;
 
-			for (int i = 0; i < n; i++) {
-
-				DMUID duuid = info.getDMUID(i);
+			for (DMUID duuid : info) {
 
 				IDesignModule dm = fDMM.getDM(duuid);
 				if (!(dm instanceof Architecture)) {
@@ -348,7 +345,7 @@ public class IGSimAnnotator {
 
 			fToplevel = fTLP.getToplevel();
 
-			n = path.getNumSegments();
+			int n = path.getNumSegments();
 
 			fAnnotationsEnv = new IGInterpreterRuntimeEnv(null, fZPrj);
 

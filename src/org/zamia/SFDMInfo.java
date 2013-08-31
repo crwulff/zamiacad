@@ -21,7 +21,7 @@ import org.zamia.vhdl.ast.DMUID;
  */
 
 @SuppressWarnings("serial")
-public class SFDMInfo implements Serializable {
+public class SFDMInfo implements Serializable, Iterable<DMUID> {
 
 	private HashSetArray<DMUID> fDMUIDs;
 
@@ -59,4 +59,5 @@ public class SFDMInfo implements Serializable {
 	public void touch() {
 		fTimestamp = System.currentTimeMillis();
 	}
+	
 }

@@ -230,10 +230,7 @@ public class DMManager {
 			if (duuids == null || duuids.size() == 0) {
 				// io error occured, 
 				// restore old stub information
-				int n = oldInfo.getNumDMUIDs();
-				for (int i = 0; i < n; i++) {
-					DMUID duuid = oldInfo.getDMUID(i);
-
+				for (DMUID duuid : oldInfo) {
 					addDesignUnitSource(duuid, aSF, aPriority, aUseFSCache);
 				}
 			} else {
@@ -348,10 +345,8 @@ public class DMManager {
 		SFDMInfo info = fSFMap.get(filename);
 
 		if (info != null) {
-			int n = info.getNumDMUIDs();
 
-			for (int i = 0; i < n; i++) {
-				DMUID duuid = info.getDMUID(i);
+			for (DMUID duuid: info) {
 
 				String uid = duuid.getUID();
 

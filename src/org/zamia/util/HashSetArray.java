@@ -293,4 +293,5 @@ public class HashSetArray<V> implements Serializable, Cloneable, Iterable<V> {
 		buf.append("]");
 		return buf.toString();
 	}
+
 }

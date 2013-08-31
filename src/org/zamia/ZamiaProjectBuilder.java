@@ -826,9 +826,7 @@ public class ZamiaProjectBuilder {
 
 			SFDMInfo info = fDUM.removeStubs(sf);
 			if (info != null) {
-				int m = info.getNumDMUIDs();
-				for (int j = 0; j < m; j++) {
-					DMUID duuid = info.getDMUID(j);
+				for (DMUID duuid : info) {
 
 					if (!needFullBuild) {
 						if (duuid.getType() != LUType.Entity && duuid.getType() != LUType.Architecture) {
@@ -847,9 +845,7 @@ public class ZamiaProjectBuilder {
 				info = compileFile(sf, false);
 
 				if (!needFullBuild && info != null) {
-					int m = info.getNumDMUIDs();
-					for (int j = 0; j < m; j++) {
-						DMUID duuid = info.getDMUID(j);
+					for (DMUID duuid : info) {
 
 						if (duuid.getType() != LUType.Entity && duuid.getType() != LUType.Architecture) {
 							logger.info("ZamiaProjectBuilder: Non-Entity/Architecture DU '%s' was changed => need a full rebuild.", duuid);
