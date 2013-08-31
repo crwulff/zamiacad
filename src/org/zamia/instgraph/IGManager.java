@@ -739,16 +739,12 @@ public final class IGManager {
 		// we re-build it
 
 		BuildPath bp = fZPrj.getBuildPath();
-		n = bp.getNumToplevels();
-
-		for (int i = 0; i < n; i++) {
+		for (Toplevel toplevel : bp.toplevels()) {
 
 			if (isCanceled()) {
 				logger.info("ZamiaProjectBuilder: ZamiaProjectBuilder: Canceled.");
 				break;
 			}
-
-			Toplevel toplevel = bp.getToplevel(i);
 
 			DMUID duuid = fDUM.getArchDUUID(toplevel);
 

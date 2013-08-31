@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
@@ -163,9 +164,7 @@ public class BuildPath implements Serializable {
 			fEntries.add(entry);
 		}
 
-		n = bp2.getNumToplevels();
-		for (int i = 0; i < n; i++) {
-			Toplevel toplevel = bp2.getToplevel(i);
+		for (Toplevel toplevel : bp2.toplevels()) {
 			fToplevels.add(toplevel);
 		}
 
@@ -972,6 +971,11 @@ public class BuildPath implements Serializable {
 		return fToplevels.get(aIdx);
 	}
 
+	public Collection<Toplevel> toplevels() {
+		return fToplevels;
+	}
+
+	
 	public int getNumSynthTLs() {
 		return fSynthTLs.size();
 	}

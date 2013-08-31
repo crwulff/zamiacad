@@ -124,9 +124,7 @@ public class ZamiaProjectBuilder {
 				return 0;
 			}
 			IGManager igm = fZPrj.getIGM();
-			int n = bp.getNumToplevels();
-			for (int i = 0; i < n; i++) {
-				Toplevel tl = bp.getToplevel(i);
+			for (Toplevel tl : bp.toplevels()) {
 				IGModule m = igm.findModule(tl);
 				if (m == null) {
 					logger.info("ZamiaProjectBuilder: Toplevel %s is missing => upgrading to full build.", tl);
@@ -683,18 +681,15 @@ public class ZamiaProjectBuilder {
 
 		IGManager igm = fZPrj.getIGM();
 
-		int n = bp.getNumToplevels();
-
-		for (int i = 0; i < n; i++) {
+		int totalUnits = 1000 / bp.getNumToplevels();
+		for (Toplevel toplevel : bp.toplevels()) {
 
 			if (isCanceled()) {
 				logger.info("ZamiaProjectBuilder: Canceled.");
 				break;
 			}
 
-			Toplevel toplevel = bp.getToplevel(i);
-
-			igm.buildIG(toplevel, fMonitor, 1000 / n);
+			igm.buildIG(toplevel, fMonitor, totalUnits);
 		}
 
 		double d = System.currentTimeMillis() - startTime;

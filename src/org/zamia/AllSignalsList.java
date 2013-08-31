@@ -157,10 +157,7 @@ public class AllSignalsList implements Runnable {
 
 					fNumSignals = 0;
 
-					int n = bp.getNumToplevels();
-					for (int i = 0; i < n; i++) {
-
-						Toplevel tl = bp.getToplevel(i);
+					for (Toplevel tl : bp.toplevels()) {
 
 						IGModule module = igm.findModule(tl);
 
