@@ -196,16 +196,13 @@ public class Entity extends PrimaryUnit {
 			ReferenceSearchResult aResult, ArrayList<SearchJob> aTODO) throws ZamiaException {
 		// FIXME: type search
 
-		int n = getNumDeclarations();
-
-		for (int i = 0; i < n; i++) {
-			BlockDeclarativeItem decl = getDeclaration(i);
+		for (BlockDeclarativeItem decl : fDeclarations) {
 			if (decl != null) {
 				decl.findReferences(aId, aCat, aRefType, aDepth + 1, aZPrj, aContainer, aCache, aResult, aTODO);
 			}
 		}
 
-		n = getNumInterfaceDeclarations();
+		int n = getNumInterfaceDeclarations();
 		for (int i = 0; i < n; i++) {
 
 			InterfaceDeclaration idecl = getInterfaceDeclaration(i);

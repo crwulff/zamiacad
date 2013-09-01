@@ -57,10 +57,7 @@ public class PackageBody extends SecondaryUnit {
 	public void findReferences(String aId, ObjectCat aCat, RefType aRefType, int aDepth, ZamiaProject aZPrj, IGContainer aContainer, IGElaborationEnv aEE,
 			ReferenceSearchResult aResult, ArrayList<SearchJob> aTODO) throws ZamiaException {
 
-		int n = getNumDeclarations();
-
-		for (int i = 0; i < n; i++) {
-			BlockDeclarativeItem decl = getDeclaration(i);
+		for (BlockDeclarativeItem decl : fDeclarations) {
 			if (decl != null) {
 				decl.findReferences(aId, aCat, aRefType, aDepth + 1, aZPrj, aContainer, aEE, aResult, aTODO);
 			}
@@ -80,11 +77,9 @@ public class PackageBody extends SecondaryUnit {
 		
 		IGInterpreterRuntimeEnv env = aCache.getInterpreterEnv();
 		
-		int n = fDeclarations.size();
-		for (int i = 0; i < n; i++) {
+		for (BlockDeclarativeItem decl : fDeclarations) {
 			
 			try {
-				BlockDeclarativeItem decl = getDeclaration(i);
 				logger.info("PackageBody: Elaborating %s", decl);
 
 				ArrayList<IGContainerItem> specItems = aContainer.findLocalItems(decl.getId());

@@ -89,9 +89,7 @@ public class Architecture extends SecondaryUnit {
 
 		aOut.println("  Signal declarations:");
 
-		int n = fDeclarations.size();
-		for (int i = 0; i < n; i++) {
-			BlockDeclarativeItem item = getDeclaration(i);
+		for (BlockDeclarativeItem item : fDeclarations) {
 			item.dump(aOut);
 		}
 
@@ -203,8 +201,7 @@ public class Architecture extends SecondaryUnit {
 
 		int n = getNumDeclarations();
 
-		for (int i = 0; i < n; i++) {
-			BlockDeclarativeItem decl = getDeclaration(i);
+		for (BlockDeclarativeItem decl : fDeclarations) {
 			if (decl != null) {
 				decl.findReferences(aId, aCat, aRefType, aDepth + 1, aZPrj, aContainer, aCache, aResult, aTODO);
 			}
@@ -400,10 +397,7 @@ public class Architecture extends SecondaryUnit {
 		Entity entity = findEntityIG(container, cache);
 		entity.initEnv(aModule, container, cache);
 
-		int n = getNumDeclarations();
-		for (int i = 0; i < n; i++) {
-
-			BlockDeclarativeItem decl = getDeclaration(i);
+		for (BlockDeclarativeItem decl : fDeclarations) {
 
 			try {
 				IGContainerItem item = decl.computeIG(null, container, cache);
@@ -418,7 +412,7 @@ public class Architecture extends SecondaryUnit {
 			}
 		}
 
-		n = getNumConcurrentStatements();
+		int n = getNumConcurrentStatements();
 		for (int i = 0; i < n; i++) {
 			ConcurrentStatement stmt = getConcurrentStatement(i);
 
@@ -440,14 +434,12 @@ public class Architecture extends SecondaryUnit {
 	public void dumpVHDL(int aIndent, PrintStream aOut) throws ZamiaException {
 		printIndented("ARCHITECTURE " + getId() + " OF " + fEntityName + " IS", aIndent, aOut);
 		aOut.println();
-		int n = fDeclarations.size();
-		for (int i = 0; i < n; i++) {
-			BlockDeclarativeItem item = getDeclaration(i);
+		for (BlockDeclarativeItem item : fDeclarations) {
 			item.dumpVHDL(aIndent + 2, aOut);
 		}
 		printIndented("BEGIN", aIndent, aOut);
 		aOut.println();
-		n = fCSS.size();
+		int n = fCSS.size();
 		for (int i = 0; i < n; i++) {
 			ConcurrentStatement cs = getConcurrentStatement(i);
 			cs.dumpVHDL(aIndent + 2, aOut);

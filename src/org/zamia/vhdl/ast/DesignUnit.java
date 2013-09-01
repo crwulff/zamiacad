@@ -48,7 +48,7 @@ public abstract class DesignUnit extends DeclarativeItem implements IDesignModul
 
 	protected HashMap<String, BlockDeclarativeItem> fDeclarationMap;
 
-	protected ArrayList<BlockDeclarativeItem> fDeclarations;
+	public ArrayList<BlockDeclarativeItem> fDeclarations;
 
 	public DesignUnit(Context aContext, String aId, SourceFile aSF, long aLocation, String aLibId, ZDB aZDB) {
 		super(aId, null, aLocation);
@@ -158,14 +158,12 @@ public abstract class DesignUnit extends DeclarativeItem implements IDesignModul
 	@Override
 	public DeclarativeItem findDeclaration(String aId, ZamiaProject aZPrj) {
 
-		DeclarativeItem decl = getDeclaration(aId);
-		if (decl != null)
-			return decl;
+		DeclarativeItem decl1 = getDeclaration(aId);
+		if (decl1 != null)
+			return decl1;
 
 		// enum ?
-		int n = getNumDeclarations();
-		for (int i = 0; i < n; i++) {
-			decl = getDeclaration(i);
+		for (BlockDeclarativeItem decl : fDeclarations) {
 
 			if (decl instanceof TypeDeclaration) {
 				TypeDeclaration td = (TypeDeclaration) decl;
@@ -192,9 +190,9 @@ public abstract class DesignUnit extends DeclarativeItem implements IDesignModul
 			return dum.getLibrary(fLibId);
 		}
 
-		decl = fContext.findDeclaration(aId, aZPrj);
-		if (decl != null)
-			return decl;
+		decl1 = fContext.findDeclaration(aId, aZPrj);
+		if (decl1 != null)
+			return decl1;
 
 		return super.findDeclaration(aId, aZPrj);
 	}
@@ -221,9 +219,8 @@ public abstract class DesignUnit extends DeclarativeItem implements IDesignModul
 
 		aIdentifiers.add(getId());
 
-		int n = fDeclarations.size();
-		for (int i = 0; i < n; i++) {
-			aIdentifiers.add(getDeclaration(i).getId());
+		for (BlockDeclarativeItem decl : fDeclarations) {
+			aIdentifiers.add(decl.getId());
 		}
 
 		super.collectIdentifiers(aIdentifiers, aZPrj);

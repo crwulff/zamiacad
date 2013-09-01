@@ -128,10 +128,7 @@ public class VHDLPackage extends PrimaryUnit {
 
 		cache.setInterpreterEnv(env);
 
-		int n = getNumDeclarations();
-		for (int i = 0; i < n; i++) {
-
-			BlockDeclarativeItem decl = getDeclaration(i);
+		for (BlockDeclarativeItem decl : fDeclarations) {
 
 			//logger.debug ("VHDLPackage: computeIG(): working on header declaration '%s'", decl.getId());
 
