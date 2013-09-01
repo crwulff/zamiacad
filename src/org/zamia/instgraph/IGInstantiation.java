@@ -68,10 +68,8 @@ public class IGInstantiation extends IGConcurrentStatement {
 		StringBuilder buf = new StringBuilder();
 
 		if (aActualGenerics != null) {
-			int n = aActualGenerics.size();
-			for (int i = 0; i < n; i++) {
-
-				Pair<String, IGStaticValue> actual = aActualGenerics.get(i);
+			
+			for (Pair<String, IGStaticValue> actual : aActualGenerics) {
 
 				buf.append("###");
 				buf.append(actual.getFirst());
