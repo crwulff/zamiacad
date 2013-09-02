@@ -344,13 +344,17 @@ public class Architecture extends SecondaryUnit {
 
 		fContext.computeIG(container, ee);
 
-		if (!computeEntityIG(module, container, ee, true)) return;
-
+		Entity e = findEntityIG(container, ee);
+		if (e == null)
+			return;
+		
+		e.computeEntityIG(module, container, ee);
+		
 		container.storeOrUpdate();
 		aModule.storeOrUpdate();
 	}
 
-	private boolean computeEntityIG(IGModule module, IGContainer container, IGElaborationEnv ee, boolean computeIG) {
+	private Entity findEntityIG(IGContainer container, IGElaborationEnv ee) {
 		Entity entity = null;
 
 		try {
@@ -363,20 +367,14 @@ public class Architecture extends SecondaryUnit {
 
 			reportError("Entity " + fEntityName + " not found.");
 
-			return false;
+			return null;
 		}
 
 		/*
 		 * entity ig
 		 */
 
-		if (computeIG) {
-			entity.computeEntityIG(module, container, ee);
-		} else {
-			entity.initEnv(module, container, ee);
-		}
-
-		return true;
+		return entity;
 	}
 
 	@Override
@@ -399,7 +397,8 @@ public class Architecture extends SecondaryUnit {
 
 		cache.setInterpreterEnv(env);
 
-		computeEntityIG(aModule, container, cache, false);
+		Entity entity = findEntityIG(container, cache);
+		entity.initEnv(aModule, container, cache);
 
 		int n = getNumDeclarations();
 		for (int i = 0; i < n; i++) {
