@@ -218,10 +218,8 @@ public class Block extends ConcurrentStatement {
 
 		if (fGenerics != null) {
 
-			int n = fGenerics.getNumInterfaces();
-			for (int i = 0; i < n; i++) {
+			for (InterfaceDeclaration interf : fGenerics) {
 				try {
-					InterfaceDeclaration interf = fGenerics.get(i);
 
 					IGObject igg = (IGObject) interf.computeIG(null, blockContainer, blockEE);
 
@@ -292,10 +290,8 @@ public class Block extends ConcurrentStatement {
 		 */
 
 		if (fPorts != null) {
-			int n = fPorts.getNumInterfaces();
-			for (int i = 0; i < n; i++) {
+			for (InterfaceDeclaration interf : fPorts) {
 				try {
-					InterfaceDeclaration interf = (InterfaceDeclaration) fPorts.get(i);
 
 					IGContainerItem igi = interf.computeIG(null, blockContainer, blockEE);
 

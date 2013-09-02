@@ -140,10 +140,7 @@ public class ASTDeclarationSearch {
 									logger.debug("SA: got interface list, looking for interface '%s'", id);
 								}
 
-								int n = interfaces.getNumInterfaces();
-								for (int i = 0; i < n; i++) {
-
-									InterfaceDeclaration interf = interfaces.get(i);
+								for (InterfaceDeclaration interf : interfaces) {
 
 									if (interf.getId().equals(id)) {
 										return interf;
@@ -167,10 +164,7 @@ public class ASTDeclarationSearch {
 									logger.debug("SA: got generics list, looking for '%s'", id);
 								}
 
-								int n = generics.getNumInterfaces();
-								for (int i = 0; i < n; i++) {
-
-									InterfaceDeclaration interf = generics.get(i);
+								for (InterfaceDeclaration interf : generics) {
 
 									if (interf.getId().equals(id)) {
 										return interf;

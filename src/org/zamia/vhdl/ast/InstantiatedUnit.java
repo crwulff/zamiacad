@@ -248,9 +248,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 
 					entityContext.computeIG(formalContainer, formalEE);
 
-					int n = formalGenerics.getNumInterfaces();
-					for (int i = 0; i < n; i++) {
-						InterfaceDeclaration interf = formalGenerics.get(i);
+					for (InterfaceDeclaration interf : formalGenerics) {
 
 						IGObject igg = (IGObject) interf.computeIG(null, formalContainer, formalEE);
 

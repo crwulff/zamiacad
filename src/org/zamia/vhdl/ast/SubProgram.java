@@ -67,9 +67,7 @@ public class SubProgram extends BlockDeclarativeItem {
 		interfaces = new InterfaceList(this, location_);
 
 		if (interfaces_ != null) {
-			int n = interfaces_.getNumInterfaces();
-			for (int i = 0; i < n; i++) {
-				InterfaceDeclaration interf = interfaces_.get(i);
+			for (InterfaceDeclaration interf : interfaces_) {
 				interfaces.add(interf);
 			}
 		}
@@ -215,10 +213,8 @@ public class SubProgram extends BlockDeclarativeItem {
 		IGContainer container = sub.getContainer();
 
 		if (interfaces != null) {
-			int n = interfaces.getNumInterfaces();
-			for (int i = 0; i < n; i++) {
+			for (InterfaceDeclaration interf : interfaces) {
 				try {
-					InterfaceDeclaration interf = (InterfaceDeclaration) interfaces.get(i);
 
 					IGContainerItem igi = interf.computeIG(null, container, aEE);
 

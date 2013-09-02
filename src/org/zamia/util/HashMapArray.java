@@ -11,7 +11,6 @@
 package org.zamia.util;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -97,10 +96,6 @@ public class HashMapArray<K, V> implements Serializable, Cloneable {
 		return hashmap.keySet();
 	}
 
-	public Collection<V> values() {
-		return hashmap.values();
-	}
-
 	public Set<Map.Entry<K, V>> entrySet() {
 		return hashmap.entrySet();
 	}
@@ -148,5 +143,9 @@ public class HashMapArray<K, V> implements Serializable, Cloneable {
 		
 		buf.append("}");
 		return buf.toString();
+	}
+
+	public Iterable<V> values() {
+		return set;
 	}
 }

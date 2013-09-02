@@ -10,7 +10,7 @@ package org.zamia.vhdl.ast;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Iterator;
 
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaProject;
@@ -30,7 +30,7 @@ import org.zamia.util.HashMapArray;
  */
 
 @SuppressWarnings("serial")
-public class InterfaceList extends VHDLNode {
+public class InterfaceList extends VHDLNode implements Iterable<InterfaceDeclaration> {
 
 	private HashMapArray<String, InterfaceDeclaration> interfaces;
 
@@ -71,10 +71,10 @@ public class InterfaceList extends VHDLNode {
 		return interfaces.size();
 	}
 	
-	public Collection<InterfaceDeclaration> all() {
-		return this.interfaces.values();
+	public Iterator<InterfaceDeclaration> iterator() {
+		return interfaces.values().iterator();
 	}
-
+	
 	@Override
 	public String toString() {
 		StringBuilder buf = new StringBuilder("(");

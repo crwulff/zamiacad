@@ -202,10 +202,7 @@ public class Entity extends PrimaryUnit {
 			}
 		}
 
-		int n = getNumInterfaceDeclarations();
-		for (int i = 0; i < n; i++) {
-
-			InterfaceDeclaration idecl = getInterfaceDeclaration(i);
+		for (InterfaceDeclaration idecl : fPorts) {
 
 			if (idecl != null) {
 				idecl.findReferences(aId, aCat, aRefType, aDepth + 1, aZPrj, aContainer, aCache, aResult, aTODO);
@@ -218,41 +215,64 @@ public class Entity extends PrimaryUnit {
 		super.collectIdentifiers(aIdentifiers, aZPrj);
 
 		if (fPorts != null) {
-			int n = fPorts.getNumInterfaces();
-			for (int i = 0; i < n; i++) {
-				InterfaceDeclaration intf = fPorts.get(i);
-				aIdentifiers.add(intf.getId());
+			for (InterfaceDeclaration interf : fPorts) {
+				aIdentifiers.add(interf.getId());
 			}
 		}
 
 		if (fGenerics != null) {
 
-			int n = fGenerics.getNumInterfaces();
-			for (int i = 0; i < n; i++) {
-				InterfaceDeclaration intf = fGenerics.get(i);
-				aIdentifiers.add(intf.getId());
+			for (InterfaceDeclaration interf : fGenerics) {
+				aIdentifiers.add(interf.getId());
 			}
 		}
 	}
 
-	public void computeEntityIG(IGModule aModule, IGContainer aContainer, IGElaborationEnv aEE) {
+	abstract class DeclarationElaborator {
+		protected abstract void body(DeclarativeItem interf, int i) throws ZamiaException;
+		public DeclarationElaborator (Iterable<? extends DeclarativeItem> c) {
+			int i = 0;
+			for (DeclarativeItem interf: c) {
+				try {
+					body(interf, i++);
+				} catch (ZamiaException e) {
+					reportError(e);
+				} catch (Throwable t) {
+					el.logException(t);
+				}
+			}
+		}
+		
+	}
 
-		IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
+	
+	public void computeEntityIG(final IGModule aModule, final IGContainer aContainer, final IGElaborationEnv aEE) {
+
+		final IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
 
 		fContext.computeIG(aContainer, aEE);
 
+		class Helper extends DeclarationElaborator {
+			protected void body2(IGObject igg, DeclarativeItem interf, int i) throws ZamiaException {
+				env.newObject((IGObject) igg, ASTErrorMode.EXCEPTION, null, interf.getLocation());
+			}
+
+			protected void body(DeclarativeItem interf, int i) throws ZamiaException {
+				IGContainerItem igg = interf.computeIG(null, aContainer, aEE);
+				if (igg instanceof IGObject)
+					body2((IGObject) igg, interf, i);
+			};
+			Helper (Iterable<? extends DeclarativeItem> c) { super(c); }
+		}
+		
 		// generics
 
 		if (fGenerics != null) {
-
-			int nActualGenerics = aModule.getNumActualGenerics();
-			int n = fGenerics.getNumInterfaces();
-			for (int i = 0; i < n; i++) {
-				try {
-					InterfaceDeclaration interf = fGenerics.get(i);
-
-					IGObject igg = (IGObject) interf.computeIG(null, aContainer, aEE);
-
+			final int nActualGenerics = aModule.getNumActualGenerics();
+			new Helper(fGenerics) {
+				
+				@Override
+				protected void body2(IGObject igg, DeclarativeItem interf, int i) throws ZamiaException {
 					aContainer.addGeneric(igg);
 
 					env.newObject(igg, ASTErrorMode.EXCEPTION, null, interf.getLocation());
@@ -261,59 +281,26 @@ public class Entity extends PrimaryUnit {
 						IGStaticValue actualGeneric = aModule.getActualGeneric(i);
 						env.setObjectValue(igg, actualGeneric, actualGeneric.computeSourceLocation());
 					}
-
-				} catch (ZamiaException e) {
-					reportError(e);
-				} catch (Throwable t) {
-					el.logException(t);
-				}
-			}
-		}
-
-		// ports
-
-		if (fPorts != null) {
-			int n = fPorts.getNumInterfaces();
-			for (int i = 0; i < n; i++) {
-				try {
-					InterfaceDeclaration interf = (InterfaceDeclaration) fPorts.get(i);
-
-					IGContainerItem igi = interf.computeIG(null, aContainer, aEE);
-
-					aContainer.addInterface((IGObject) igi);
-
-					if (igi instanceof IGObject) {
-						env.newObject((IGObject) igi, ASTErrorMode.EXCEPTION, null, interf.getLocation());
-					}
-
-				} catch (ZamiaException e) {
-					reportError(e);
-				} catch (Throwable t) {
-					el.logException(t);
-				}
-			}
-		}
-
-		// declarations:
-
-		int n = fDeclarations.size();
-		for (int i = 0; i < n; i++) {
-			try {
-				BlockDeclarativeItem decl = getDeclaration(i);
-				IGContainerItem item = decl.computeIG(null, aContainer, aEE);
-
-				if (item instanceof IGObject) {
-					IGObject obj = (IGObject) item;
-					env.newObject(obj, ASTErrorMode.EXCEPTION, null, decl.getLocation());
 				}
 
-			} catch (ZamiaException e) {
-				reportError(e);
-			} catch (Throwable t) {
-				el.logException(t);
-			}
+			};
 		}
 
+		if (fPorts != null) new Helper(fPorts) { 
+			
+			@Override
+			protected void body2(IGObject igg, DeclarativeItem interf, int i) throws ZamiaException {
+
+				
+				aContainer.addInterface(igg);
+
+				env.newObject(igg, ASTErrorMode.EXCEPTION, null, interf.getLocation());
+
+			}
+		};
+
+		new Helper(fDeclarations);
+		
 		// statements
 
 		// FIXME
@@ -333,22 +320,19 @@ public class Entity extends PrimaryUnit {
 	 * @param aContainer
 	 * @param aEE
 	 */
-	void initEnv(IGModule aModule, IGContainer aContainer, IGElaborationEnv aEE) {
+	void initEnv(final IGModule aModule, final IGContainer aContainer, IGElaborationEnv aEE) {
 
-		IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
+		final IGInterpreterRuntimeEnv env = aEE.getInterpreterEnv();
 
-		HashSet<Long> processedItems = new HashSet<Long>(aContainer.getNumLocalItems());
+		final HashSet<Long> processedItems = new HashSet<Long>(aContainer.getNumLocalItems());
 
 		// generics
-
+		
 		if (fGenerics != null) {
-
-			int nActualGenerics = aModule.getNumActualGenerics();
-			int n = fGenerics.getNumInterfaces();
-			for (int i = 0; i < n; i++) {
-				try {
-					InterfaceDeclaration interf = fGenerics.get(i);
-
+			final int nActualGenerics = aModule.getNumActualGenerics();
+			new DeclarationElaborator(fGenerics) {
+				
+				protected void body(DeclarativeItem interf, int i) throws ZamiaException {
 					IGObject igg = aContainer.getGeneric(i);
 
 					processedItems.add(igg.getDBID());
@@ -359,23 +343,15 @@ public class Entity extends PrimaryUnit {
 						IGStaticValue actualGeneric = aModule.getActualGeneric(i);
 						env.setObjectValue(igg, actualGeneric, actualGeneric.computeSourceLocation());
 					}
-
-				} catch (ZamiaException e) {
-					reportError(e);
-				} catch (Throwable t) {
-					el.logException(t);
-				}
-			}
+				};				
+			};
 		}
 
 		// ports
 
 		if (fPorts != null) {
-			int n = fPorts.getNumInterfaces();
-			for (int i = 0; i < n; i++) {
-				try {
-					InterfaceDeclaration interf = (InterfaceDeclaration) fPorts.get(i);
-
+			new DeclarationElaborator(fPorts) {
+				protected void body(DeclarativeItem interf, int i) throws ZamiaException { 
 					IGContainerItem igi = aContainer.getInterface(i);
 
 					processedItems.add(igi.getDBID());
@@ -383,13 +359,8 @@ public class Entity extends PrimaryUnit {
 					if (igi instanceof IGObject) {
 						env.newObject((IGObject) igi, ASTErrorMode.EXCEPTION, null, interf.getLocation());
 					}
-
-				} catch (ZamiaException e) {
-					reportError(e);
-				} catch (Throwable t) {
-					el.logException(t);
 				}
-			}
+			};
 		}
 
 		// declarations:
