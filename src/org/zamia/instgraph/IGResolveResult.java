@@ -9,6 +9,7 @@
 package org.zamia.instgraph;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 /**
  * result of IGContainer:resolve(id)
@@ -17,7 +18,7 @@ import java.util.ArrayList;
  * 
  */
 
-public class IGResolveResult {
+public class IGResolveResult implements Iterable<IGItem> {
 
 	private final ArrayList<IGItem> fResults;
 
@@ -37,6 +38,10 @@ public class IGResolveResult {
 
 	public IGItem getResult(int aIdx) {
 		return fResults.get(aIdx);
+	}
+	
+	public Iterator<IGItem> iterator() {
+		return fResults.iterator();
 	}
 
 	public void addItem(IGItem aItem) {
@@ -60,5 +65,6 @@ public class IGResolveResult {
 	public boolean isEmpty() {
 		return fResults.isEmpty();
 	}
+
 
 }

@@ -153,9 +153,7 @@ public class Entity extends PrimaryUnit {
 
 			IGResolveResult rres = container.resolve(aId);
 
-			int n = rres.getNumResults();
-			for (int i = 0; i < n; i++) {
-				IGItem item = rres.getResult(i);
+			for (IGItem item : rres) {
 				if (item instanceof IGLibraryImport) {
 					IGLibraryImport ip = (IGLibraryImport) item;
 

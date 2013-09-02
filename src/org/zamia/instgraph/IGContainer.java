@@ -275,9 +275,7 @@ public class IGContainer extends IGItem {
 
 		IGResolveResult res = resolve(aId);
 
-		int n = res.getNumResults();
-		for (int i = 0; i < n; i++) {
-			IGItem item = res.getResult(i);
+		for (IGItem item : res) {
 			if (item instanceof IGType) {
 				return (IGType) item;
 			}
@@ -289,9 +287,7 @@ public class IGContainer extends IGItem {
 	public IGLibraryImport resolveLibrary(String aId) {
 		IGResolveResult res = resolve(aId);
 
-		int n = res.getNumResults();
-		for (int i = 0; i < n; i++) {
-			IGItem item = res.getResult(i);
+		for (IGItem item : res) {
 			if (item instanceof IGLibraryImport) {
 				return (IGLibraryImport) item;
 			}
@@ -303,9 +299,7 @@ public class IGContainer extends IGItem {
 	public IGObject resolveObject(String aId) {
 		IGResolveResult res = resolve(aId);
 
-		int n = res.getNumResults();
-		for (int i = 0; i < n; i++) {
-			IGItem item = res.getResult(i);
+		for (IGItem item : res) {
 			if (item instanceof IGObject) {
 				return (IGObject) item;
 			}

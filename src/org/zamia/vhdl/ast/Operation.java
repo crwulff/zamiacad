@@ -163,10 +163,8 @@ public abstract class Operation extends VHDLNode {
 
 		IGResolveResult rr = aContainer.resolve(aOpId);
 		IGOperationInvokeSubprogram inv = null;
-		int n = rr.getNumResults();
-		for (int i = 0; i < n; i++) {
+		for (IGItem item : rr) {
 
-			IGItem item = rr.getResult(i);
 			if (!(item instanceof IGSubProgram)) {
 				continue;
 			}

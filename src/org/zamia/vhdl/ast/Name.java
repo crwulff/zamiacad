@@ -153,10 +153,7 @@ public class Name extends VHDLNode {
 
 		IGResolveResult res = new IGResolveResult();
 
-		int n = aRR.getNumResults();
-		
-		for (int i = 0; i < n; i++) {
-			IGItem item = aRR.getResult(i);
+		for (IGItem item : aRR) {
 
 			if (item instanceof IGObject) {
 				item = new IGOperationObject((IGObject) item, getLocation(), aZDB);
@@ -230,10 +227,9 @@ public class Name extends VHDLNode {
 			return aRR;
 		}
 
-		int m = aRR.getNumResults();
-		ArrayList<IGItem> items = new ArrayList<IGItem>(m);
-		for (int j = 0; j < m; j++) {
-			items.add(aRR.getResult(j));
+		ArrayList<IGItem> items = new ArrayList<IGItem>(aRR.getNumResults());
+		for (IGItem item : aRR) {
+			items.add(item);
 		}
 
 		SourceLocation prevLocation = getLocation();
@@ -242,10 +238,9 @@ public class Name extends VHDLNode {
 
 			NameExtension ext = getExtension(iExt);
 
-			m = items.size();
-			ArrayList<IGItem> newItems = new ArrayList<IGItem>(m);
-			for (int j = 0; j < m; j++) {
-				ext.computeIG(items.get(j), prevLocation, aContainer, aEE, aCache, newItems, aReport);
+			ArrayList<IGItem> newItems = new ArrayList<IGItem>(items.size());
+			for (IGItem item : items) {
+				ext.computeIG(item, prevLocation, aContainer, aEE, aCache, newItems, aReport);
 				prevLocation = ext.getLocation();
 			}
 
@@ -261,10 +256,7 @@ public class Name extends VHDLNode {
 
 		IGResolveResult result = computeIG(null, aContainer, aEE, aCache, aErrorMode, aReport);
 
-		int n = result.getNumResults();
-		for (int i = 0; i < n; i++) {
-
-			IGItem item = result.getResult(i);
+		for (IGItem item : result) {
 
 			if (item instanceof IGType) {
 				return (IGType) item;
@@ -352,10 +344,7 @@ public class Name extends VHDLNode {
 
 		IGResolveResult result = computeIG(null, aContainer, aEE, new IGOperationCache(), aErrorMode, report);
 
-		int n = result.getNumResults();
-		for (int i = 0; i < n; i++) {
-
-			IGItem item = result.getResult(i);
+		for (IGItem item : result) {
 
 			if (item instanceof IGDUUID) {
 				return (IGDUUID) item;
@@ -375,10 +364,7 @@ public class Name extends VHDLNode {
 
 		IGResolveResult result = computeIG(null, aContainer, aEE, new IGOperationCache(), aErrorMode, report);
 
-		int n = result.getNumResults();
-		for (int i = 0; i < n; i++) {
-
-			IGItem item = result.getResult(i);
+		for (IGItem item : result) {
 
 			if (item instanceof IGSubProgram) {
 
@@ -412,10 +398,7 @@ public class Name extends VHDLNode {
 
 		IGResolveResult result = computeIG(null, aContainer, aEE, new IGOperationCache(), aErrorMode, report);
 
-		int n = result.getNumResults();
-		for (int i = 0; i < n; i++) {
-
-			IGItem item = result.getResult(i);
+		for (IGItem item : result) {
 
 			if (item instanceof IGSubProgram) {
 

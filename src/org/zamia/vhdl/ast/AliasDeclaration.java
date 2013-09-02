@@ -105,9 +105,7 @@ public class AliasDeclaration extends BlockDeclarativeItem {
 
 		IGResolveResult result = name.computeIG(null, aContainer, aEE, new IGOperationCache(), ASTErrorMode.EXCEPTION, null);
 
-		int n = result.getNumResults();
-		for (int i = 0; i < n; i++) {
-			IGItem item = result.getResult(i);
+		for (IGItem item : result) {
 			if (item instanceof IGOperation) {
 
 				IGOperation op = (IGOperation) item;

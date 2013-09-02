@@ -78,9 +78,8 @@ public class OperationAllocator extends Operation {
 			return res;
 		}
 
-		int n = result.getNumResults();
-		for (int i = 0; i < n; i++) {
-			IGItem item = result.getResult(i);
+		for (IGItem item : result) {
+
 			if (item instanceof IGOperationTypeQualification) {
 
 				IGOperationTypeQualification qual = (IGOperationTypeQualification) item;
