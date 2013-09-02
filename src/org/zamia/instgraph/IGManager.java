@@ -165,10 +165,7 @@ public final class IGManager {
 
 			if (container != null) {
 
-				int n = container.getNumLocalItems();
-				for (int i = 0; i < n; i++) {
-
-					IGContainerItem item = container.getLocalItem(i);
+				for (IGContainerItem item : container.localItems()) {
 
 					if (!(item instanceof IGObject)) {
 						continue;
@@ -899,9 +896,7 @@ public final class IGManager {
 				fNumObjects += container.getNumInterfaces();
 			}
 
-			int n = container.getNumLocalItems();
-			for (int i = 0; i < n; i++) {
-				IGContainerItem localItem = container.getLocalItem(i);
+			for (IGContainerItem localItem : container.localItems()) {
 				if (localItem instanceof IGObject) {
 					IGObject object = (IGObject) localItem;
 

@@ -132,9 +132,7 @@ public class IGSimAnnotator {
 
 		IGISimCursor cursor = aSim.createCursor();
 
-		int n = aContainer.getNumLocalItems();
-		for (int i = 0; i < n; i++) {
-			IGContainerItem item = aContainer.getLocalItem(i);
+		for (IGContainerItem item : aContainer.localItems()) {
 
 			if (!(item instanceof IGObject)) {
 				continue;
@@ -249,10 +247,7 @@ public class IGSimAnnotator {
 				}
 
 				if (dump) {
-					m = childContainer.getNumInterfaces();
-					for (int j = 0; j < m; j++) {
-
-						IGObject iface = childContainer.getInterface(j);
+					for (IGObject iface: childContainer.interfaces()) {
 
 						IGStaticValue actualValue = fAnnotationsEnv.getObjectValue(iface);
 						logger.info("      INTERFACE %s => %s", iface.getId(), actualValue);
@@ -285,9 +280,7 @@ public class IGSimAnnotator {
 	}
 
 	private void computeSignalInfos(IGContainer aContainer, PathName aLocalPrefix) {
-		int n = aContainer.getNumLocalItems();
-		for (int i = 0; i < n; i++) {
-			IGContainerItem item = aContainer.getLocalItem(i);
+		for (IGContainerItem item : aContainer.localItems()) {
 
 			if (!(item instanceof IGObject)) {
 				continue;

@@ -83,10 +83,7 @@ public class IGOperationInvokeSubprogram extends IGOperation {
 
 		// create and init interfaces
 
-		int n = subContainer.getNumLocalItems();
-		for (int i = 0; i < n; i++) {
-
-			IGContainerItem item = subContainer.getLocalItem(i);
+		for (IGContainerItem item : subContainer.localItems()) {
 
 			if (!(item instanceof IGObject)) {
 				continue;

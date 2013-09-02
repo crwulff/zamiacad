@@ -386,7 +386,7 @@ public class Name extends VHDLNode {
 
 				IGContainer formalScope = sub.getContainer();
 
-				ArrayList<IGObject> interfaces = formalScope.getInterfaces();
+				ArrayList<IGObject> interfaces = formalScope.getInterfaceList();
 				if (interfaces.size() != 1) {
 					continue;
 				}
@@ -423,7 +423,7 @@ public class Name extends VHDLNode {
 
 				IGContainer formalScope = sub.getContainer();
 
-				ArrayList<IGObject> interfaces = formalScope.getInterfaces();
+				ArrayList<IGObject> interfaces = formalScope.getInterfaceList();
 				if (interfaces.size() > 0) {
 					report.append("Num interfaces >0", getLocation());
 					continue;

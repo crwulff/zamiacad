@@ -189,10 +189,7 @@ public class VHDLPackage extends PrimaryUnit {
 		// successfully?
 
 		int nTotal = 0, nOK = 0;
-		int nItems = container.getNumLocalItems();
-		for (int i = 0; i < nItems; i++) {
-
-			IGContainerItem item = container.getLocalItem(i);
+		for (IGContainerItem item : container.localItems()) {
 
 			if (item instanceof IGType) {
 

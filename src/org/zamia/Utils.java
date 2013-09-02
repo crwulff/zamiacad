@@ -1,6 +1,7 @@
 package org.zamia;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -42,6 +43,13 @@ public class Utils {
 		return sb.toString();
 	}
 
+	public static <T> ArrayList<T> createArrayList(Iterable<T> items) {
+		ArrayList<T> al = new ArrayList<>();
+		for (T item : items) {
+			al.add(item);
+		}
+		return al;
+	}
 	public static int getEnvInt(String name, int deflt) {
 		try {
 			String sVal = System.getenv(name);

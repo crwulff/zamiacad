@@ -519,9 +519,7 @@ public class IGSimRef implements IGISimulator {
 	}
 
 	private void initObjects(LocalItemFilter aFilter, IGContainer aContainer, IGInterpreterRuntimeEnv aEnv, PathName aPath) throws ZamiaException {
-		int n = aContainer.getNumLocalItems();
-		for (int i = 0; i < n; i++) {
-			IGContainerItem item = aContainer.getLocalItem(i);
+		for (IGContainerItem item : aContainer.localItems()) {
 
 			if (!(item instanceof IGObject)) {
 				continue;

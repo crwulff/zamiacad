@@ -16,6 +16,7 @@ import java.util.Set;
 import org.zamia.DMManager;
 import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
+import org.zamia.Utils;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.ZamiaProject;
@@ -23,6 +24,7 @@ import org.zamia.instgraph.IGObject.IGObjectCat;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.IGSubProgram.IGBuiltin;
 import org.zamia.instgraph.IGType.TypeCat;
+import org.zamia.util.ZdbList;
 import org.zamia.vhdl.ast.ConfigurationSpecification;
 import org.zamia.vhdl.ast.DMUID;
 import org.zamia.vhdl.ast.DMUID.LUType;
@@ -51,11 +53,11 @@ public class IGContainer extends IGItem {
 
 	private HashMap<String, ArrayList<Long>> fLocalItemMap = new HashMap<String, ArrayList<Long>>();
 
-	private ArrayList<Long> fLocalItems = new ArrayList<Long>();
+	private ZdbList<IGContainerItem> fLocalItems = new ZdbList<>();
 
-	private ArrayList<Long> fInterfaces = new ArrayList<Long>();
+	private ZdbList<IGObject> fInterfaces = new ZdbList<>();
 
-	private ArrayList<Long> fGenerics = new ArrayList<Long>();
+	private ZdbList<IGObject> fGenerics = new ZdbList<>();
 
 	private ArrayList<ConfigurationSpecification> fConfSpecs = new ArrayList<ConfigurationSpecification>();
 
@@ -94,13 +96,8 @@ public class IGContainer extends IGItem {
 		return (IGObject) getZDB().load(fGenerics.get(aIdx));
 	}
 
-	public ArrayList<IGObject> getGenerics() {
-		int n = getNumGenerics();
-		ArrayList<IGObject> res = new ArrayList<IGObject>(n);
-		for (int i = 0; i < n; i++) {
-			res.add(getGeneric(i));
-		}
-		return res;
+	public ArrayList<IGObject> getGenericList() {
+		return Utils.createArrayList(fGenerics.zdbIterator(getZDB()));
 	}
 
 	public int getNumInterfaces() {
@@ -111,13 +108,12 @@ public class IGContainer extends IGItem {
 		return (IGObject) getZDB().load(fInterfaces.get(aIdx));
 	}
 
-	public ArrayList<IGObject> getInterfaces() {
-		int n = getNumInterfaces();
-		ArrayList<IGObject> res = new ArrayList<IGObject>(n);
-		for (int i = 0; i < n; i++) {
-			res.add(getInterface(i));
-		}
-		return res;
+	public Iterable<IGObject> interfaces() {
+		return fInterfaces.zdbIterator(getZDB());
+	}
+
+	public ArrayList<IGObject> getInterfaceList() {
+		return Utils.createArrayList(fInterfaces.zdbIterator(getZDB()));
 	}
 
 	public void add(IGContainerItem aItem) throws ZamiaException {
@@ -454,6 +450,10 @@ public class IGContainer extends IGItem {
 		return (IGContainerItem) getZDB().load(fLocalItems.get(aIdx));
 	}
 
+	public Iterable<IGContainerItem> localItems() {
+		return fLocalItems.zdbIterator(getZDB());
+	}
+
 	public int getNumPackageImports() {
 		return fImportedPackages.size();
 	}
@@ -490,7 +490,7 @@ public class IGContainer extends IGItem {
 
 	public void removeInterfaces() {
 		fLocalItemMap = new HashMap<String, ArrayList<Long>>();
-		fInterfaces = new ArrayList<Long>();
+		fInterfaces = new ZdbList<>();
 	}
 
 	public void add(ConfigurationSpecification aConfSpec) {

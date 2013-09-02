@@ -237,7 +237,7 @@ public class Block extends ConcurrentStatement {
 
 		if (fGMS != null) {
 
-			ArrayList<IGObject> generics = blockContainer.getGenerics();
+			ArrayList<IGObject> generics = blockContainer.getGenericList();
 
 			ErrorReport report = new ErrorReport();
 			IGMappings mappings = fGMS.map(blockContainer, blockEE, new IGOperationCache(), aContainer, aEE, new IGOperationCache(), generics, true, report, true);
@@ -311,7 +311,7 @@ public class Block extends ConcurrentStatement {
 
 		if (fPMS != null) {
 
-			ArrayList<IGObject> interfaces = blockContainer.getInterfaces();
+			ArrayList<IGObject> interfaces = blockContainer.getInterfaceList();
 
 			ErrorReport report = new ErrorReport();
 			IGMappings mappings = fPMS.map(blockContainer, blockEE, new IGOperationCache(), aContainer, aEE, new IGOperationCache(), interfaces, true, report, true);

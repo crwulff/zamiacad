@@ -365,10 +365,8 @@ public class Entity extends PrimaryUnit {
 
 		// declarations:
 
-		int n = aContainer.getNumLocalItems();
-		for (int i = 0; i < n; i++) {
+		for (IGContainerItem item : aContainer.localItems()) {
 			try {
-				IGContainerItem item = aContainer.getLocalItem(i);
 
 				if (processedItems.contains(item.getDBID())) {
 					continue;

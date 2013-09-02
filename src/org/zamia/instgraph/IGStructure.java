@@ -289,10 +289,9 @@ public class IGStructure extends IGConcurrentStatement implements Scope {
 
 		// ports
 
-		n = aContainer.getNumInterfaces();
-		for (int i = 0; i < n; i++) {
+		for (IGObject interf: aContainer.interfaces()) {
 
-			IGContainerItem igi = aContainer.getInterface(i);
+			IGContainerItem igi = interf;
 
 			try {
 
@@ -311,10 +310,7 @@ public class IGStructure extends IGConcurrentStatement implements Scope {
 
 		// declarations:
 
-		n = aContainer.getNumLocalItems();
-		for (int i = 0; i < n; i++) {
-
-			IGContainerItem item = aContainer.getLocalItem(i);
+		for (IGContainerItem item : aContainer.localItems()) {
 
 			if (processedItems.contains(item.getDBID())) {
 				continue;

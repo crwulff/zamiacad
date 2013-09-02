@@ -246,10 +246,7 @@ public class IGSynth {
 		IGContainer container = aIGS.getContainer();
 
 		if (aSynthPorts) {
-			int n = container.getNumLocalItems();
-			for (int i = 0; i < n; i++) {
-
-				IGContainerItem item = container.getLocalItem(i);
+			for (IGContainerItem item : container.localItems()) {
 
 				if (!(item instanceof IGObject)) {
 					continue;

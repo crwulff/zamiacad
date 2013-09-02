@@ -303,9 +303,8 @@ public class SubProgram extends BlockDeclarativeItem {
 			IGContainer container2 = sub.getContainer();
 
 			container.removeInterfaces();
-			int nI = container2.getNumInterfaces();
-			for (int i = 0; i < nI; i++) {
-				container.addInterface(container2.getInterface(i));
+			for (IGObject interf: container2.interfaces()) {
+				container.addInterface(interf);
 			}
 
 			sub.setContainer(container);

@@ -261,7 +261,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 					IGOperationCache formalCache = new IGOperationCache();
 					IGOperationCache actualCache = new IGOperationCache();
 
-					ArrayList<IGObject> generics = formalContainer.getGenerics();
+					ArrayList<IGObject> generics = formalContainer.getGenericList();
 					
 					IGMappings mappings = fGMS.map(formalContainer, formalEE, formalCache, aParentContainer, aParentEE, actualCache, generics, true, report, true);
 					if (mappings == null) {
@@ -330,9 +330,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 					}
 
 					IGContainer formalIntfContainer = new IGContainer(aParentContainer.getDBID(), getLocation(), aParentEE.getZDB());
-					int n = formalContainer.getNumInterfaces();
-					for (int i = 0; i < n; i++) {
-						IGObject intf = formalContainer.getInterface(i);
+					for (IGObject intf: formalContainer.interfaces()) {
 						formalIntfContainer.add(intf);
 					}
 
@@ -341,7 +339,7 @@ public abstract class InstantiatedUnit extends ConcurrentStatement {
 
 					IGOperationCache actualCache = new IGOperationCache();
 
-					ArrayList<IGObject> interfaces = formalContainer.getInterfaces();
+					ArrayList<IGObject> interfaces = formalContainer.getInterfaceList();
 
 					ErrorReport report = new ErrorReport();
 					IGMappings mappings = fPMS.map(formalIntfContainer, formalEE, formalCache, aParentContainer, aParentEE, actualCache, interfaces, true, report, true);

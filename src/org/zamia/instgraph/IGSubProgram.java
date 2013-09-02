@@ -101,10 +101,7 @@ public class IGSubProgram extends IGContainerItem {
 
 		IGContainer subContainer = getContainer();
 
-		int n = subContainer.getNumLocalItems();
-		for (int i = 0; i < n; i++) {
-
-			IGContainerItem item = subContainer.getLocalItem(i);
+		for (IGContainerItem item : subContainer.localItems()) {
 
 			if (!(item instanceof IGObject)) {
 				continue;
@@ -302,7 +299,7 @@ public class IGSubProgram extends IGContainerItem {
 		IGElaborationEnv formalEE = new IGElaborationEnv(aEE.getZamiaProject());
 		IGOperationCache formalCache = new IGOperationCache();
 
-		ArrayList<IGObject> interfaces = formalScope.getInterfaces();
+		ArrayList<IGObject> interfaces = formalScope.getInterfaceList();
 
 		IGMappings mappings = aAL.map(formalScope, formalEE, formalCache, aContainer, aEE, aCache, interfaces, false, aReport, false);
 
