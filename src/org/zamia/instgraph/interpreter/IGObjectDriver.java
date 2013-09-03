@@ -286,8 +286,6 @@ public class IGObjectDriver implements Serializable {
 			}
 			adaptArraySize(aLocation);
 
-			fValue = aValue;
-
 			// so we have to do an index shift?
 			if (!fDeclaredType.isUnconstrained() && fDeclaredType.getCat() != IGType.TypeCat.FILE && fDeclaredType.getCat() != IGType.TypeCat.ACCESS) {
 				fValue = shiftIndex(fDeclaredType, fValue, aLocation);
