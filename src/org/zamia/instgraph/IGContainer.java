@@ -51,7 +51,7 @@ public class IGContainer extends IGItem {
 
 	private ArrayList<IGPackageImport> fImportedPackages = new ArrayList<IGPackageImport>();
 
-	private HashMap<String, ArrayList<Long>> fLocalItemMap = new HashMap<String, ArrayList<Long>>();
+	private HashMap<String, ZdbList<IGContainerItem>> fLocalItemMap = new HashMap<>();
 
 	private ZdbList<IGContainerItem> fLocalItems = new ZdbList<>();
 
@@ -97,7 +97,7 @@ public class IGContainer extends IGItem {
 	}
 
 	public ArrayList<IGObject> getGenericList() {
-		return Utils.createArrayList(fGenerics.zdbIterator(getZDB()));
+		return fGenerics.toList(getZDB());
 	}
 
 	public int getNumInterfaces() {
@@ -113,7 +113,7 @@ public class IGContainer extends IGItem {
 	}
 
 	public ArrayList<IGObject> getInterfaceList() {
-		return Utils.createArrayList(fInterfaces.zdbIterator(getZDB()));
+		return fInterfaces.toList(getZDB());
 	}
 
 	public void add(IGContainerItem aItem) throws ZamiaException {
@@ -126,9 +126,9 @@ public class IGContainer extends IGItem {
 				logger.error("IGContainer: sanity check failed. tried to add anonymous item.");
 			}
 
-			ArrayList<Long> items = fLocalItemMap.get(id);
+			ZdbList<IGContainerItem> items = fLocalItemMap.get(id);
 			if (items == null) {
-				items = new ArrayList<Long>(1);
+				items = new ZdbList<IGContainerItem>(1);
 				fLocalItemMap.put(id, items);
 			}
 
@@ -172,13 +172,10 @@ public class IGContainer extends IGItem {
 
 		IGResolveResult res = aResult;
 
-		ArrayList<Long> itemsL = fLocalItemMap.get(aId);
+		ZdbList<IGContainerItem> itemsL = fLocalItemMap.get(aId);
 		if (itemsL != null) {
 
-			int n = itemsL.size();
-			for (int i = 0; i < n; i++) {
-
-				IGItem item = (IGItem) getZDB().load(itemsL.get(i).longValue());
+			for (IGItem item : itemsL.zdbIterator(getZDB())) {
 				res.addItem(item);
 			}
 
@@ -468,22 +465,16 @@ public class IGContainer extends IGItem {
 
 	public ArrayList<IGContainerItem> findLocalItems(String aId) {
 
-		ArrayList<Long> itemsL = fLocalItemMap.get(aId);
+		ZdbList<IGContainerItem> itemsL = fLocalItemMap.get(aId);
 		if (itemsL == null) {
 			return null;
 		}
 
-		int n = itemsL.size();
-		ArrayList<IGContainerItem> items = new ArrayList<IGContainerItem>(n);
-		for (int i = 0; i < n; i++) {
-			Long dbid = itemsL.get(i);
-			items.add((IGContainerItem) getZDB().load(dbid.longValue()));
-		}
-		return items;
+		return itemsL.toList(getZDB());		
 	}
 
 	public void removeInterfaces() {
-		fLocalItemMap = new HashMap<String, ArrayList<Long>>();
+		fLocalItemMap = new HashMap<String, ZdbList<IGContainerItem>>();
 		fInterfaces = new ZdbList<>();
 	}
 

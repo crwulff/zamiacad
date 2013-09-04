@@ -4,13 +4,22 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import org.zamia.instgraph.IGConcurrentStatement;
+import org.zamia.Utils;
+import org.zamia.instgraph.IGObject;
 import org.zamia.zdb.ZDB;
 
 /**
  * http://stackoverflow.com/questions/13534985/abstract-iterator-for-indexable-colletions
  * */
 public class ZdbList<T> extends ArrayList<Long> {
+	
+	public ZdbList(int size) {
+		super(size);
+	}
+	
+	public ZdbList() {
+		super();
+	}
 	
 	public Iterable<T> zdbIterator(ZDB zdb) {
 		return new ZdbIterator<T>(zdb);
@@ -41,6 +50,10 @@ public class ZdbList<T> extends ArrayList<Long> {
 			created = true;
 			return this;
 		}
+	}
+
+	public ArrayList<T> toList(ZDB zdb) {
+		return Utils.createArrayList(zdbIterator(zdb), size());
 	}
 
 }

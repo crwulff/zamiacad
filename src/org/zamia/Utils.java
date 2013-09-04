@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import org.zamia.instgraph.IGObject;
+import org.zamia.util.ZdbList;
 import org.zamia.zdb.ZDB;
 
 public class Utils {
@@ -43,8 +45,8 @@ public class Utils {
 		return sb.toString();
 	}
 
-	public static <T> ArrayList<T> createArrayList(Iterable<T> items) {
-		ArrayList<T> al = new ArrayList<>();
+	public static <T> ArrayList<T> createArrayList(Iterable<T> items, int size) {
+		ArrayList<T> al = new ArrayList<>(size);
 		for (T item : items) {
 			al.add(item);
 		}
