@@ -46,6 +46,7 @@ import org.zamia.instgraph.IGSequentialRestart;
 import org.zamia.instgraph.IGSequentialStatement;
 import org.zamia.instgraph.IGSequentialWait;
 import org.zamia.instgraph.IGStaticValue;
+import org.zamia.instgraph.IGStaticValue.CHAR_LITERAL;
 import org.zamia.instgraph.IGStructure;
 import org.zamia.instgraph.IGType;
 import org.zamia.instgraph.IGTypeStatic;
@@ -149,6 +150,8 @@ public class IGSynth {
 		fOperationSynthAdapters = new HashMap<Class, IGOperationSynthAdapter>();
 		fOperationSynthAdapters.put(IGOperationBinary.class, new IGSAOperationBinary());
 		fOperationSynthAdapters.put(IGStaticValue.class, new IGSAStaticValue());
+		fOperationSynthAdapters.put(CHAR_LITERAL.class, new IGSAStaticValue()); // TODO: should we share the IGSAStaticValue instance? 
+			
 		fOperationSynthAdapters.put(IGOperationObject.class, new IGSAOperationObject());
 		fOperationSynthAdapters.put(IGOperationInvokeSubprogram.class, new IGSAOperationInvokeSubprogram());
 		fOperationSynthAdapters.put(IGOperationIndex.class, new IGSAOperationIndex());

@@ -40,21 +40,13 @@ import org.zamia.zdb.ZDB;
 public class IGStaticValue extends IGOperation {
 
 	public final static char BIT_0 = '0';
-
 	public final static char BIT_1 = '1';
-
 	public final static char BIT_Z = 'Z';
-
 	public final static char BIT_X = 'X';
-
 	public final static char BIT_U = 'U';
-
 	public final static char BIT_DC = '-';
-
 	public final static char BIT_L = 'L';
-
 	public final static char BIT_H = 'H';
-
 	public final static char BIT_W = 'W';
 
 	private BigInteger fNum;
@@ -67,29 +59,89 @@ public class IGStaticValue extends IGOperation {
 
 	private HashMapArray<String, IGStaticValue> fRecordValues;
 
-	private boolean fIsCharLiteral;
+	protected IGStaticValue(IGStaticValueBuilder aBuilder, boolean dummy) {
+		super(aBuilder.getType(), aBuilder.getSrc(), aBuilder.getZDB());
+		fId = aBuilder.getId();
+	};
+	
+	protected IGStaticValue(ZDB aZDB) {
+		super(null, null, aZDB);
+	}
+	
+	public static class INNER_BOOLEAN_DUPLICATE extends IGStaticValue {
+		private final boolean fTruthValue;
+		public INNER_BOOLEAN_DUPLICATE(boolean aTruthValue, ZDB aZDB) {
+			super(aZDB);
+			fTruthValue = aTruthValue;
+		}
+		
+		public boolean isTrue() { return fTruthValue; }
+		public String toHRString() { return "" + fTruthValue; }
+		public IGType getType() { return null; }
+	}
+	public static class ENUM extends IGStaticValue {
+		protected final int fEnumOrd;
+		public ENUM(IGStaticValueBuilder aBuilder) throws ZamiaException {
+			super(aBuilder, true);
+			fEnumOrd = aBuilder.getEnumOrd();
+		}
+		
+		public int getEnumOrd() { return fEnumOrd; }
+		
+		public String toHRString() {
+			try {
+				if (getType().isCharEnum())
+					return Character.toString((char) this.getOrd());
+				
+				String id = getId();
+				if (id != null) {
+					return getId();
+				}
 
-	private int fEnumOrd;
+				IGStaticValue literal = getType().getEnumLiteral(fEnumOrd, null, ASTErrorMode.EXCEPTION, null);
+				return literal.getId();
+			} catch (Exception e) {
+				return "***ERR: " + e.getMessage();
+			}
 
-	private char fCharLiteral;
+		}
+		
+		public long getOrd() throws ZamiaException { return fEnumOrd; }
+		public boolean isTrue() { return fEnumOrd == 1; }
+	}
+	public static class CHAR_LITERAL extends ENUM {
+		private final char fCharLiteral;
+		public CHAR_LITERAL(IGStaticValueBuilder aBuilder) throws ZamiaException {
+			super(aBuilder);
+			fCharLiteral = aBuilder.getCharLiteral();
+		}
 
-	private File fFile;
+		@Override
+		public char getCharLiteral() { return fCharLiteral; }
+		public boolean isCharLiteral() { return true;}
+		public char computeBit() { return fCharLiteral; }
+		public boolean isLogicOne() { return fCharLiteral == BIT_1;}
+		public String toHRString() { return "" + fCharLiteral;}
+		
+	}
+	public static class FILE extends IGStaticValue {
 
-	//	private long fReferencedObjectDBID;
+		private final File fFile;
+		public FILE(IGStaticValueBuilder aBuilder) throws ZamiaException {
+			super(aBuilder, true);
+			fFile = aBuilder.getFile();
+		}
+
+		@Override
+		public File getFile() { return fFile;}
+		public String toHRString() {return "FILE " + fFile;}
+
+	}
+	public File getFile() { return null;}
 
 	private IGStaticValue fLeft, fRight, fAscending;
 
-	private boolean fIsBuiltinBool = false;
-
-	private boolean fTruthValue;
-
-	public IGStaticValue(boolean aTruthValue, ZDB aZDB) {
-		super(null, null, aZDB);
-		fIsBuiltinBool = true;
-		fTruthValue = aTruthValue;
-	}
-
-	public IGStaticValue(IGStaticValueBuilder aBuilder) throws ZamiaException {
+	IGStaticValue(IGStaticValueBuilder aBuilder) throws ZamiaException {
 		super(aBuilder.getType(), aBuilder.getSrc(), aBuilder.getZDB());
 
 		if (getZDB() == null) {
@@ -97,11 +149,7 @@ public class IGStaticValue extends IGOperation {
 		}
 
 		fId = aBuilder.getId();
-		fIsCharLiteral = aBuilder.isCharLiteral();
-		fCharLiteral = aBuilder.getCharLiteral();
-		fEnumOrd = aBuilder.getEnumOrd();
 		fNum = aBuilder.getNum();
-		fFile = aBuilder.getFile();
 		fReal = aBuilder.getReal();
 		fLeft = aBuilder.getLeft();
 		fRight = aBuilder.getRight();
@@ -189,9 +237,6 @@ public class IGStaticValue extends IGOperation {
 
 		switch (cat) {
 
-		case ENUM:
-			return fEnumOrd;
-
 		case INTEGER:
 			return fNum.longValue();
 
@@ -203,11 +248,11 @@ public class IGStaticValue extends IGOperation {
 	}
 
 	public char getCharLiteral() {
-		return fCharLiteral;
+		return 0;
 	}
 
 	public boolean isCharLiteral() {
-		return fIsCharLiteral;
+		return false;
 	}
 
 	/************************************************
@@ -289,9 +334,7 @@ public class IGStaticValue extends IGOperation {
 	 **************************************************/
 
 	public boolean isTrue() {
-		if (fIsBuiltinBool)
-			return fTruthValue;
-		return fEnumOrd == 1;
+		return false;
 	}
 
 	/**************************************************
@@ -301,17 +344,11 @@ public class IGStaticValue extends IGOperation {
 	 **************************************************/
 
 	public boolean isLogicOne() {
-		if (!fIsCharLiteral) {
 			return isTrue();
-		}
-		return fCharLiteral == BIT_1;
 	}
 
 	public char computeBit() {
-		if (!fIsCharLiteral) {
-			return BIT_U;
-		}
-		return fCharLiteral;
+		return BIT_U;
 	}
 
 	public static IGStaticValue generateZ(IGTypeStatic aType, SourceLocation aSrc) throws ZamiaException {
@@ -530,10 +567,6 @@ public class IGStaticValue extends IGOperation {
 
 	public String toHRString() {
 
-		if (fIsBuiltinBool) {
-			return "" + fTruthValue;
-		}
-
 		try {
 			IGType type = getType();
 			switch (type.getCat()) {
@@ -589,28 +622,9 @@ public class IGStaticValue extends IGOperation {
 				buf.append(")");
 				return buf.toString();
 
-			case ENUM:
-				if (fIsCharLiteral) {
-					return "" + fCharLiteral;
-				}
-
-				if (type.isCharEnum())
-					return Character.toString((char) this.getOrd());
-				
-				String id = getId();
-				if (id != null) {
-					return getId();
-				}
-
-				IGStaticValue literal = type.getEnumLiteral(fEnumOrd, null, ASTErrorMode.EXCEPTION, null);
-				return literal.getId();
-
 			case ACCESS:
 				// FIXME
 				return "ACCESS";
-
-			case FILE:
-				return "FILE " + fFile;
 
 			case REAL:
 				return "" + getReal();
@@ -1170,9 +1184,10 @@ public class IGStaticValue extends IGOperation {
 				type = value.getStaticType();
 				continue;
 			}
-			if (resolvedValue.fIsCharLiteral) {
-				char curC = resolvedValue.fCharLiteral;
-				char newC = value.fCharLiteral;
+
+			if (resolvedValue instanceof CHAR_LITERAL) {
+				char curC = resolvedValue.getCharLiteral();
+				char newC = value.getCharLiteral();
 
 				if (curC == BIT_U || newC == BIT_U) {
 					curC = BIT_U;
@@ -1295,11 +1310,7 @@ public class IGStaticValue extends IGOperation {
 	}
 
 	public int getEnumOrd() {
-		return fEnumOrd;
-	}
-
-	public File getFile() {
-		return fFile;
+		return -1;
 	}
 
 	//	public IGObject getReferencedObject() {
@@ -1436,9 +1447,6 @@ public class IGStaticValue extends IGOperation {
 
 	@Override
 	public IGType getType() {
-		if (fIsBuiltinBool) {
-			return null;
-		}
 		return super.getType();
 	}
 

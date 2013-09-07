@@ -18,6 +18,8 @@ import org.zamia.ExceptionLogger;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
+import org.zamia.instgraph.IGStaticValue.CHAR_LITERAL;
+import org.zamia.instgraph.IGStaticValue.FILE;
 import org.zamia.zdb.ZDB;
 
 
@@ -140,6 +142,14 @@ public class IGStaticValueBuilder {
 	}
 
 	public IGStaticValue buildConstant() throws ZamiaException {
+		if (getType().isEnum()) {
+			if (isCharLiteral())
+				return new IGStaticValue.CHAR_LITERAL(this);
+			return new IGStaticValue.ENUM(this);
+		}
+		assert !isCharLiteral() : "Char literal is expected to be enum" ;
+		if (getFile() != null)
+			return new IGStaticValue.FILE(this);
 		return new IGStaticValue(this);
 	}
 

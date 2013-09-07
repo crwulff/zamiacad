@@ -204,7 +204,7 @@ public class IGTypeStatic extends IGType {
 		int n = getNumEnumLiterals();
 		IGStaticValue left = getEnumLiteral(0, aSrc, ASTErrorMode.EXCEPTION, null);
 		IGStaticValue right = getEnumLiteral(n - 1, aSrc, ASTErrorMode.EXCEPTION, null);
-		IGStaticValue asc = new IGStaticValue(true, getZDB());
+		IGStaticValue asc = new IGStaticValue.INNER_BOOLEAN_DUPLICATE(true, getZDB());
 
 		IGTypeStatic rType = new IGTypeStatic(TypeCat.RANGE, null, null, this, null, false, aSrc, getZDB());
 		fRange = new IGStaticValueBuilder(rType, null, aSrc).setLeft(left).setRight(right).setAscending(asc).buildConstant();

@@ -113,7 +113,7 @@ public class IGPushStmt extends IGStmt {
 		} else if (fStaticValue != null) {
 			aRuntime.push(fStaticValue);
 		} else {
-			IGStaticValue c = new IGStaticValue(fTruthValue, getZDB());
+			IGStaticValue c = new IGStaticValue.INNER_BOOLEAN_DUPLICATE(fTruthValue, getZDB());
 			aRuntime.push(c);
 		}
 		return ReturnStatus.CONTINUE;
