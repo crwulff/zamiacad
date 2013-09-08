@@ -28,6 +28,7 @@ import org.zamia.instgraph.interpreter.IGNewObjectStmt;
 import org.zamia.instgraph.interpreter.IGPopStmt;
 import org.zamia.instgraph.interpreter.IGPushStmt;
 import org.zamia.instgraph.interpreter.IGStmt;
+import org.zamia.instgraph.interpreter.IGPushStmt.OBJECT;
 import org.zamia.util.HashSetArray;
 import org.zamia.util.Pair;
 import org.zamia.zdb.ZDB;
@@ -195,13 +196,14 @@ public class IGSequentialLoop extends IGSequentialStatement {
 			// init loop var
 			aCode.add(new IGEnterNewContextStmt(location, getZDB()));
 			aCode.add(new IGNewObjectStmt(param, location, getZDB()));
-			aCode.add(new IGPushStmt(param, location, getZDB()));
+
+			aCode.add(new IGPushStmt.OBJECT(param, location, getZDB()));
 			fRange.generateCode(true, aCode);
 			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.LEFT, false, location, getZDB()));
 			aCode.add(new IGPopStmt(false, false, false, location, getZDB()));
 
 			// loop header: check boundaries
-			aCode.add(new IGPushStmt(getParameter(), location, getZDB()));
+			aCode.add(new IGPushStmt.OBJECT(getParameter(), location, getZDB()));
 			fRange.generateCode(true, aCode);
 			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.RIGHT, false, location, getZDB()));
 			conditional.generate(new IGBinaryOpStmt(BinOp.GREATER, b, location, getZDB()),
@@ -217,15 +219,15 @@ public class IGSequentialLoop extends IGSequentialStatement {
 
 			// loop footer: inc/dec loop var, jump back to header
 
-			aCode.add(new IGPushStmt(getParameter(), location, getZDB()));
+			aCode.add(new IGPushStmt.OBJECT(getParameter(), location, getZDB()));
 			fRange.generateCode(true, aCode);
 			aCode.add(new IGAttributeStmt(param.getType(), AttrOp.RIGHT, false, location, getZDB()));
 			aCode.add(new IGBinaryOpStmt(BinOp.EQUAL, b, location, getZDB()));
 			aCode.add(new IGJumpCStmt(loopExitLabel, location, getZDB()));
 
-			aCode.add(new IGPushStmt(getParameter(), location, getZDB()));
-			aCode.add(new IGPushStmt(getParameter(), location, getZDB()));
-			aCode.add(new IGPushStmt(param.getType(), location, getZDB()));
+			aCode.add(new IGPushStmt.OBJECT(getParameter(), location, getZDB()));
+			aCode.add(new IGPushStmt.OBJECT(getParameter(), location, getZDB()));
+			aCode.add(new IGPushStmt.TYPE(param.getType(), location, getZDB()));
 			conditional.generate(new IGAttributeStmt(param.getType(), AttrOp.SUCC, true, location, getZDB()), 
 					new IGAttributeStmt(param.getType(), AttrOp.PRED, true, location, getZDB()));
 			

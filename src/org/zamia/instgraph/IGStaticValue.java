@@ -1340,7 +1340,7 @@ public class IGStaticValue extends IGOperation {
 
 	@Override
 	public void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
-		aCode.add(new IGPushStmt(this, computeSourceLocation(), getZDB()));
+		aCode.add(new IGPushStmt.STATIC_VALUE(this, computeSourceLocation(), getZDB()));
 	}
 
 	@Override

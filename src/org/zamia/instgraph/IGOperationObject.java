@@ -14,6 +14,7 @@ import org.zamia.instgraph.IGItemAccess.AccessType;
 import org.zamia.instgraph.IGObject.OIDir;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGPushStmt;
+import org.zamia.instgraph.interpreter.IGPushStmt.OBJECT;
 import org.zamia.util.HashSetArray;
 import org.zamia.zdb.ZDB;
 
@@ -39,7 +40,7 @@ public class IGOperationObject extends IGOperation {
 	@Override
 	public void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
 		aCode.makeObjectMSProof(getObject(), computeSourceLocation());
-		aCode.add(new IGPushStmt(getObject(), computeSourceLocation(), getZDB()));
+		aCode.add(new IGPushStmt.OBJECT(getObject(), computeSourceLocation(), getZDB()));
 
 		// FIXME?
 		//		if (aCheckDirection) {

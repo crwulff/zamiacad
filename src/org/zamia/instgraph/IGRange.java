@@ -120,7 +120,7 @@ public class IGRange extends IGOperation {
 		if (fAscending != null) {
 			fAscending.generateCode(aFromInside, aCode);
 		} else {
-			aCode.add(new IGPushStmt(true, computeSourceLocation(), getZDB()));
+			aCode.add(new IGPushStmt.BOOLEAN(true, computeSourceLocation(), getZDB()));
 		}
 		fRight.generateCode(aFromInside, aCode);
 

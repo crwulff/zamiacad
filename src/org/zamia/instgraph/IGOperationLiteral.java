@@ -162,7 +162,7 @@ public class IGOperationLiteral extends IGOperation {
 
 	@Override
 	public void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
-		aCode.add(new IGPushStmt(this, computeSourceLocation(), getZDB()));
+		aCode.add(new IGPushStmt.LITERAL(this, computeSourceLocation(), getZDB()));
 	}
 
 	@Override

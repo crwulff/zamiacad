@@ -52,11 +52,11 @@ public class IGOperationAttribute extends IGOperation {
 		}
 
 		if (fItem instanceof IGType) {
-			aCode.add(new IGPushStmt((IGType) fItem, computeSourceLocation(), getZDB()));
+			aCode.add(new IGPushStmt.TYPE((IGType) fItem, computeSourceLocation(), getZDB()));
 		} else if (fItem instanceof IGOperation) {
 			((IGOperation) fItem).generateCode(aFromInside, aCode);
 		} else if (fItem instanceof IGObject) {
-			aCode.add(new IGPushStmt((IGObject) fItem, computeSourceLocation(), getZDB()));
+			aCode.add(new IGPushStmt.OBJECT((IGObject) fItem, computeSourceLocation(), getZDB()));
 		}
 
 		aCode.add(new IGAttributeStmt(getType(), fAttrOp, fOp != null, computeSourceLocation(), getZDB()));
