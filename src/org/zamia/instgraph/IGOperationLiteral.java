@@ -8,6 +8,7 @@
  */
 package org.zamia.instgraph;
 
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
@@ -20,122 +21,20 @@ import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.instgraph.interpreter.IGPushStmt;
 import org.zamia.util.HashSetArray;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
+import org.zamia.zdb.ZDB;
 
 
 /**
  * 
  * @author Guenter Bartsch
+ * separated into subclasses (separating conditionals with polymorphism) by valentin tihhomirov
  * 
  */
 
 @SuppressWarnings("serial")
-public class IGOperationLiteral extends IGOperation {
+public abstract class IGOperationLiteral extends IGOperation {
 
-	public enum IGOLCat {
-		INTEGER, DECIMAL, STRING, CHAR, ACCESS
-	};
-
-	protected IGOLCat fCat;
-
-	private BigInteger fNum;
-
-	private BigDecimal fReal;
-
-	protected String fStr;
-
-	protected char fChar;
-
-	public IGOperationLiteral(BigInteger aNum, IGType aType, SourceLocation aSrc) {
-		super(aType, aSrc, aType.getZDB());
-		fCat = IGOLCat.INTEGER;
-		fNum = aNum;
-	}
-
-	public IGOperationLiteral(BigDecimal aReal, IGType aType, SourceLocation aSrc) {
-		super(aType, aSrc, aType.getZDB());
-		fCat = IGOLCat.DECIMAL;
-		fReal = aReal;
-	}
-
-	public IGOperationLiteral(String aStr, IGType aType, SourceLocation aSrc) {
-		super(aType, aSrc, aType.getZDB());
-		fCat = IGOLCat.STRING;
-		fStr = aStr;
-	}
-
-	public IGOperationLiteral(char aChar, IGType aType, SourceLocation aSrc) {
-		super(aType, aSrc, aType.getZDB());
-		fCat = IGOLCat.CHAR;
-		fChar = aChar;
-	}
-
-	public IGOperationLiteral(IGType aType, SourceLocation aSrc) {
-		super(aType, aSrc, aType.getZDB());
-		fCat = IGOLCat.ACCESS;
-	}
-
-	// convenience:
-	public IGOperationLiteral(int aNum, IGType aType, SourceLocation aSrc) {
-		this(new BigInteger("" + aNum), aType, aSrc);
-	}
-
-	public IGOperationLiteral(long aNum, IGType aType, SourceLocation aSrc) {
-		this(new BigInteger("" + aNum), aType, aSrc);
-	}
-
-	public IGOperationLiteral(double aDec, IGType aType, SourceLocation aSrc) {
-		this(new BigDecimal("" + aDec), aType, aSrc);
-	}
-
-	@Override
-	public void computeAccessedItems(boolean aLeftSide, IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) {
-	}
-
-	public IGStaticValue computeStaticValue(IGInterpreterRuntimeEnv aRuntime) throws ZamiaException {
-
-		IGStaticValue ac = null;
-		
-		if (aRuntime != null) {
-			ac = aRuntime.getCachedLiteralActualConstant(this);
-			if (ac != null) {
-				return ac;
-			}
-		}
-
-		IGTypeStatic t = getType().computeStaticType(aRuntime, ASTErrorMode.EXCEPTION, null);
-
-		IGStaticValueBuilder builder = new IGStaticValueBuilder(t, getId(), computeSourceLocation());
-		switch (fCat) {
-		case DECIMAL:
-			ac = builder.setReal(fReal).buildConstant();
-			break;
-
-		case INTEGER:
-			
-			ac = builder.setNum(fNum).buildConstant();
-			break;
-
-		case STRING:
-			ac = computeString(fStr, builder, computeSourceLocation());
-			break;
-
-		case CHAR:
-			ac = builder.setChar(fChar).buildConstant();
-			break;
-
-		}
-
-		if (ac == null) {
-			throw new ZamiaException("Internal error. sorry.", computeSourceLocation());
-		}
-
-		if (aRuntime != null) {
-			aRuntime.putCachedLiteralActualConstant(this, ac);
-		}
-		return ac;
-	}
-
-	public static IGStaticValue computeString(String aInput, IGStaticValueBuilder aBuilder, SourceLocation aSourceLocation) throws ZamiaException {
+	public static IGStaticValueBuilder computeString(String aInput, IGStaticValueBuilder aBuilder, SourceLocation aSourceLocation) throws ZamiaException {
 
 		IGTypeStatic t = aBuilder.getType();
 		IGTypeStatic et = t.getStaticElementType(aSourceLocation);
@@ -157,9 +56,16 @@ public class IGOperationLiteral extends IGOperation {
 
 		}
 
-		return aBuilder.buildConstant();
+		return aBuilder;
 	}
 
+	public IGOperationLiteral(IGType aType, SourceLocation aSrc, ZDB aZDB) {
+		super(aType, aSrc, aZDB);
+	}
+
+	@Override
+	public void computeAccessedItems(boolean aLeftSide, IGItem aFilterItem, AccessType aFilterType, int aDepth, HashSetArray<IGItemAccess> aAccessedItems) { }
+	
 	@Override
 	public void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
 		aCode.add(new IGPushStmt.LITERAL(this, computeSourceLocation(), getZDB()));
@@ -179,45 +85,159 @@ public class IGOperationLiteral extends IGOperation {
 	public IGOperation getOperand(int aIdx) {
 		return null;
 	}
+	
+	abstract protected IGStaticValueBuilder computeStaticValue(IGStaticValueBuilder builder) throws ZamiaException;
+	public IGStaticValue computeStaticValue(IGInterpreterRuntimeEnv aRuntime) throws ZamiaException {
 
-	@Override
-	public String getId() {
-		switch (fCat) {
-		case STRING:
-			return fStr;
-		case CHAR:
-			return "" + fChar;
+		IGStaticValue ac = null;
+		
+		if (aRuntime != null) {
+			ac = aRuntime.getCachedLiteralActualConstant(this);
+			if (ac != null) {
+				return ac;
+			}
 		}
-		return super.getId();
+
+		IGTypeStatic t = getType().computeStaticType(aRuntime, ASTErrorMode.EXCEPTION, null);
+
+		IGStaticValueBuilder builder = new IGStaticValueBuilder(t, getId(), computeSourceLocation());
+		ac = computeStaticValue(builder).buildConstant();
+		
+		if (ac == null) {
+			throw new ZamiaException("Internal error. sorry.", computeSourceLocation());
+		}
+
+		if (aRuntime != null) {
+			aRuntime.putCachedLiteralActualConstant(this, ac);
+		}
+		return ac;
 	}
 
-	@Override
 	public String toString() {
-		switch (fCat) {
-		case DECIMAL:
-			return fReal.toString();
-		case INTEGER:
-			return fNum.toString();
-		case STRING:
-			return "\"" + fStr + "\"";
-		case CHAR:
-			return "'" + fChar + "'";
-		case ACCESS:
+		return "IGOperationLiteral(?????)";
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	public static class ACCESS extends IGOperationLiteral {
+		public ACCESS(IGType aType, SourceLocation aSrc) {
+			super(aType, aSrc, aType.getZDB());
+		}
+
+		public String toString() {
 			return "NULL";
 		}
-		return "IGOperationLiteral(???)";
-	}
 
-	public boolean isCharLiteral() {
-		return fCat == IGOLCat.CHAR;
-	}
+		protected IGStaticValueBuilder computeStaticValue(IGStaticValueBuilder builder) throws ZamiaException {
+			return builder;
+		}
 
-	public BigInteger getNum() {
-		return fNum;
+	}	
+	
+	public static class STR extends IGOperationLiteral {
+		final protected String fStr;
+		public STR(String aStr, IGType aType, SourceLocation aSrc) {
+			super(aType, aSrc, aType.getZDB());
+			fStr = aStr;
+		}
+		
+		@Override
+		public String getId() {
+			return fStr;
+		}
+		
+		@Override
+		protected IGStaticValueBuilder computeStaticValue(IGStaticValueBuilder builder) throws ZamiaException {
+			return IGOperationLiteral.computeString(fStr, builder, computeSourceLocation());
+		}
+		
+		@Override
+		public void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
+			aCode.add(new IGPushStmt.LITERAL(this, computeSourceLocation(), getZDB()));
+		}
+	
+		@Override
+		public String toString() {
+			return "\"" + fStr + "\"";
+		}
 	}
+	
+	public static class INT extends IGOperationLiteral {
+		final private BigInteger fNum;
+		public INT(BigInteger aNum, IGType aType, SourceLocation aSrc) {
+			super(aType, aSrc, aType.getZDB());
+			fNum = aNum;
+		}
+//		// convenience:
+		public INT(int aNum, IGType aType, SourceLocation aSrc) {
+			this(new BigInteger("" + aNum), aType, aSrc);
+		}
 
-	public char getChar() {
-		return fChar;
+		public INT(long aNum, IGType aType, SourceLocation aSrc) {
+			this(new BigInteger("" + aNum), aType, aSrc);
+		}
+		
+		@Override
+		protected IGStaticValueBuilder computeStaticValue(IGStaticValueBuilder builder) {
+			return builder.setNum(fNum);
+		}
+
+		public BigInteger getNum() {
+			return fNum;
+		}
+
+		@Override
+		public String toString() {
+			return fNum.toString();
+		}
 	}
+	
+	public static class DECIMAL extends IGOperationLiteral {
+		private BigDecimal fReal;
+		public DECIMAL(BigDecimal aReal, IGType aType, SourceLocation aSrc) {
+			super(aType, aSrc, aType.getZDB());
+			fReal = aReal;
+		}
+//		// convenience:
+		public DECIMAL(double aDec, IGType aType, SourceLocation aSrc) {
+			this(new BigDecimal("" + aDec), aType, aSrc);
+		}
+		@Override
+		protected IGStaticValueBuilder computeStaticValue(IGStaticValueBuilder builder) {
+			return builder.setReal(fReal);
+		}
+		
+		@Override
+		public String toString() {
+			return fReal.toString();
+		}
+	}	
+	public static class CHAR extends IGOperationLiteral {
+		final protected char fChar;
+		public CHAR(char aChar, IGType aType, SourceLocation aSrc) {
+			super(aType, aSrc, aType.getZDB());
+			fChar = aChar;
+		}
+		public String getId() {
+			return "" + fChar;
+		}
+		@Override
+		protected IGStaticValueBuilder computeStaticValue(IGStaticValueBuilder builder) {
+			return builder.setChar(fChar);
+		}
+		public char getChar() {
+			return fChar;
+		}
 
+		@Override
+		public String toString() {
+			return "'" + fChar + "'";
+		}
+	}
+	
 }

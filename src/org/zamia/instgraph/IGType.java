@@ -696,7 +696,7 @@ public class IGType extends IGContainerItem {
 			return fEnumLiterals.get((int) aOrd);
 
 		case INTEGER:
-			return new IGOperationLiteral(aOrd, this, aSrc);
+			return new IGOperationLiteral.INT(aOrd, this, aSrc);
 		}
 
 		ZamiaException msg = new ZamiaException("Discrete type expected here.", aSrc);

@@ -95,14 +95,11 @@ public class IGMapInfo implements Serializable {
 				return getStatic(iv);
 			} else if (aOp instanceof IGOperationLiteral) {
 
-				IGOperationLiteral lit = (IGOperationLiteral) aOp;
-
-				BigInteger num = lit.getNum();
-
-				if (num == null) {
+				if (!(aOp instanceof IGOperationLiteral.INT)) {
 					return null;
 				}
-
+				
+				BigInteger num = ((IGOperationLiteral.INT)aOp).getNum();
 				return num.longValue();
 			}
 		} catch (Throwable t) {

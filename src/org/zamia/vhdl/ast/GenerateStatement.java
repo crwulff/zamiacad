@@ -276,7 +276,7 @@ public class GenerateStatement extends ConcurrentStatement {
 
 					// declare the loop constant in a local scope
 
-					IGOperation iv = type.isEnum() ? type.getEnumLiteral(i, getLocation(), ASTErrorMode.EXCEPTION, null) : new IGOperationLiteral(i, type, getLocation());
+					IGOperation iv = type.isEnum() ? type.getEnumLiteral(i, getLocation(), ASTErrorMode.EXCEPTION, null) : new IGOperationLiteral.INT(i, type, getLocation());
 
 					IGObject loopConst = new IGObject(OIDir.NONE, iv, IGObjectCat.CONSTANT, type, fLoopVarId, getLocation(), aEE.getZDB());
 
@@ -309,7 +309,7 @@ public class GenerateStatement extends ConcurrentStatement {
 
 					// declare the loop constant in a local scope
 
-					IGOperation iv = type.isEnum() ? type.getEnumLiteral(i, getLocation(), ASTErrorMode.EXCEPTION, null) : new IGOperationLiteral(i, type, getLocation());
+					IGOperation iv = type.isEnum() ? type.getEnumLiteral(i, getLocation(), ASTErrorMode.EXCEPTION, null) : new IGOperationLiteral.INT(i, type, getLocation());
 
 					IGObject loopConst = new IGObject(OIDir.NONE, iv, IGObjectCat.CONSTANT, type, fLoopVarId, getLocation(), aEE.getZDB());
 

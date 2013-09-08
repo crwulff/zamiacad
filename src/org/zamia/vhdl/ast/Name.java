@@ -198,7 +198,7 @@ public class Name extends VHDLNode {
 
 				IGType type = aTypeHint.fitToLength(image.length() - 1, aContainer, getLocation(), aEE, aErrorMode, aReport);
 
-				rr.addItem(new IGOperationLiteral(image, type, getLocation()));
+				rr.addItem(new IGOperationLiteral.STR(image, type, getLocation()));
 
 				return rr;
 			}

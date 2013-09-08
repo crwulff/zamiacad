@@ -26,6 +26,7 @@ import org.zamia.instgraph.IGOperationCache;
 import org.zamia.instgraph.IGOperationLiteral;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.IGType;
+import org.zamia.instgraph.IGOperationLiteral.INT;
 import org.zamia.instgraph.interpreter.IGInterpreterRuntimeEnv;
 import org.zamia.zdb.ZDB;
 
@@ -367,7 +368,7 @@ public class OperationLiteral extends Operation {
 			
 			String bitstring = parseBitStringLiteral();
 
-			value = new IGOperationLiteral(bitstring, type, getLocation());
+			value = new IGOperationLiteral.STR(bitstring, type, getLocation());
 			break;
 
 		case CHAR:
@@ -396,14 +397,14 @@ public class OperationLiteral extends Operation {
 			ParseResult pr = parseAbstractLiteral();
 			if (pr.bigInt == null) {
 
-				value = new IGOperationLiteral(pr.realValue, type, getLocation());
+				value = new IGOperationLiteral.DECIMAL(pr.realValue, type, getLocation());
 
 			} else {
 
 				if (type.isInteger()) {
-					value = new IGOperationLiteral(pr.bigInt, type, getLocation());
+					value = new IGOperationLiteral.INT(pr.bigInt, type, getLocation());
 				} else if (type.isScalar()) {
-					value = new IGOperationLiteral(pr.bigInt.doubleValue(), type, getLocation());
+					value = new IGOperationLiteral.DECIMAL(pr.bigInt.doubleValue(), type, getLocation());
 				} else if (type.isArray()) {
 
 					if (!type.getElementType().isBit()) {
@@ -411,7 +412,7 @@ public class OperationLiteral extends Operation {
 						return res;
 					}
 
-					value = new IGOperationLiteral(IGStaticValue.convert(pr.bigInt, 0), type, getLocation());
+					value = new IGOperationLiteral.STR(IGStaticValue.convert(pr.bigInt, 0), type, getLocation());
 
 				} else {
 					reportError("Numeric type expected, got " + type + " instead.", this, aErrorMode, aReport);
@@ -442,7 +443,7 @@ public class OperationLiteral extends Operation {
 				return res;
 			}
 
-			value = new IGOperationLiteral(aTypeHint, getLocation());
+			value = new IGOperationLiteral.ACCESS(aTypeHint, getLocation());
 			break;
 
 		case PHYSICAL:
@@ -470,7 +471,7 @@ public class OperationLiteral extends Operation {
 			BigDecimal valr = pr.realValue.multiply(sr);
 			BigInteger vali = valr.toBigInteger();
 
-			value = new IGOperationLiteral(vali, type, getLocation());
+			value = new IGOperationLiteral.INT(vali, type, getLocation());
 
 			break;
 
@@ -486,7 +487,7 @@ public class OperationLiteral extends Operation {
 
 			type = aTypeHint.fitToLength(image.length() - 1, aContainer, getLocation(), aEE, aErrorMode, aReport);
 
-			value = new IGOperationLiteral(image, type, getLocation());
+			value = new IGOperationLiteral.STR(image, type, getLocation());
 
 			break;
 		}

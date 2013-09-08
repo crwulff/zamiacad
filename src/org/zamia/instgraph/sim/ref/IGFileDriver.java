@@ -90,7 +90,7 @@ public class IGFileDriver extends IGObjectDriver {
 			SourceLocation aLocation, VHDLNode.ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
 
 		IGStaticValueBuilder builder = newLineBuilder(aLine.length(), aStringType, aRuntime, aLocation, aErrorMode, aReport);
-		return IGOperationLiteral.computeString(aLine, builder, aLocation);
+		return IGOperationLiteral.computeString(aLine, builder, aLocation).buildConstant();
 
 	}
 
