@@ -33,7 +33,7 @@ import org.zamia.zdb.ZDB;
  * This represents any constant value in the interpreter or ig
  * 
  * @author Guenter Bartsch
- * 
+ * Oct 2012, Valentin Tihhomirov converted conditional style into polymorphysm, http://codereview.stackexchange.com/questions/18016/replacing-conditional-with-polymorphysm-slows-down-the-performance  
  */
 
 @SuppressWarnings("serial")
@@ -49,11 +49,8 @@ public class IGStaticValue extends IGOperation {
 	public final static char BIT_H = 'H';
 	public final static char BIT_W = 'W';
 
-	private BigInteger fNum;
-
-	private BigDecimal fReal;
-
-	protected IGStaticValue(IGStaticValueBuilder aBuilder, boolean dummy) {
+	// TODO: why do we need an ID? can we get rid of it?
+	protected IGStaticValue(IGStaticValueBuilder aBuilder) {
 		super(aBuilder.getType(), aBuilder.getSrc(), aBuilder.getZDB());
 		fId = aBuilder.getId();
 	};
@@ -62,11 +59,74 @@ public class IGStaticValue extends IGOperation {
 		super(aType, null, aZDB);
 	}
 	
+	public static class INT extends IGStaticValue {
+		private BigInteger fNum;
+		
+		public INT(IGStaticValueBuilder aBuilder) throws ZamiaException {
+			super(aBuilder);
+			assert getType().isInteger() || getType().isPhysical() : "IGStaticValue.INT<init>: int/physical type expected here instead of " + getType();
+			fNum = aBuilder.getNum();
+			assert fNum != null : "IGStaticValue.INT<init>: int value is not defined in the builder";
+		}
+		
+		public long getOrd() throws ZamiaException {
+			return fNum.longValue();
+		}
+		
+		public BigInteger getNum() { return fNum; }
+		public int getInt() { return fNum.intValue(); }
+		public int getInt(SourceLocation aSrc) {
+			assert getType().isInteger() : "IGStaticValue: Integer type expected in getInt instead of " + getType();
+			return fNum.intValue();
+		}
+		
+		public String toHRString() {
+			IGType type = getType();
+			try {
+				switch (type.getCat()) {
+				case INTEGER:
+					return "" + fNum;
+
+				case PHYSICAL:
+		
+					IGTypeStatic st = getStaticType();
+					int nUnits = st.getNumUnits(null);
+		
+					String baseUnit = ""; // no primary unit?
+					if (nUnits > 0) {
+						IGStaticValue unit = st.getUnit(0, null);
+						baseUnit = unit.getId();
+					}
+		
+					return fNum + " " + baseUnit.toLowerCase(); // units must be lowercased to conform VHDL spec
+				}
+
+			} catch (Exception e) {
+				return "***ERR: " + e.getMessage();
+			}
+
+			return "***ERR: value " + fNum + " is incompliant with TYPE " + getType();
+		}
+		
+	}
+	public static class REAL extends IGStaticValue {
+		private final BigDecimal fReal;
+		public REAL(IGStaticValueBuilder aBuilder) throws ZamiaException {
+			super(aBuilder);
+			assert getType().isReal() : "IGStaticValue.REAL<init>: Real type expected here instead of " + getType();
+			fReal = aBuilder.getReal();
+			assert fReal != null : "IGStaticValue.REAL<init>: real value is not defined in the builder";
+		}
+		public BigDecimal getReal() { return fReal; }
+		public BigDecimal getReal(SourceLocation aSrc) { return fReal;}
+		public String toHRString() { return "" + getReal(); }
+
+	}
 	public static class ARRAY extends IGStaticValue {
 		private final ArrayList<IGStaticValue> fArrayValues;
 		private int fArrayOffset; // this is cached value of our_type'low
 		public ARRAY(IGStaticValueBuilder aBuilder) throws ZamiaException {
-			super(aBuilder, true);
+			super(aBuilder);
 			IGTypeStatic type = aBuilder.getType();
 			assert getType().isArray() : "IGStaticValue.Array must be of array type but " + getType() + " is " + getType().getCat();
 			SourceLocation location = computeSourceLocation();
@@ -83,14 +143,12 @@ public class IGStaticValue extends IGOperation {
 					for (int i = 0; i < card; i++) {
 						fArrayValues.add(aBuilder.get(i + fArrayOffset, location));
 					}
-				}  else {
-					//throw new ZamiaException("IGStaticValue: array cardinality is negative", location);
-					fArrayValues = null;
+					return;
 				}
-			} else {
-				//throw new ZamiaException("IGStaticValue: array must be constrained", location);
-				fArrayValues = null;
 			}
+			
+			fArrayValues = null;
+
 		}
 		
 		public int getNumArrayEntries(SourceLocation aLocation) { return fArrayValues.size();}
@@ -240,7 +298,7 @@ public class IGStaticValue extends IGOperation {
 	public static class ENUM extends IGStaticValue {
 		protected final int fEnumOrd;
 		public ENUM(IGStaticValueBuilder aBuilder) throws ZamiaException {
-			super(aBuilder, true);
+			super(aBuilder);
 			fEnumOrd = aBuilder.getEnumOrd();
 		}
 		
@@ -286,7 +344,7 @@ public class IGStaticValue extends IGOperation {
 
 		private final File fFile;
 		public FILE(IGStaticValueBuilder aBuilder) throws ZamiaException {
-			super(aBuilder, true);
+			super(aBuilder);
 			fFile = aBuilder.getFile();
 		}
 
@@ -300,7 +358,7 @@ public class IGStaticValue extends IGOperation {
 		private final HashMapArray<String, IGStaticValue> fRecordValues;
 
 		RECORD(IGStaticValueBuilder aBuilder) throws ZamiaException {
-			super(aBuilder, true);
+			super(aBuilder);
 			SourceLocation location = computeSourceLocation();
 			fRecordValues = new HashMapArray<String, IGStaticValue>();
 
@@ -349,29 +407,6 @@ public class IGStaticValue extends IGOperation {
 	
 	public File getFile() { return null;}
 
-	IGStaticValue(IGStaticValueBuilder aBuilder) throws ZamiaException {
-		super(aBuilder.getType(), aBuilder.getSrc(), aBuilder.getZDB());
-
-		if (getZDB() == null) {
-			logger.error("IGStaticValue: ZDB==null!");
-		}
-
-		fId = aBuilder.getId();
-		fNum = aBuilder.getNum();
-		fReal = aBuilder.getReal();
-
-		IGTypeStatic type = aBuilder.getType();
-
-		switch (type.getCat()) {
-		case INTEGER:
-			if (fNum == null) {
-				logger.error("IGStaticValue: Internal error: cat==INTEGER, fNum == null: %s", computeSourceLocation());
-			}
-			break;
-		}
-
-	}
-
 	public IGTypeStatic getStaticType() {
 		return (IGTypeStatic) getType();
 	}
@@ -383,16 +418,7 @@ public class IGStaticValue extends IGOperation {
 	 ******************************************/
 
 	public BigDecimal getReal(SourceLocation aSrc) throws ZamiaException {
-
-		if (getType().isInteger()) {
-			return new BigDecimal(fNum.doubleValue());
-		}
-
-		if (!getType().isReal() && !getType().isPhysical()) {
-			throw new ZamiaException("IGStaticValue: Real/Physical type expected here.", aSrc);
-		}
-
-		return fReal;
+		throw new ZamiaException("IGStaticValue: real type values must be subclasses of REAL", aSrc);
 	}
 
 	/************************************************
@@ -402,20 +428,7 @@ public class IGStaticValue extends IGOperation {
 	 ************************************************/
 
 	public long getOrd() throws ZamiaException {
-
-		IGTypeStatic type = getStaticType();
-		TypeCat cat = type.getCat();
-
-		switch (cat) {
-
-		case INTEGER:
-			return fNum.longValue();
-
-		case PHYSICAL:
-			return fNum.longValue();
-		}
-
-		throw new ZamiaException("IGStaticValue: Discrete/Physical type expected here.");
+		throw new ZamiaException("IGStaticValue: getOrd() is not available in " + getClass().getSimpleName());
 	}
 
 	public char getCharLiteral() {
@@ -433,35 +446,11 @@ public class IGStaticValue extends IGOperation {
 	 ************************************************/
 
 	public int getInt() {
-		if (fNum == null)
-			return 0;
-		return fNum.intValue();
-	}
-
-	public long getLong() {
-		if (fNum == null)
-			return 0;
-		return fNum.longValue();
+		throw new IllegalAccessError("Accessing int field of " + getClass().getSimpleName() + " : " + this);
 	}
 
 	public int getInt(SourceLocation aSrc) throws ZamiaException {
-		if (!getType().isInteger())
-			throw new ZamiaException("IGStaticValue: Integer type expected here.", aSrc);
-
-		return fNum.intValue();
-	}
-
-	public long getLong(SourceLocation aSrc) throws ZamiaException {
-		if (!getType().isInteger())
-			throw new ZamiaException("IGStaticValue: Integer type expected here.", aSrc);
-
-		return fNum.longValue();
-	}
-
-	public BigInteger getNum(SourceLocation aSrc) throws ZamiaException {
-		if (!getType().isInteger())
-			throw new ZamiaException("IGStaticValue: Integer type expected here.", aSrc);
-		return fNum;
+		throw new ZamiaException("IGStaticValue: you use generic static value but getInt exists only in the INT subtype", aSrc);
 	}
 
 	/************************************************
@@ -644,81 +633,7 @@ public class IGStaticValue extends IGOperation {
 
 	@Override
 	public String toString() {
-
 		return toHRString();
-		//		StringBuilder buf = new StringBuilder("IGStaticValue (id=" + getId() + ", ");
-		//
-		//		try {
-		//			switch (getType().getCat()) {
-		//			case ARRAY:
-		//
-		//				if (fArrayValues != null) {
-		//					int n = fArrayValues.size();
-		//					buf.append("(");
-		//					for (int i = 0; i < n; i++) {
-		//						buf.append(fArrayValues.get(i));
-		//						if (i < n - 1)
-		//							buf.append(", ");
-		//					}
-		//					buf.append(")");
-		//				} else {
-		//					buf.append(" NULL ");
-		//				}
-		//				break;
-		//
-		//			case RECORD:
-		//
-		//				IGActualType rt = getType();
-		//
-		//				if (rt != null) {
-		//					int n = rt.getNumRecordFields(null);
-		//					for (int i = 0; i < n; i++) {
-		//						IGRecordField rf = rt.getType().getRecordField(i, null);
-		//						buf.append("" + rf + " => ");
-		//						buf.append(fRecordValues.get(rf));
-		//						if (i < n - 1)
-		//							buf.append(", ");
-		//					}
-		//				} else {
-		//					buf.append(" NULL ");
-		//				}
-		//				break;
-		//
-		//			case ENUM:
-		//				buf.append(getId());
-		//				break;
-		//
-		//			case ACCESS:
-		//				// FIXME
-		//				buf.append("ACCESS ?");
-		//				break;
-		//
-		//			case FILE:
-		//				// FIXME
-		//				buf.append("FILE ?");
-		//				break;
-		//
-		//			case REAL:
-		//				buf.append("" + fReal);
-		//				break;
-		//
-		//			case INTEGER:
-		//				buf.append("" + fNum);
-		//				break;
-		//
-		//			case PHYSICAL:
-		//				// FIXME: unit missing
-		//				buf.append("" + fReal);
-		//				break;
-		//			default:
-		//				buf.append("***ERR: UNKNOWN VALUE TYPE " + getType());
-		//			}
-		//		} catch (Exception e) {
-		//			buf.append("***ERR: " + e.getMessage());
-		//		}
-		//		buf.append(")");
-		//		return buf.toString();
-
 	}
 
 	public String toHRString() {
@@ -728,26 +643,7 @@ public class IGStaticValue extends IGOperation {
 			switch (type.getCat()) {
 			case ACCESS:
 				// FIXME
-				return "ACCESS";
-
-			case REAL:
-				return "" + getReal();
-
-			case INTEGER:
-				return "" + fNum;
-
-			case PHYSICAL:
-
-				IGTypeStatic st = getStaticType();
-				int nUnits = st.getNumUnits(null);
-
-				String baseUnit = ""; // no primary unit?
-				if (nUnits > 0) {
-					IGStaticValue unit = st.getUnit(0, null);
-					baseUnit = unit.getId();
-				}
-
-				return fNum + " " + baseUnit.toLowerCase(); // everything must be lowercased in spec
+				return "toString is not implemented for ACCESS type";
 
 			}
 		} catch (Exception e) {
@@ -1359,51 +1255,23 @@ public class IGStaticValue extends IGOperation {
 		return resolvedValue;
 	}
 
-	public static int getInt(String aString) {
-		return (int) getLong(aString);
-	}
-
+//	public static int getInt(String aString) {
+//		return (int) getLong(aString);
+//	}
+//
 	public static long getLong(char aChar) {
 		if (aChar == BIT_1)
 			return 1l;
 		return 0l;
 	}
 
-	public static long getLong(String aString) {
-		int w = aString.length();
-		long l = 0;
-		for (int i = 0; i < w; i++) {
-			char bit = aString.charAt(i);
-			l = l * 2 + getLong(bit);
-		}
-		return l;
-	}
-
-	public static BigInteger getBigInt(String aString) {
-		int w = aString.length();
-		BigInteger res = new BigInteger("0");
-		BigInteger two = new BigInteger("2");
-		BigInteger one = new BigInteger("1");
-		for (int i = 0; i < w; i++) {
-			char bit = aString.charAt(i);
-
-			if (getLong(bit) != 0)
-				res = res.multiply(two).add(one);
-			else
-				res = res.multiply(two);
-		}
-		return res;
-	}
-
 	public BigInteger getNum() {
-		return fNum;
+		return null;
 	}
 
+	//TODO: push down into the REAL. Other values must not have this method
 	public BigDecimal getReal() {
-		if (fReal == null && fNum != null) {
-			return new BigDecimal(fNum);
-		}
-		return fReal;
+		return null;
 	}
 
 	public int getArrayOffset() {

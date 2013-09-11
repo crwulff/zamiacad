@@ -141,22 +141,22 @@ public class IGStaticValueBuilder {
 
 	public IGStaticValue buildConstant() throws ZamiaException {
 		IGType type = getType();
-		if (type.isEnum()) {
-			if (isCharLiteral())
-				return new IGStaticValue.CHAR_LITERAL(this);
-			return new IGStaticValue.ENUM(this);
-		}
-		assert !isCharLiteral() : "Char literal is expected to be enum" ;
-		if (getFile() != null)
-			return new IGStaticValue.FILE(this);
+		assert type.isEnum() || !isCharLiteral() : "Char literal is expected to be enum" ;
 		
 		switch (type.getCat()) {
+			case REAL: return new IGStaticValue.REAL(this);
+			case ENUM: return  (isCharLiteral()) ? new IGStaticValue.CHAR_LITERAL(this)
+				: new IGStaticValue.ENUM(this);
+			case FILE: return new IGStaticValue.FILE(this); 
 			case ARRAY: return new IGStaticValue.ARRAY(this);
 			case RANGE: throw new ZamiaException("attempt to use StaticValueBuilder for range create. Invoke value constructor directly.");
 			case RECORD: return new IGStaticValue.RECORD(this);
+			case PHYSICAL:
+			case INTEGER: return new IGStaticValue.INT(this);
+			case ACCESS: return new IGStaticValue(this);
 		}
 		
-		return new IGStaticValue(this);
+		throw new ZamiaException("A value cannot be created for a type " + type);
 	}
 
 	public String getId() {

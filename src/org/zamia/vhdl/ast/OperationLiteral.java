@@ -200,7 +200,12 @@ public class OperationLiteral extends Operation {
 			pr.bigInt = null;
 			String rvStr = buf.substring(mStart, mEnd + 1);
 			try {
-				pr.realValue = new BigDecimal(Double.parseDouble(rvStr)).multiply(new BigDecimal(Math.pow(base, exponent)));
+				pr.realValue = new BigDecimal(
+						// why guenter did this extra step that introduces an error furthermore?
+						// For instance, TIME(1.2 ns) is paresed as 1199 fs because of Double.parse
+						//Double.parseDouble(rvStr)
+						rvStr // parse directly
+					).multiply(new BigDecimal(Math.pow(base, exponent)));
 			} catch (NumberFormatException e) {
 				throw new ZamiaException("Trouble parsing real: " + rvStr + " : " + e, this);
 			}
@@ -458,7 +463,8 @@ public class OperationLiteral extends Operation {
 				return res;
 			}
 
-			BigDecimal sr = scale.getReal();
+			BigDecimal sr = new BigDecimal(scale.getNum());
+			
 			pr = parseAbstractLiteral();
 
 			BigDecimal valr = pr.realValue.multiply(sr);

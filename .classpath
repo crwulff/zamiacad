@@ -4,7 +4,7 @@
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry exported="true" kind="lib" path="bin" sourcepath="bin"/>
+	<classpathentry exported="true" kind="lib" path="bin" sourcepath="src"/>
 	<classpathentry exported="true" kind="lib" path="share" sourcepath="share"/>
 	<classpathentry exported="true" kind="lib" path="share/jars/commons-cli-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="share/jars/commons-io-2.1.jar"/>

@@ -223,21 +223,9 @@ public class IGTest {
 	}
 
 	@Test
-	public void testLiteral5() throws Exception {
-
-		runTest("examples/semantic/literal5Test", 1);
-	}
-
-	@Test
 	public void testResolver() throws Exception {
 
 		runTest("examples/semantic/resolverTest", 1);
-	}
-
-	@Test
-	public void testLiteral4() throws Exception {
-
-		runTest("examples/semantic/literal4Test", 1);
 	}
 
 	@Test
@@ -339,12 +327,6 @@ public class IGTest {
 	}
 
 	@Test
-	public void testLiteral3() throws Exception {
-
-		runTest("examples/semantic/literal3Test", 1);
-	}
-
-	@Test
 	public void testPSL2() throws Exception {
 
 		runTest("examples/semantic/psl2Test", 1);
@@ -396,13 +378,6 @@ public class IGTest {
 	public void testSubProgram3() throws Exception {
 
 		runTest("examples/semantic/subProgramTest3", 1);
-	}
-
-	@Test
-	@Ignore
-	public void testLiteral2() throws Exception {
-
-		runTest("examples/semantic/literal2Test", 1);
 	}
 
 	@Test
