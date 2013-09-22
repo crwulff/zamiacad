@@ -30,9 +30,7 @@ public class IGOperationDeref extends IGOperation {
 
 	public IGOperationDeref(IGOperation aOp, IGType aType, SourceLocation aSrc, ZDB aZDB) {
 		super(aType, aSrc, aZDB);
-
 		fOp = aOp;
-
 	}
 
 	@Override
@@ -42,8 +40,8 @@ public class IGOperationDeref extends IGOperation {
 
 	@Override
 	public void generateCode(boolean aFromInside, IGInterpreterCode aCode) throws ZamiaException {
-		fOp.generateCode(aFromInside, aCode);
-		aCode.add(new IGDerefOpStmt(getType(), computeSourceLocation(), getZDB()));
+		//fOp.generateCode(aFromInside, aCode);
+		aCode.add(new IGDerefOpStmt(fOp, getType(), computeSourceLocation(), getZDB()));
 	}
 
 	@Override

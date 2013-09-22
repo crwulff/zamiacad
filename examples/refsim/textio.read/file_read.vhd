@@ -29,12 +29,13 @@ begin
 	
 	-- This caused NPE because procedure variables, as opposed to precess variables
 	--	are not initialized at simulation start and line was null causing NPE in write(line, val).
+	-- Also, this tests access.all dereferencer.
 	procedure WRITE_PROC is
 		variable LINE1: LINE;
 	begin
-		report "555";
 		write(LINE1, string'("aaa"));
-		report "222";
+		assert line1.all = "aaa" report "after write(line1, ""aaa""), line1.all must be 'aaa'";
+		assert line1.all /= "aaaa" report "after write(line1, ""aaa""), line1.all must be different from 'aaaa'";
 	end procedure;
 	
   begin
@@ -259,8 +260,8 @@ begin
 	 
 	write(l, string'("ABC"));
 	l2 := l;
-	flush(output);
-	assert l2'length = 2 report "another ref to the same lime must decrease len" severity NOTE;
+	flush(output); -- in Modelsim: unknown identifier "flush" 
+	assert l2'length = 2 report "another ref to the same line must decrease len" severity NOTE;
 
 	WRITE_PROC;
     wait;

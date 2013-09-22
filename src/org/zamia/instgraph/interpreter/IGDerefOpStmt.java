@@ -11,7 +11,11 @@ package org.zamia.instgraph.interpreter;
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
+import org.zamia.instgraph.IGObject;
+import org.zamia.instgraph.IGOperation;
+import org.zamia.instgraph.IGOperationObject;
 import org.zamia.instgraph.IGType;
+import org.zamia.instgraph.interpreter.IGStmt.ReturnStatus;
 import org.zamia.vhdl.ast.VHDLNode.ASTErrorMode;
 import org.zamia.zdb.ZDB;
 
@@ -24,15 +28,25 @@ import org.zamia.zdb.ZDB;
 
 @SuppressWarnings("serial")
 public class IGDerefOpStmt extends IGOpStmt {
-
-	public IGDerefOpStmt(IGType aResultType, SourceLocation aLocation, ZDB aZDB) {
+	
+	private long fObjectDBID;
+	
+	public IGDerefOpStmt(IGOperation fOp, IGType aResultType, SourceLocation aLocation, ZDB aZDB) {
 		super(aResultType, aLocation, aZDB);
+		if (fOp instanceof IGOperationObject)
+			fObjectDBID = ((IGOperationObject)fOp).getObject().getDBID();
+		
+		//TODO: check what are we doing here in case of non-operationobject 
+		// (non-access type), I got here with arrayTest/vital_timing_body.vhdl
+		else;  
 	}
 
 	@Override
 	public ReturnStatus execute(IGInterpreterRuntimeEnv aRuntime, ASTErrorMode aErrorMode, ErrorReport aReport) throws ZamiaException {
-		// FIXME
-		throw new ZamiaException("Sorry, not implemented yet.");
+		IGObject obj = (IGObject) getZDB().load(fObjectDBID);
+		IGObjectDriver drv = aRuntime.getDriver(obj);
+		aRuntime.push(drv);
+		return ReturnStatus.CONTINUE;
 	}
 
 	@Override
