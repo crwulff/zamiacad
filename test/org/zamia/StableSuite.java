@@ -37,6 +37,7 @@ import org.zamia.zdb.ZDBTest;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
+	
 		IGRefSimTest.class,
 		FSCacheTest.class,
 		BuildPathTest.class,
@@ -50,7 +51,9 @@ import org.zamia.zdb.ZDBTest;
 		VerilogParserTest.class,
 		VerilogParserIntegrationTest.class,
 		IGSynthTest.class,
-		ReportUtilsTest.class
+		ReportUtilsTest.class,
+		
+		FailedTestsToPass.class,
 })
 public class StableSuite {
 }

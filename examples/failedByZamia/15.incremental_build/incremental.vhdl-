@@ -1,0 +1,30 @@
+package PKG is 
+	procedure PROC;
+	function FUNK return string;
+end package;
+
+package body PKG is
+	procedure PROC is begin
+		report "HELLO FROM INCREMENTAL PKG";
+	end procedure;
+end package body;
+
+entity INCREMENTAL is end;
+
+use WORK.PKG.all;
+
+architecture ORIGINAL of INCREMENTAL is
+	
+	impure function HELLO return boolean is
+	begin
+		report "HELLO FROM INCREMENTAL ARCH";
+		PROC;
+		return true;
+	end function;
+	constant EXECUTOR: boolean := HELLO;
+	
+	
+	
+begin 
+
+end architecture;

@@ -1,0 +1,10 @@
+
+toplevel PORTCHECK
+toplevel GENERIC_CHECK
+#toplevel SELF_INSTANCE(ARCH)
+#toplevel SELF_INSTANCE(ARCH3)
+
+toplevel TOP(TEST4_UNIMPLEMENTED)
+
+toplevel TOP(LIB_ENTITY)
+local LIBA "inst(port)Test/compiledIntoLibA.vhdl"

@@ -7,21 +7,14 @@
 
 package org.zamia.instgraph;
 
-import org.apache.log4j.Level;
-import org.junit.After;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.zamia.BasicTest;
 import org.zamia.BuildPath;
-import org.zamia.ERManager;
-import org.zamia.SourceFile;
 import org.zamia.Toplevel;
 import org.zamia.ZamiaException;
-import org.zamia.ZamiaLogger;
-import org.zamia.ZamiaProject;
-import org.zamia.ZamiaProjectBuilder;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGStmt;
-import org.zamia.vhdl.ast.DMUID;
 
 import java.io.File;
 import java.util.Arrays;
@@ -31,100 +24,17 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.hasItem;
 
 /**
  * @author Guenter Bartsch
  */
-public class IGTest {
 
-	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 
-	private ZamiaProject fZPrj;
+public class IGTest extends BasicTest {
 
 	private IGInterpreterCode fCode;
 
-	public void setupTest(String aBasePath, String aBuildPath) throws Exception {
-		ZamiaLogger.setup(Level.DEBUG);
-
-		File f = new File(aBuildPath);
-
-		assertTrue(f.exists());
-
-		SourceFile sf = new SourceFile(f);
-
-		fZPrj = new ZamiaProject("IG Test Tmp Project", aBasePath, sf, null);
-		fZPrj.clean();
-	}
-
-	private DMUID getUID(ZamiaProject aZPrj) {
-		BuildPath bp = aZPrj.getBuildPath();
-
-		Toplevel tl = bp.getToplevel(0);
-
-		return aZPrj.getDUM().getArchDUUID(tl.getDUUID());
-	}
-
-	/**Default implementation expects 0 exceptions.*/
-	class ErrorChecker {
-		
-		public void handle() {
-			int nErr = fZPrj.getERM().getNumErrors();
-			logger.error("IGTest: Build finished. Found %d errors.", nErr);
-
-			for (int i = 0; i < nErr; i++) {
-				ZamiaException em = fZPrj.getERM().getError(i);
-				logger.error("IGTest: error %6d/%6d: %s", i + 1, nErr, em.toString());
-			}
-
-			assertEquals("No errors expected", 0, nErr);
-		}
-	}
-	
-	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes) throws Exception {
-		runTest(aTestDir, aBuildPathName, aNumNodes, new ErrorChecker());
-	}
-	
-	private void runTest(String aTestDir, String aBuildPathName, int aNumNodes, ErrorChecker errChecker) throws Exception {
-		setupTest(aTestDir, aTestDir + File.separator + aBuildPathName);
-
-		ZamiaProjectBuilder builder = fZPrj.getBuilder();
-
-		builder.build(true, true, null);
-
-		DMUID duuid = getUID(fZPrj);
-
-		errChecker.handle();
-
-		int n = fZPrj.getIGM().countNodes(duuid);
-		logger.info("IGTest: elaborated model for %s has %d unique modules.", duuid, n);
-		assertEquals(aNumNodes, n);
-	}
-
-	private void runTest(String aTestDir, int aNumNodes) throws Exception {
-		runTest(aTestDir, "BuildPath.txt", aNumNodes);
-	}
-
-	@After
-	public void tearDown() {
-		if (fZPrj != null) {
-			// fZPrj.getZDB().dump();
-			fZPrj.shutdown();
-			fZPrj = null;
-		}
-	}
-
-	// disabled for now (supposed to generate errors)
-	//	public void testInst() throws Exception {
-	//
-	//		if (!enableInstTest) {
-	//			fail("Test disabled");
-	//			return;
-	//		}
-	//
-	//		runTest("test/semantic/instTest", 2);
-	//	}
 
 	// FIXME: disabled for now (PSL support is incomplete)
 	//	public void testPSL6() throws Exception {
@@ -142,30 +52,24 @@ public class IGTest {
 		runTest("examples/semantic/loops", 1);
 	}
 	
-	@Test @Ignore
-	/**Fails to sustain Std type overriding because they are
-	 * not "semantically resolved" and looked up by string name
-	 * instead.*/
-	public void testBuiltinTypes() throws Exception {
-		runTest("examples/semantic/typeTest/overriding_builtin_types", 1);
-	}
-
 	@Test
-	public void testGenerics1() throws Exception {
+	public void testInstGenerics() throws Exception {
 
-		runTest("examples/semantic/genericsTest1", 2);
+		runTest("examples/semantic/instGenericTest", "BuildPath.txt", 9, new ErrorChecker() {
+			public void handle() {
+				int nErr = fZPrj.getERM().getNumErrors();
+				assertEquals("Got wrong number of errors", 1, nErr);
+				assertContains(0, "PLANNED ERROR: INTENTIONALLY WRONG EXPECTED,2, IS SPECIFIED INSTEAD OF CORRECT 1: 1 MUST EQUAL 2");
+			}
+		}); 
+
+				
 	}
 
 	@Test
 	public void testAVSAES() throws Exception {
 
 		runTest("examples/avs_aes", 125);
-	}
-
-	@Test
-	public void testAggregate() throws Exception {
-
-		runTest("examples/semantic/aggregateTest", 1);
 	}
 
 	@Test
@@ -187,9 +91,9 @@ public class IGTest {
 	}
 
 	@Test
-	public void testAlias1() throws Exception {
+	public void testAlias() throws Exception {
 
-		runTest("examples/semantic/alias1Test", 1);
+		runTest("examples/semantic/aliasTest", 1);
 	}
 
 	@Test
@@ -205,21 +109,15 @@ public class IGTest {
 	}
 
 	@Test
+	public void testArray2() throws Exception {
+
+		runTest("examples/semantic/array2Test", 1);
+	}
+
+	@Test
 	public void testSubProgram2() throws Exception {
 
 		runTest("examples/semantic/subProgramTest2", 1);
-	}
-
-	@Test
-	public void testConcat7() throws Exception {
-
-		runTest("examples/semantic/concat7Test", 1);
-	}
-
-	@Test
-	public void testConcat2() throws Exception {
-
-		runTest("examples/semantic/concat2Test", 1);
 	}
 
 	@Test
@@ -241,44 +139,38 @@ public class IGTest {
 	}
 
 	@Test
-	public void testConcat6() throws Exception {
-
-		runTest("examples/semantic/concat6Test", 1);
-	}
-
-	@Test
 	public void testPSL5() throws Exception {
 
 		runTest("examples/semantic/psl5Test", 1);
 	}
 
 	@Test
-	public void testType3() throws Exception {
+	public void testInstPort() throws Exception {
 
-		runTest("examples/semantic/type3Test", 1);
-	}
-
-	@Test
-	public void testInst3() throws Exception {
-
-		runTest("examples/semantic/inst3Test", "BuildPath.txt", 2, new ErrorChecker() {
-			private void assertContains(int i, String expected) {
-				String msg = fZPrj.getERM().getError(i).toString();
-				assertTrue(msg + "\n\t ^^^ is the error message that failed to contain the following string vvv\n"+expected, msg.contains(expected));
-			}
-			
+		runTest("examples/semantic/inst(port)Test", "BuildPath.txt", 19, new ErrorChecker() {
 			
 			public void handle() {
 				int nErr = fZPrj.getERM().getNumErrors();
-				assertEquals("Got wrong number of errors", 4, nErr);
+				assertEquals("Got wrong number of errors", 15, nErr);
 				
-				assertContains(0, "(instTest.vhdl) instTest.vhdl:57,48: Type mismatch in expression");
-				assertContains(1, "(instTest.vhdl) instTest.vhdl:58,58: Type mismatch in expression.");
-				assertContains(1, "(instTest.vhdl) instTest.vhdl:58,58: Failed to compute actual item in named mapping: 1, formal 1/1 was: PORTA (item=IGOperationObject(PORTA))");
-				assertContains(1, "(instTest.vhdl) instTest.vhdl:58,58: Failed to map: formal=PORTA, actual=1");
-				assertContains(2, "(instTest.vhdl) instTest.vhdl:59,48: Direction mismatch in positional mapping formal PORTB of mode OUT to actual PORTA of mode IN");
-				assertContains(3, "(instTest.vhdl) instTest.vhdl:60,56: Direction mismatch in named mapping formal PORTB of mode OUT to actual PORTA of mode IN");
-				assertContains(3, "(instTest.vhdl) instTest.vhdl:60,56: Failed to map: formal=PORTB, actual=PORTA");
+				assertContains(0, "Design unit expected here.");
+				assertContains(1, "Couldn't resolve TR2");
+				assertContains(2, " Couldn't resolve PORTTR1");
+				assertContains(3, "Too many positional parameters.");
+				assertContains(4, "Illegal mix of named and positional parameters");
+				assertContains(5, " Type mismatch in expression.");
+				assertContains(6, " Failed to compute actual item in named mapping: 1, formal 1/1 was: PORTA");
+				assertContains(7, "Direction mismatch in positional mapping formal PORTB of mode OUT to actual PORTA of mode IN");
+				assertContains(8, "Direction mismatch in named mapping formal PORTB of mode OUT to actual PORTA of mode IN");
+//				assertContains(9, "Couldn't resolve SELF_INSTANCE1");
+//				assertContains(9, "Couldn't resolve SELF_INSTANCE1");
+//				assertContains(11, "EntityInstantiation: Couldn't find 'SELF_INSTANCE(ABC)'");
+				assertContains(9, "Couldn't resolve UNEXISTING");
+				assertContains(10, "EntityInstantiation: Couldn't find 'UNIMPLEMENTED_ENTITY'");
+				assertContains(11, "EntityInstantiation: Couldn't find 'TOP(UNEXISTING)'");
+				//assertContains(12, "Architecture not found for WORK.UNIMPLEMENTED_ENTITY");
+				assertContains(12, "Couldn't resolve UNEXISTING_COMPONENT");
+				assertContains(13, "Design unit expected here.");
 			}
 			
 		});
@@ -291,27 +183,15 @@ public class IGTest {
 	}
 
 	@Test
-	public void testType2() throws Exception {
+	public void testType() throws Exception {
 
-		runTest("examples/semantic/type2Test", 1);
+		runTest("examples/semantic/typeTest", 5);
 	}
-
+	
 	@Test
 	public void testSubProgram5() throws Exception {
 
 		runTest("examples/semantic/subProgramTest5", 1);
-	}
-
-	@Test
-	public void testConcat5() throws Exception {
-
-		runTest("examples/semantic/concat5Test", 1);
-	}
-
-	@Test
-	public void testArray2() throws Exception {
-
-		runTest("examples/semantic/array2Test", 1);
 	}
 
 	@Test
@@ -333,63 +213,33 @@ public class IGTest {
 	}
 
 	@Test
-	public void testAttribute4() throws Exception {
-
-		runTest("examples/semantic/attribute4Test", 1);
-	}
-
-	@Test
-	public void testConst3() throws Exception {
-
-		runTest("examples/semantic/const3Test", 1);
-	}
-
-	@Test
 	public void testPSL() throws Exception {
 
 		runTest("examples/semantic/pslTest", 1);
 	}
 
-	@Test
-	public void testAttr3() throws Exception {
-
-		runTest("examples/semantic/attribute3Test", 1);
-	}
-
-	@Test
-	public void testInst2() throws Exception {
-
-		runTest("examples/semantic/inst2Test", 2);
-	}
-
-	@Test
-	public void testAttr2() throws Exception {
-
-		runTest("examples/semantic/attribute2Test", 1);
-	}
-
-	@Test
-	public void testExpr2() throws Exception {
-
-		runTest("examples/semantic/expr2Test", 1);
-	}
+	//public static class Attributes extends BasicTest
+		@Test
+		public void attributeTest() throws Exception {
+			runTest("examples/semantic/attributes/attributeTest", 2);
+		}
+		@Test
+		public void attribute2Test() throws Exception {
+			runTest("examples/semantic/attributes/attribute2Test", 1);
+		}
+		@Test
+		public void attribute3Test() throws Exception {
+			runTest("examples/semantic/attributes/attribute3Test", 1);
+		}
+		@Test
+		public void attribute4Test() throws Exception {
+			runTest("examples/semantic/attributes/attribute4Test", 1);
+		}
 
 	@Test
 	public void testSubProgram3() throws Exception {
 
 		runTest("examples/semantic/subProgramTest3", 1);
-	}
-
-	@Test
-	public void testTypeConversion2() throws Exception {
-
-		runTest("examples/semantic/typeConversion2Test", 1);
-	}
-
-	@Test
-	public void testConst2() throws Exception {
-
-		runTest("examples/semantic/const2Test", 4);
 	}
 
 	@Test
@@ -405,46 +255,22 @@ public class IGTest {
 	}
 
 	@Test
-	public void testAggregate3() throws Exception {
+	public void testExpr2() throws Exception {
 
-		runTest("examples/semantic/aggregate3Test", 2);
+		runTest("examples/semantic/expr2Test", 1);
 	}
+
 
 	@Test
-	public void testConcat3() throws Exception {
+	public void testAggregate() throws Exception {
 
-		runTest("examples/semantic/concat3Test", 1);
+		runTest("examples/semantic/aggregateTest", 5);
 	}
-
-	@Test
-	public void testAttributes() throws Exception {
-
-		runTest("examples/semantic/attributeTest", 1);
-	}
-
-	// at the moment it is not clear whether this
-	// test is supposed to work or not
-	// ghdl doesn't like this one either:
-	// aggTest.vhdl:20:32: type "rt2" not allowed in an expression
-	//	public void testAggregate2() throws Exception {
-	//
-	//		if (!enableAggregate2Test) {
-	//			fail("Test disabled");
-	//			return;
-	//		}
-	//
-	//		runTest("test/semantic/aggregate2Test", 1);
-	//	}
-	@Test
-	public void testConcat4() throws Exception {
-
-		runTest("examples/semantic/concat4Test", 1);
-	}
-
+	
 	@Test
 	public void testTypeConversion() throws Exception {
 
-		runTest("examples/semantic/typeConversionTest", 1);
+		runTest("examples/semantic/typeConversionTest", 4);
 	}
 
 	@Test
@@ -514,15 +340,9 @@ public class IGTest {
 	}
 
 	@Test
-	public void testType() throws Exception {
-
-		runTest("examples/semantic/typeTest", 1);
-	}
-
-	@Test
 	public void testITC99() throws Exception {
 
-		runTest("examples/itc99", 1);
+		runTest("examples/itc99", 110);
 	}
 
 	@Test
@@ -570,7 +390,7 @@ public class IGTest {
 	@Test
 	public void testPlasma() throws Exception {
 
-		runTest("examples/plasma", 14);
+		runTest("examples/plasma", 44);
 	}
 
 	@Test

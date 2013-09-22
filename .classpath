@@ -10,10 +10,11 @@
 	<classpathentry exported="true" kind="lib" path="share/jars/commons-io-2.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="share/jars/commons-logging-1.0.4.jar"/>
 	<classpathentry exported="true" kind="lib" path="share/jars/jakarta-oro-2.0.8.jar"/>
-	<classpathentry exported="true" kind="lib" path="share/jars/junit-4.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="share/jars/log4j-1.2.14.jar"/>
 	<classpathentry exported="true" kind="lib" path="share/jars/log5j-1.2.jar"/>
 	<classpathentry kind="lib" path="share/jars/minijdd_103.jar" sourcepath="/home/guenter/tmp/jdd/jdd/src"/>
 	<classpathentry exported="true" kind="lib" path="share/jars/jython.jar"/>
+	<classpathentry kind="lib" path="C:/Users/valentin/workspace/zamiacad/share/jars/junit-hierarchicalcontextrunner-4.11.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

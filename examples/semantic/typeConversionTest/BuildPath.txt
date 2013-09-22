@@ -1,3 +1,5 @@
-toplevel TC2TEST
 toplevel TCTEST
+toplevel TC2TEST
+toplevel TC3TEST
+
 

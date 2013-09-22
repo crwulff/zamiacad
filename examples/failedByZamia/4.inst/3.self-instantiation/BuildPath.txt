@@ -1,0 +1,9 @@
+# This will cause counting error
+toplevel TOP
+# so that
+# we never reach counting these nodes, as it never ends
+toplevel SELF_INSTANCE(ARCH)
+toplevel SELF_INSTANCE(ARCH3)
+toplevel SELF_INSTANCE(ARCH4)
+
+
