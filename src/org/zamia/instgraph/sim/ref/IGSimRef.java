@@ -92,7 +92,7 @@ public class IGSimRef implements IGISimulator {
 
 	private EventListenerList fObservers = new EventListenerList();
 
-	private SimData fData;
+	public SimData fData;
 
 	private Set<IGSimProcess> fProcesses;
 

@@ -10,6 +10,7 @@ import org.zamia.util.SimpleRegexp;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -62,7 +63,20 @@ public class SimData {
 		}
 	}
 
+	/**
+	 * Trace listener was added to monitor events for purposes not limited to trace logging.
+	 * This was particularly necessary to perform signal comparisons on clk events.
+	 * */
+	public static interface TraceAddListener {
+		public void trace(PathName aSignalName, BigInteger aTime, IGStaticValue aValue, boolean aIsEvent);
+	}
+	
+	public Collection<TraceAddListener> traceAddListeners = new ArrayList<>();
+	
 	public void addSignalValue(PathName aSignalName, BigInteger aTime, IGStaticValue aValue, boolean aIsEvent) throws ZamiaException {
+		for (TraceAddListener l : traceAddListeners)
+			l.trace(aSignalName, aTime, aValue, aIsEvent);
+		
 		IGSignalLog log = fTracedSignals.get(aSignalName);
 		if (log != null) {
 			log.add(aTime, aValue, aIsEvent);
