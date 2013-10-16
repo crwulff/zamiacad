@@ -91,16 +91,11 @@ public class Zamia {
 
 		// determine default values for project variables
 
-		String curDirPath = System.getProperty("user.dir");
-
-		fProjectBasePath = curDirPath;
-
+		fProjectBasePath = System.getProperty("user.dir"); // user.dir is absolute path to "."
+		fProjectId = new File(fProjectBasePath).getName();
+				
 		processArgs(args);
-
-		File curDir = new File(fProjectBasePath);
-		fProjectBasePath = curDir.getAbsolutePath();
-
-		fProjectId = curDir.getAbsoluteFile().getName();
+		
 
 		String projectBuildPath = fProjectBasePath + File.separator + "BuildPath.txt";
 
@@ -208,7 +203,7 @@ public class Zamia {
 			}
 
 			if (line.hasOption("d")) {
-				fProjectBasePath += File.separator + line.getOptionValue("d");
+				fProjectBasePath = line.getOptionValue("d");
 			}
 
 			if (line.hasOption("x")) {
