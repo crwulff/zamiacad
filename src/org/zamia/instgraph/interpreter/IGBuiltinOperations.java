@@ -124,6 +124,10 @@ public class IGBuiltinOperations {
 
 		case BITVECTOR_ROR:
 		case BITVECTOR_ROL:
+		case BITVECTOR_SLL:
+		case BITVECTOR_SRL:
+		case BITVECTOR_SLA:
+		case BITVECTOR_SRA:
 			return execBitvectorBinary(aSub, aRuntime, aLocation, aErrorMode, aReport);
 			
 		case ARRAY_CONCATAA:
@@ -754,22 +758,21 @@ public class IGBuiltinOperations {
 		return aRt;
 	}
 		
-	private static ReturnStatus execBitvectorBinary(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
+	private static ReturnStatus execBitvectorBinary(IGSubProgram aSub, IGInterpreterRuntimeEnv aRuntime, final SourceLocation aLocation, ASTErrorMode aErrorMode, ErrorReport aReport)
 			throws ZamiaException {
 
 		IGContainer container = aSub.getContainer();
 		IGObject intfA = container.resolveObject("a");
-		IGStaticValue valueA = aRuntime.getObjectValue(intfA);
+		final IGStaticValue valueA = aRuntime.getObjectValue(intfA);
 		if (valueA == null)	{
 			return error(valueA, "execBitvectorBinary(): vA", aErrorMode, aLocation);
 		}
 
 		IGObject intfB = container.resolveObject("b");
-		IGStaticValue valueB = aRuntime.getObjectValue(intfB);
+		final IGStaticValue valueB = aRuntime.getObjectValue(intfB);
 		if (valueB == null)	{
 			return error(valueB, "execBitvectorBinary(): vB", aErrorMode, aLocation);
 		}
-		int shiftDistance = valueB.getInt();
 
 		IGTypeStatic rt = aSub.getReturnType().computeStaticType(aRuntime, aErrorMode, aReport);
 		if (rt == null) {
@@ -780,28 +783,85 @@ public class IGBuiltinOperations {
 		if (rt.isUnconstrained())
 			throw new ZamiaException("Interpreter error: cannot determine resulting array boundaries, all types involved are unconstrained :-/", aLocation);
 
-		IGStaticValueBuilder builder = new IGStaticValueBuilder(rt, null, aLocation);
+		final IGStaticValueBuilder builder = new IGStaticValueBuilder(rt, null, aLocation);
 
 		IGSubProgram.IGBuiltin func = aSub.getBuiltin();
+
+		final int offset = valueA.getArrayOffset();
+		final int nA = valueA.getNumArrayEntries(aLocation);
+		final int limit = offset + nA;
+		final int valueb = valueB.getInt();
 		
-		if (func == IGBuiltin.BITVECTOR_ROL) {
-			func = IGBuiltin.BITVECTOR_ROR; // shift left is the same as shift right 
-			shiftDistance = -shiftDistance; // just into opposite direction 
-		}
-			
-		if (func == IGBuiltin.BITVECTOR_ROR) {
-			
-			int offset = valueA.getArrayOffset();
-			int nA = valueA.getNumArrayEntries(aLocation);
-			int limit = offset + nA;
-			for (int src = shiftDistance, dst = offset ; dst != limit ; src++, dst++) {
-				int wrappedSrc = //(src % nA) // this sux in Java
-						(src % nA + nA) % nA; // we must do this to support shift distance ouside the vector range
-				IGStaticValue el = valueA.getValue(wrappedSrc + offset, aLocation); // take bit
-				builder.set(dst, el, aLocation);  // put into dest
+		class ROR {
+			int src;
+			/**Use right = 1 for right and -1 for left*/
+			ROR(int right) {
+				src = right * valueb;
 			}
-		} else
+			void run() throws ZamiaException {
+				for (int dst = offset ; dst != limit ; src++, dst++) {
+					IGStaticValue el = get();
+					builder.set(dst, el, aLocation);  // put into dest
+				}
+			}
+			IGStaticValue get() throws ZamiaException {
+				int wrappedSrc = //(src % nA) // this sux in Java
+						(src % nA + nA) % nA // we must do this to support shift distance ouside the vector range
+						+ offset;
+				return valueA.getValue(wrappedSrc, aLocation); // take bit
+			}
+		}
+		
+		class SLL extends ROR {
+			final IGStaticValue filler;
+			SLL(int right) throws ZamiaException {
+				super(right);
+				src += offset;
+				filler = getFiller();
+			}
+			IGStaticValue getFiller() throws ZamiaException {
+				// fill with 0, by default
+				IGTypeStatic et = builder.getType().getStaticElementType(aLocation);
+				return et.getEnumLiteral(0, aLocation, ASTErrorMode.EXCEPTION, null);
+			};
+			boolean inRange() {return !(src < offset);}
+			IGStaticValue get() throws ZamiaException {
+				return (inRange()) ? valueA.getValue(src, aLocation) : filler; 
+			}
+		}
+		
+		class SRL extends SLL {
+			SRL(int right) throws ZamiaException {super(right);}
+			int max = nA + offset;
+			boolean inRange() {return src < max;}
+		}
+		
+		class SLA extends SLL {
+			SLA(int right) throws ZamiaException { super(right); }
+			IGStaticValue getFiller() throws ZamiaException {
+				return valueA.getValue(offset, aLocation); // a single value L'Right
+			};
+		}
+		class SRA extends SRL {
+			SRA(int right) throws ZamiaException {super(right);}
+
+			IGStaticValue getFiller() throws ZamiaException {
+				return valueA.getValue(/*max*/nA + offset-1, aLocation); // L'Left
+			};
+			
+		}
+		
+		
+		switch (func) {
+		case BITVECTOR_ROR: new ROR( 1).run(); break;
+		case BITVECTOR_ROL: new ROR(-1).run(); break;// just into opposite direction
+		case BITVECTOR_SRL: ((valueb < 0) ? new SLL( 1) : new SRL( 1)).run(); break;
+		case BITVECTOR_SLL: ((valueb < 0) ? new SRL(-1) : new SLL(-1)).run(); break;
+		case BITVECTOR_SRA: ((valueb < 0) ? new SLA( 1) : new SRA( 1)).run(); break;
+		case BITVECTOR_SLA: ((valueb < 0) ? new SRA(-1) : new SLA(-1)).run(); break;
+		default:
 			throw new ZamiaException("Internal interpreter error: execArrayBinary() called on non-implemented op " + aSub.getBuiltin(), aLocation);
+		}
 
 		IGStaticValue resValue = builder.buildConstant();
 

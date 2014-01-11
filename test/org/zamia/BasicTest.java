@@ -16,6 +16,7 @@ import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.spi.LoggingEvent;
 import org.junit.After;
+import org.junit.Before;
 import org.zamia.instgraph.IGStaticValue;
 import org.zamia.instgraph.sim.ref.IGSimRef;
 import org.zamia.util.PathName;
@@ -28,9 +29,13 @@ import org.zamia.vhdl.ast.DMUID;
 public class BasicTest {
 	
 		// If we need capturing console, http://stackoverflow.com/questions/2169330
-	static class CaputreLogMessagesContaining extends AppenderSkeleton {
+	public static class CaputreLogMessagesContaining extends AppenderSkeleton {
 		
-		CaputreLogMessagesContaining(String[] pieces) {
+		{
+			ZamiaLogger.getInstance().getLogger().addAppender(this);
+		}
+		
+		public void startCapturing(String[] pieces) {
 			toCaputre.addAll(Arrays.asList(pieces));
 		}
 		public List<String> toCaputre = new LinkedList<>();
@@ -39,6 +44,7 @@ public class BasicTest {
 			
 			for (ListIterator<String> li = toCaputre.listIterator(); li.hasNext() ; ) {
 				String piece = li.next().toUpperCase();
+				System.out.println(msg);
 				if (msg.contains(piece))
 					li.remove();
 			}
@@ -46,8 +52,13 @@ public class BasicTest {
 		public void close() {} public boolean requiresLayout() {return false;}
 		
 	};
-
 	
+	protected CaputreLogMessagesContaining expectedLogMessages;
+	
+	@Before
+	public void setUp() {
+		expectedLogMessages = new CaputreLogMessagesContaining();
+	}
 	public final static ZamiaLogger logger = ZamiaLogger.getInstance();
 	
 	/**Default implementation expects 0 exceptions.*/
@@ -154,11 +165,20 @@ public class BasicTest {
 
 	@After
 	public void tearDown() {
+		
 		if (fZPrj != null) {
 			// fZPrj.getZDB().dump();
 			fZPrj.shutdown();
 			fZPrj = null;
 		}
+		
+		ZamiaLogger.getInstance().getLogger().removeAppender(expectedLogMessages);
+
+		//It seems to be a bad idea to raise errors here but 
+		// it is very convenient.
+		for (String str : expectedLogMessages.toCaputre)
+			assertTrue("log fails to contain \"" + str + "\"", false);
+
 	}
 
 	

@@ -13,6 +13,8 @@ import org.zamia.BasicTest;
 import org.zamia.BuildPath;
 import org.zamia.Toplevel;
 import org.zamia.ZamiaException;
+import org.zamia.ZamiaLogger;
+import org.zamia.BasicTest.CaputreLogMessagesContaining;
 import org.zamia.instgraph.interpreter.IGInterpreterCode;
 import org.zamia.instgraph.interpreter.IGStmt;
 
@@ -24,6 +26,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.matchers.JUnitMatchers.hasItem;
 
 /**
@@ -120,6 +123,14 @@ public class IGTest extends BasicTest {
 		runTest("examples/semantic/subProgramTest2", 1);
 	}
 
+
+	@Test
+	public void testArrayOps() throws Exception {
+		String[] toCaputre = {"ROL/ROR SIMULATION DONE"};
+		expectedLogMessages.startCapturing(toCaputre);
+		runTest("examples/semantic/arrayOpTest", 3, 400);
+	}
+	
 	@Test
 	public void testResolver() throws Exception {
 

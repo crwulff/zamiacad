@@ -189,18 +189,10 @@ public class FailedTestsToPass extends BasicTest {
 			try {
 				
 				String[] toCaputre = {"HELLO FROM INCREMENTAL PKG", "HELLO FROM INCREMENTAL ARCH"};
-				CaputreLogMessagesContaining appender = new CaputreLogMessagesContaining(toCaputre);
-				ZamiaLogger.getInstance().getLogger().addAppender(appender);
-				
-				try {
-					vhdl.add(new SourceFile(original));
-					builder.build(false, false, vhdl);
-				} finally {
-					ZamiaLogger.getInstance().getLogger().removeAppender(appender);
-				}
-				
-				for (String str : appender.toCaputre)
-					assertTrue("log fails to contain \"" + str + "\"", false);
+				expectedLogMessages.startCapturing(toCaputre);
+
+				vhdl.add(new SourceFile(original));
+				builder.build(false, false, vhdl);
 				
 				
 			} finally {
