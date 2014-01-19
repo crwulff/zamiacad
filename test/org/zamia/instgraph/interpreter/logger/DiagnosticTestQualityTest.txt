@@ -1,0 +1,343 @@
+###########  Assignments  ###########    TotalStmts = 11   W = 10.09  L = 1.00  H = 11.00  We = 0.08  We2 = 0.29
+Hamming=4.0, UniqMaxim=6.0, ValMarko=8.639562961552132, Kostin=11, WHD=3.0
+(gray-ones) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>                                                                             x   <0|1>
+    1:  0 <|>       x                                                                     x   <0|2>
+    2:  0 <|>       x      x                                                              x   <0|3>
+    3:  0 <|>       x      x      x                                                       x   <0|4>
+    4:  0 <|>       x      x      x      x                                                x   <0|5>
+    5:  0 <|>       x      x      x      x      x                                         x   <0|6>
+    6:  0 <|>       x      x      x      x      x      x                                  x   <0|7>
+    7:  0 <|>       x      x      x      x      x      x      x                           x   <0|8>
+    8:  0 <|>       x      x      x      x      x      x      x      x                    x   <0|9>
+    9:  0 <|>       x      x      x      x      x      x      x      x      x             x   <0|10>
+   10:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 10.00  L = 1.00  H = 10.00  We = 0.00  We2 = 0.00
+Hamming=4.0, UniqMaxim=5.0, ValMarko=8.63956296155213, Kostin=11, WHD=3.0
+(gray-zeroes) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    1:  0 <|>       x                                                                         <0|1>
+    2:  0 <|>       x      x                                                                  <0|2>
+    3:  0 <|>       x      x      x                                                           <0|3>
+    4:  0 <|>       x      x      x      x                                                    <0|4>
+    5:  0 <|>       x      x      x      x      x                                             <0|5>
+    6:  0 <|>       x      x      x      x      x      x                                      <0|6>
+    7:  0 <|>       x      x      x      x      x      x      x                               <0|7>
+    8:  0 <|>       x      x      x      x      x      x      x      x                        <0|8>
+    9:  0 <|>       x      x      x      x      x      x      x      x      x                 <0|9>
+   10:  0 <|>       x      x      x      x      x      x      x      x      x      x          <0|10>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 7.73  L = 1.00  H = 10.09  We = 2.56  We2 = 1.60
+Hamming=4.545454545454546, UniqMaxim=5.545454545454545, ValMarko=8.988595338107784, Kostin=11, WHD=2.909090909090909
+(green - one) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>                                                                             x   <0|1>
+    1:  0 <|>       x                                                                     x   <0|2>
+    2:  0 <|>       x      x                                                              x   <0|3>
+    3:  0 <|>       x      x      x                                                       x   <0|4>
+    4:  0 <|>       x      x      x      x                                                x   <0|5>
+    5:  0 <|>       x      x      x      x      x                                         x   <0|6>
+    6:  0 <|>       x      x      x      x      x      x                                      <0|6>
+    7:  0 <|>       x      x      x      x      x      x      x                               <0|7>
+    8:  0 <|>       x      x      x      x      x      x      x      x                        <0|8>
+    9:  0 <|>       x      x      x      x      x      x      x      x      x                 <0|9>
+   10:  0 <|>       x      x      x      x      x      x      x      x      x      x          <0|10>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 7.73  L = 1.00  H = 9.91  We = 2.56  We2 = 1.60
+Hamming=4.545454545454546, UniqMaxim=5.454545454545454, ValMarko=8.988595338107784, Kostin=11, WHD=2.909090909090909
+(green - zero) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>                                                                             x   <0|1>
+    1:  0 <|>       x                                                                     x   <0|2>
+    2:  0 <|>       x      x                                                              x   <0|3>
+    3:  0 <|>       x      x      x                                                       x   <0|4>
+    4:  0 <|>       x      x      x      x                                                x   <0|5>
+    5:  0 <|>       x      x      x      x      x                                             <0|5>
+    6:  0 <|>       x      x      x      x      x      x                                      <0|6>
+    7:  0 <|>       x      x      x      x      x      x      x                               <0|7>
+    8:  0 <|>       x      x      x      x      x      x      x      x                        <0|8>
+    9:  0 <|>       x      x      x      x      x      x      x      x      x                 <0|9>
+   10:  0 <|>       x      x      x      x      x      x      x      x      x      x          <0|10>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 9.10  L = 1.00  H = 10.00  We = 0.09  We2 = 0.30
+Hamming=3.4545454545454546, UniqMaxim=5.545454545454546, ValMarko=8.29053058499648, Kostin=11, WHD=2.909090909090909
+(red - one) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    1:  0 <|>       x                                                                         <0|1>
+    2:  0 <|>       x      x                                                                  <0|2>
+    3:  0 <|>       x      x      x                                                           <0|3>
+    4:  0 <|>       x      x      x      x                                                    <0|4>
+    5:  0 <|>       x      x      x      x      x                                         x   <0|6>
+    6:  0 <|>       x      x      x      x      x      x                                  x   <0|7>
+    7:  0 <|>       x      x      x      x      x      x      x                           x   <0|8>
+    8:  0 <|>       x      x      x      x      x      x      x      x                    x   <0|9>
+    9:  0 <|>       x      x      x      x      x      x      x      x      x             x   <0|10>
+   10:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 9.10  L = 1.00  H = 10.00  We = 0.09  We2 = 0.30
+Hamming=3.4545454545454546, UniqMaxim=5.454545454545455, ValMarko=8.29053058499648, Kostin=11, WHD=2.909090909090909
+(red - zero) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    1:  0 <|>       x                                                                         <0|1>
+    2:  0 <|>       x      x                                                                  <0|2>
+    3:  0 <|>       x      x      x                                                           <0|3>
+    4:  0 <|>       x      x      x      x                                                    <0|4>
+    5:  0 <|>       x      x      x      x      x                                             <0|5>
+    6:  0 <|>       x      x      x      x      x      x                                  x   <0|7>
+    7:  0 <|>       x      x      x      x      x      x      x                           x   <0|8>
+    8:  0 <|>       x      x      x      x      x      x      x      x                    x   <0|9>
+    9:  0 <|>       x      x      x      x      x      x      x      x      x             x   <0|10>
+   10:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 1.00  L = 1.00  H = 1.00  We = 0.00  We2 = 0.00
+Hamming=1.8181818181818181, UniqMaxim=0.9090909090909093, ValMarko=7.249069088355586, Kostin=11, WHD=1.8181818181818181
+(blue - zeros) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>       x                                                                         <0|1>
+    1:  0 <|>              x                                                                  <0|1>
+    2:  0 <|>                     x                                                           <0|1>
+    3:  0 <|>                            x                                                    <0|1>
+    4:  0 <|>                                   x                                             <0|1>
+    5:  0 <|>                                          x                                      <0|1>
+    6:  0 <|>                                                 x                               <0|1>
+    7:  0 <|>                                                        x                        <0|1>
+    8:  0 <|>                                                               x                 <0|1>
+    9:  0 <|>                                                                      x          <0|1>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 11.00  L = 1.00  H = 11.00  We = 0.00  We2 = 0.00
+Hamming=3.4545454545454546, UniqMaxim=1.9090909090909094, ValMarko=7.938958933107131, Kostin=11, WHD=1.8181818181818181
+(blue - ones) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>       x                                                                     x   <0|2>
+    1:  0 <|>              x                                                              x   <0|2>
+    2:  0 <|>                     x                                                       x   <0|2>
+    3:  0 <|>                            x                                                x   <0|2>
+    4:  0 <|>                                   x                                         x   <0|2>
+    5:  0 <|>                                          x                                  x   <0|2>
+    6:  0 <|>                                                 x                           x   <0|2>
+    7:  0 <|>                                                        x                    x   <0|2>
+    8:  0 <|>                                                               x             x   <0|2>
+    9:  0 <|>                                                                      x      x   <0|2>
+   10:  0 <|>                                                                             x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 9.18  L = 1.00  H = 11.00  We = 6.69  We2 = 2.59
+Hamming=3.309090909090909, UniqMaxim=9.181818181818182, ValMarko=7.875742266947142, Kostin=11, WHD=1.9636363636363636
+(orange - 01) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>              x      x      x      x      x      x      x      x      x          <0|9>
+    1:  0 <|>       x             x      x      x      x      x      x      x      x      x   <0|10>
+    2:  0 <|>       x      x             x      x      x      x      x      x      x          <0|9>
+    3:  0 <|>       x      x      x             x      x      x      x      x      x          <0|9>
+    4:  0 <|>       x      x      x      x             x      x      x      x      x          <0|9>
+    5:  0 <|>       x      x      x      x      x             x      x      x      x          <0|9>
+    6:  0 <|>       x      x      x      x      x      x             x      x      x          <0|9>
+    7:  0 <|>       x      x      x      x      x      x      x             x      x          <0|9>
+    8:  0 <|>       x      x      x      x      x      x      x      x             x          <0|9>
+    9:  0 <|>       x      x      x      x      x      x      x      x      x                 <0|9>
+   10:  0 <|>       x      x      x      x      x      x      x      x      x      x          <0|10>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 3.73  L = 1.00  H = 11.00  We = 6.20  We2 = 2.49
+Hamming=2.727272727272727, UniqMaxim=9.545454545454545, ValMarko=7.6228756023071895, Kostin=11, WHD=2.4545454545454546
+(orange - 011111) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>              x      x      x      x      x      x      x      x      x          <0|9>
+    1:  0 <|>       x             x      x      x      x      x      x      x      x      x   <0|10>
+    2:  0 <|>       x      x             x      x      x      x      x      x      x      x   <0|10>
+    3:  0 <|>       x      x      x             x      x      x      x      x      x      x   <0|10>
+    4:  0 <|>       x      x      x      x             x      x      x      x      x      x   <0|10>
+    5:  0 <|>       x      x      x      x      x             x      x      x      x      x   <0|10>
+    6:  0 <|>       x      x      x      x      x      x             x      x      x          <0|9>
+    7:  0 <|>       x      x      x      x      x      x      x             x      x          <0|9>
+    8:  0 <|>       x      x      x      x      x      x      x      x             x          <0|9>
+    9:  0 <|>       x      x      x      x      x      x      x      x      x                 <0|9>
+   10:  0 <|>       x      x      x      x      x      x      x      x      x      x          <0|10>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 1.91  L = 1.00  H = 11.00  We = 8.26  We2 = 2.87
+Hamming=1.8181818181818181, UniqMaxim=10.09090909090909, ValMarko=7.249069088355586, Kostin=11, WHD=1.8181818181818181
+(orange - all ones) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>              x      x      x      x      x      x      x      x      x      x   <0|10>
+    1:  0 <|>       x             x      x      x      x      x      x      x      x      x   <0|10>
+    2:  0 <|>       x      x             x      x      x      x      x      x      x      x   <0|10>
+    3:  0 <|>       x      x      x             x      x      x      x      x      x      x   <0|10>
+    4:  0 <|>       x      x      x      x             x      x      x      x      x      x   <0|10>
+    5:  0 <|>       x      x      x      x      x             x      x      x      x      x   <0|10>
+    6:  0 <|>       x      x      x      x      x      x             x      x      x      x   <0|10>
+    7:  0 <|>       x      x      x      x      x      x      x             x      x      x   <0|10>
+    8:  0 <|>       x      x      x      x      x      x      x      x             x      x   <0|10>
+    9:  0 <|>       x      x      x      x      x      x      x      x      x             x   <0|10>
+   10:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 11.00  L = 11.00  H = 11.00  We = 0.00  We2 = 0.00
+Hamming=2.0, UniqMaxim=1.0000000000000002, ValMarko=7.306792271507248, Kostin=1, WHD=0.0
+(useless test 1) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>       x                                                                         <0|1>
+    1:  0 <|>       x                                                                         <0|1>
+    2:  0 <|>       x                                                                         <0|1>
+    3:  0 <|>       x                                                                         <0|1>
+    4:  0 <|>       x                                                                         <0|1>
+    5:  0 <|>       x                                                                         <0|1>
+    6:  0 <|>       x                                                                         <0|1>
+    7:  0 <|>       x                                                                         <0|1>
+    8:  0 <|>       x                                                                         <0|1>
+    9:  0 <|>       x                                                                         <0|1>
+   10:  0 <|>       x                                                                         <0|1>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 11.00  L = 11.00  H = 11.00  We = 0.00  We2 = 0.00
+Hamming=6.0, UniqMaxim=4.999999999999999, ValMarko=10.511193398951127, Kostin=1, WHD=0.0
+(useless test 2) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>       x      x      x      x      x                                             <0|5>
+    1:  0 <|>       x      x      x      x      x                                             <0|5>
+    2:  0 <|>       x      x      x      x      x                                             <0|5>
+    3:  0 <|>       x      x      x      x      x                                             <0|5>
+    4:  0 <|>       x      x      x      x      x                                             <0|5>
+    5:  0 <|>       x      x      x      x      x                                             <0|5>
+    6:  0 <|>       x      x      x      x      x                                             <0|5>
+    7:  0 <|>       x      x      x      x      x                                             <0|5>
+    8:  0 <|>       x      x      x      x      x                                             <0|5>
+    9:  0 <|>       x      x      x      x      x                                             <0|5>
+   10:  0 <|>       x      x      x      x      x                                             <0|5>
+
+###########  Assignments  ###########    TotalStmts = 11   W = 11.00  L = 11.00  H = 11.00  We = 0.00  We2 = 0.00
+Hamming=0.0, UniqMaxim=11.0, ValMarko=6.671837256838966, Kostin=1, WHD=0.0
+(all ones) TestWhatif.txt:
+         <F|P>  Test0  Test1  Test2  Test3  Test4  Test5  Test6  Test7  Test8  Test9 Test10
+    0:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+    1:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+    2:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+    3:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+    4:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+    5:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+    6:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+    7:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+    8:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+    9:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+   10:  0 <|>       x      x      x      x      x      x      x      x      x      x      x   <0|11>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 3.57  L = 1.00  H = 5.29  We = 1.96  We2 = 1.40
+Hamming=4.0, UniqMaxim=4.0, ValMarko=6.291951668768951, Kostin=8, WHD=4.0
+(best) TestWhatif.txt:
+         <F|P> Test0 Test1 Test2
+    0:  0 <|>      x     x     x   <0|3>
+    1:  0 <|>      x     x         <0|2>
+    2:  0 <|>      x           x   <0|2>
+    3:  0 <|>      x               <0|1>
+    4:  0 <|>            x     x   <0|2>
+    5:  0 <|>            x         <0|1>
+    6:  0 <|>                  x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 3.33  L = 2.00  H = 4.67  We = 3.56  We2 = 1.89
+Hamming=4.0, UniqMaxim=4.0, ValMarko=6.426122638850533, Kostin=4, WHD=4.0
+(half the best) TestWhatif.txt:
+         <F|P> Test0 Test1
+    0:  0 <|>      x     x   <0|2>
+    1:  0 <|>      x     x   <0|2>
+    2:  0 <|>      x         <0|1>
+    3:  0 <|>      x         <0|1>
+    4:  0 <|>            x   <0|1>
+    5:  0 <|>            x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 1.00  L = 1.00  H = 1.00  We = 0.00  We2 = 0.00
+Hamming=1.0, UniqMaxim=0.5, ValMarko=5.245714617988433, Kostin=2, WHD=1.0
+(00000001) TestWhatif.txt:
+         <F|P> Test0 Test1
+    7:  0 <|>            x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 2.00  L = 2.00  H = 2.00  We = 0.00  We2 = 0.00
+Hamming=2.0, UniqMaxim=1.0, ValMarko=5.6391839582758, Kostin=2, WHD=2.0
+(00000011) TestWhatif.txt:
+         <F|P> Test0 Test1
+    6:  0 <|>            x   <0|1>
+    7:  0 <|>            x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 3.00  L = 3.00  H = 3.00  We = 0.00  We2 = 0.00
+Hamming=3.0, UniqMaxim=1.5, ValMarko=6.032653298563167, Kostin=2, WHD=3.0
+(00000111) TestWhatif.txt:
+         <F|P> Test0 Test1
+    5:  0 <|>            x   <0|1>
+    6:  0 <|>            x   <0|1>
+    7:  0 <|>            x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 4.00  L = 4.00  H = 4.00  We = 0.00  We2 = 0.00
+Hamming=4.0, UniqMaxim=2.0, ValMarko=6.426122638850534, Kostin=2, WHD=4.0
+(00001111) TestWhatif.txt:
+         <F|P> Test0 Test1
+    4:  0 <|>            x   <0|1>
+    5:  0 <|>            x   <0|1>
+    6:  0 <|>            x   <0|1>
+    7:  0 <|>            x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 5.00  L = 5.00  H = 5.00  We = 0.00  We2 = 0.00
+Hamming=5.0, UniqMaxim=2.5, ValMarko=6.8195919791379005, Kostin=2, WHD=3.0
+(00011111) TestWhatif.txt:
+         <F|P> Test0 Test1
+    3:  0 <|>            x   <0|1>
+    4:  0 <|>            x   <0|1>
+    5:  0 <|>            x   <0|1>
+    6:  0 <|>            x   <0|1>
+    7:  0 <|>            x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 6.00  L = 6.00  H = 6.00  We = 0.00  We2 = 0.00
+Hamming=6.0, UniqMaxim=3.0, ValMarko=7.213061319425266, Kostin=2, WHD=2.0
+(00111111) TestWhatif.txt:
+         <F|P> Test0 Test1
+    2:  0 <|>            x   <0|1>
+    3:  0 <|>            x   <0|1>
+    4:  0 <|>            x   <0|1>
+    5:  0 <|>            x   <0|1>
+    6:  0 <|>            x   <0|1>
+    7:  0 <|>            x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 7.00  L = 7.00  H = 7.00  We = 0.00  We2 = 0.00
+Hamming=7.0, UniqMaxim=3.5, ValMarko=7.606530659712633, Kostin=2, WHD=1.0
+(01111111) TestWhatif.txt:
+         <F|P> Test0 Test1
+    1:  0 <|>            x   <0|1>
+    2:  0 <|>            x   <0|1>
+    3:  0 <|>            x   <0|1>
+    4:  0 <|>            x   <0|1>
+    5:  0 <|>            x   <0|1>
+    6:  0 <|>            x   <0|1>
+    7:  0 <|>            x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 8.00  L = 8.00  H = 8.00  We = 0.00  We2 = 0.00
+Hamming=8.0, UniqMaxim=4.0, ValMarko=8.0, Kostin=1, WHD=0.0
+(11111111) TestWhatif.txt:
+         <F|P> Test0 Test1
+    0:  0 <|>            x   <0|1>
+    1:  0 <|>            x   <0|1>
+    2:  0 <|>            x   <0|1>
+    3:  0 <|>            x   <0|1>
+    4:  0 <|>            x   <0|1>
+    5:  0 <|>            x   <0|1>
+    6:  0 <|>            x   <0|1>
+    7:  0 <|>            x   <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 4.00  L = 4.00  H = 4.00  We = 0.00  We2 = 0.00
+Hamming=8.0, UniqMaxim=4.0, ValMarko=8.0, Kostin=2, WHD=0.0
+(01010101) TestWhatif.txt:
+         <F|P> Test0 Test1
+    0:  0 <|>            x   <0|1>
+    1:  0 <|>      x         <0|1>
+    2:  0 <|>            x   <0|1>
+    3:  0 <|>      x         <0|1>
+    4:  0 <|>            x   <0|1>
+    5:  0 <|>      x         <0|1>
+    6:  0 <|>            x   <0|1>
+    7:  0 <|>      x         <0|1>
+
+###########  Assignments  ###########    TotalStmts = 8   W = 3.33  L = 2.00  H = 4.67  We = 3.56  We2 = 1.89
+Hamming=4.0, UniqMaxim=4.0, ValMarko=6.426122638850533, Kostin=4, WHD=4.0
+(00110011) TestWhatif.txt:
+         <F|P> Test0 Test1
+    1:  0 <|>      x         <0|1>
+    2:  0 <|>            x   <0|1>
+    3:  0 <|>      x     x   <0|2>
+    5:  0 <|>      x         <0|1>
+    6:  0 <|>            x   <0|1>
+    7:  0 <|>      x     x   <0|2>
+

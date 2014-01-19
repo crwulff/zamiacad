@@ -6,6 +6,7 @@ import org.zamia.ZamiaLogger;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -22,14 +23,18 @@ public class DiagnosticTestQuality {
 	private TreeMap<SourceFile, TreeMap<Integer, Distance>> distances;
 
 	private double uniquenessJaan;
-	private double uniquenessMaksim;
+	public double uniquenessMaksim, ValMarko;
 	private double uniquenessMaksimEmph;
 	private double uniquenessMaksimEmph2;
 	private double deviation;
 	private double coverage;
+	public int kostinResolution; // indicates into how many groups the statements are divided into
+	public double WHD_avg = 0; // corrected hamming distance
 
 	private int numCodeItems;
 
+
+	
 	private DiagnosticTestQuality(int numCodeItems) {
 		this.numCodeItems = numCodeItems;
 		distances = new TreeMap<SourceFile, TreeMap<Integer, Distance>>(Report.LOCATION_COMPARATOR);
@@ -55,6 +60,7 @@ public class DiagnosticTestQuality {
 		return distances.get(file).size();
 	}
 
+	/**The assumption is that the same num of tests is applied to every source file.*/
 	public int getNumTests() {
 		return distances.values().iterator().next().size();
 	}
@@ -218,24 +224,24 @@ public class DiagnosticTestQuality {
 	}
 
 	/**
-	 * @param aExecutedStmts loggers that represent executed statements
+	 * @param aHitCounters loggers that represent executed statements
 	 * @param aAllStmts logger representing all statements (assignments/conditions) in the design
 	 * @return assessment of the quality of diagnostic test
 	 */
-	public static DiagnosticTestQuality createFrom(List<? extends IGCodeExecutionLogger> aExecutedStmts, IGCodeExecutionLogger aAllStmts) {
+	public static DiagnosticTestQuality createFrom(List<? extends IGCodeExecutionLogger> aHitCounters, IGCodeExecutionLogger aAllStmts) {
 
-		if (aExecutedStmts.size() < 2) {
-			logger.info("DiagnosticTestQuality: test quality can only be computed for multiple tests. Num of received tests: %d", aExecutedStmts.size());
+		if (aHitCounters.size() < 2) {
+			logger.info("DiagnosticTestQuality: test quality can only be computed for multiple tests. Num of received tests: %d", aHitCounters.size());
 			return null;
 		}
 
 		HashMap<SourceFile, boolean[][]> matrices = new HashMap<SourceFile, boolean[][]>();
 
 		int tst = 0;
-		int numTests = aExecutedStmts.size();
+		int numTests = aHitCounters.size();
 		int numAllStmts = aAllStmts.getNumItems();
 
-		for (IGCodeExecutionLogger logger : aExecutedStmts) {
+		for (IGCodeExecutionLogger logger : aHitCounters) {
 
 			logger.dropSystemFiles();
 
@@ -286,6 +292,9 @@ public class DiagnosticTestQuality {
 				}
 				uniquenessJaan += count > 0 ? (double) numTests / count : 0;
 				uniquenessMaksim += (double) count / numTests;
+				
+				double marko = Math.abs((double)numTests/2d - (double)count)/(double)numTests;
+				ret.ValMarko += Math.exp(-marko); 
 			}
 
 			/* Compute HAMMING */
@@ -329,33 +338,71 @@ public class DiagnosticTestQuality {
 		ret.uniquenessMaksimEmph = uniMaksEmph / numTests;
 		ret.uniquenessMaksimEmph2 = Math.sqrt(uniMaksEmph / numTests);
 
-		/* Compute DEVIATION */
 		boolean[][] bigMatrix = mergeMatrices(new ArrayList<boolean[][]>(matrices.values()));
 		assert bigMatrix[0].length == numAllStmts;
-		double hAve = ret.getSumNormRaimund();
-		int N = ret.getNumDistances();
-		double total = 0;
-		for (int first = 0; first < numTests - 1; first++) {
-			for (int second = first; second < numTests; second++) {
-				if (first == second) {
-					continue;
+		
+		{/* Compute DEVIATION */
+			double hAve = ret.getSumNormRaimund();
+			int N = ret.getNumDistances();
+			double total = 0;
+			
+			for (int first = 0; first < numTests - 1; first++) {
+				for (int second = first; second < numTests; second++) {
+					if (first == second) {
+						continue;
+					}
+					int dist = computeHammingDistance(first, second, bigMatrix);
+					total += Math.pow((double) dist - hAve, 2);
+					
+					double halfStatements = numAllStmts/2d;
+					ret.WHD_avg += dist < halfStatements ? dist : numAllStmts - dist;
+					
+					
 				}
-				int dist = computeHammingDistance(first, second, bigMatrix);
-				total += Math.pow((double) dist - hAve, 2);
+				
 			}
-		}
-		ret.deviation = Math.sqrt(total / N);
-
-		double coverage = 0;
-		try {
-			IGCodeExecutionLogger mergedLogger = IGCodeExecutionLogger.mergeAll(aExecutedStmts.toArray(new IGCodeExecutionLogger[numTests]));
-			int covered = mergedLogger.getNumItems();
-			coverage = (double) covered / numAllStmts * 100;
-		} catch (ZamiaException e) {
-			logger.debug("DiagnosticTestQuality: could not merge aExecutedStmts to compute coverage", e, "");
+			ret.deviation = Math.sqrt(total / N);
+			ret.WHD_avg /= N;
 		}
 
-		ret.coverage = coverage;
+		{ // KOSTIN SCORE
+			class UnresolvedStatements extends ArrayList<Integer>{}; // a collection of unresolved statements
+			UnresolvedStatements unresolvedInitially = new UnresolvedStatements();
+			for (int i = 0; i != numAllStmts; i++) {
+				unresolvedInitially.add(i);
+			}
+			Collection<UnresolvedStatements> kostinGroups = new ArrayList<>();
+			kostinGroups.add(unresolvedInitially); // Initially, we have all statements unresolved
+			for (int test = 0; test != numTests ; test++) {
+				Collection<UnresolvedStatements> newGroups = new ArrayList();
+				for (UnresolvedStatements unresolvedStatements : kostinGroups) {
+					UnresolvedStatements ones = new UnresolvedStatements();
+					UnresolvedStatements zeroes = new UnresolvedStatements();
+					for (Integer st : unresolvedStatements) {
+						(bigMatrix[test][st] ? ones : zeroes).add(st); 
+					}
+						
+					if (!ones.isEmpty()) newGroups.add(ones);
+					if (!zeroes.isEmpty()) newGroups.add(zeroes);
+				}
+				kostinGroups = newGroups;
+			}
+			ret.kostinResolution = kostinGroups.size(); 
+		}
+		
+		
+		{ // COVERAGE
+			double coverage = 0;
+			try {
+				IGCodeExecutionLogger mergedLogger = IGCodeExecutionLogger.mergeAll(aHitCounters.toArray(new IGCodeExecutionLogger[numTests]));
+				int covered = mergedLogger.getNumItems();
+				coverage = (double) covered / numAllStmts * 100;
+			} catch (ZamiaException e) {
+				logger.debug("DiagnosticTestQuality: could not merge aExecutedStmts to compute coverage", e, "");
+			}
+
+			ret.coverage = coverage;
+		}
 
 		return ret;
 	}

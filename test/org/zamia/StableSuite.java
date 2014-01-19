@@ -4,6 +4,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.zamia.analysis.SATest;
 import org.zamia.instgraph.IGTest;
+import org.zamia.instgraph.interpreter.logger.DiagnosticTestQualityTest;
 import org.zamia.instgraph.interpreter.logger.ReportUtilsTest;
 import org.zamia.instgraph.sim.ref.IGRefSimTest;
 import org.zamia.instgraph.sim.vcd.VCDTest;
@@ -38,6 +39,7 @@ import org.zamia.zdb.ZDBTest;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 	
+		DiagnosticTestQualityTest.class,
 		IGRefSimTest.class,
 		FSCacheTest.class,
 		BuildPathTest.class,

@@ -53,7 +53,7 @@ public abstract class IGCodeExecutionLogger {
 		return fLoggersByFile != null;
 	}
 
-	private IGCodeExecutionLogger getOrCreateLogger(SourceFile aSourceFile) {
+	IGCodeExecutionLogger getOrCreateLogger(SourceFile aSourceFile) {
 
 		if (isLeaf()) {
 			throw new RuntimeException("Trying to get file logger from LEAF logger");

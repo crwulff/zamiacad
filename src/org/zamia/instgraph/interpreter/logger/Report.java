@@ -34,7 +34,7 @@ public class Report {
 
 	Header fHeader;
 
-	double fWhatif = -1;
+	public double fWhatif = -1;
 	double fWhatifHi = -1;
 	double fWhatifLo = -1;
 	double fWhatifEmph = -1;
@@ -624,7 +624,7 @@ public class Report {
 				return item.fLoc.fCol;
 			}
 
-			private double getV1() {
+			public double getV1() {
 				return stat.v1;
 			}
 
