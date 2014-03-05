@@ -379,8 +379,10 @@ public class IGObjectDriver implements Serializable {
 
 		if (fDeclaredType.isArray()) {
 
-			for (IGObjectDriver arrayElement : fArrayElementDrivers) {
-				arrayElement.resetEventInternal();
+			if (fArrayElementDrivers != null) {
+				for (IGObjectDriver arrayElement : fArrayElementDrivers) {
+					arrayElement.resetEventInternal();
+				}
 			}
 
 		} else if (fDeclaredType.isRecord()) {
