@@ -241,6 +241,10 @@ public class IGBuiltinOperations {
 		
 		BigInteger numB = vB.getNum();
 
+		if (numB == null) {
+			numB = vB.getReal().toBigInteger();
+		}
+
 		BigInteger res = null;
 
 		switch (aSub.getBuiltin()) {
