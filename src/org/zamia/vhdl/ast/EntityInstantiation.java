@@ -79,7 +79,7 @@ public class EntityInstantiation extends InstantiatedUnit {
 				return null;
 			}
 
-			return instantiateIGModule(arch, aDUUID, aContainer, aStructure, aEE);
+			return instantiateIGModule(arch, aDUUID, aContainer, aStructure, aEE, null, null);
 		} catch (ZamiaException e) {
 			reportError(e);
 		}

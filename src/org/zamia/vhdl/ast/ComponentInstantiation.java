@@ -50,6 +50,22 @@ public class ComponentInstantiation extends InstantiatedUnit {
 			String archId = null;
 
 			int n = aContainer.getNumConfSpecs();
+			AssociationList gma = null, pma = null;
+			if (n > 0) {
+				gma = new AssociationList(null, 0);
+				if (fGMS != null) {
+					for (int i = 0; i<fGMS.getNumAssociations(); i++) {
+						gma.add(fGMS.getAssociation(i));
+					}
+				}
+
+				pma = new AssociationList(null, 0);
+				if (fPMS != null) {
+					for (int i = 0; i<fPMS.getNumAssociations(); i++) {
+						pma.add(fPMS.getAssociation(i));
+					}
+				}
+			}
 			for (int i = 0; i < n; i++) {
 
 				ConfigurationSpecification cs = aContainer.getConfSpec(i);
@@ -75,14 +91,16 @@ public class ComponentInstantiation extends InstantiatedUnit {
 
 				AssociationList pm = bi.getPortMapAspect();
 				if (pm != null) {
-					// FIXME
-					throw new ZamiaException("Sorry. Port mpas in configuration specifications are not supported yet.", cs);
+					for (int j=0; j<pm.getNumAssociations(); j++) {
+						pma.add(pm.getAssociation(j));
+					}
 				}
 
 				AssociationList gm = bi.getGenericMapAspect();
 				if (gm != null) {
-					// FIXME
-					throw new ZamiaException("Sorry. Port mpas in configuration specifications are not supported yet.", cs);
+					for (int j=0; j<gm.getNumAssociations(); j++) {
+						gma.add(gm.getAssociation(j));
+					}
 				}
 
 				EntityAspect ea = bi.getEntityAspect();
@@ -135,7 +153,7 @@ public class ComponentInstantiation extends InstantiatedUnit {
 				return null;
 			}
 
-			return instantiateIGModule(arch, aDUUID, aContainer, aStructure, aEE);
+			return instantiateIGModule(arch, aDUUID, aContainer, aStructure, aEE, gma, pma);
 		} catch (ZamiaException e) {
 			reportError(e);
 		}
