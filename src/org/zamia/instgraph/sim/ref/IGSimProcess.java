@@ -54,7 +54,8 @@ public class IGSimProcess extends IGInterpreterRuntimeEnv {
 		if (!(aDriver instanceof IGSignalDriver)) {
 			throw new ZamiaException("IGRefSim: wakeup scheduled on a non-signal driver: " + aDriver, aLocation);
 		}
-		((IGSignalDriver) aDriver).addListener(this);
+
+		fSim.scheduleWakeup(this, ((IGSignalDriver)aDriver), aLocation);
 	}
 
 	@Override

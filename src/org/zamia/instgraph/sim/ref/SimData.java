@@ -1,6 +1,7 @@
 package org.zamia.instgraph.sim.ref;
 
 
+import org.zamia.SourceLocation;
 import org.zamia.ZamiaException;
 import org.zamia.ZamiaLogger;
 import org.zamia.instgraph.IGContainer;
@@ -13,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -34,6 +36,11 @@ public class SimData {
 
 	private final HashMap<PathName, IGSignalDriver> fAllSignals;
 
+	/**
+	 *  Drivers indexed by listening process
+	 */
+	private final HashMap<IGSimProcess, Set<IGSignalDriver> > fSignalDrivers;
+
 	private HashMap<PathName, IGContainer> fContainers;
 	/**
 	 * Signals which had transitions (at the moment of forcing) before specified signal was forced a new value
@@ -46,6 +53,7 @@ public class SimData {
 		fSimRef = aSimRef;
 		fTracedSignals = new HashMap<PathName, IGSignalLog>();
 		fAllSignals = new HashMap<PathName, IGSignalDriver>();
+		fSignalDrivers = new HashMap<IGSimProcess, Set<IGSignalDriver>>();
 		fContainers = new HashMap<PathName, IGContainer>();
 	}
 
@@ -254,9 +262,23 @@ public class SimData {
 		return fContainers.get(aSignalPath);
 	}
 
+	public void addListener(IGSimProcess aProcess, IGSignalDriver aDriver) {
+		Set<IGSignalDriver> drivers = fSignalDrivers.get(aProcess);
+		if (drivers == null) {
+			drivers = new HashSet<IGSignalDriver>();
+			fSignalDrivers.put(aProcess, drivers);
+		}
+		drivers.add(aDriver);
+
+		aDriver.addListener(aProcess);
+	}
+
 	public void removeListener(IGSimProcess aProcess) {
-		for (IGSignalDriver driver : fAllSignals.values()) {
-			driver.removeListener(aProcess);
+		Set<IGSignalDriver> drivers = fSignalDrivers.remove(aProcess);
+		if (drivers != null) {
+			for (IGSignalDriver driver : drivers) {
+				driver.removeListener(aProcess);
+			}
 		}
 	}
 

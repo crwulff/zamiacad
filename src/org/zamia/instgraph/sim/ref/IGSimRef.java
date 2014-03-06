@@ -702,6 +702,10 @@ public class IGSimRef implements IGISimulator {
 		fSimSchedule.schedule(aT, new IGWakeupRequest(aProcess));
 	}
 
+	public void scheduleWakeup(IGSimProcess aProcess, IGSignalDriver aDriver, SourceLocation aLocation) {
+		fData.addListener(aProcess, aDriver);
+	}
+
 	public void scheduleSignalChange(IGSimProcess aProcess, boolean aInertial, IGStaticValue aDelay, IGStaticValue aReject, IGStaticValue aValue, IGSignalDriver aSignalDriver, SourceLocation aLocation)
 			throws ZamiaException {
 
