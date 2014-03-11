@@ -10,6 +10,7 @@ package org.zamia.instgraph.interpreter;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 
 import org.zamia.ErrorReport;
 import org.zamia.SourceLocation;
@@ -69,6 +70,7 @@ public class IGBuiltinOperations {
 		case REAL_DIV:
 		case REAL_MUL:
 		case REAL_POWER:
+		case REALINT_POWER:
 			return execRealBinary(aSub, aRuntime, aLocation, aErrorMode, aReport);
 
 		case SCALAR_EQUALS:
@@ -348,6 +350,10 @@ public class IGBuiltinOperations {
 
 		BigDecimal numB = vB.getReal();
 
+		if (numB == null) {
+			numB = new BigDecimal(vB.getNum());
+		}
+
 		BigDecimal res = null;
 
 		switch (aSub.getBuiltin()) {
@@ -364,7 +370,8 @@ public class IGBuiltinOperations {
 			res = numA.multiply(numB);
 			break;
 		case REAL_POWER:
-			res = numA.pow(numB.intValue());
+		case REALINT_POWER:
+			res = numA.pow(numB.intValue(), MathContext.DECIMAL64);
 			break;
 		default:
 			throw new ZamiaException("Sorry. Internal error. Unsupported operation: " + aSub, aLocation);
